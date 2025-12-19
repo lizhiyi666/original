@@ -14,7 +14,7 @@ def simulation(RUN_ID = "marionette", WANDB_DIR = "wandb", PROJECT_ROOT = "./"):
     # Get task and datamodule
     task, datamodule = get_task(run_path, data_root=PROJECT_ROOT)
 
-    test_data = torch.load(PROJECT_ROOT+'data/'+data_name + f'/{data_name}_test.pkl')
+    test_data = torch.load(PROJECT_ROOT+'data/'+data_name + f'/{data_name}_test.pkl',weights_only=False)
     gps_dict = test_data['poi_gps']
 
 

@@ -851,7 +851,7 @@ def load_sequences(root, name: str) -> List[Sequence]:
 
     """
     path = os.path.join(root, f"{name}.pkl")
-    loader = torch.load(path, map_location=torch.device("cpu"))
+    loader = torch.load(path, map_location=torch.device("cpu"),weights_only=False)
 
     sequences = loader["sequences"]
     tmax = loader["t_max"]

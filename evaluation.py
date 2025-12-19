@@ -94,9 +94,9 @@ def run_EpiSim(task,dataset, experiment_comments, init_exposed_num, exp_num, max
 
 def run_Statistical(dataset, experiment_comments):
     print(f'get Statistical Performance')
-    test_data = torch.load(f'{dataset_file_path}/data/{dataset}/{dataset}_test.pkl')
+    test_data = torch.load(f'{dataset_file_path}/data/{dataset}/{dataset}_test.pkl',weights_only=False)
     generated_data_path = f'{dataset_file_path}/data/{dataset}/{dataset}_generated.pkl' if experiment_comments=="" else f'{dataset_file_path}/data/{dataset}/{dataset}_{experiment_comments}_generated.pkl'
-    generated_data = torch.load(generated_data_path)
+    generated_data = torch.load(generated_data_path,weights_only=False)
     test_seqs = test_data.get('sequences')
     generated_seqs = generated_data.get('sequences')
     

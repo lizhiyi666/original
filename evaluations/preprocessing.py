@@ -5,7 +5,7 @@ import os
 
 def preprocessing_data(dicts,source_file,mode):  
     target_file_prefix = source_file.split('.')[0]
-    data=torch.load(dicts+'/'+source_file)
+    data=torch.load(dicts+'/'+source_file,weights_only=False)
     seqs=data.get('sequences')
     user_ids=[]
     checkin_times=[]

@@ -125,11 +125,13 @@ class Tasks(pl.LightningModule):
         optimizer2 = torch.optim.AdamW(self.discrete_diffusion.parameters(), lr=self.learning_rate2, weight_decay=self.weight_decay2)
 
         lr_scheduler1 = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer1, factor=0.95, patience=1000, verbose=True
+            optimizer1, factor=0.95, patience=1000, 
+            #verbose=True
         )
 
         lr_scheduler2 = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer2, factor=0.95, patience=1000, verbose=True
+            optimizer2, factor=0.95, patience=1000, 
+            #verbose=True
         )
         return ({"optimizer": optimizer1,"lr_scheduler": {"scheduler": lr_scheduler1}},
                 {"optimizer": optimizer2,"lr_scheduler": {"scheduler": lr_scheduler2}})
