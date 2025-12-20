@@ -132,7 +132,7 @@ def run_Statistical(dataset, experiment_comments):
     # compute per-test-sequence reference-based OVR: for each test sequence, extract its reference pairs
     # and compute average violation rate in the corresponding generated sequence.
     try:
-        OVR_ref = dataset_ovr_by_test_pairs(test_seqs, generated_seqs, poi_category, allow_skip=False, skip_nan=True)
+        OVR_ref = dataset_ovr_by_test_pairs(test_seqs, generated_seqs, poi_category, allow_skip=True, skip_nan=True)
     except Exception as e:
         # in case of errors, record nan and continue
         print(f"Warning: OVR computation failed: {e}")
