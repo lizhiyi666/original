@@ -1,4 +1,4 @@
 root: data/
 batch_size: 512
-name: new_Istanbul
+name: Istanbul
 
