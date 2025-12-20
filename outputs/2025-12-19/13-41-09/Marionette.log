@@ -1,0 +1,7 @@
+[13:41:14][__main__][INFO] /root/original/wandb/run-20251219_134112-wtrix1j7/files
+[13:41:14][__main__][INFO] Loading data
+[13:41:54][__main__][INFO] new_Istanbul
+[13:41:54][__main__][INFO] Instantiating model
+[13:41:54][__main__][INFO] Loading checkpoint
+[13:41:54][__main__][INFO] Instantiating trainer
+[13:41:54][__main__][INFO] Starting training!
