@@ -161,8 +161,8 @@ class DensityEstimation(Tasks):
         spatial_loss=spatial_loss.mean()
         
         current_epoch = self.current_epoch
-        warmup_start = 20
-        warmup_end = 50
+        warmup_start = 50
+        warmup_end = 100
         
         effective_weight = 0.0
         if self.po_loss_weight > 0:
@@ -203,8 +203,7 @@ class DensityEstimation(Tasks):
         )
 
         total_loss = spatial_loss + temporal_loss
-        # ... (日志记录保持不变) ...
-        
+       
         return temporal_loss, spatial_loss, total_loss
 
     def training_step(self, batch, batch_idx):

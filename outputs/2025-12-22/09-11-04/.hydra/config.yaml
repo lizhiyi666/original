@@ -1,0 +1,41 @@
+data:
+  root: data/
+  batch_size: 512
+  name: Istanbul_PO1
+task:
+  learning_rate1: 0.0001
+  learning_rate2: 0.001
+  weight_decay1: 0.0001
+  weight_decay2: 0.0
+  po_loss_weight: 1.0
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: gpu
+  devices:
+  - 0
+  max_epochs: 1000
+  log_every_n_steps: 1
+  resume_from_checkpoint: null
+  gradient_clip_val: null
+  gradient_clip_algorithm: value
+seed: 135398
+eval_testset: false
+id: null
+entity: null
+project: Marionette
+group: null
+mode: null
+name: null
+run_dir: null
+early_stopping: null
+model:
+  temporal_steps: 100
+  spatial_steps: 200
+  temporal_classifier_layer: 1
+  temporal_encoder_layer: 3
+  temporal_mix_components: 8
+  temporal_hidden_dims: 32
+  temporal_kernel_size: 5
+  temporal_time_segments: 24
+  spatial_hidden_dims: 256
+  num_condition_types: 6
