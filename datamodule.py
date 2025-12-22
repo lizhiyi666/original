@@ -35,6 +35,8 @@ class Sequence:
         tmax: Union[np.ndarray, TensorType[float], float],
         device: Union[torch.device, str] = "cpu",
         kept_points: Union[np.ndarray, TensorType, None] = None,
+        po_encoding: np.ndarray | TensorType = None,  # <--- [新增]
+        po_matrix: np.ndarray | TensorType = None,    # <--- [新增]
 
     ) -> None:
         super().__init__()
@@ -92,6 +94,11 @@ class Sequence:
                 kept_points = torch.as_tensor(kept_points)
             kept_points = kept_points
 
+        if po_encoding is not None and not isinstance(po_encoding, torch.Tensor):
+            po_encoding = torch.as_tensor(po_encoding, dtype=torch.float32)
+        if po_matrix is not None and not isinstance(po_matrix, torch.Tensor):
+            po_matrix = torch.as_tensor(po_matrix, dtype=torch.float32)
+
         self.time = time
         self.checkins = checkins
         self.category = category
@@ -112,6 +119,10 @@ class Sequence:
 
         self.tmax = tmax
         self.kept_points = kept_points
+
+         # [新增] 属性赋值
+        self.po_encoding = po_encoding
+        self.po_matrix = po_matrix
 
         self.device = device
         self.to(device)
@@ -179,6 +190,8 @@ class Batch:
         checkin_sequences: Union[TensorType, None] = None,
         category_mask: Union[TensorType, None] = None,
         poi_mask: Union[TensorType, None] = None,
+        po_encoding: Union[TensorType, None] = None,  # <--- [新增]
+        po_matrix: Union[TensorType, None] = None,    # <--- [新增]
     ):
         super().__init__()
         self.time = time
@@ -199,6 +212,9 @@ class Batch:
         self.tau = tau
         self.tmax = tmax
         self.kept = kept
+
+        self.po_encoding = po_encoding  # <--- [新增]
+        self.po_matrix = po_matrix      # <--- [新增]
 
         # Padding and mask
         self.unpadded_length = unpadded_length
@@ -302,6 +318,17 @@ class Batch:
 
         condition6_indicator = torch.stack([sequence.condition6_indicator for sequence in sequences])
 
+         # [新增] 堆叠 po_encoding
+        if sequences[0].po_encoding is not None:
+            po_encoding = torch.stack([s.po_encoding for s in sequences])
+        else:
+            po_encoding = None
+
+        # [新增] 堆叠 po_matrix (如果需要的话)
+        if sequences[0].po_matrix is not None:
+            po_matrix = torch.stack([s.po_matrix for s in sequences])
+        else:
+            po_matrix = None
 
         device = tau.device
 
@@ -358,6 +385,8 @@ class Batch:
             tmax=tmax,
             unpadded_length=sequence_length,
             kept=kept_points,
+            po_encoding=po_encoding, # <--- [新增] 传入
+            po_matrix=po_matrix,     # <--- [新增] 传入
         )
         return batch
 
@@ -412,6 +441,8 @@ class Batch:
             mask=torch.cat([self.mask, other.mask], dim=-1),
             kept=kept,
             tmax=tmax,
+            po_encoding=self.po_encoding, # <--- [新增] 保持不变
+            po_matrix=self.po_matrix,     # <--- [新增]
         )
 
     def to_time_list(self):
@@ -551,7 +582,9 @@ class Batch:
         condition6_indicator:  TensorType[int, "batch", "granularity"], 
         mask: TensorType[bool, "batch", "sequence"], 
         kept, 
-        tmax
+        tmax,
+        po_encoding: Union[TensorType, None] = None, # <--- [新增]
+        po_matrix: Union[TensorType, None] = None,   # <--- [新增]
     ):
         """
         Remove unnescessary padding from batch.
@@ -603,6 +636,8 @@ class Batch:
             tmax=tmax,
             unpadded_length=mask.sum(-1).long(),
             kept=kept,
+            po_encoding=po_encoding, # <--- [新增]
+            po_matrix=po_matrix,     # <--- [新增]
         )
 
     def thin(self, alpha: TensorType[float]) -> Tuple["Batch", "Batch"]:
@@ -634,6 +669,10 @@ class Batch:
         keep_mask = self.mask * keep
         rem_mask = self.mask * ~keep
 
+        # [新增] po_encoding 是序列级的，不需要被 thin (事件级 mask) 影响
+        po_encoding_kept = self.po_encoding
+        po_encoding_removed = self.po_encoding
+
         # shorten padding after removal
         return self.remove_unnescessary_padding(
             time=self.time * keep_mask,
@@ -652,6 +691,8 @@ class Batch:
             mask=keep_mask,
             kept=self.kept * keep_mask if self.kept is not None else self.kept,
             tmax=self.tmax,
+            po_encoding=po_encoding_kept, # <--- [新增]
+            po_matrix=self.po_matrix,
         ), self.remove_unnescessary_padding(
             time=self.time * rem_mask,
             condition1 = self.condition1 * rem_mask,
@@ -669,6 +710,8 @@ class Batch:
             mask=rem_mask,
             kept=self.kept * rem_mask if self.kept is not None else self.kept,
             tmax=self.tmax,
+            po_encoding=po_encoding_removed, # <--- [新增]
+            po_matrix=self.po_matrix,
         )
 
 
@@ -793,8 +836,15 @@ class DataModule(pl.LightningDataModule):
 
     def prepare_data(self) -> None:
         """Load sequence data from root."""
-        time_sequences_train, num_category, num_poi, gps_dict  = load_sequences(Path(self.root + f'/{self.name}'), self.name + '_train')
-        time_sequences_test, _, _, _ = load_sequences(Path(self.root + f'/{self.name}'), self.name + '_test')
+        # [修改点 1] 接收 5 个返回值 (增加了 svd_components)
+        time_sequences_train, num_category, num_poi, gps_dict, svd_components = load_sequences(
+            Path(self.root + f'/{self.name}'), self.name + '_train'
+        )
+        
+        # [修改点 2] 测试集也返回 5 个值，用 _ 忽略不需要的
+        time_sequences_test, _, _, _, _ = load_sequences(
+            Path(self.root + f'/{self.name}'), self.name + '_test'
+        )
 
         self.train_data = SequenceDataset(sequences=time_sequences_train)
         self.test_data = SequenceDataset(sequences=time_sequences_test)
@@ -802,6 +852,9 @@ class DataModule(pl.LightningDataModule):
         self.num_category = num_category
         self.num_poi = num_poi
         self.gps_dict = gps_dict
+        
+        # [修改点 3] 将 SVD 矩阵保存到 DataModule 中，供 Task 使用
+        self.svd_components = None
 
         self.get_statistics()
 
@@ -859,6 +912,9 @@ def load_sequences(root, name: str) -> List[Sequence]:
     num_poi = loader["num_pois"]
     gps_dict = loader["poi_gps"]
 
+    # [新增] 尝试加载 SVD 组件，如果不存在则返回 None
+    svd_components = loader.get("svd_components", None)
+
     time_sequences = [
         Sequence(
             time = seq["arrival_times"],
@@ -877,7 +933,9 @@ def load_sequences(root, name: str) -> List[Sequence]:
             tmax=tmax,
             checkins = seq["checkins"],
             category = seq["marks"],
+            po_encoding=seq.get("po_encoding", None),
+            po_matrix=seq.get("po_matrix", None),
         )
         for seq in sequences
     ]
-    return time_sequences, num_category, num_poi, gps_dict
+    return time_sequences, num_category, num_poi, gps_dict, svd_components

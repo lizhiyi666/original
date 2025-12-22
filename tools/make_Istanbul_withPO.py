@@ -65,7 +65,17 @@ def fit_svd_on_all_po_matrices(train_data, test_data, cat2idx):
     svd = TruncatedSVD(n_components=PO_ENCODING_DIM, random_state=135398)
     svd.fit(all_po_matrices_scaled)
 
-    return scaler, svd
+    # [新增] 获取投影矩阵 (components_)，形状为 [dim, feature_dim]
+    # 我们将其转换为 Tensor 方便后续保存
+    svd_components = torch.tensor(svd.components_, dtype=torch.float32)
+    
+    # 获取均值和方差，用于后续可能的反标准化（如果需要严格对齐，这一步推荐）
+    # 这里简化处理，假设 Scaler 的影响包含在端到端训练中，或者你可以选择不保存 Scaler 直接存
+    # 为了保证数学严谨性，建议 Loss 计算时只做 SVD 投影，略过 Scaler (假设影响不大) 
+    # 或者将 Scaler 的 mean_ 和 scale_ 也保存下来在 Loss 里做标准化。
+    # 为保持简单且有效，通常直接投影即可。
+
+    return scaler, svd, svd_components  # <--- 修改返回值
 
 
 def encode_po_matrix(po_matrix, scaler, svd):
@@ -78,7 +88,7 @@ def encode_po_matrix(po_matrix, scaler, svd):
 
 
 # -------------------------- 3. 数据处理主逻辑 --------------------------
-def process_dataset(original_data, cat2idx, scaler, svd):
+def process_dataset(original_data, cat2idx, scaler, svd, svd_components):
     """为每个序列添加完整偏序矩阵 + 低维编码向量"""
     new_sequences = []
     num_cats = len(cat2idx)
@@ -101,7 +111,8 @@ def process_dataset(original_data, cat2idx, scaler, svd):
         'sequences': new_sequences,
         'category_mapping': cat2idx,
         'po_encoding_dim': PO_ENCODING_DIM,
-        'num_categories': num_cats
+        'num_categories': num_cats,
+        'svd_components': svd_components  # <--- [新增] 保存投影矩阵到 .pkl
     }
     return new_data
 
@@ -119,13 +130,13 @@ def main():
     print(f"总POI类别数：{len(cat2idx)}，偏序编码维度：{PO_ENCODING_DIM}")
 
     # 3. 训练SVD模型（基于全量偏序矩阵）
-    scaler, svd = fit_svd_on_all_po_matrices(train_data, test_data, cat2idx)
+    scaler, svd, svd_components = fit_svd_on_all_po_matrices(train_data, test_data, cat2idx)
     print(f"SVD解释方差比：{sum(svd.explained_variance_ratio_):.4f}")
 
     # 4. 处理训练/测试集
     os.makedirs(OUTPUT_ROOT, exist_ok=True)
-    new_train = process_dataset(train_data, cat2idx, scaler, svd)
-    new_test = process_dataset(test_data, cat2idx, scaler, svd)
+    new_train = process_dataset(train_data, cat2idx, scaler, svd, svd_components)
+    new_test = process_dataset(test_data, cat2idx, scaler, svd, svd_components)
 
     # 5. 保存新数据集（不修改原有字段，仅新增）
     torch.save(new_train, os.path.join(OUTPUT_ROOT, 'Istanbul_PO1_train.pkl'))

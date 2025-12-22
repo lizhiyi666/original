@@ -16,7 +16,7 @@ from add_thin.metrics import (
     lengths_distribution_wasserstein_distance,
 )
 from evaluations.statistical_metrics import Get_Statistical_Metrics
-
+from partial_order_loss import PartialOrderLoss
 
 class Tasks(pl.LightningModule):
     def __init__(
@@ -139,11 +139,73 @@ class Tasks(pl.LightningModule):
 
 class DensityEstimation(Tasks):
     def __init__(
-        self, tpp_model, discrete_diffusion, learning_rate1, learning_rate2, weight_decay1, weight_decay2
+        self, tpp_model, discrete_diffusion, learning_rate1, learning_rate2, 
+        weight_decay1, weight_decay2,
+        svd_components=None, po_loss_weight=0.0 # [新增参数]
     ):
         super().__init__(
             tpp_model, discrete_diffusion, learning_rate1, learning_rate2, weight_decay1, weight_decay2
         )
+         # [新增] 初始化偏序损失
+        self.po_loss_fn = None
+        self.po_loss_weight = po_loss_weight
+        if svd_components is not None and po_loss_weight > 0:
+            self.po_loss_fn = PartialOrderLoss(svd_components)
+
+    def step(self, batch, name):
+        # Forward pass
+        x_n_int_x_0, log_prob_x_0, x_n = self.tpp_model.forward(batch)
+        
+        # Spatial loss (Original)
+        spatial_loss,category_logits = self.discrete_diffusion.training_losses(batch)
+        spatial_loss=spatial_loss.mean()
+        
+        current_epoch = self.current_epoch
+        warmup_start = 20
+        warmup_end = 50
+        
+        effective_weight = 0.0
+        if self.po_loss_weight > 0:
+            if current_epoch < warmup_start:
+                effective_weight = 0.0
+            elif current_epoch < warmup_end:
+                # 线性增长
+                ratio = (current_epoch - warmup_start) / (warmup_end - warmup_start)
+                effective_weight = self.po_loss_weight * ratio
+            else:
+                effective_weight = self.po_loss_weight
+
+        # 计算 PO Loss
+        po_loss = torch.tensor(0.0, device=self.device)
+        if self.po_loss_weight > 0 and self.po_loss_fn is not None and batch.po_matrix is not None:
+            # 1. 获取 Logits
+            #category_logits = self.discrete_diffusion.get_category_logits(batch)
+            
+            # 2. 计算 Loss (传入 po_matrix 而不是 po_encoding)
+            # 确保 po_matrix 在同一设备上
+            target_matrix = batch.po_matrix.to(self.device)
+            
+            po_loss = self.po_loss_fn(
+                logits=category_logits,
+                target_matrix=target_matrix,
+                mask=batch.mask
+            )
+            
+            # 使用动态权重
+            spatial_loss = spatial_loss + effective_weight * po_loss
+            
+            # 记录实际使用的权重，方便观察
+            self.log(f"{name}/po_loss_weight", effective_weight, batch_size=batch.batch_size)
+
+        # Compute loss
+        temporal_loss, classification, intensity = self.get_loss(
+            log_prob_x_0, x_n_int_x_0, x_n
+        )
+
+        total_loss = spatial_loss + temporal_loss
+        # ... (日志记录保持不变) ...
+        
+        return temporal_loss, spatial_loss, total_loss
 
     def training_step(self, batch, batch_idx):
         loss_temporal, loss_spatial, loss_all = self.step(batch, "train")

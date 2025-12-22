@@ -51,7 +51,14 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     return tpp_model, discrete_diffusion
 
 
-def instantiate_task(config: DictConfig, tpp_model, discrete_diffusion):
+
+def instantiate_task(config: DictConfig, tpp_model, discrete_diffusion, datamodule=None): # [修改] 增加 datamodule 参数
+    # 尝试从 datamodule 获取 svd_components
+    svd_components = getattr(datamodule, 'svd_components', None)
+    
+    # 获取 loss weight 配置 (需要在 config/train.yaml 中添加 task.po_loss_weight)
+    po_loss_weight = getattr(config, 'po_loss_weight', 0.0) 
+
     return DensityEstimation(
         tpp_model,
         discrete_diffusion,
@@ -59,5 +66,6 @@ def instantiate_task(config: DictConfig, tpp_model, discrete_diffusion):
         config.learning_rate2,
         config.weight_decay1,
         config.weight_decay2,
+        svd_components=svd_components, # [新增]
+        po_loss_weight=po_loss_weight  # [新增]
     )
-

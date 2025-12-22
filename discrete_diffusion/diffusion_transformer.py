@@ -12,6 +12,8 @@ from einops import rearrange
 
 eps = 1e-8
 
+
+
 def sum_except_batch(x, num_dims=1):
     return x.reshape(*x.shape[:num_dims], -1).sum(-1)
 
@@ -350,7 +352,7 @@ class DiffusionTransformer(nn.Module):
 
         return log_pred
 
- 
+
     
     def q_posterior(self, log_x_start, log_x_t, t, batch):            
 
@@ -409,6 +411,38 @@ class DiffusionTransformer(nn.Module):
         else:
             raise ValueError
 
+    def get_category_logits(self, batch):
+        """
+        专门为偏序 Loss 提供预测的 Logits (预测的 x_start 分布)
+        """
+        b, device = batch.batch_size, batch.device
+        
+        # 1. 准备数据 (复用 training_losses 的逻辑)
+        x_start = batch.checkin_sequences
+        
+        # 2. 随机采样时间步 t
+        # 使用 'importance' 采样，与训练保持一致，这样计算的梯度最合理
+        t, pt = self.sample_time(b, device, 'importance')
+        
+        # 3. 将离散数据转换为 One-hot 并加噪得到 x_t
+        # 注意：这里假设 index_to_log_onehot 是文件内可访问的函数
+        log_x_start = index_to_log_onehot(x_start, self.num_classes)
+        log_xt = self.q_sample(log_x_start=log_x_start, t=t, batch=batch)
+
+        # 4. 获取条件编码
+        cond_emb = self.condition_encoder(batch)
+
+        # 5. 模型预测 x_0 的 Logits
+        # log_x0_recon 的形状通常是 [Batch, Num_Classes, Seq_Len]
+        log_x0_recon = self.predict_start(log_xt, cond_emb, t=t, batch=batch)
+        
+        # 注意：training_losses 里有一句 log_x0_recon.transpose(1, 2)
+        # 这说明原始的 log_x0_recon 是 [B, C, L] 格式。
+        # 我们的 PartialOrderLoss 正好期望 [B, C, L] 格式作为输入。
+        # 所以这里不需要转置，直接返回即可。
+        
+        return log_x0_recon
+
     @property
     def device(self):
         return self.transformer.to_logits[-1].weight.device ##todo
@@ -434,7 +468,7 @@ class DiffusionTransformer(nn.Module):
         loss = F.cross_entropy(log_x0_recon.reshape(-1, log_x0_recon.shape[-1]), x_start.flatten(),ignore_index=3, reduce=False)
         loss = loss.reshape(x_start.size(0), -1)
         losses['loss'] = torch.mean(loss, -1)
-        return losses['loss']
+        return losses['loss'], log_x0_recon.transpose(1, 2)
 
     def sample_fast(
             self,

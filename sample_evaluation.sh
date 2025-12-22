@@ -9,6 +9,6 @@ fi
 RUN_ID=$1
 
 python sample.py --run_id "$RUN_ID"
-python evaluation.py --datasets Istanbul --task Stat --experiment_comments "$RUN_ID" &
+python evaluation.py --datasets Istanbul_PO1 --task Stat --experiment_comments "$RUN_ID" &
 
 

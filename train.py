@@ -113,7 +113,7 @@ def main(config: DictConfig):
     log.info("Instantiating model")
     tpp_model, discrete_diffusion = instantiate_model(config.model, datamodule)
 
-    task = instantiate_task(config.task, tpp_model, discrete_diffusion)
+    task = instantiate_task(config.task, tpp_model, discrete_diffusion,datamodule=datamodule)
 
     logger = WandbLogger()
 
