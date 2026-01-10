@@ -136,8 +136,15 @@ def test_projection():
     )
     print(f"投影后违规值: {violations_after[0].item():.4f}")
     
-    print(f"违规减少: {(violations_before[0] - violations_after[0]).item():.4f}")
-    print(f"✓ 测试通过: 投影后违规值应该减少")
+    violation_reduction = (violations_before[0] - violations_after[0]).item()
+    print(f"违规减少: {violation_reduction:.4f}")
+    
+    # 实际验证投影是否有效
+    if violation_reduction > 0:
+        print(f"✓ 测试通过: 投影后违规值减少了 {violation_reduction:.4f}")
+    else:
+        print(f"✗ 测试失败: 投影后违规值增加了 {-violation_reduction:.4f}")
+        print(f"  注意: 这可能是由于优化参数需要调整（学习率、迭代次数等）")
     print()
 
 
@@ -161,7 +168,8 @@ def test_integration():
             'use_constraint_projection',
             'projection_tau',
             'projection_lambda',
-            'projection_alm_iters'
+            'projection_alm_iters',
+            'projection_frequency'
         ]
         
         for param in required_params:

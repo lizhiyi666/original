@@ -140,6 +140,9 @@ class ConstraintProjection:
         y = log_probs.detach().clone().requires_grad_(True)
         lambda_multiplier = self.lambda_init
         
+        # 使用更大的初始学习率和自适应调整
+        initial_lr = 1.0
+        
         # ALM 迭代
         for alm_iter in range(self.alm_iterations):
             # 确保 y 需要梯度
@@ -169,8 +172,14 @@ class ConstraintProjection:
             loss.backward()
             
             with torch.no_grad():
-                # 梯度下降步长
-                step_size = 0.1 / (alm_iter + 1)
+                # 自适应学习率：前期大，后期小
+                step_size = initial_lr / (1 + alm_iter * 0.5)
+                
+                # 梯度裁剪防止过大更新
+                grad_norm = y.grad.norm()
+                if grad_norm > 1.0:
+                    y.grad = y.grad / grad_norm
+                
                 y = y - step_size * y.grad
                 
                 # 重新归一化为有效的 log 概率
