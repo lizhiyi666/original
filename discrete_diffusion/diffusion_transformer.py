@@ -155,6 +155,7 @@ class DiffusionTransformer(nn.Module):
         projection_tau=0.0,  # [新增] 投影阈值
         projection_lambda=1.0,  # [新增] ALM 初始乘子
         projection_alm_iters=5,  # [新增] ALM 迭代次数
+        projection_frequency=1,  # [新增] 投影频率，每隔几步应用一次投影
 
     ):
         super().__init__()  
@@ -174,6 +175,7 @@ class DiffusionTransformer(nn.Module):
         
         # [新增] 约束投影模块
         self.use_constraint_projection = use_constraint_projection
+        self.projection_frequency = projection_frequency  # [新增] 投影频率
         if self.use_constraint_projection:
             self.constraint_projector = ConstraintProjection(
                 num_classes=self.num_classes,
@@ -390,11 +392,21 @@ class DiffusionTransformer(nn.Module):
         return log_model_pred, log_x_recon
 
     @torch.no_grad()
-    def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
+    def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None, diffusion_index=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
         
         # [新增] 应用约束投影（如果启用且有约束）
+        # 根据 projection_frequency 决定是否在当前步骤应用投影
+        should_apply_projection = False
         if self.use_constraint_projection and po_constraints is not None:
+            if diffusion_index is not None:
+                # 当 diffusion_index % projection_frequency == 0 时应用投影
+                should_apply_projection = (diffusion_index % self.projection_frequency == 0)
+            else:
+                # 如果没有提供 diffusion_index，则每步都应用（向后兼容）
+                should_apply_projection = True
+                
+        if should_apply_projection:
             # 只在类别采样时应用投影
             # 投影应用于模型预测的分布
             model_log_prob = self.constraint_projector.apply_projection_to_category_positions(
@@ -540,7 +552,7 @@ class DiffusionTransformer(nn.Module):
         with torch.no_grad():
             for diffusion_index in range(start_step - 1, -1, -1):
                 t = torch.full((B,), diffusion_index, device=device, dtype=torch.long)
-                log_z = self.p_sample(log_z, cond_emb, t, batch, po_constraints=po_constraints)  # log_z is log_onehot
+                log_z = self.p_sample(log_z, cond_emb, t, batch, po_constraints=po_constraints, diffusion_index=diffusion_index)  # log_z is log_onehot
 
         content_token = log_onehot_to_index(log_z)
 

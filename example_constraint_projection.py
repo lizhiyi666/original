@@ -21,6 +21,7 @@ use_constraint_projection: true
 projection_tau: 0.0          # 约束阈值，建议保持为 0
 projection_lambda: 1.0       # 初始拉格朗日乘子
 projection_alm_iters: 5      # ALM 迭代次数
+projection_frequency: 1      # 投影频率，每隔几步应用一次（1=每步都应用）
 
 然后正常运行训练和采样:
 python train.py
@@ -49,7 +50,8 @@ def example_usage_in_code():
         use_constraint_projection=True,  # 启用投影
         projection_tau=0.0,
         projection_lambda=1.0,
-        projection_alm_iters=5
+        projection_alm_iters=5,
+        projection_frequency=1   # 每步都应用投影
     )
     
     # 2. 准备偏序矩阵
@@ -200,11 +202,17 @@ PARAMETER_TUNING_GUIDE = """
    - 宽松: 0.1 (允许小量违规)
    - 影响: 允许的最大约束违规量
 
+4. projection_frequency (投影频率)
+   - 每步都应用: 1 (最严格，最慢)
+   - 平衡模式: 2-5 (推荐)
+   - 快速模式: 10+ (速度快，约束满足率可能降低)
+   - 影响: 值越大，投影应用越少，速度越快但约束满足率可能降低
+
 调优流程建议:
-1. 先用 alm_iters=3, lambda=1.0 快速测试
+1. 先用 frequency=5, alm_iters=3, lambda=1.0 快速测试
 2. 检查约束满足率
-3. 如果满足率不够，增加 alm_iters 或 lambda
-4. 如果采样太慢，减少 alm_iters
+3. 如果满足率不够，减少 frequency 或增加 alm_iters/lambda
+4. 如果采样太慢，增加 frequency 或减少 alm_iters
 5. 平衡约束满足率和采样速度
 """
 

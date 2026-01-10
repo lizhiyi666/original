@@ -17,3 +17,4 @@ use_constraint_projection: false  # 默认关闭，需要时设为 true
 projection_tau: 0.0  # 约束阈值（论文建议为 0）
 projection_lambda: 1.0  # ALM 初始拉格朗日乘子
 projection_alm_iters: 5  # ALM 内循环迭代次数
+projection_frequency: 1  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
