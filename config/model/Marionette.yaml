@@ -11,3 +11,9 @@ spatial_hidden_dims: 256
 
 num_condition_types: 6
 
+# [新增] Constraint Projection 参数
+# 设置为 True 以启用 Constrained Discrete Diffusion 投影方法
+use_constraint_projection: false  # 默认关闭，需要时设为 true
+projection_tau: 0.0  # 约束阈值（论文建议为 0）
+projection_lambda: 1.0  # ALM 初始拉格朗日乘子
+projection_alm_iters: 5  # ALM 内循环迭代次数

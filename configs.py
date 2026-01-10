@@ -41,12 +41,22 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         time_segments=config.temporal_time_segments,
     )
 
+    # [新增] 从配置中读取约束投影参数
+    use_constraint_projection = getattr(config, 'use_constraint_projection', False)
+    projection_tau = getattr(config, 'projection_tau', 0.0)
+    projection_lambda = getattr(config, 'projection_lambda', 1.0)
+    projection_alm_iters = getattr(config, 'projection_alm_iters', 5)
+
     discrete_diffusion =  DiffusionTransformer(
         diffusion_step=config.spatial_hidden_dims,
         alpha_init_type='alpha1',
         type_classes=datamodule.num_category,
         poi_classes=datamodule.num_poi,
         num_condition_types=config.num_condition_types,
+        use_constraint_projection=use_constraint_projection,  # [新增]
+        projection_tau=projection_tau,  # [新增]
+        projection_lambda=projection_lambda,  # [新增]
+        projection_alm_iters=projection_alm_iters,  # [新增]
     )
     return tpp_model, discrete_diffusion
 

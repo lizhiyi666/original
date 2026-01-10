@@ -9,6 +9,7 @@ from torch.nn import TransformerEncoderLayer, TransformerEncoder
 from discrete_diffusion.conditional_attention import Transformer
 from datamodule import Batch
 from einops import rearrange
+from constraint_projection import ConstraintProjection, parse_po_matrix_to_constraints
 
 eps = 1e-8
 
@@ -150,6 +151,10 @@ class DiffusionTransformer(nn.Module):
         poi_classes=3477,
         num_spectial=4,
         num_classes=None,
+        use_constraint_projection=False,  # [新增] 是否使用约束投影
+        projection_tau=0.0,  # [新增] 投影阈值
+        projection_lambda=1.0,  # [新增] ALM 初始乘子
+        projection_alm_iters=5,  # [新增] ALM 迭代次数
 
     ):
         super().__init__()  
@@ -166,6 +171,19 @@ class DiffusionTransformer(nn.Module):
         self.loss_type = 'vb_stochastic'
         self.num_timesteps = diffusion_step
         self.parametrization = 'x0'
+        
+        # [新增] 约束投影模块
+        self.use_constraint_projection = use_constraint_projection
+        if self.use_constraint_projection:
+            self.constraint_projector = ConstraintProjection(
+                num_classes=self.num_classes,
+                type_classes=self.type_classes,
+                num_spectial=self.num_spectial,
+                tau=projection_tau,
+                lambda_init=projection_lambda,
+                alm_iterations=projection_alm_iters,
+                device='cuda'
+            )
 
         at,at1, bt,bt1, ct,ct1, att,att1, btt1,btt2, ctt,ctt1 = alpha_schedule(self.num_timesteps, type_classes=self.type_classes, poi_classes = self.poi_classes)
 
@@ -372,8 +390,19 @@ class DiffusionTransformer(nn.Module):
         return log_model_pred, log_x_recon
 
     @torch.no_grad()
-    def p_sample(self, log_x, cond_emb,  t, batch):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
+    def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
+        
+        # [新增] 应用约束投影（如果启用且有约束）
+        if self.use_constraint_projection and po_constraints is not None:
+            # 只在类别采样时应用投影
+            # 投影应用于模型预测的分布
+            model_log_prob = self.constraint_projector.apply_projection_to_category_positions(
+                model_log_prob,
+                po_constraints,
+                batch.category_mask
+            )
+        
         # Gumbel sample
         out = self.log_sample_categorical(model_log_prob)
         return out
@@ -499,10 +528,19 @@ class DiffusionTransformer(nn.Module):
 
         log_z = index_to_log_onehot(input,self.num_classes)
         start_step = self.num_timesteps
+        
+        # [新增] 从 batch 中提取偏序约束
+        po_constraints = None
+        if self.use_constraint_projection and hasattr(batch, 'po_matrix') and batch.po_matrix is not None:
+            # 假设 batch 中所有样本共享同一个 po_matrix
+            # po_matrix shape: [B, C, C] 或 [C, C]
+            po_matrix = batch.po_matrix[0] if batch.po_matrix.dim() == 3 else batch.po_matrix
+            po_constraints = parse_po_matrix_to_constraints(po_matrix.to(device))
+        
         with torch.no_grad():
             for diffusion_index in range(start_step - 1, -1, -1):
                 t = torch.full((B,), diffusion_index, device=device, dtype=torch.long)
-                log_z = self.p_sample(log_z, cond_emb, t, batch)  # log_z is log_onehot
+                log_z = self.p_sample(log_z, cond_emb, t, batch, po_constraints=po_constraints)  # log_z is log_onehot
 
         content_token = log_onehot_to_index(log_z)
 
