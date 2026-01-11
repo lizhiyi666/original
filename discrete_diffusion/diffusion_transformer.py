@@ -154,7 +154,9 @@ class DiffusionTransformer(nn.Module):
         use_constraint_projection=False,  # [新增] 是否使用约束投影
         projection_tau=0.0,  # [新增] 投影阈值
         projection_lambda=1.0,  # [新增] ALM 初始乘子
-        projection_alm_iters=5,  # [新增] ALM 迭代次数
+        projection_alm_iters=10,  # [新增] ALM 迭代次数（论文建议 10-20）
+        projection_eta=0.2,  # [新增] ALM 学习率 η（论文建议 0.2）
+        projection_mu=1.0,  # [新增] ALM 惩罚权重 μ（论文建议 1.0）
         projection_frequency=1,  # [新增] 投影频率，每隔几步应用一次投影
 
     ):
@@ -184,6 +186,8 @@ class DiffusionTransformer(nn.Module):
                 tau=projection_tau,
                 lambda_init=projection_lambda,
                 alm_iterations=projection_alm_iters,
+                eta=projection_eta,  # [新增] 学习率 η
+                mu=projection_mu,  # [新增] 惩罚权重 μ
                 device='cuda'
             )
 

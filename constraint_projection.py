@@ -20,7 +20,9 @@ class ConstraintProjection:
         num_spectial: int,
         tau: float = 0.0,
         lambda_init: float = 1.0,
-        alm_iterations: int = 5,
+        alm_iterations: int = 10,
+        eta: float = 0.2,
+        mu: float = 1.0,
         device: str = 'cuda'
     ):
         """
@@ -30,7 +32,9 @@ class ConstraintProjection:
             num_spectial: 特殊 token 数量
             tau: 约束阈值（论文中建议设为 0）
             lambda_init: ALM 算法初始拉格朗日乘子
-            alm_iterations: ALM 内循环迭代次数
+            alm_iterations: ALM 内循环迭代次数（论文建议 10-20）
+            eta: ALM 学习率 η，用于更新 y 的步长（论文建议 0.2）
+            mu: ALM 惩罚权重 μ，二次惩罚项系数（论文建议 1.0）
             device: 设备
         """
         self.num_classes = num_classes
@@ -39,6 +43,8 @@ class ConstraintProjection:
         self.tau = tau
         self.lambda_init = lambda_init
         self.alm_iterations = alm_iterations
+        self.eta = eta  # 学习率 η
+        self.mu = mu  # 惩罚权重 μ
         self.device = device
         
         # 类别范围：[num_spectial : num_spectial + type_classes]
@@ -112,23 +118,25 @@ class ConstraintProjection:
         self,
         log_probs: torch.Tensor,
         po_constraints: list,
-        category_mask: torch.Tensor,
-        beta: float = 1.0
+        category_mask: torch.Tensor
     ) -> torch.Tensor:
         """
         使用 ALM (Augmented Lagrangian Method) 投影到约束空间
         
         优化目标:
-        min_y  D_KL(y || y_model) + λ * max(0, g(y) - τ) + β/2 * max(0, g(y) - τ)^2
+        min_y  D_KL(y || y_model) + λ * max(0, g(y) - τ) + μ/2 * max(0, g(y) - τ)^2
         
-        根据 Constrained Discrete Diffusion 论文，这是一个独立的优化过程
-        需要临时启用梯度计算
+        根据 Constrained Discrete Diffusion 论文（Appendix D）：
+        - η (eta): 学习率，控制 y 的更新步长，推荐 0.2
+        - μ (mu): 惩罚权重，二次惩罚项系数，推荐 1.0
+        - 内循环次数: 推荐 10-20 次
+        
+        这是一个独立的优化过程，需要临时启用梯度计算
         
         Args:
             log_probs: [B, V, L] 模型输出的 log 概率
             po_constraints: 偏序约束列表
             category_mask: [B, L] 类别位置掩码
-            beta: 惩罚参数
             
         Returns:
             projected_log_probs: [B, V, L] 投影后的 log 概率
@@ -145,10 +153,8 @@ class ConstraintProjection:
         y.requires_grad_(True)
         
         lambda_multiplier = self.lambda_init
-        
-        # 根据论文，使用固定的学习率进行内循环优化
-        # 这是 ALM 算法的 y 更新步长，不是外层扩散的学习率
-        lr = 0.01  # 内循环优化学习率
+        mu = self.mu  # 使用配置的惩罚权重
+        eta = self.eta  # 使用配置的学习率
         
         # ALM 迭代 - 这是一个独立的优化循环
         for alm_iter in range(self.alm_iterations):
@@ -167,8 +173,8 @@ class ConstraintProjection:
             kl_div = (torch.exp(y) * (y - log_probs)).sum(dim=(1, 2))
             
             # 增广拉格朗日函数
-            # L = KL + λ * Δg + β/2 * Δg^2
-            aug_lagrangian = kl_div + lambda_multiplier * delta_g + (beta / 2) * (delta_g ** 2)
+            # L = KL + λ * Δg + μ/2 * Δg^2
+            aug_lagrangian = kl_div + lambda_multiplier * delta_g + (mu / 2) * (delta_g ** 2)
             
             # 总损失（对批次求平均）
             loss = aug_lagrangian.mean()
@@ -178,8 +184,8 @@ class ConstraintProjection:
             
             # 梯度下降更新 y (不使用 torch.no_grad，因为我们需要跟踪这个操作)
             with torch.no_grad():
-                # 使用固定学习率
-                y_new = y - lr * y.grad
+                # 使用配置的学习率 η 进行更新
+                y_new = y - eta * y.grad
                 
                 # 重新归一化为有效的 log 概率
                 # 先转换为概率空间
@@ -195,8 +201,8 @@ class ConstraintProjection:
             with torch.no_grad():
                 g_y_current = self.compute_constraint_violation(y, po_constraints, category_mask)
                 delta_g_current = F.relu(g_y_current - self.tau)
-                # 乘子更新：λ ← λ + β * max(0, g(y) - τ)
-                lambda_multiplier = lambda_multiplier + beta * delta_g_current.mean().item()
+                # 乘子更新：λ ← λ + μ * max(0, g(y) - τ)
+                lambda_multiplier = lambda_multiplier + mu * delta_g_current.mean().item()
         
         # 返回优化后的结果（detach 以避免梯度问题）
         return y.detach()

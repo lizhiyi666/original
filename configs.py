@@ -45,7 +45,9 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     use_constraint_projection = getattr(config, 'use_constraint_projection', False)
     projection_tau = getattr(config, 'projection_tau', 0.0)
     projection_lambda = getattr(config, 'projection_lambda', 1.0)
-    projection_alm_iters = getattr(config, 'projection_alm_iters', 5)
+    projection_alm_iters = getattr(config, 'projection_alm_iters', 10)  # 默认 10（论文建议）
+    projection_eta = getattr(config, 'projection_eta', 0.2)  # [新增] 学习率 η，默认 0.2
+    projection_mu = getattr(config, 'projection_mu', 1.0)  # [新增] 惩罚权重 μ，默认 1.0
     projection_frequency = getattr(config, 'projection_frequency', 1)  # [新增] 投影频率
 
     discrete_diffusion =  DiffusionTransformer(
@@ -58,6 +60,8 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         projection_tau=projection_tau,  # [新增]
         projection_lambda=projection_lambda,  # [新增]
         projection_alm_iters=projection_alm_iters,  # [新增]
+        projection_eta=projection_eta,  # [新增] 学习率 η
+        projection_mu=projection_mu,  # [新增] 惩罚权重 μ
         projection_frequency=projection_frequency,  # [新增]
     )
     return tpp_model, discrete_diffusion

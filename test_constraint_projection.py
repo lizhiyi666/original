@@ -105,6 +105,8 @@ def test_projection():
         tau=0.0,
         lambda_init=1.0,
         alm_iterations=10,
+        eta=0.2,  # [新增] 使用论文推荐的学习率
+        mu=1.0,  # [新增] 使用论文推荐的惩罚权重
         device='cpu'
     )
     
@@ -169,6 +171,8 @@ def test_integration():
             'projection_tau',
             'projection_lambda',
             'projection_alm_iters',
+            'projection_eta',  # [新增] 学习率 η
+            'projection_mu',  # [新增] 惩罚权重 μ
             'projection_frequency'
         ]
         
