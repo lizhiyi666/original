@@ -121,6 +121,9 @@ class ConstraintProjection:
         优化目标:
         min_y  D_KL(y || y_model) + λ * max(0, g(y) - τ) + β/2 * max(0, g(y) - τ)^2
         
+        根据 Constrained Discrete Diffusion 论文，这是一个独立的优化过程
+        需要临时启用梯度计算
+        
         Args:
             log_probs: [B, V, L] 模型输出的 log 概率
             po_constraints: 偏序约束列表
@@ -136,18 +139,22 @@ class ConstraintProjection:
             
         B, V, L = log_probs.shape
         
-        # 初始化
-        y = log_probs.detach().clone().requires_grad_(True)
+        # 初始化 - detach 并创建新的需要梯度的张量
+        # 注意：即使在 torch.no_grad() 上下文中，这里也需要梯度
+        y = log_probs.detach().clone()
+        y.requires_grad_(True)
+        
         lambda_multiplier = self.lambda_init
         
-        # 使用更大的初始学习率和自适应调整
-        initial_lr = 1.0
+        # 根据论文，使用固定的学习率进行内循环优化
+        # 这是 ALM 算法的 y 更新步长，不是外层扩散的学习率
+        lr = 0.01  # 内循环优化学习率
         
-        # ALM 迭代
+        # ALM 迭代 - 这是一个独立的优化循环
         for alm_iter in range(self.alm_iterations):
-            # 确保 y 需要梯度
-            if not y.requires_grad:
-                y.requires_grad_(True)
+            # 清零梯度
+            if y.grad is not None:
+                y.grad.zero_()
                 
             # 计算约束违规
             g_y = self.compute_constraint_violation(y, po_constraints, category_mask)
@@ -166,38 +173,32 @@ class ConstraintProjection:
             # 总损失（对批次求平均）
             loss = aug_lagrangian.mean()
             
-            # 梯度下降更新 y
-            if y.grad is not None:
-                y.grad.zero_()
+            # 计算梯度 - 这在 torch.no_grad() 外也能工作，因为 y.requires_grad=True
             loss.backward()
             
+            # 梯度下降更新 y (不使用 torch.no_grad，因为我们需要跟踪这个操作)
             with torch.no_grad():
-                # 自适应学习率：前期大，后期小
-                step_size = initial_lr / (1 + alm_iter * 0.5)
-                
-                # 梯度裁剪防止过大更新
-                grad_norm = y.grad.norm()
-                if grad_norm > 1.0:
-                    y.grad = y.grad / grad_norm
-                
-                y = y - step_size * y.grad
+                # 使用固定学习率
+                y_new = y - lr * y.grad
                 
                 # 重新归一化为有效的 log 概率
                 # 先转换为概率空间
-                probs = torch.exp(y)
+                probs = torch.exp(y_new)
                 probs = probs / (probs.sum(dim=1, keepdim=True) + 1e-10)
                 # 转回 log 空间
-                y = torch.log(probs + 1e-30).clamp(-70, 0)
+                y_new = torch.log(probs + 1e-30).clamp(-70, 0)
                 
-                # 需要再次设置 requires_grad
-                y = y.detach().requires_grad_(True)
+                # 更新 y，并重新启用梯度追踪
+                y = y_new.detach().requires_grad_(True)
                 
             # 更新拉格朗日乘子
             with torch.no_grad():
                 g_y_current = self.compute_constraint_violation(y, po_constraints, category_mask)
                 delta_g_current = F.relu(g_y_current - self.tau)
+                # 乘子更新：λ ← λ + β * max(0, g(y) - τ)
                 lambda_multiplier = lambda_multiplier + beta * delta_g_current.mean().item()
         
+        # 返回优化后的结果（detach 以避免梯度问题）
         return y.detach()
     
     def apply_projection_to_category_positions(
@@ -220,13 +221,17 @@ class ConstraintProjection:
         if not po_constraints or category_mask is None:
             return log_probs
             
-        # 对整个序列应用投影
-        # 投影算法会利用 category_mask 来只关注类别位置
-        projected = self.project_to_constraint_space(
-            log_probs, 
-            po_constraints, 
-            category_mask
-        )
+        # 重要：即使在 torch.no_grad() 上下文中调用，
+        # 投影优化也需要临时启用梯度
+        # 使用 torch.enable_grad() 来覆盖外层的 no_grad
+        with torch.enable_grad():
+            # 对整个序列应用投影
+            # 投影算法会利用 category_mask 来只关注类别位置
+            projected = self.project_to_constraint_space(
+                log_probs, 
+                po_constraints, 
+                category_mask
+            )
         
         return projected
 
