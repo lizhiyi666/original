@@ -2,3 +2,8 @@ wandb/
 *.ckpt
 *.pth
 *.pt
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
