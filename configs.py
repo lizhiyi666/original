@@ -48,7 +48,10 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     projection_alm_iters = getattr(config, 'projection_alm_iters', 10)  # 默认 10（论文建议）
     projection_eta = getattr(config, 'projection_eta', 0.2)  # [新增] 学习率 η，默认 0.2
     projection_mu = getattr(config, 'projection_mu', 1.0)  # [新增] 惩罚权重 μ，默认 1.0
-    projection_frequency = getattr(config, 'projection_frequency', 1)  # [新增] 投影频率
+    projection_frequency = getattr(config, 'projection_frequency', 10)  # [新增] 投影频率
+    use_gumbel_softmax = getattr(config, "use_gumbel_softmax", True)
+    gumbel_temperature = getattr(config, "gumbel_temperature", 1.0)
+    projection_last_k_steps = getattr(config, "projection_last_k_steps", 60)
 
     discrete_diffusion =  DiffusionTransformer(
         diffusion_step=config.spatial_hidden_dims,
@@ -63,6 +66,10 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         projection_eta=projection_eta,  # [新增] 学习率 η
         projection_mu=projection_mu,  # [新增] 惩罚权重 μ
         projection_frequency=projection_frequency,  # [新增]
+        # [新增] 传入 Gumbel-Softmax 超参
+        use_gumbel_softmax=use_gumbel_softmax,
+        gumbel_temperature=gumbel_temperature,
+        projection_last_k_steps=projection_last_k_steps,
     )
     return tpp_model, discrete_diffusion
 

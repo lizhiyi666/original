@@ -7,3 +7,6 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+# 忽略数据集
+data/
+dataset/

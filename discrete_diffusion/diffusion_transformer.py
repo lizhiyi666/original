@@ -157,8 +157,10 @@ class DiffusionTransformer(nn.Module):
         projection_alm_iters=10,  # [新增] ALM 迭代次数（论文建议 10-20）
         projection_eta=0.2,  # [新增] ALM 学习率 η（论文建议 0.2）
         projection_mu=1.0,  # [新增] ALM 惩罚权重 μ（论文建议 1.0）
-        projection_frequency=1,  # [新增] 投影频率，每隔几步应用一次投影
-
+        projection_frequency=10,  # [新增] 投影频率，每隔几步应用一次投影
+        use_gumbel_softmax=True,
+        gumbel_temperature=1.0,
+        projection_last_k_steps: int = 60,
     ):
         super().__init__()  
 
@@ -174,6 +176,9 @@ class DiffusionTransformer(nn.Module):
         self.loss_type = 'vb_stochastic'
         self.num_timesteps = diffusion_step
         self.parametrization = 'x0'
+        self.use_gumbel_softmax = use_gumbel_softmax
+        self.gumbel_temperature = gumbel_temperature
+        self.projection_last_k_steps = projection_last_k_steps
         
         # [新增] 约束投影模块
         self.use_constraint_projection = use_constraint_projection
@@ -188,7 +193,10 @@ class DiffusionTransformer(nn.Module):
                 alm_iterations=projection_alm_iters,
                 eta=projection_eta,  # [新增] 学习率 η
                 mu=projection_mu,  # [新增] 惩罚权重 μ
-                device='cuda'
+                device='cuda',
+
+                use_gumbel_softmax=self.use_gumbel_softmax,
+                gumbel_temperature=self.gumbel_temperature,
             )
 
         at,at1, bt,bt1, ct,ct1, att,att1, btt1,btt2, ctt,ctt1 = alpha_schedule(self.num_timesteps, type_classes=self.type_classes, poi_classes = self.poi_classes)
@@ -395,7 +403,7 @@ class DiffusionTransformer(nn.Module):
             raise ValueError
         return log_model_pred, log_x_recon
 
-    @torch.no_grad()
+    '''@torch.no_grad()
     def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None, diffusion_index=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
         
@@ -420,6 +428,103 @@ class DiffusionTransformer(nn.Module):
             )
         
         # Gumbel sample
+        out = self.log_sample_categorical(model_log_prob)
+        return out'''
+    @torch.no_grad()
+    def p_sample(self, log_x, cond_emb, t, batch, po_constraints=None, diffusion_index=None):
+        model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
+
+        # 根据 projection_frequency 决定是否应用投影
+        # 只在后期 step 投影（速度优先）
+        last_k_steps = self.projection_last_k_steps
+
+        should_apply_projection = False
+        if self.use_constraint_projection and po_constraints is not None:
+            if diffusion_index is not None:
+                should_apply_projection = (
+                    (diffusion_index % self.projection_frequency == 0)
+                    and (diffusion_index < last_k_steps)
+                )
+            else:
+                should_apply_projection = True
+
+        # [关键] 默认不投影时 after=before，避免未定义变量
+        model_log_prob_after = model_log_prob
+
+        if should_apply_projection:
+            # 只打印一次，避免刷屏
+            if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_projection_printed", False):
+                self._debug_projection_printed = True
+                print("[DEBUG][projection] CALLED in p_sample")
+                print(f"[DEBUG][projection] diffusion_index={diffusion_index}, projection_frequency={self.projection_frequency}")
+                print(f"[DEBUG][projection] model_log_prob.shape={tuple(model_log_prob.shape)}")
+                print(f"[DEBUG][projection] category_mask.sum={batch.category_mask.sum().item() if hasattr(batch,'category_mask') and batch.category_mask is not None else None}")
+
+            # viol debug：只打印一次（很耗时）
+            debug_viol = getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_viol_printed", False)
+            if debug_viol:
+                self._debug_viol_printed = True
+
+            # 判断是否为 per-sample constraints（list-of-list）
+            is_per_sample = (
+                isinstance(po_constraints, list)
+                and len(po_constraints) > 0
+                and isinstance(po_constraints[0], list)
+            )
+
+            # if is_per_sample:
+            #     # 每条样本单独投影（最小改动、可用，但慢）
+            #     projected = model_log_prob.clone()
+            #     if debug_viol:
+            #         # 只打印第一个样本的 viol
+            #         with torch.no_grad():
+            #             viol_b0 = self.constraint_projector.compute_constraint_violation(
+            #                 model_log_prob[0:1], po_constraints[0], batch.category_mask[0:1]
+            #             )
+            #             print(f"[DEBUG][projection] per-sample: viol_before[0]={viol_b0[0].item():.6f}")
+
+            #     for i in range(model_log_prob.shape[0]):
+            #         projected[i:i+1] = self.constraint_projector.apply_projection_to_category_positions(
+            #             model_log_prob[i:i+1],
+            #             po_constraints[i],
+            #             batch.category_mask[i:i+1],
+            #         )
+
+            #     model_log_prob_after = projected
+
+            #     if debug_viol:
+            #         with torch.no_grad():
+            #             viol_a0 = self.constraint_projector.compute_constraint_violation(
+            #                 model_log_prob_after[0:1], po_constraints[0], batch.category_mask[0:1]
+            #             )
+            #             print(f"[DEBUG][projection] per-sample:  viol_after[0]={viol_a0[0].item():.6f}")
+
+            # else:
+            #     # batch 共享 constraints
+            #     if debug_viol:
+            #         with torch.no_grad():
+            #             viol_before = self.constraint_projector.compute_constraint_violation(
+            #                 model_log_prob, po_constraints, batch.category_mask
+            #             )
+            #             print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
+
+                model_log_prob_after = self.constraint_projector.apply_projection_to_category_positions(
+                    model_log_prob,
+                    po_constraints,
+                    batch.category_mask
+                )
+
+                if debug_viol:
+                    with torch.no_grad():
+                        viol_after = self.constraint_projector.compute_constraint_violation(
+                            model_log_prob_after, po_constraints, batch.category_mask
+                        )
+                        print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
+                        print(f"[DEBUG][projection]  delta_mean={(viol_before.mean()-viol_after.mean()).item():.6f}")
+
+        # 用 after（不投影时等于 before）
+        model_log_prob = model_log_prob_after
+
         out = self.log_sample_categorical(model_log_prob)
         return out
 
@@ -526,8 +631,11 @@ class DiffusionTransformer(nn.Module):
 
         batch.device = device
 
+        #cond_emb = self.condition_encoder(batch)
+        print("tau before cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
         cond_emb = self.condition_encoder(batch)
-
+        print("tau after  cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
+        
         mask_poi=self.num_classes-1
         mask_cat=self.num_classes-2
         
@@ -546,19 +654,61 @@ class DiffusionTransformer(nn.Module):
         start_step = self.num_timesteps
         
         # [新增] 从 batch 中提取偏序约束
-        po_constraints = None
+        '''po_constraints = None
         if self.use_constraint_projection and hasattr(batch, 'po_matrix') and batch.po_matrix is not None:
             # 假设 batch 中所有样本共享同一个 po_matrix
             # po_matrix shape: [B, C, C] 或 [C, C]
             po_matrix = batch.po_matrix[0] if batch.po_matrix.dim() == 3 else batch.po_matrix
-            po_constraints = parse_po_matrix_to_constraints(po_matrix.to(device))
-        
+            po_constraints = parse_po_matrix_to_constraints(po_matrix.to(device))'''
+        # [新增] 从 batch 中提取偏序约束（支持每条样本独立 po_matrix）
+        po_constraints = None
+        if self.use_constraint_projection and hasattr(batch, "po_matrix") and batch.po_matrix is not None:
+            pm = batch.po_matrix
+            # debug：只打印一次
+            if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_po_printed", False):
+                self._debug_po_printed = True
+                print("[DEBUG][projection] sample_fast: batch has po_matrix=True")
+                print("[DEBUG][projection] po_matrix.dim()=", pm.dim(), "shape=", tuple(pm.shape))
+
+            if pm.dim() == 2:
+                # 全 batch 共用
+                po_constraints = parse_po_matrix_to_constraints(pm.to(device))
+            elif pm.dim() == 3:
+                # 每条样本一个
+                po_constraints = [parse_po_matrix_to_constraints(pm[i].to(device)) for i in range(pm.shape[0])]
+            else:
+                raise ValueError(f"Unexpected po_matrix.dim()={pm.dim()}, expected 2 or 3")
+
         with torch.no_grad():
             for diffusion_index in range(start_step - 1, -1, -1):
                 t = torch.full((B,), diffusion_index, device=device, dtype=torch.long)
                 log_z = self.p_sample(log_z, cond_emb, t, batch, po_constraints=po_constraints, diffusion_index=diffusion_index)  # log_z is log_onehot
 
         content_token = log_onehot_to_index(log_z)
+
+        # content_token: [B, content_len]
+        content_len = content_token.shape[1]
+        device = content_token.device
+
+        category_mask = torch.zeros((B, content_len), device=device, dtype=torch.int64)
+        poi_mask = torch.zeros((B, content_len), device=device, dtype=torch.int64)
+
+        # 对每条序列单独写入 mask（每条 L_i 不同）
+        for i in range(B):
+            seq_len_i = int(batch.unpadded_length[i].item())
+            # content layout: [0] + cat(seq_len_i) + [1] + poi(seq_len_i) + [2]
+            # cat positions: 1 ... seq_len_i
+            category_mask[i, 1:1+seq_len_i] = 1
+            # poi positions: (seq_len_i+2) ... (seq_len_i+2+seq_len_i-1)
+            poi_start = seq_len_i + 2
+            poi_mask[i, poi_start:poi_start+seq_len_i] = 1
+
+        print("[DEBUG][shape] time", batch.time.shape)
+        print("[DEBUG][shape] mask", batch.mask.shape)
+        print("[DEBUG][shape] tau ", batch.tau.shape)
+        print("[DEBUG][shape] cond1", batch.condition1.shape)
+        print("[DEBUG][shape] unpadded_length", batch.unpadded_length.shape, batch.unpadded_length.max().item())
+        print("[DEBUG][shape] content_token", content_token.shape)
 
         return Batch(
             time=batch.time,
@@ -577,8 +727,8 @@ class DiffusionTransformer(nn.Module):
             mask=batch.mask, 
             tmax=batch.tmax,
             checkin_sequences=content_token,
-            category_mask=batch.category_mask,
-            poi_mask=batch.poi_mask,
+            category_mask=category_mask,
+            poi_mask=poi_mask,
             tau=batch.tau,
             unpadded_length=batch.unpadded_length
         )

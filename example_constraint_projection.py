@@ -51,7 +51,7 @@ def example_usage_in_code():
         projection_tau=0.0,
         projection_lambda=1.0,
         projection_alm_iters=5,
-        projection_frequency=1   # 每步都应用投影
+        projection_frequency=10   # 每步都应用投影
     )
     
     # 2. 准备偏序矩阵
@@ -91,7 +91,7 @@ def example_standalone_projection():
         tau=0.0,
         lambda_init=1.0,
         alm_iterations=5,
-        device='cuda'
+        device='cuda',
     )
     
     # 2. 准备约束
