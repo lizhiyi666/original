@@ -1,2 +1,22 @@
+'''
+projection_tau: 0.0  # 约束阈值（论文建议为 0）
+projection_lambda: 1.0  # ALM 初始拉格朗日乘子
+projection_alm_iters: 10  # ALM 内循环迭代次数（论文建议 10-20）
+projection_eta: 0.2  # ALM 学习率 η，控制 y 更新步长（论文建议 0.2）
+projection_mu: 1.0  # ALM 惩罚权重 μ，二次惩罚项系数（论文建议 1.0）
+projection_frequency: 10  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
+use_gumbel_softmax: true
+gumbel_temperature: 1.0   # Tsample，建议从 1.0 -> 0.5 -> 0.2 逐步尝试
+projection_last_k_steps: 60
+'''
 Distance: 0.0635032322531151, Radius: 0.021960746337679346, Interval: 0.008038394251806823, DailyLoc: 0.03568611733556633, Category: 0.0019403946808356372, 'G-RANK': 0.11589313719619468, OVR_ref: 0.43167995803685455
+'''
+same hyperparameters after modifying
+#allow_skip=true
+'''
 Distance: 0.07476302876137825, Radius: 0.030701959063200952, Interval: 0.008047124406632888, DailyLoc: 0.0405200075965943, Category: 0.00284410071909607, 'G-RANK': 0.12961532372074752, OVR_ref: 0.13366092381243896
+#allow_skip=false
+Distance: 0.07476302876137825, Radius: 0.030701959063200952, Interval: 0.008047124406632888, DailyLoc: 0.0405200075965943, Category: 0.00284410071909607, 'G-RANK': 0.12961532372074752, OVR_ref: 0.9137607545350181
+Distance: 0.07476302876137825, Radius: 0.030701959063200952, Interval: 0.008047124406632888, DailyLoc: 0.0405200075965943, Category: 0.00284410071909607, 'G-RANK': 0.12961532372074752, OVR_ref_skip: 0.13366092381243896, OVR_ref_strict: 0.9137607545350181, coverage: 0.09829488465396188
+#约束违反率（只算约束是否被满足）
+Unsat_ref: 0.9227683049147443
