@@ -472,41 +472,41 @@ class DiffusionTransformer(nn.Module):
                 and isinstance(po_constraints[0], list)
             )
 
-            # if is_per_sample:
-            #     # 每条样本单独投影（最小改动、可用，但慢）
-            #     projected = model_log_prob.clone()
-            #     if debug_viol:
-            #         # 只打印第一个样本的 viol
-            #         with torch.no_grad():
-            #             viol_b0 = self.constraint_projector.compute_constraint_violation(
-            #                 model_log_prob[0:1], po_constraints[0], batch.category_mask[0:1]
-            #             )
-            #             print(f"[DEBUG][projection] per-sample: viol_before[0]={viol_b0[0].item():.6f}")
+            if is_per_sample:
+                # 每条样本单独投影（最小改动、可用，但慢）
+                projected = model_log_prob.clone()
+                if debug_viol:
+                    # 只打印第一个样本的 viol
+                    with torch.no_grad():
+                        viol_b0 = self.constraint_projector.compute_constraint_violation(
+                            model_log_prob[0:1], po_constraints[0], batch.category_mask[0:1]
+                        )
+                        print(f"[DEBUG][projection] per-sample: viol_before[0]={viol_b0[0].item():.6f}")
 
-            #     for i in range(model_log_prob.shape[0]):
-            #         projected[i:i+1] = self.constraint_projector.apply_projection_to_category_positions(
-            #             model_log_prob[i:i+1],
-            #             po_constraints[i],
-            #             batch.category_mask[i:i+1],
-            #         )
+                for i in range(model_log_prob.shape[0]):
+                    projected[i:i+1] = self.constraint_projector.apply_projection_to_category_positions(
+                        model_log_prob[i:i+1],
+                        po_constraints[i],
+                        batch.category_mask[i:i+1],
+                    )
 
-            #     model_log_prob_after = projected
+                model_log_prob_after = projected
 
-            #     if debug_viol:
-            #         with torch.no_grad():
-            #             viol_a0 = self.constraint_projector.compute_constraint_violation(
-            #                 model_log_prob_after[0:1], po_constraints[0], batch.category_mask[0:1]
-            #             )
-            #             print(f"[DEBUG][projection] per-sample:  viol_after[0]={viol_a0[0].item():.6f}")
+                if debug_viol:
+                    with torch.no_grad():
+                        viol_a0 = self.constraint_projector.compute_constraint_violation(
+                            model_log_prob_after[0:1], po_constraints[0], batch.category_mask[0:1]
+                        )
+                        print(f"[DEBUG][projection] per-sample:  viol_after[0]={viol_a0[0].item():.6f}")
 
-            # else:
-            #     # batch 共享 constraints
-            #     if debug_viol:
-            #         with torch.no_grad():
-            #             viol_before = self.constraint_projector.compute_constraint_violation(
-            #                 model_log_prob, po_constraints, batch.category_mask
-            #             )
-            #             print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
+            else:
+                # batch 共享 constraints
+                if debug_viol:
+                    with torch.no_grad():
+                        viol_before = self.constraint_projector.compute_constraint_violation(
+                            model_log_prob, po_constraints, batch.category_mask
+                        )
+                        print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
 
                 model_log_prob_after = self.constraint_projector.apply_projection_to_category_positions(
                     model_log_prob,
