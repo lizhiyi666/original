@@ -11,15 +11,18 @@ spatial_hidden_dims: 256
 
 num_condition_types: 6
 
-# [新增] Constraint Projection 参数
-# 设置为 True 以启用 Constrained Discrete Diffusion 投影方法
-use_constraint_projection: True  # 默认关闭，需要时设为 true
-projection_tau: 0.0  # 约束阈值（论文建议为 0）
-projection_lambda: 1.0  # ALM 初始拉格朗日乘子
-projection_alm_iters: 10  # ALM 内循环迭代次数（论文建议 10-20）
-projection_eta: 0.2  # ALM 学习率 η，控制 y 更新步长（论文建议 0.2）
-projection_mu: 1.0  # ALM 惩罚权重 μ，二次惩罚项系数（论文建议 1.0）
-projection_frequency: 5  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
+# Constraint Projection 参数
+use_constraint_projection: True
+projection_tau: 0.0
+projection_lambda: 0.0          # λinit
+projection_mu: 1.0              # μinit
+projection_mu_max: 1000.0       # μmax
+projection_outer_iters: 1000    # outer_itermax
+projection_inner_iters: 100     # inner_itermax
+projection_mu_alpha: 2.0        # α，放大 μ
+projection_eta: 1.0             # η
+projection_alm_iters: 10
+projection_frequency: 5
 use_gumbel_softmax: true
-gumbel_temperature: 0.5   # Tsample，建议从 1.0 -> 0.5 -> 0.2 逐步尝试
+gumbel_temperature: 0.5
 projection_last_k_steps: 60

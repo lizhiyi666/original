@@ -5,14 +5,21 @@ from evaluate_utils import get_task, get_run_data
 parser = argparse.ArgumentParser()
 parser.add_argument("--run_id", type=str, default="marionette")
 
-# [新增] 采样时强制开启投影（不依赖训练时配置）
 parser.add_argument("--use_constraint_projection", action="store_true")
+
+# [新增] 采样时强制开启投影（不依赖训练时配置）
 parser.add_argument("--projection_frequency", type=int, default=10)
 parser.add_argument("--projection_alm_iters", type=int, default=10)
 parser.add_argument("--projection_tau", type=float, default=0.0)
-parser.add_argument("--projection_lambda", type=float, default=1.0)
-parser.add_argument("--projection_eta", type=float, default=0.2)
-parser.add_argument("--projection_mu", type=float, default=1.0)
+parser.add_argument("--projection_lambda", type=float, default=0.0)   # λinit
+parser.add_argument("--projection_eta", type=float, default=1.0)      # η
+parser.add_argument("--projection_mu", type=float, default=1.0)       # μinit
+parser.add_argument("--projection_mu_max", type=float, default=1000.0)
+parser.add_argument("--projection_outer_iters", type=int, default=1000)
+parser.add_argument("--projection_inner_iters", type=int, default=100)
+parser.add_argument("--projection_mu_alpha", type=float, default=2.0)
+parser.add_argument("--projection_delta_tol", type=float, default=1e-6)
+
 
 # [新增] debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
@@ -35,6 +42,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd._debug_projection_printed = False
         dd._debug_viol_printed = False
         dd._debug_po_printed = False
+        
 
         # 保存参数（供内部使用/打印）
         dd.projection_tau = args.projection_tau
@@ -42,6 +50,11 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd.projection_alm_iters = args.projection_alm_iters
         dd.projection_eta = args.projection_eta
         dd.projection_mu = args.projection_mu
+        dd.projection_mu_max = args.projection_mu_max
+        dd.projection_outer_iters = args.projection_outer_iters
+        dd.projection_inner_iters = args.projection_inner_iters
+        dd.projection_mu_alpha = args.projection_mu_alpha
+        dd.projection_delta_tol = args.projection_delta_tol
 
         # 关键：训练时若 use_constraint_projection=False，则 __init__ 不会创建 constraint_projector，这里补建
         if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
@@ -52,9 +65,13 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 num_spectial=dd.num_spectial,
                 tau=args.projection_tau,
                 lambda_init=args.projection_lambda,
-                alm_iterations=args.projection_alm_iters,
+                mu_init=args.projection_mu,
+                mu_alpha=args.projection_mu_alpha,
+                mu_max=args.projection_mu_max,
+                outer_iterations=args.projection_outer_iters,
+                inner_iterations=args.projection_inner_iters,
                 eta=args.projection_eta,
-                mu=args.projection_mu,
+                delta_tol=args.projection_delta_tol,
                 device=str(device),
             )
 
