@@ -45,11 +45,22 @@ class ConstraintProjection:
         self.use_gumbel_softmax = use_gumbel_softmax
         self.gumbel_temperature = gumbel_temperature
 
+    def _sample_gumbel(self, shape, device, dtype):
+        U = torch.rand(shape, device=device, dtype=dtype)
+        return -torch.log(-torch.log(U + 1e-20) + 1e-20)
+
+    def _gumbel_softmax_relax(self, logits_lv, tau, gumbel_noise=None):
+        if gumbel_noise is None:
+            gumbel_noise = self._sample_gumbel(logits_lv.shape, logits_lv.device, logits_lv.dtype)
+        y = (logits_lv + gumbel_noise) / max(tau, 1e-6)
+        return torch.softmax(y, dim=-1), gumbel_noise
+
     def compute_constraint_violation(
         self,
         log_probs: torch.Tensor,
         po_constraints: list,
         category_mask: torch.Tensor,
+        gumbel_noise=None,
     ) -> torch.Tensor:
         """
         原始版本 g(Y):
@@ -62,8 +73,16 @@ class ConstraintProjection:
         dev = log_probs.device
 
         # 转为概率 [B,L,V]
-        probs = torch.exp(log_probs).transpose(1, 2)
-
+        #probs = torch.exp(log_probs).transpose(1, 2)
+        
+        logits_lv = log_probs.transpose(1, 2)  # [B,L,V]
+        if self.use_gumbel_softmax:
+            probs, gumbel_noise = self._gumbel_softmax_relax(
+                logits_lv, tau=self.gumbel_temperature, gumbel_noise=gumbel_noise
+            )  # probs = x_tilde
+        else:
+            probs = torch.softmax(logits_lv, dim=-1)
+        
         # 只考虑类别位置
         if category_mask is not None:
             probs = probs * category_mask.unsqueeze(-1).float()
@@ -86,7 +105,7 @@ class ConstraintProjection:
             violation_k = (P_B_weighted * P_A).sum(dim=1)  # [B]
             total_violation += violation_k
 
-        return total_violation
+        return total_violation,gumbel_noise
 
     def project_to_constraint_space(
         self,
@@ -108,12 +127,16 @@ class ConstraintProjection:
         lambda_multiplier = self.lambda_init
         mu = self.mu
         eta = self.eta
+        gumbel_noise=None
 
         for _ in range(self.alm_iterations):
             if y.grad is not None:
                 y.grad.zero_()
 
-            g_y = self.compute_constraint_violation(y, po_constraints, category_mask)
+            #g_y = self.compute_constraint_violation(y, po_constraints, category_mask)
+            g_y, gumbel_noise = self.compute_constraint_violation(
+                y, po_constraints, category_mask, gumbel_noise=gumbel_noise
+            )
             delta_g = F.relu(g_y - self.tau)
 
             # KL(p_y || p_model)，这里沿用你当前实现方式（exp(y) * (y - y_model)）
@@ -130,7 +153,10 @@ class ConstraintProjection:
                 y = torch.log(probs + 1e-30).clamp(-70, 0).detach().requires_grad_(True)
 
             with torch.no_grad():
-                g_y_current = self.compute_constraint_violation(y, po_constraints, category_mask)
+                #g_y_current = self.compute_constraint_violation(y, po_constraints, category_mask)
+                g_y_current, _ = self.compute_constraint_violation(
+                    y, po_constraints, category_mask, gumbel_noise=gumbel_noise
+                )
                 delta_g_current = F.relu(g_y_current - self.tau)
                 lambda_multiplier = lambda_multiplier + mu * delta_g_current.mean().item()
 

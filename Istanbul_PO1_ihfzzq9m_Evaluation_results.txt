@@ -8,15 +8,17 @@ projection_frequency: 10  # 投影频率：每隔几步应用一次投影（1表
 use_gumbel_softmax: true
 gumbel_temperature: 1.0   # Tsample，建议从 1.0 -> 0.5 -> 0.2 逐步尝试
 projection_last_k_steps: 60
-'''
-Distance: 0.0635032322531151, Radius: 0.021960746337679346, Interval: 0.008038394251806823, DailyLoc: 0.03568611733556633, Category: 0.0019403946808356372, 'G-RANK': 0.11589313719619468, OVR_ref: 0.43167995803685455
-'''
-same hyperparameters after modifying
-#allow_skip=true
-'''
-Distance: 0.07476302876137825, Radius: 0.030701959063200952, Interval: 0.008047124406632888, DailyLoc: 0.0405200075965943, Category: 0.00284410071909607, 'G-RANK': 0.12961532372074752, OVR_ref: 0.13366092381243896
 #allow_skip=false
+#use_gumbel_softmax: false
 Distance: 0.07476302876137825, Radius: 0.030701959063200952, Interval: 0.008047124406632888, DailyLoc: 0.0405200075965943, Category: 0.00284410071909607, 'G-RANK': 0.12961532372074752, OVR_ref: 0.9137607545350181
 Distance: 0.07476302876137825, Radius: 0.030701959063200952, Interval: 0.008047124406632888, DailyLoc: 0.0405200075965943, Category: 0.00284410071909607, 'G-RANK': 0.12961532372074752, OVR_ref_skip: 0.13366092381243896, OVR_ref_strict: 0.9137607545350181, coverage: 0.09829488465396188
 #约束违反率（只算约束是否被满足）
 Unsat_ref: 0.9227683049147443
+projection_frequency: 10  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
+use_gumbel_softmax: true
+gumbel_temperature: 1
+Distance: 0.0627857009063324, Radius: 0.020689408151196728, Interval: 0.008094080246153667, DailyLoc: 0.03552267159875733, Category: 0.0026103608641115154, 'G-RANK': 0.11876637359211692, OVR_ref_skip: 0.4589779733972647, OVR_ref_strict: 0.9060043506619813, coverage: 0.16233315330607206, Unsat_ref: 0.9434457217807268
+projection_frequency: 5  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
+use_gumbel_softmax: true
+gumbel_temperature: 0.5
+Distance: 0.06776877185125249, Radius: 0.024420511632399274, Interval: 0.007866571147699192, DailyLoc: 0.033327981336612494, Category: 0.0020230218983869333, 'G-RANK': 0.1159813759493544, OVR_ref_skip: 0.4342956624016181, OVR_ref_strict: 0.8977253004930645, coverage: 0.16811974384692538, Unsat_ref: 0.9371190494560605

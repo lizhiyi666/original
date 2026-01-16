@@ -479,7 +479,7 @@ class DiffusionTransformer(nn.Module):
                     # 只打印第一个样本的 viol
                     with torch.no_grad():
                         viol_b0 = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob[0:1], po_constraints[0], batch.category_mask[0:1]
+                            model_log_prob[0:1], po_constraints[0], batch.category_mask[0:1],gumbel_noise=None
                         )
                         print(f"[DEBUG][projection] per-sample: viol_before[0]={viol_b0[0].item():.6f}")
 
@@ -495,7 +495,7 @@ class DiffusionTransformer(nn.Module):
                 if debug_viol:
                     with torch.no_grad():
                         viol_a0 = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob_after[0:1], po_constraints[0], batch.category_mask[0:1]
+                            model_log_prob_after[0:1], po_constraints[0], batch.category_mask[0:1],gumbel_noise=None
                         )
                         print(f"[DEBUG][projection] per-sample:  viol_after[0]={viol_a0[0].item():.6f}")
 
@@ -504,7 +504,7 @@ class DiffusionTransformer(nn.Module):
                 if debug_viol:
                     with torch.no_grad():
                         viol_before = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob, po_constraints, batch.category_mask
+                            model_log_prob, po_constraints, batch.category_mask,gumbel_noise=None
                         )
                         print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
 
@@ -517,7 +517,7 @@ class DiffusionTransformer(nn.Module):
                 if debug_viol:
                     with torch.no_grad():
                         viol_after = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob_after, po_constraints, batch.category_mask
+                            model_log_prob_after, po_constraints, batch.category_mask,gumbel_noise=None
                         )
                         print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
                         print(f"[DEBUG][projection]  delta_mean={(viol_before.mean()-viol_after.mean()).item():.6f}")

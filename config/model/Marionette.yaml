@@ -19,7 +19,7 @@ projection_lambda: 1.0  # ALM 初始拉格朗日乘子
 projection_alm_iters: 10  # ALM 内循环迭代次数（论文建议 10-20）
 projection_eta: 0.2  # ALM 学习率 η，控制 y 更新步长（论文建议 0.2）
 projection_mu: 1.0  # ALM 惩罚权重 μ，二次惩罚项系数（论文建议 1.0）
-projection_frequency: 10  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
+projection_frequency: 5  # 投影频率：每隔几步应用一次投影（1表示每步都应用）
 use_gumbel_softmax: true
-gumbel_temperature: 1.0   # Tsample，建议从 1.0 -> 0.5 -> 0.2 逐步尝试
+gumbel_temperature: 0.5   # Tsample，建议从 1.0 -> 0.5 -> 0.2 逐步尝试
 projection_last_k_steps: 60

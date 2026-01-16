@@ -114,10 +114,10 @@ def example_standalone_projection():
     
     # 6. 计算投影前后的约束违规
     violation_before = projector.compute_constraint_violation(
-        log_probs, constraints, category_mask
+        log_probs, constraints, category_mask,gumbel_noise=None
     )
     violation_after = projector.compute_constraint_violation(
-        projected_log_probs, constraints, category_mask
+        projected_log_probs, constraints, category_mask,gumbel_noise=None
     )
     
     print(f"投影前违规: {violation_before.mean().item():.4f}")

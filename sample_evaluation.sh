@@ -11,7 +11,7 @@ python sample.py \
   --run_id "$RUN_ID" \
   --use_constraint_projection \
   --debug_constraint_projection \
-  --projection_frequency 10 \
+  --projection_frequency 5 \
   --projection_alm_iters 10 \
   --projection_tau 0.0 \
   --projection_lambda 1.0 \
