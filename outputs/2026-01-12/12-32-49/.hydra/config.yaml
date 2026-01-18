@@ -42,7 +42,6 @@ model:
   use_constraint_projection: true
   projection_tau: 0.0
   projection_lambda: 1.0
-  projection_alm_iters: 10
   projection_eta: 0.2
   projection_mu: 1.0
   projection_frequency: 1

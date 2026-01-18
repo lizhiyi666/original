@@ -9,18 +9,20 @@ parser.add_argument("--use_constraint_projection", action="store_true")
 
 # [新增] 采样时强制开启投影（不依赖训练时配置）
 parser.add_argument("--projection_frequency", type=int, default=10)
-parser.add_argument("--projection_alm_iters", type=int, default=10)
+#parser.add_argument("--projection_alm_iters", type=int, default=10)
 parser.add_argument("--projection_tau", type=float, default=0.0)
 parser.add_argument("--projection_lambda", type=float, default=0.0)   # λinit
 parser.add_argument("--projection_eta", type=float, default=1.0)      # η
 parser.add_argument("--projection_mu", type=float, default=1.0)       # μinit
 parser.add_argument("--projection_mu_max", type=float, default=1000.0)
-parser.add_argument("--projection_outer_iters", type=int, default=1000)
-parser.add_argument("--projection_inner_iters", type=int, default=100)
+parser.add_argument("--projection_outer_iters", type=int, default=10)
+parser.add_argument("--projection_inner_iters", type=int, default=10)
 parser.add_argument("--projection_mu_alpha", type=float, default=2.0)
 parser.add_argument("--projection_delta_tol", type=float, default=1e-6)
-
-
+parser.add_argument("--projection_existence_weight", type=float, default=0.02)
+parser.add_argument("--use_gumbel_softmax", action="store_true", help="Enable Gumbel-Softmax for gradient estimation")
+parser.add_argument("--gumbel_temperature", type=float, default=1.0)
+parser.add_argument("--projection_last_k_steps", type=int, default=60)
 # [新增] debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
 
@@ -43,11 +45,14 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd._debug_viol_printed = False
         dd._debug_po_printed = False
         
+        dd.projection_last_k_steps = args.projection_last_k_steps 
+        dd.use_gumbel_softmax = args.use_gumbel_softmax
+        dd.gumbel_temperature = args.gumbel_temperature
 
         # 保存参数（供内部使用/打印）
         dd.projection_tau = args.projection_tau
         dd.projection_lambda = args.projection_lambda
-        dd.projection_alm_iters = args.projection_alm_iters
+        #dd.projection_alm_iters = args.projection_alm_iters
         dd.projection_eta = args.projection_eta
         dd.projection_mu = args.projection_mu
         dd.projection_mu_max = args.projection_mu_max
@@ -55,7 +60,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd.projection_inner_iters = args.projection_inner_iters
         dd.projection_mu_alpha = args.projection_mu_alpha
         dd.projection_delta_tol = args.projection_delta_tol
-
+        dd.projection_existence_weight = args.projection_existence_weight
+        
         # 关键：训练时若 use_constraint_projection=False，则 __init__ 不会创建 constraint_projector，这里补建
         if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
             device = next(dd.parameters()).device
@@ -72,16 +78,28 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 inner_iterations=args.projection_inner_iters,
                 eta=args.projection_eta,
                 delta_tol=args.projection_delta_tol,
+                existence_weight=args.projection_existence_weight,
+                 # [新增] 传入 Gumbel 相关参数
+                use_gumbel_softmax=args.use_gumbel_softmax,
+                gumbel_temperature=args.gumbel_temperature,
                 device=str(device),
             )
 
         print("[DEBUG] sample.py forced use_constraint_projection=True")
         print("[DEBUG] projection params:",
               dict(freq=dd.projection_frequency,
-                   iters=dd.projection_alm_iters,
-                   tau=dd.projection_tau,
-                   lambda_=dd.projection_lambda,
-                   eta=dd.projection_eta,
+                   tau=args.projection_tau,
+                    lambda_init=args.projection_lambda,
+                    mu_init=args.projection_mu,
+                    mu_alpha=args.projection_mu_alpha,
+                    mu_max=args.projection_mu_max,
+                    outer_iterations=args.projection_outer_iters,
+                    inner_iterations=args.projection_inner_iters,
+                    eta=args.projection_eta,
+                    delta_tol=args.projection_delta_tol,
+                    existence_weight=args.projection_existence_weight,
+                    use_gumbel_softmax=args.use_gumbel_softmax,
+                    gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
     # ======================================================
 

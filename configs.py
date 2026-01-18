@@ -45,18 +45,19 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     use_constraint_projection = getattr(config, 'use_constraint_projection', False)
     projection_tau = getattr(config, 'projection_tau', 0.0)
     projection_lambda = getattr(config, 'projection_lambda', 0.0)
-    projection_alm_iters = getattr(config, 'projection_alm_iters', 10)
+    #projection_alm_iters = getattr(config, 'projection_alm_iters', 10)
     projection_eta = getattr(config, 'projection_eta', 1.0)
     projection_mu = getattr(config, 'projection_mu', 1.0)
     projection_frequency = getattr(config, 'projection_frequency', 10)
     projection_mu_max = getattr(config, 'projection_mu_max', 1000.0)
-    projection_outer_iters = getattr(config, 'projection_outer_iters', 1000)
-    projection_inner_iters = getattr(config, 'projection_inner_iters', 100)
+    projection_outer_iters = getattr(config, 'projection_outer_iters', 10)
+    projection_inner_iters = getattr(config, 'projection_inner_iters', 10)
     projection_mu_alpha = getattr(config, 'projection_mu_alpha', 2.0)
     projection_delta_tol = getattr(config, 'projection_delta_tol', 1e-6)
     use_gumbel_softmax = getattr(config, "use_gumbel_softmax", True)
     gumbel_temperature = getattr(config, "gumbel_temperature", 1.0)
     projection_last_k_steps = getattr(config, 'projection_last_k_steps',60)
+    projection_existence_weight = getattr(config, 'projection_existence_weight', 5.0)
 
     discrete_diffusion =  DiffusionTransformer(
         diffusion_step=config.spatial_hidden_dims,
@@ -67,7 +68,7 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         use_constraint_projection=use_constraint_projection,
         projection_tau=projection_tau,
         projection_lambda=projection_lambda,
-        projection_alm_iters=projection_alm_iters,
+        #projection_alm_iters=projection_alm_iters,
         projection_eta=projection_eta,
         projection_mu=projection_mu,
         projection_frequency=projection_frequency,

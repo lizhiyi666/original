@@ -154,7 +154,7 @@ class DiffusionTransformer(nn.Module):
         use_constraint_projection=False,  # [新增] 是否使用约束投影
         projection_tau=0.0,
         projection_lambda=0.0,          # λinit
-        projection_alm_iters=10,        # 保持兼容，但实际外层内层由下方参数控制
+        #projection_alm_iters=10,        # 保持兼容，但实际外层内层由下方参数控制
         projection_eta=1.0,             # η
         projection_mu=1.0,              # μinit
         projection_frequency=10,
@@ -162,10 +162,11 @@ class DiffusionTransformer(nn.Module):
         gumbel_temperature=1.0,
         projection_last_k_steps: int = 60,
         projection_mu_max: float = 1000.0,      # μmax
-        projection_outer_iters: int = 1000,     # outer_itermax
-        projection_inner_iters: int = 100,      # inner_itermax
+        projection_outer_iters: int = 10,     # outer_itermax
+        projection_inner_iters: int = 10,      # inner_itermax
         projection_mu_alpha: float = 2.0,       # α 放大系数
         projection_delta_tol: float = 0.25,     # δ 容忍
+        projection_existence_weight: float = 0.02,
     ):
         super().__init__()  
 
@@ -184,7 +185,8 @@ class DiffusionTransformer(nn.Module):
         self.use_gumbel_softmax = use_gumbel_softmax
         self.gumbel_temperature = gumbel_temperature
         self.projection_last_k_steps = projection_last_k_steps
-        
+        self.projection_existence_weight=projection_existence_weight
+
         # [新增] 约束投影模块
         self.use_constraint_projection = use_constraint_projection
         self.projection_frequency = projection_frequency  # [新增] 投影频率
@@ -205,6 +207,7 @@ class DiffusionTransformer(nn.Module):
                 device='cuda',
                 use_gumbel_softmax=self.use_gumbel_softmax,
                 gumbel_temperature=self.gumbel_temperature,
+                projection_existence_weight=projection_existence_weight, 
             )
 
         at,at1, bt,bt1, ct,ct1, att,att1, btt1,btt2, ctt,ctt1 = alpha_schedule(self.num_timesteps, type_classes=self.type_classes, poi_classes = self.poi_classes)
@@ -467,7 +470,8 @@ class DiffusionTransformer(nn.Module):
                 print(f"[DEBUG][projection] diffusion_index={diffusion_index}, projection_frequency={self.projection_frequency}")
                 print(f"[DEBUG][projection] model_log_prob.shape={tuple(model_log_prob.shape)}")
                 print(f"[DEBUG][projection] category_mask.sum={batch.category_mask.sum().item() if hasattr(batch,'category_mask') and batch.category_mask is not None else None}")
-
+                print(f"[DEBUG] Projection triggered at step {diffusion_index}")
+                
             # viol debug：只打印一次（很耗时）
             debug_viol = getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_viol_printed", False)
             if debug_viol:
@@ -479,56 +483,57 @@ class DiffusionTransformer(nn.Module):
                 and len(po_constraints) > 0
                 and isinstance(po_constraints[0], list)
             )
-
+            if debug_viol:
+                print(f"[DEBUG] Constraint Type: {'Per-Sample (List of Lists)' if is_per_sample else 'Shared (List of Tuples)'}")
+            
+            # 1. 编译约束矩阵 (Compiling Constraint Matrices)
+            W_A, W_B, c_mask = None, None, None
+            
             if is_per_sample:
-                # 每条样本单独投影（最小改动、可用，但慢）
-                projected = model_log_prob.clone()
-                if debug_viol:
-                    # 只打印第一个样本的 viol
-                    with torch.no_grad():
-                        viol_b0 = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob[0:1], po_constraints[0], batch.category_mask[0:1],gumbel_noise=None
-                        )
-                        print(f"[DEBUG][projection] per-sample: viol_before[0]={viol_b0[0].item():.6f}")
-
-                for i in range(model_log_prob.shape[0]):
-                    projected[i:i+1] = self.constraint_projector.apply_projection_to_category_positions(
-                        model_log_prob[i:i+1],
-                        po_constraints[i],
-                        batch.category_mask[i:i+1],
-                    )
-
-                model_log_prob_after = projected
-
-                if debug_viol:
-                    with torch.no_grad():
-                        viol_a0 = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob_after[0:1], po_constraints[0], batch.category_mask[0:1],gumbel_noise=None
-                        )
-                        print(f"[DEBUG][projection] per-sample:  viol_after[0]={viol_a0[0].item():.6f}")
-
+                # Case A: 每条样本约束不同 -> W_A, W_B shape: [B, V_type, K_max]
+                # 这是一个新函数，需要在 ConstraintProjection 中实现 (见上文)
+                W_A, W_B, c_mask = self.constraint_projector.compile_batched_constraints(
+                    po_constraints, device=model_log_prob.device
+                )
             else:
-                # batch 共享 constraints
-                if debug_viol:
-                    with torch.no_grad():
-                        viol_before = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob, po_constraints, batch.category_mask,gumbel_noise=None
-                        )
-                        print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
-
-                model_log_prob_after = self.constraint_projector.apply_projection_to_category_positions(
-                    model_log_prob,
-                    po_constraints,
-                    batch.category_mask
+                # Case B: 全 Batch 共享约束 -> W_A, W_B shape: [V_type, K]
+                # 这是上一轮建议的 compile_constraints 函数
+                W_A, W_B = self.constraint_projector._compile_constraints(
+                    po_constraints, device=model_log_prob.device
                 )
 
-                if debug_viol:
-                    with torch.no_grad():
-                        viol_after = self.constraint_projector.compute_constraint_violation(
-                            model_log_prob_after, po_constraints, batch.category_mask,gumbel_noise=None
-                        )
-                        print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
-                        print(f"[DEBUG][projection]  delta_mean={(viol_before.mean()-viol_after.mean()).item():.6f}")
+            # 2. 执行 Debug (Before Projection)
+            if debug_viol and W_A is not None:
+                with torch.no_grad():
+                    # 复用优化后的计算函数，速度极快
+                    viol_before, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                        model_log_prob, W_A, W_B,  batch.category_mask,constraint_mask=c_mask, gumbel_noise=None
+                    )
+                    # 打印 Batch 中第一个样本的违规，以及平均违规
+                    print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
+
+            # 3. 执行投影 (Project)
+            # 无论 W_A 是 2D 还是 3D，project_with_matrices 内部的 matmul 都能自动广播处理
+            if W_A is not None:
+                model_log_prob_after = self.constraint_projector.project_with_matrices(
+                    model_log_prob,
+                    W_A, W_B,
+                    batch.category_mask,
+                    constraint_mask=c_mask,
+                )
+            else:
+                model_log_prob_after = model_log_prob
+
+            # 4. 执行 Debug (After Projection)
+            if debug_viol and W_A is not None:
+                with torch.no_grad():
+                    viol_after, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                        model_log_prob_after, W_A, W_B, batch.category_mask, constraint_mask=c_mask, gumbel_noise=None
+                    )
+                    print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
+                    delta = (viol_before - viol_after).mean().item()
+                    print(f"[DEBUG][projection]  delta_mean={delta:.6f}")
+            
 
         # 用 after（不投影时等于 before）
         model_log_prob = model_log_prob_after

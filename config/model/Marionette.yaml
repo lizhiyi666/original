@@ -13,16 +13,18 @@ num_condition_types: 6
 
 # Constraint Projection 参数
 use_constraint_projection: True
-projection_tau: 0.0
+projection_tau: 0
+projection_delta_tal: 0.000001
 projection_lambda: 0.0          # λinit
 projection_mu: 1.0              # μinit
 projection_mu_max: 1000.0       # μmax
-projection_outer_iters: 1000    # outer_itermax
+projection_outer_iters: 100    # outer_itermax
 projection_inner_iters: 100     # inner_itermax
 projection_mu_alpha: 2.0        # α，放大 μ
-projection_eta: 1.0             # η
+projection_eta: 0.2             # η
 projection_alm_iters: 10
-projection_frequency: 5
+projection_frequency: 1
 use_gumbel_softmax: true
-gumbel_temperature: 0.5
-projection_last_k_steps: 60
+gumbel_temperature: 0.1
+projection_last_k_steps: 100
+projection_existence_weight: 5.0
