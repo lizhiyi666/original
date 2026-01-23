@@ -27,4 +27,4 @@ projection_frequency: 5
 use_gumbel_softmax: true
 gumbel_temperature: 0.1
 projection_last_k_steps: 100
-projection_existence_weight: 0.1
+projection_existence_weight: 0.4

@@ -78,7 +78,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 inner_iterations=args.projection_inner_iters,
                 eta=args.projection_eta,
                 delta_tol=args.projection_delta_tol,
-                existence_weight=args.projection_existence_weight,
+                projection_existence_weight=args.projection_existence_weight,
                  # [新增] 传入 Gumbel 相关参数
                 use_gumbel_softmax=args.use_gumbel_softmax,
                 gumbel_temperature=args.gumbel_temperature,
@@ -86,13 +86,13 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             )
 
         if hasattr(dd, "constraint_projector") and dd.constraint_projector is not None:
-            dd.constraint_projector.existence_weight = args.projection_existence_weight
+            dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
             # 顺便更新其他可能被忽略的参数
             dd.constraint_projector.eta = args.projection_eta
             dd.constraint_projector.inner_iterations = args.projection_inner_iters
             dd.constraint_projector.outer_iterations = args.projection_outer_iters
             
-            print(f"[DEBUG] Force updated projector.existence_weight to {dd.constraint_projector.existence_weight}")
+            print(f"[DEBUG] Force updated projector.projection_existence_weight to {dd.constraint_projector.projection_existence_weight}")
 
 
         print("[DEBUG] sample.py forced use_constraint_projection=True")
@@ -107,7 +107,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     inner_iterations=args.projection_inner_iters,
                     eta=args.projection_eta,
                     delta_tol=args.projection_delta_tol,
-                    existence_weight=args.projection_existence_weight,
+                    projection_existence_weight=args.projection_existence_weight,
                     use_gumbel_softmax=args.use_gumbel_softmax,
                     gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
