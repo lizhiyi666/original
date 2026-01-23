@@ -313,7 +313,7 @@ class ConstraintProjection:
                     log_q = F.log_softmax(y_model, dim=-1) 
                     
                     # Forward KL: sum P_new * (log P_new - log P_old)
-                    kl_loss = F.kl_div(log_p, torch.exp(log_q), reduction='batchmean') * y.shape[0]
+                    kl_loss = F.kl_div(log_p, log_q, reduction='batchmean',log_target=True) 
 
                     constraint_loss = (lambda_multiplier * delta_soft + 0.5 * mu * (delta_soft ** 2)).mean()
                     
@@ -322,6 +322,11 @@ class ConstraintProjection:
                     # 现在这里可以正常反向传播了
                     loss.backward()
                     
+                    # grad_norm = y.grad.norm().item()
+                    # if _ == 0: # 只在第一次迭代打印
+                    #     print(f"[DEBUG] Inner Iter 0: Loss={loss.item():.4f}, Grad Norm={grad_norm:.4f}")
+                    #     print(f"[DEBUG] Params: exist_w={self.projection_existence_weight}, eta={self.eta}")
+
                     # 梯度裁剪 (建议加上，防止 NaN)
                     #torch.nn.utils.clip_grad_norm_([y], 1.0)
                     #print(f"GRAD NORM: {y.grad.norm().item()}") # 如果是 0，说明梯度没传回来
