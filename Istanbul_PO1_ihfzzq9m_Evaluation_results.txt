@@ -137,3 +137,4 @@ projection_outer_iters: 20    # outer_itermax
 projection_mu_alpha: 2.0        # α，放大 μ
 projection_eta: 0.8             # η
 projection_last_k_steps: 50
+Distance: 0.17325324353125687, Radius: 0.10150146431529367, Interval: 0.007495124692232299, DailyLoc: 0.04354215820735104, Category: 0.036585512421942266, 'G-RANK': 0.21964688405592558, OVR_ref_skip: 0.384194168932541, OVR_ref_strict: 0.5708742658038966, coverage: 0.6551963583056863, Unsat_ref: 0.6141501427359
