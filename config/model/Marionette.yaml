@@ -18,7 +18,7 @@ projection_delta_tal: 0.000001
 projection_lambda: 0.0          # λinit
 projection_mu: 1.0              # μinit
 projection_mu_max: 1000.0       # μmax
-projection_outer_iters: 100    # outer_itermax
+projection_outer_iters: 50    # outer_itermax
 projection_inner_iters: 100     # inner_itermax
 projection_mu_alpha: 2.0        # α，放大 μ
 projection_eta: 0.5             # η

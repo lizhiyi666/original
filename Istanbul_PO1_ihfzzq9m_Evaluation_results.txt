@@ -117,9 +117,10 @@ projection_last_k_steps: 100
 projection_existence_weight: 5.0
 Distance: 0.17665402970742788, Radius: 0.10670456891831548, Interval: 0.007892553070442024, DailyLoc: 0.04496061659075093, Category: 0.04090245008823512, 'G-RANK': 0.2259840817633945, OVR_ref_skip: 0.39616741643947756, OVR_ref_strict: 0.5639220726143858, coverage: 0.6879098834966437, Unsat_ref: 0.5948615075997222
 projection_lambda: 0.0          # λinit
-projection_outer_iters: 100    # outer_itermax
+projection_outer_iters: 50    # outer_itermax
 projection_mu_alpha: 2.0        # α，放大 μ
 projection_eta: 0.5             # η
 projection_frequency: 2
 projection_last_k_steps: 100
 projection_existence_weight: 2.0
+Distance: 0.1758622646233737, Radius: 0.10399554407593141, Interval: 0.007742178445770663, DailyLoc: 0.04059998989350758, Category: 0.04026806759340677, 'G-RANK': 0.22566386217110504, OVR_ref_skip: 0.3874386811443959, OVR_ref_strict: 0.5587278679587094, coverage: 0.6833577656045058, Unsat_ref: 0.5949386621402669

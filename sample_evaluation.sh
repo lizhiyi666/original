@@ -14,7 +14,7 @@ python sample.py \
   --use_constraint_projection \
   --debug_constraint_projection \
   --projection_frequency 2 \
-  --projection_outer_iters 100 \
+  --projection_outer_iters 50 \
   --projection_inner_iters 100\
   --projection_tau 0 \
   --projection_lambda 0.0 \
