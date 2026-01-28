@@ -1,5 +1,6 @@
 import torch
 import argparse
+import math
 from evaluate_utils import get_task, get_run_data
 
 parser = argparse.ArgumentParser()
@@ -23,6 +24,9 @@ parser.add_argument("--projection_existence_weight", type=float, default=0.02)
 parser.add_argument("--use_gumbel_softmax", action="store_true", help="Enable Gumbel-Softmax for gradient estimation")
 parser.add_argument("--gumbel_temperature", type=float, default=1.0)
 parser.add_argument("--projection_last_k_steps", type=int, default=60)
+# [新增] 并行采样参数
+parser.add_argument("--rank", type=int, default=0, help="当前进程的索引 (0 ~ world_size-1)")
+parser.add_argument("--world_size", type=int, default=1, help="总进程数 (GPU数量)")
 # [新增] debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
 
@@ -112,6 +116,25 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
     # ======================================================
+    all_sequences = datamodule.test_data.sequences
+    total_len = len(all_sequences)
+    
+    # 计算当前 GPU 应该负责的范围
+    chunk_size = int(math.ceil(total_len / args.world_size))
+    start_idx = args.rank * chunk_size
+    end_idx = min((args.rank + 1) * chunk_size, total_len)
+    
+    # 切分数据
+    my_sequences = all_sequences[start_idx:end_idx]
+    
+    # 覆盖 datamodule 中的数据，这样 dataloader 就会只加载这一部分
+    datamodule.test_data.sequences = my_sequences
+    
+    print(f"[GPU {args.rank}] Processing {len(my_sequences)} sequences (Range: {start_idx} -> {end_idx})")
+    
+    if len(my_sequences) == 0:
+        print(f"[GPU {args.rank}] No data to process, exiting.")
+        return
 
     test_data = torch.load(PROJECT_ROOT + 'data/' + data_name + f'/{data_name}_test.pkl', weights_only=False)
     gps_dict = test_data['poi_gps']
@@ -152,8 +175,11 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         assert len(samples) == batch.batch_size, "not enough samples"
         generated_seqs += samples
 
+     # ================= [修改] 保存文件带上 rank 后缀 =================
+    # 避免不同 GPU 同时写同一个文件造成冲突
+    save_name = f'./data/{data_name}/{data_name}_{RUN_ID}_generated_part{args.rank}.pkl'
     data_new = {'sequences': generated_seqs, 't_max': batch.tmax.detach().cpu().numpy()}
-    torch.save(data_new, f'./data/{data_name}/{data_name}_{RUN_ID}_generated.pkl')
-
+    torch.save(data_new, save_name)
+    print(f"[GPU {args.rank}] Saved part file to {save_name}")
 
 simulation(RUN_ID=args.run_id)

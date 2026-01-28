@@ -25,7 +25,7 @@ python sample.py \
   --projection_delta_tol 0.000001\
   --use_gumbel_softmax \
   --gumbel_temperature 0.1 \
-  --projection_last_k_steps 40 \
+  --projection_last_k_steps 100 \
   --projection_existence_weight 5.0 \
 
 python evaluation.py --datasets Istanbul_PO1 --task Stat --experiment_comments "$RUN_ID" &
