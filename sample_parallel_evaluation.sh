@@ -35,7 +35,7 @@ do
       --projection_outer_iters 100 \
       --projection_inner_iters 100\
       --projection_tau 0 \
-      --projection_lambda 1.0 \
+      --projection_lambda 0 \
       --projection_eta 0.4 \
       --projection_mu 1.0 \
       --projection_mu_max 1000.0 \
@@ -44,7 +44,7 @@ do
       --use_gumbel_softmax \
       --gumbel_temperature 0.1 \
       --projection_last_k_steps 100 \
-      --projection_existence_weight 5.0 \
+      --projection_existence_weight 2.5 \
       > "gpu_${rank}.log" 2>&1 &  
     
     # 保存后台进程 PID (可选，用于调试)
