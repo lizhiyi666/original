@@ -31,20 +31,20 @@ do
       --rank $rank \
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
-      --projection_frequency 2 \
-      --projection_outer_iters 100 \
+      --projection_frequency 4 \
+      --projection_outer_iters 200 \
       --projection_inner_iters 100\
       --projection_tau 0 \
       --projection_lambda 1.0 \
-      --projection_eta 0.4 \
+      --projection_eta 1.0 \
       --projection_mu 1.0 \
       --projection_mu_max 1000.0 \
       --projection_mu_alpha 2.0 \
       --projection_delta_tol 0.000001\
       --use_gumbel_softmax \
       --gumbel_temperature 0.1 \
-      --projection_last_k_steps 100 \
-      --projection_existence_weight 2.5 \
+      --projection_last_k_steps 40 \
+      --projection_existence_weight 5 \
       > "gpu_${rank}.log" 2>&1 &  
     
     # 保存后台进程 PID (可选，用于调试)

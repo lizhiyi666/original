@@ -18,13 +18,13 @@ projection_delta_tal: 0.000001
 projection_lambda: 1.0          # λinit
 projection_mu: 1.0              # μinit
 projection_mu_max: 1000.0       # μmax
-projection_outer_iters: 100    # outer_itermax
+projection_outer_iters: 200    # outer_itermax
 projection_inner_iters: 100     # inner_itermax
 projection_mu_alpha: 2.0        # α，放大 μ
-projection_eta: 0.4             # η
+projection_eta: 1.0             # η
 projection_alm_iters: 10
-projection_frequency: 2
+projection_frequency: 4
 use_gumbel_softmax: true
 gumbel_temperature: 0.1
-projection_last_k_steps: 100
-projection_existence_weight: 2.5
+projection_last_k_steps: 40
+projection_existence_weight: 5
