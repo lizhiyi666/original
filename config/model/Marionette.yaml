@@ -15,7 +15,7 @@ num_condition_types: 6
 use_constraint_projection: True
 projection_tau: 0
 projection_delta_tal: 0.000001
-projection_lambda: 0          # λinit
+projection_lambda: 1.0          # λinit
 projection_mu: 1.0              # μinit
 projection_mu_max: 1000.0       # μmax
 projection_outer_iters: 100    # outer_itermax

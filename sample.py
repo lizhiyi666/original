@@ -92,6 +92,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         if hasattr(dd, "constraint_projector") and dd.constraint_projector is not None:
             dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
             # 顺便更新其他可能被忽略的参数
+            dd.constraint_projector.lambda_init = args.projection_lambda
             dd.constraint_projector.eta = args.projection_eta
             dd.constraint_projector.inner_iterations = args.projection_inner_iters
             dd.constraint_projector.outer_iterations = args.projection_outer_iters
