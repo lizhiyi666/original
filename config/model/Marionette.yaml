@@ -12,7 +12,7 @@ spatial_hidden_dims: 256
 num_condition_types: 6
 
 # Constraint Projection 参数
-use_constraint_projection: True
+use_constraint_projection: False
 projection_tau: 0
 projection_delta_tal: 0.000001
 projection_lambda: 1.0          # λinit

@@ -10,11 +10,10 @@ parser.add_argument("--use_constraint_projection", action="store_true")
 
 # [新增] 采样时强制开启投影（不依赖训练时配置）
 parser.add_argument("--projection_frequency", type=int, default=10)
-#parser.add_argument("--projection_alm_iters", type=int, default=10)
 parser.add_argument("--projection_tau", type=float, default=0.0)
-parser.add_argument("--projection_lambda", type=float, default=0.0)   # λinit
-parser.add_argument("--projection_eta", type=float, default=1.0)      # η
-parser.add_argument("--projection_mu", type=float, default=1.0)       # μinit
+parser.add_argument("--projection_lambda", type=float, default=0.0)
+parser.add_argument("--projection_eta", type=float, default=1.0)
+parser.add_argument("--projection_mu", type=float, default=1.0)
 parser.add_argument("--projection_mu_max", type=float, default=1000.0)
 parser.add_argument("--projection_outer_iters", type=int, default=10)
 parser.add_argument("--projection_inner_iters", type=int, default=10)
@@ -29,6 +28,11 @@ parser.add_argument("--rank", type=int, default=0, help="当前进程的索引 (
 parser.add_argument("--world_size", type=int, default=1, help="总进程数 (GPU数量)")
 # [新增] debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
+
+# ========== [新增] Baseline 选择 ==========
+parser.add_argument("--baseline", type=str, default=None,
+    choices=[None, "posthoc_swap"],
+    help="选择 baseline 方法。posthoc_swap: 先正常采样再后处理交换。")
 
 args = parser.parse_args()
 
@@ -56,7 +60,6 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         # 保存参数（供内部使用/打印）
         dd.projection_tau = args.projection_tau
         dd.projection_lambda = args.projection_lambda
-        #dd.projection_alm_iters = args.projection_alm_iters
         dd.projection_eta = args.projection_eta
         dd.projection_mu = args.projection_mu
         dd.projection_mu_max = args.projection_mu_max
@@ -66,7 +69,6 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd.projection_delta_tol = args.projection_delta_tol
         dd.projection_existence_weight = args.projection_existence_weight
         
-        # 关键：训练时若 use_constraint_projection=False，则 __init__ 不会创建 constraint_projector，这里补建
         if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
             device = next(dd.parameters()).device
             dd.constraint_projector = ConstraintProjection(
@@ -83,7 +85,6 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 eta=args.projection_eta,
                 delta_tol=args.projection_delta_tol,
                 projection_existence_weight=args.projection_existence_weight,
-                 # [新增] 传入 Gumbel 相关参数
                 use_gumbel_softmax=args.use_gumbel_softmax,
                 gumbel_temperature=args.gumbel_temperature,
                 device=str(device),
@@ -91,7 +92,6 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
         if hasattr(dd, "constraint_projector") and dd.constraint_projector is not None:
             dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
-            # 顺便更新其他可能被忽略的参数
             dd.constraint_projector.lambda_init = args.projection_lambda
             dd.constraint_projector.eta = args.projection_eta
             dd.constraint_projector.inner_iterations = args.projection_inner_iters
@@ -140,44 +140,70 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     test_data = torch.load(PROJECT_ROOT + 'data/' + data_name + f'/{data_name}_test.pkl', weights_only=False)
     gps_dict = test_data['poi_gps']
 
+    # ========== [新增] 收集 po_matrix 用于 Baseline2 后处理 ==========
+    collected_po_matrices = []
+
     generated_seqs = []
     for batch in datamodule.test_dataloader():
-        # tpp 采样出时间序列（这个 time_samples 通常不包含 po_matrix）
+        # tpp 采样出时间序列
         time_samples = task.tpp_model.sample(
             batch.batch_size,
             tmax=batch.tmax.to(task.device),
             x_n=batch.to(task.device)
         ).mask_check()
-        #print("time_samples.time", time_samples.time.shape)
-        #print("time_samples.tau ", time_samples.tau.shape)
-        # ========== [新增] 把每条轨迹自己的 po_matrix 从原始 batch 传给 time_samples ==========
-        # 这是投影能否生效的关键：diffusion 的 sample_fast 只看到 time_samples
+        
         if hasattr(batch, "po_matrix"):
             if batch.po_matrix is not None:
                 print("po_matrix shape:", batch.po_matrix.shape, "sum0:", batch.po_matrix[0].sum().item())
             else:
                 print("po_matrix missing")
             time_samples.po_matrix = batch.po_matrix.to(task.device)
-        # 同时把 category_mask 等也带上（通常 time_samples 已有，但这里做兜底）
-        '''if hasattr(batch, "category_mask"):
-            time_samples.category_mask = batch.category_mask.to(task.device)
-        if hasattr(batch, "poi_mask"):
-            time_samples.poi_mask = batch.poi_mask.to(task.device)
-        if hasattr(batch, "tau"):
-            time_samples.tau = batch.tau.to(task.device) if hasattr(batch.tau, "to") else batch.tau
-        if hasattr(batch, "unpadded_length"):
-            time_samples.unpadded_length = batch.unpadded_length.to(task.device) if hasattr(batch.unpadded_length, "to") else batch.unpadded_length'''
-        # ============================================================================
-        #print("time_samples.time", time_samples.time.shape)
-        #print("time_samples.tau ", time_samples.tau.shape)
+        
         assert len(time_samples) == batch.batch_size, "not enough samples"
 
         samples = task.discrete_diffusion.sample_fast(time_samples.to(task.device)).to_seq_list(gps_dict)
         assert len(samples) == batch.batch_size, "not enough samples"
         generated_seqs += samples
 
-     # ================= [修改] 保存文件带上 rank 后缀 =================
-    # 避免不同 GPU 同时写同一个文件造成冲突
+
+    # ========== [新增] Baseline 2: Post-hoc Swap ==========
+    if args.baseline == "posthoc_swap":
+        from baseline_posthoc_swap import apply_posthoc_swap, get_eval_cats, extract_constraints_from_test_seq
+        
+        # 需要 test 序列和 poi_category 来做修复
+        # test_data 已经在前面加载过了
+        poi_category = test_data['poi_category']
+        category_mapping = test_data.get('category_mapping', None)
+        
+        # 获取当前 rank 对应的 test 序列切片
+        all_test_seqs = test_data['sequences']
+        my_test_seqs = all_test_seqs[start_idx:end_idx]
+        
+        # 收集 po_matrices（如果有的话）
+        po_matrices = None
+        if category_mapping is not None:
+            po_matrices = []
+            for seq in my_test_seqs:
+                pm = seq.get('po_matrix', None)
+                if pm is not None:
+                    po_matrices.append(pm)
+                else:
+                    po_matrices = None
+                    break
+        
+        print(f"\n[Baseline2] Applying post-hoc swap to {len(generated_seqs)} sequences...")
+        
+        generated_seqs, swap_summary = apply_posthoc_swap(
+            generated_seqs=generated_seqs,
+            test_seqs=my_test_seqs,
+            poi_category=poi_category,
+            category_mapping=category_mapping,
+            po_matrices=po_matrices,
+            verbose=True,
+        )
+        print(f"[Baseline2] Done. Summary: {swap_summary}")
+
+    # ================= 保存文件带上 rank 后缀 =================
     save_name = f'./data/{data_name}/{data_name}_{RUN_ID}_generated_part{args.rank}.pkl'
     data_new = {'sequences': generated_seqs, 't_max': batch.tmax.detach().cpu().numpy()}
     torch.save(data_new, save_name)
