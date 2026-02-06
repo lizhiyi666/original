@@ -538,6 +538,45 @@ class DiffusionTransformer(nn.Module):
         # 用 after（不投影时等于 before）
         model_log_prob = model_log_prob_after
 
+        def apply_classifier_guidance(
+            model_log_prob: torch.Tensor,   # [B, V, L] 扩散模型的 log p(x_{t-1}|x_t)
+            log_x_t: torch.Tensor,          # [B, V, L] 当前噪声状态
+            t: torch.Tensor,                # [B] 时间步
+            classifier,                     # ConstraintClassifier 实例
+            category_mask: torch.Tensor,    # [B, L]
+            guidance_scale: float = 1.0,    # s: guidance 强度
+        ) -> torch.Tensor:
+            """
+            应用 Classifier-Based Guidance。
+            
+            修改后的采样分布:
+                log p_guided(x_{t-1}) = log p(x_{t-1}|x_t) + s * ∇_{log_x_t} log p(y=1|x_t, t)
+            
+            Args:
+                model_log_prob: 扩散模型预测的转移分布 [B, V, L]
+                log_x_t: 当前状态的 log-onehot [B, V, L]
+                t: 时间步 [B]
+                classifier: 训练好的约束分类器
+                category_mask: [B, L] category 位置 mask
+                guidance_scale: 引导强度
+            
+            Returns:
+                guided_log_prob: 引导后的 log 分布 [B, V, L]
+            """
+            if classifier is None or guidance_scale == 0:
+                return model_log_prob
+            
+            # 计算分类器的梯度
+            gradient = classifier.get_log_prob_gradient(log_x_t, t, category_mask)  # [B, V, L]
+            
+            # 应用引导: log p + s * grad
+            guided_log_prob = model_log_prob + guidance_scale * gradient
+            
+            # 重新归一化（确保仍然是有效的 log 概率）
+            guided_log_prob = torch.clamp(guided_log_prob, -70, 0)
+            
+            return guided_log_prob
+
         out = self.log_sample_categorical(model_log_prob)
         return out
 
