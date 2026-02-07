@@ -8,7 +8,7 @@ parser.add_argument("--run_id", type=str, default="marionette")
 
 parser.add_argument("--use_constraint_projection", action="store_true")
 
-# 采样时强制开启投影（不依赖训练时配置）
+# 投影参数
 parser.add_argument("--projection_frequency", type=int, default=10)
 parser.add_argument("--projection_tau", type=float, default=0.0)
 parser.add_argument("--projection_lambda", type=float, default=0.0)
@@ -23,26 +23,26 @@ parser.add_argument("--projection_existence_weight", type=float, default=0.02)
 parser.add_argument("--use_gumbel_softmax", action="store_true", help="Enable Gumbel-Softmax for gradient estimation")
 parser.add_argument("--gumbel_temperature", type=float, default=1.0)
 parser.add_argument("--projection_last_k_steps", type=int, default=60)
+
 # 并行采样参数
 parser.add_argument("--rank", type=int, default=0, help="当前进程的索引 (0 ~ world_size-1)")
 parser.add_argument("--world_size", type=int, default=1, help="总进程数 (GPU数量)")
+
 # debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
 
 # ========== Baseline 选择 ==========
 parser.add_argument("--baseline", type=str, default=None,
-    choices=["posthoc_swap", "classifier_guidance"],
-    help="选择 baseline 方法。posthoc_swap: Baseline2, classifier_guidance: Baseline3")
+    choices=["posthoc_swap", "energy_guidance"],
+    help="Baseline方法: posthoc_swap=Baseline2, energy_guidance=Baseline3")
 
-# ========== Baseline 3: Classifier-Based Guidance 参数 ==========
-parser.add_argument("--classifier_path", type=str, default=None,
-    help="Path to trained constraint classifier checkpoint (.pt)")
-parser.add_argument("--guidance_scale", type=float, default=3.0,
-    help="Classifier guidance scale (s)")
+# ========== Baseline 3: Energy-Based Guidance 参数 ==========
+parser.add_argument("--guidance_scale", type=float, default=10.0,
+    help="Guidance scale (越大约束越强，但可能影响生成质量)")
 parser.add_argument("--guidance_last_k_steps", type=int, default=40,
-    help="Only apply classifier guidance in the last k diffusion steps")
+    help="Only apply guidance in the last k diffusion steps")
 parser.add_argument("--guidance_frequency", type=int, default=4,
-    help="Apply classifier guidance every N steps")
+    help="Apply guidance every N steps")
 
 args = parser.parse_args()
 
@@ -125,91 +125,55 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
 
-    # ========== Baseline 3: Classifier-Based Guidance 设置 ==========
-    if args.baseline == "classifier_guidance":
-        from constraint_classifier import ConstraintClassifier
-        from classifier_guidance_injection import apply_classifier_guidance
-
-        assert args.classifier_path is not None, \
-            "Must provide --classifier_path for classifier_guidance baseline"
+    # ========== Baseline 3: Energy-Based Guidance 设置 ==========
+    if args.baseline == "energy_guidance":
+        from constraint_projection import ConstraintProjection
 
         dd = task.discrete_diffusion
-        device = next(dd.parameters()).device
 
-        print(f"[Baseline3] Loading classifier from {args.classifier_path}")
-        ckpt = torch.load(args.classifier_path, map_location=device, weights_only=False)
-        cfg = ckpt['config']
+        # 设置 guidance 标志和参数
+        dd.use_guidance_baseline = True
+        dd.guidance_scale = args.guidance_scale
+        dd.guidance_last_k_steps = args.guidance_last_k_steps
+        dd.guidance_frequency = args.guidance_frequency
+        dd._guidance_printed = False
 
-        constraint_classifier = ConstraintClassifier(
-            num_classes=cfg['num_classes'],
-            type_classes=cfg['type_classes'],
-            num_spectial=cfg['num_spectial'],
-            hidden_dim=cfg['hidden_dim'],
-            num_heads=cfg['num_heads'],
-            num_layers=cfg['num_layers'],
-            num_timesteps=cfg['num_timesteps'],
-            dropout=cfg.get('dropout', 0.1),
-        ).to(device)
-        constraint_classifier.load_state_dict(ckpt['model_state_dict'])
-        constraint_classifier.eval()
-        for param in constraint_classifier.parameters():
-            param.requires_grad = False
+        # 确保 use_constraint_projection = True，这样 sample_fast 会解析 po_matrix → po_constraints
+        # 但 projection 本身不执行（因为 should_apply_projection 的条件独立判断）
+        dd.use_constraint_projection = True
+        dd.projection_frequency = 999999  # 设一个巨大值，让投影条件永远不满足
+        dd.projection_last_k_steps = 0    # 或者让 last_k = 0
+        dd.debug_constraint_projection = False
+        dd._debug_projection_printed = True
+        dd._debug_viol_printed = True
+        dd._debug_po_printed = True
 
-        print(f"[Baseline3] Classifier loaded. guidance_scale={args.guidance_scale}, "
+        # 确保 constraint_projector 存在（用于编译约束矩阵和计算 violation）
+        if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
+            device = next(dd.parameters()).device
+            dd.constraint_projector = ConstraintProjection(
+                num_classes=dd.num_classes,
+                type_classes=dd.type_classes,
+                num_spectial=dd.num_spectial,
+                tau=0.0,
+                lambda_init=0.0,
+                mu_init=1.0,
+                mu_alpha=2.0,
+                mu_max=1000.0,
+                outer_iterations=1,   # guidance 不用 ALM 迭代
+                inner_iterations=1,
+                eta=1.0,
+                delta_tol=1e-6,
+                projection_existence_weight=0.02,
+                use_gumbel_softmax=True,
+                gumbel_temperature=0.1,
+                device=str(device),
+            )
+
+        print(f"[Baseline3] Energy-Based Guidance enabled")
+        print(f"[Baseline3] guidance_scale={args.guidance_scale}, "
               f"last_k={args.guidance_last_k_steps}, freq={args.guidance_frequency}")
 
-        # --- 保存引用到闭包变量 ---
-        _guidance_scale = args.guidance_scale
-        _guidance_last_k_steps = args.guidance_last_k_steps
-        _guidance_frequency = args.guidance_frequency
-        _classifier = constraint_classifier
-        _printed_once = [False]
-
-        # --- 保存原始 p_sample ---
-        _original_p_sample = dd.p_sample
-
-        def guided_p_sample(log_x, cond_emb, t, batch, po_constraints=None, diffusion_index=None):
-            """
-            带 Classifier-Based Guidance 的 p_sample。
-            替换原始 p_sample，在模型预测的 log-prob 上加分类器梯度。
-            """
-            # 1. 调用原始 p_pred 得到模型分布
-            model_log_prob, log_x_recon = dd.p_pred(log_x, cond_emb, t, batch)
-
-            # 2. 判断是否在当前步应用 guidance
-            should_guide = False
-            if diffusion_index is not None:
-                should_guide = (
-                    (diffusion_index % _guidance_frequency == 0)
-                    and (diffusion_index < _guidance_last_k_steps)
-                )
-
-            # 3. 应用 Classifier Guidance
-            if should_guide and hasattr(batch, 'category_mask') and batch.category_mask is not None:
-                if not _printed_once[0]:
-                    _printed_once[0] = True
-                    print(f"[Baseline3] First guidance applied at diffusion_index={diffusion_index}")
-
-                with torch.enable_grad():
-                    model_log_prob = apply_classifier_guidance(
-                        model_log_prob=model_log_prob,
-                        log_x_t=log_x,
-                        t=t,
-                        classifier=_classifier,
-                        category_mask=batch.category_mask,
-                        guidance_scale=_guidance_scale,
-                    )
-
-            # 4. Gumbel 采样（与原始 p_sample 末尾一致）
-            out = dd.log_sample_categorical(model_log_prob)
-            return out
-
-        # --- 替换 p_sample ---
-        dd.p_sample = guided_p_sample
-        print("[Baseline3] dd.p_sample replaced with guided_p_sample")
-
-    # ======================================================
-    # 数据分片 + 采样循环（不变）
     # ======================================================
     all_sequences = datamodule.test_data.sequences
     total_len = len(all_sequences)
@@ -286,7 +250,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         )
         print(f"[Baseline2] Done. Summary: {swap_summary}")
 
-    # ================= 保存文件带上 rank 后缀 =================
+    # ================= 保存 =================
     save_name = f'./data/{data_name}/{data_name}_{RUN_ID}_generated_part{args.rank}.pkl'
     data_new = {'sequences': generated_seqs, 't_max': batch.tmax.detach().cpu().numpy()}
     torch.save(data_new, save_name)

@@ -1,29 +1,21 @@
 #!/bin/bash
 
-# Baseline 3: Classifier-Based Guidance
-# 用法: bash sample_baseline3.sh <run_id>
+# Baseline 3: Energy-Based Guidance
+# 用法: bash sample_baseline3.sh <run_id> [guidance_scale]
 
 if [ -z "$1" ]; then
     echo "Error: Missing Run ID."
-    echo "Usage: bash sample_baseline3.sh <run_id>"
+    echo "Usage: bash sample_baseline3.sh <run_id> [guidance_scale]"
     exit 1
 fi
 
 RUN_ID=$1
+GUIDANCE_SCALE=${2:-10.0}
 WORLD_SIZE=4
 DATA_NAME="Istanbul_PO1"
-CLASSIFIER_PATH="./checkpoints/constraint_classifier_${RUN_ID}.pt"
-GUIDANCE_SCALE=3.0
-
-# 检查分类器是否已训练
-if [ ! -f "$CLASSIFIER_PATH" ]; then
-    echo "Classifier not found at $CLASSIFIER_PATH"
-    echo "Training classifier first..."
-    python train_classifier.py --run_id "$RUN_ID" --epochs 20 --lr 1e-4
-fi
 
 echo "====================================================="
-echo "Baseline 3: Classifier-Based Guidance"
+echo "Baseline 3: Energy-Based Guidance"
 echo "Run ID: $RUN_ID, Guidance Scale: $GUIDANCE_SCALE"
 echo "====================================================="
 
@@ -35,8 +27,7 @@ do
       --run_id "$RUN_ID" \
       --rank $rank \
       --world_size $WORLD_SIZE \
-      --baseline classifier_guidance \
-      --classifier_path "$CLASSIFIER_PATH" \
+      --baseline energy_guidance \
       --guidance_scale $GUIDANCE_SCALE \
       --guidance_last_k_steps 40 \
       --guidance_frequency 4 \

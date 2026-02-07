@@ -445,8 +445,7 @@ class DiffusionTransformer(nn.Module):
     def p_sample(self, log_x, cond_emb, t, batch, po_constraints=None, diffusion_index=None):
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
 
-        # 根据 projection_frequency 决定是否应用投影
-        # 只在后期 step 投影（速度优先）
+        # ========== 原有: Constraint Projection (ALM 投影) ==========
         last_k_steps = self.projection_last_k_steps
 
         should_apply_projection = False
@@ -459,11 +458,9 @@ class DiffusionTransformer(nn.Module):
             else:
                 should_apply_projection = True
 
-        # [关键] 默认不投影时 after=before，避免未定义变量
         model_log_prob_after = model_log_prob
 
         if should_apply_projection:
-            # 只打印一次，避免刷屏
             if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_projection_printed", False):
                 self._debug_projection_printed = True
                 print("[DEBUG][projection] CALLED in p_sample")
@@ -471,13 +468,11 @@ class DiffusionTransformer(nn.Module):
                 print(f"[DEBUG][projection] model_log_prob.shape={tuple(model_log_prob.shape)}")
                 print(f"[DEBUG][projection] category_mask.sum={batch.category_mask.sum().item() if hasattr(batch,'category_mask') and batch.category_mask is not None else None}")
                 print(f"[DEBUG] Projection triggered at step {diffusion_index}")
-                
-            # viol debug：只打印一次（很耗时）
+
             debug_viol = getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_viol_printed", False)
             if debug_viol:
                 self._debug_viol_printed = True
 
-            # 判断是否为 per-sample constraints（list-of-list）
             is_per_sample = (
                 isinstance(po_constraints, list)
                 and len(po_constraints) > 0
@@ -485,35 +480,25 @@ class DiffusionTransformer(nn.Module):
             )
             if debug_viol:
                 print(f"[DEBUG] Constraint Type: {'Per-Sample (List of Lists)' if is_per_sample else 'Shared (List of Tuples)'}")
-            
-            # 1. 编译约束矩阵 (Compiling Constraint Matrices)
+
             W_A, W_B, c_mask = None, None, None
-            
+
             if is_per_sample:
-                # Case A: 每条样本约束不同 -> W_A, W_B shape: [B, V_type, K_max]
-                # 这是一个新函数，需要在 ConstraintProjection 中实现 (见上文)
                 W_A, W_B, c_mask = self.constraint_projector.compile_batched_constraints(
                     po_constraints, device=model_log_prob.device
                 )
             else:
-                # Case B: 全 Batch 共享约束 -> W_A, W_B shape: [V_type, K]
-                # 这是上一轮建议的 compile_constraints 函数
                 W_A, W_B = self.constraint_projector._compile_constraints(
                     po_constraints, device=model_log_prob.device
                 )
 
-            # 2. 执行 Debug (Before Projection)
             if debug_viol and W_A is not None:
                 with torch.no_grad():
-                    # 复用优化后的计算函数，速度极快
                     viol_before, _ = self.constraint_projector.compute_constraint_violation_optimized(
-                        model_log_prob, W_A, W_B,  batch.category_mask,constraint_mask=c_mask, gumbel_noise=None
+                        model_log_prob, W_A, W_B, batch.category_mask, constraint_mask=c_mask, gumbel_noise=None
                     )
-                    # 打印 Batch 中第一个样本的违规，以及平均违规
                     print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
 
-            # 3. 执行投影 (Project)
-            # 无论 W_A 是 2D 还是 3D，project_with_matrices 内部的 matmul 都能自动广播处理
             if W_A is not None:
                 model_log_prob_after = self.constraint_projector.project_with_matrices(
                     model_log_prob,
@@ -524,7 +509,6 @@ class DiffusionTransformer(nn.Module):
             else:
                 model_log_prob_after = model_log_prob
 
-            # 4. 执行 Debug (After Projection)
             if debug_viol and W_A is not None:
                 with torch.no_grad():
                     viol_after, _ = self.constraint_projector.compute_constraint_violation_optimized(
@@ -533,50 +517,70 @@ class DiffusionTransformer(nn.Module):
                     print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
                     delta = (viol_before - viol_after).mean().item()
                     print(f"[DEBUG][projection]  delta_mean={delta:.6f}")
-            
 
-        # 用 after（不投影时等于 before）
         model_log_prob = model_log_prob_after
 
-        def apply_classifier_guidance(
-            model_log_prob: torch.Tensor,   # [B, V, L] 扩散模型的 log p(x_{t-1}|x_t)
-            log_x_t: torch.Tensor,          # [B, V, L] 当前噪声状态
-            t: torch.Tensor,                # [B] 时间步
-            classifier,                     # ConstraintClassifier 实例
-            category_mask: torch.Tensor,    # [B, L]
-            guidance_scale: float = 1.0,    # s: guidance 强度
-        ) -> torch.Tensor:
-            """
-            应用 Classifier-Based Guidance。
-            
-            修改后的采样分布:
-                log p_guided(x_{t-1}) = log p(x_{t-1}|x_t) + s * ∇_{log_x_t} log p(y=1|x_t, t)
-            
-            Args:
-                model_log_prob: 扩散模型预测的转移分布 [B, V, L]
-                log_x_t: 当前状态的 log-onehot [B, V, L]
-                t: 时间步 [B]
-                classifier: 训练好的约束分类器
-                category_mask: [B, L] category 位置 mask
-                guidance_scale: 引导强度
-            
-            Returns:
-                guided_log_prob: 引导后的 log 分布 [B, V, L]
-            """
-            if classifier is None or guidance_scale == 0:
-                return model_log_prob
-            
-            # 计算分类器的梯度
-            gradient = classifier.get_log_prob_gradient(log_x_t, t, category_mask)  # [B, V, L]
-            
-            # 应用引导: log p + s * grad
-            guided_log_prob = model_log_prob + guidance_scale * gradient
-            
-            # 重新归一化（确保仍然是有效的 log 概率）
-            guided_log_prob = torch.clamp(guided_log_prob, -70, 0)
-            
-            return guided_log_prob
+        # ========== 新增: Baseline 3 - Energy-Based Guidance ==========
+        if getattr(self, 'use_guidance_baseline', False) and po_constraints is not None:
+            guidance_scale = getattr(self, 'guidance_scale', 10.0)
+            guidance_last_k = getattr(self, 'guidance_last_k_steps', 40)
+            guidance_freq = getattr(self, 'guidance_frequency', 4)
 
+            should_guide = False
+            if diffusion_index is not None:
+                should_guide = (
+                    (diffusion_index % guidance_freq == 0)
+                    and (diffusion_index < guidance_last_k)
+                )
+
+            if should_guide and hasattr(batch, 'category_mask') and batch.category_mask is not None:
+                # 1. 编译约束矩阵（如果 projection 阶段没编译的话）
+                if not should_apply_projection:
+                    # 重新编译（projection 没执行时 W_A/W_B 不存在）
+                    is_per_sample = (
+                        isinstance(po_constraints, list)
+                        and len(po_constraints) > 0
+                        and isinstance(po_constraints[0], list)
+                    )
+                    W_A, W_B, c_mask = None, None, None
+                    if is_per_sample:
+                        W_A, W_B, c_mask = self.constraint_projector.compile_batched_constraints(
+                            po_constraints, device=model_log_prob.device
+                        )
+                    else:
+                        W_A, W_B = self.constraint_projector._compile_constraints(
+                            po_constraints, device=model_log_prob.device
+                        )
+
+                if W_A is not None:
+                    # 2. 准备需要梯度的 logits
+                    logits = model_log_prob.detach().clone().requires_grad_(True)
+
+                    # 3. 计算约束违规度（能量函数）
+                    with torch.enable_grad():
+                        violation, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                            logits, W_A, W_B, batch.category_mask,
+                            constraint_mask=c_mask, gumbel_noise=None
+                        )
+                        energy = violation.sum()
+
+                    # 4. 计算梯度
+                    grad = torch.autograd.grad(energy, logits)[0]
+
+                    # 5. 应用 Guidance: logits = logits - scale * grad
+                    model_log_prob = model_log_prob - guidance_scale * grad
+
+                    # 6. clamp 防止数值异常
+                    model_log_prob = model_log_prob.clamp(-70, 0)
+
+                    # debug 输出（只打印一次）
+                    if not getattr(self, '_guidance_printed', False):
+                        self._guidance_printed = True
+                        print(f"[Baseline3-Guidance] Applied at step {diffusion_index}, "
+                              f"energy={energy.item():.4f}, grad_norm={grad.norm().item():.4f}, "
+                              f"scale={guidance_scale}")
+
+        # ========== 最终采样 ==========
         out = self.log_sample_categorical(model_log_prob)
         return out
 
