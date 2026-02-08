@@ -161,8 +161,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 mu_init=1.0,
                 mu_alpha=2.0,
                 mu_max=1000.0,
-                outer_iterations=1,
-                inner_iterations=1,
+                outer_iterations=50,
+                inner_iterations=50,
                 eta=1.0,
                 delta_tol=1e-6,
                 projection_existence_weight=args.projection_existence_weight,
@@ -170,7 +170,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 gumbel_temperature=1.0,
                 device=str(device),
             )
-
+        dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
+        print(f"[Baseline3] existence_weight {args.projection_existence_weight}")
         print(f"[Baseline3] Classifier-Based Guidance enabled")
         print(f"[Baseline3] scale={args.guidance_scale}, temp={args.guidance_temperature}, "
               f"last_k={args.guidance_last_k_steps}, freq={args.guidance_frequency}")
