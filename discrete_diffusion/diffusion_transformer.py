@@ -567,7 +567,7 @@ class DiffusionTransformer(nn.Module):
                             constraint_mask=g_c_mask,
                             temperature=guidance_temperature,
                         )
-                        energy = violation.mean()
+                        energy = violation.sum()
 
                     # 3. 计算梯度
                     grad = torch.autograd.grad(energy, x0_logits)[0]
@@ -590,7 +590,7 @@ class DiffusionTransformer(nn.Module):
                     else:
                         model_log_prob = guided_x0
 
-                    # debug
+                                        # debug
                     if not getattr(self, '_guidance_printed', False):
                         self._guidance_printed = True
                         # 看 category 部分的梯度
@@ -604,12 +604,21 @@ class DiffusionTransformer(nn.Module):
                               f"cat_part_norm={cat_grad.norm().item():.6f}")
                         
                         with torch.no_grad():
+                            # [新增] 计算引导前的硬违规 (hard violation before)
+                            viol_before, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                                log_x_recon, g_W_A, g_W_B, batch.category_mask,
+                                constraint_mask=g_c_mask, gumbel_noise=None
+                            )
+                            # 计算引导后的硬违规 (hard violation after)
                             viol_after, _ = self.constraint_projector.compute_constraint_violation_optimized(
                                 guided_x0, g_W_A, g_W_B, batch.category_mask,
                                 constraint_mask=g_c_mask, gumbel_noise=None
                             )
+                        
+                        # [修改] 打印对比结果
                         print(f"[Baseline3-Guidance] step={diffusion_index}, "
-                              f"energy_before={energy.item():.4f}, "
+                              f"energy_soft={energy.item():.4f}, "
+                              f"hard_viol_before={viol_before.mean().item():.4f}, "
                               f"hard_viol_after={viol_after.mean().item():.4f}, "
                               f"raw_grad_norm={grad_norm.item():.6f}, "
                               f"scale={guidance_scale}, temp={guidance_temperature}")
