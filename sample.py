@@ -43,7 +43,8 @@ parser.add_argument("--guidance_last_k_steps", type=int, default=40,
     help="Only apply guidance in the last k diffusion steps")
 parser.add_argument("--guidance_frequency", type=int, default=4,
     help="Apply guidance every N steps")
-
+parser.add_argument("--guidance_temperature", type=float, default=1.0,
+                    help="Softmax temperature for guidance violation (higher = softer = better gradients)")
 args = parser.parse_args()
 
 
@@ -125,7 +126,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
 
-    # ========== Baseline 3: Energy-Based Guidance 设置 ==========
+        # ========== Baseline 3: Classifier-Based Guidance 设置 ==========
     if args.baseline == "energy_guidance":
         from constraint_projection import ConstraintProjection
 
@@ -136,19 +137,19 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd.guidance_scale = args.guidance_scale
         dd.guidance_last_k_steps = args.guidance_last_k_steps
         dd.guidance_frequency = args.guidance_frequency
+        dd.guidance_temperature = args.guidance_temperature  # [新增]
         dd._guidance_printed = False
 
-        # 确保 use_constraint_projection = True，这样 sample_fast 会解析 po_matrix → po_constraints
-        # 但 projection 本身不执行（因为 should_apply_projection 的条件独立判断）
+        # 确保 po_constraints 能被解析出来
         dd.use_constraint_projection = True
-        dd.projection_frequency = 999999  # 设一个巨大值，让投影条件永远不满足
-        dd.projection_last_k_steps = 0    # 或者让 last_k = 0
+        dd.projection_frequency = 999999
+        dd.projection_last_k_steps = 0
         dd.debug_constraint_projection = False
         dd._debug_projection_printed = True
         dd._debug_viol_printed = True
         dd._debug_po_printed = True
 
-        # 确保 constraint_projector 存在（用于编译约束矩阵和计算 violation）
+        # 确保 constraint_projector 存在
         if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
             device = next(dd.parameters()).device
             dd.constraint_projector = ConstraintProjection(
@@ -160,18 +161,18 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 mu_init=1.0,
                 mu_alpha=2.0,
                 mu_max=1000.0,
-                outer_iterations=1,   # guidance 不用 ALM 迭代
+                outer_iterations=1,
                 inner_iterations=1,
                 eta=1.0,
                 delta_tol=1e-6,
-                projection_existence_weight=0.02,
-                use_gumbel_softmax=True,
-                gumbel_temperature=0.1,
+                projection_existence_weight=args.projection_existence_weight,
+                use_gumbel_softmax=False,   # guidance 不用 Gumbel
+                gumbel_temperature=1.0,
                 device=str(device),
             )
 
-        print(f"[Baseline3] Energy-Based Guidance enabled")
-        print(f"[Baseline3] guidance_scale={args.guidance_scale}, "
+        print(f"[Baseline3] Classifier-Based Guidance enabled")
+        print(f"[Baseline3] scale={args.guidance_scale}, temp={args.guidance_temperature}, "
               f"last_k={args.guidance_last_k_steps}, freq={args.guidance_frequency}")
 
     # ======================================================

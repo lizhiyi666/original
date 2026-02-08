@@ -89,6 +89,71 @@ class ConstraintProjection:
     #         total_violation += violation_k
     #     return total_violation
 
+    def compute_guidance_violation(
+    self,
+    log_probs: torch.Tensor,    # [B, V, L]
+    W_A: torch.Tensor,
+    W_B: torch.Tensor,
+    category_mask: torch.Tensor,
+    constraint_mask: torch.Tensor = None,
+    temperature: float = 1.0,
+    ) -> torch.Tensor:
+        """
+        专门为 Classifier-Based Guidance 设计的 violation 计算。
+        
+        关键区别：只在 category 类别子空间内做 softmax，
+        避免 3000+ POI 类别稀释 category 概率导致梯度消失。
+        """
+        B, V, L = log_probs.shape
+
+        # 1. transpose → [B, L, V]
+        logits_lv = log_probs.transpose(1, 2)
+
+        # 2. [关键] 只截取 category 部分的 logits [B, L, V_type]
+        cat_logits = logits_lv[:, :, self.category_start : self.category_end]
+
+        # 3. [关键] 在 category 子空间内做 softmax（不和 POI 混在一起）
+        # 这保证了 category 概率之和为 1.0，梯度充分
+        cat_probs = torch.softmax(cat_logits / temperature, dim=-1)  # [B, L, V_type]
+
+        # 4. 应用 Category Mask（只保留 category 位置）
+        if category_mask is not None:
+            cat_probs = cat_probs * category_mask.unsqueeze(-1).float()
+
+        # 5. 投影到约束空间 [B, L, K]
+        P_A_all = torch.matmul(cat_probs, W_A)
+        P_B_all = torch.matmul(cat_probs, W_B)
+
+        # 6. 应用约束掩码
+        if constraint_mask is not None:
+            mask_expanded = constraint_mask.unsqueeze(1)
+            P_A_all = P_A_all * mask_expanded
+            P_B_all = P_B_all * mask_expanded
+
+        # 7. 计算顺序违规 (Prefix Sum)
+        P_B_cumsum = torch.cumsum(P_B_all, dim=1)
+        P_B_prefix = torch.zeros_like(P_B_cumsum)
+        P_B_prefix[:, 1:, :] = P_B_cumsum[:, :-1, :]
+
+        order_per_k = (P_B_prefix * P_A_all).sum(dim=1)  # [B, K]
+
+        # 8. 计算存在性违规
+        count_A = P_A_all.sum(dim=1)
+        count_B = P_B_all.sum(dim=1)
+
+        target_count = 1.0
+        viol_exist_A = F.relu(target_count - count_A)
+        viol_exist_B = F.relu(target_count - count_B)
+        exist_per_k = viol_exist_A + viol_exist_B
+
+        if constraint_mask is not None:
+            order_per_k = order_per_k * constraint_mask
+            exist_per_k = exist_per_k * constraint_mask
+
+        total_violation = order_per_k.sum(dim=1) + self.projection_existence_weight * exist_per_k.sum(dim=1)
+
+        return total_violation
+
     def compute_hard_constraint_violation_optimized(
         self,
         log_probs: torch.Tensor, # [B, V, L]

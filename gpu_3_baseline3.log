@@ -1,12 +1,15 @@
 /opt/conda/envs/marionette/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   __import__("pkg_resources").declare_namespace(__name__)
-[Baseline3] Energy-Based Guidance enabled
-[Baseline3] guidance_scale=5.0, last_k=40, freq=4
+[Baseline3] Classifier-Based Guidance enabled
+[Baseline3] scale=10.0, temp=1.0, last_k=40, freq=4
 [GPU 3] Processing 1195 sequences (Range: 3594 -> 4789)
 po_matrix shape: torch.Size([512, 9, 9]) sum0: 26.0
 tau before cond_encoder: torch.Size([512, 15]) time: torch.Size([512, 15])
 tau after  cond_encoder: torch.Size([512, 15]) time: torch.Size([512, 15])
-[Baseline3-Guidance] Applied at step 36, energy=2336.4426, grad_norm=0.1674, scale=5.0
+[Baseline3-Debug] category_mask.shape=(512, 31), category_mask.sum=3059
+[Baseline3-Debug] cat_grad on mask: norm=0.000010, min=-0.000004, max=0.000004
+[Baseline3-Debug] full grad: norm=0.000011, cat_part_norm=0.000011
+[Baseline3-Guidance] step=36, energy_before=4.5647, hard_viol_after=4.5617, raw_grad_norm=0.000011, scale=10.0, temp=1.0
 [DEBUG][shape] time torch.Size([512, 15])
 [DEBUG][shape] mask torch.Size([512, 15])
 [DEBUG][shape] tau  torch.Size([512, 15])
@@ -14,21 +17,21 @@ tau after  cond_encoder: torch.Size([512, 15]) time: torch.Size([512, 15])
 [DEBUG][shape] unpadded_length torch.Size([512]) 14
 [DEBUG][shape] content_token torch.Size([512, 31])
 po_matrix shape: torch.Size([512, 9, 9]) sum0: 20.0
-tau before cond_encoder: torch.Size([512, 13]) time: torch.Size([512, 13])
-tau after  cond_encoder: torch.Size([512, 13]) time: torch.Size([512, 13])
-[DEBUG][shape] time torch.Size([512, 13])
-[DEBUG][shape] mask torch.Size([512, 13])
-[DEBUG][shape] tau  torch.Size([512, 13])
-[DEBUG][shape] cond1 torch.Size([512, 13])
-[DEBUG][shape] unpadded_length torch.Size([512]) 12
-[DEBUG][shape] content_token torch.Size([512, 27])
+tau before cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
+tau after  cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
+[DEBUG][shape] time torch.Size([512, 14])
+[DEBUG][shape] mask torch.Size([512, 14])
+[DEBUG][shape] tau  torch.Size([512, 14])
+[DEBUG][shape] cond1 torch.Size([512, 14])
+[DEBUG][shape] unpadded_length torch.Size([512]) 13
+[DEBUG][shape] content_token torch.Size([512, 29])
 po_matrix shape: torch.Size([171, 9, 9]) sum0: 18.0
-tau before cond_encoder: torch.Size([171, 13]) time: torch.Size([171, 13])
-tau after  cond_encoder: torch.Size([171, 13]) time: torch.Size([171, 13])
-[DEBUG][shape] time torch.Size([171, 13])
-[DEBUG][shape] mask torch.Size([171, 13])
-[DEBUG][shape] tau  torch.Size([171, 13])
-[DEBUG][shape] cond1 torch.Size([171, 13])
-[DEBUG][shape] unpadded_length torch.Size([171]) 12
-[DEBUG][shape] content_token torch.Size([171, 27])
+tau before cond_encoder: torch.Size([171, 14]) time: torch.Size([171, 14])
+tau after  cond_encoder: torch.Size([171, 14]) time: torch.Size([171, 14])
+[DEBUG][shape] time torch.Size([171, 14])
+[DEBUG][shape] mask torch.Size([171, 14])
+[DEBUG][shape] tau  torch.Size([171, 14])
+[DEBUG][shape] cond1 torch.Size([171, 14])
+[DEBUG][shape] unpadded_length torch.Size([171]) 13
+[DEBUG][shape] content_token torch.Size([171, 29])
 [GPU 3] Saved part file to ./data/Istanbul_PO1/Istanbul_PO1_ihfzzq9m_generated_part3.pkl
