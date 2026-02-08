@@ -33,7 +33,7 @@ do
       --guidance_temperature $GUIDANCE_TEMP \
       --guidance_last_k_steps 100 \
       --guidance_frequency 1 \
-      --projection_existence_weight 10.0 \
+      --projection_existence_weight 20.0 \
       > "gpu_${rank}_baseline3.log" 2>&1 &
 
     pids[$rank]=$!
