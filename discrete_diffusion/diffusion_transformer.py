@@ -121,9 +121,15 @@ class ConditionEmbeddingModel(nn.Module):
         encoder_layer = TransformerEncoderLayer(d_model=self.emb_dims, nhead=4, batch_first=True)
         self.condition_transformers = TransformerEncoder(encoder_layer, num_layers=3)
         
-        # [新增] CFG 参数
+        self.po_input_dim = 81 
+        self.po_encoder = nn.Sequential(
+            nn.Linear(self.po_input_dim, emb_dims),
+            nn.ReLU(),
+            nn.Linear(emb_dims, emb_dims)
+        )
+        # [新增] Null Embedding (用于 Unconditional)
+        self.null_po_embedding = nn.Parameter(torch.randn(1, 1, emb_dims))
         self.dropout_rate = dropout_rate
-        self.null_embedding = nn.Parameter(torch.randn(1, 1, self.emb_dims))
 
     def forward(self, batch, force_dropout=False): # [修改] 增加参数
         seq_length = batch.time.size(1)
@@ -131,7 +137,7 @@ class ConditionEmbeddingModel(nn.Module):
         
         # [CFG 逻辑 1] 强制丢弃 (用于采样)
         if force_dropout:
-            return self.null_embedding.expand(batch.batch_size, seq_length, -1)
+            return self.null_po_embedding.expand(batch.batch_size, seq_length, -1)
 
         time_embeddings = self.encoder(batch.time.long()+1)
         condition1_embeddings = self.encoder(batch.condition1)
@@ -141,17 +147,43 @@ class ConditionEmbeddingModel(nn.Module):
         condition5_embeddings = self.encoder(batch.condition5)
         condition6_embeddings = self.encoder(batch.condition6)
 
-        condition_embeddings = self.input_up_proj(torch.cat([time_embeddings,condition1_embeddings,condition2_embeddings,\
-            condition3_embeddings,condition4_embeddings,condition5_embeddings,condition6_embeddings],dim=-1))
+        raw_cond_emb = torch.cat([time_embeddings,condition1_embeddings,condition2_embeddings,\
+            condition3_embeddings,condition4_embeddings,condition5_embeddings,condition6_embeddings],dim=-1)
+        
+        condition_embeddings = self.input_up_proj(raw_cond_emb)
+        
+        # 2. [新增] 编码 PO Constraints 并处理 Dropout
+        # 获取 po_matrix，如果不存在则全0
+        if hasattr(batch, 'po_matrix') and batch.po_matrix is not None:
+            pm = batch.po_matrix.float() # [B, 9, 9]
+            pm_flat = pm.reshape(pm.size(0), -1) # [B, 81]
+        else:
+            # 兼容没有 po_matrix 的情况
+            pm_flat = torch.zeros(batch.batch_size, self.po_input_dim, device=batch.time.device)
+
+        po_emb = self.po_encoder(pm_flat).unsqueeze(1) # [B, 1, D]
+        
+        # 广播到序列长度 [B, L, D] (因为约束是对整个序列生效的)
+        po_emb = po_emb.expand(-1, seq_length, -1)
+
+        # === CFG Dropout 逻辑 ===
+        if force_dropout:
+            # 采样时的 Unconditional 分���：使用 Null Embedding
+            final_po_emb = self.null_po_embedding.expand(-1, seq_length, -1)
+        elif self.training and self.dropout_rate > 0:
+            # 训练时随机 Dropout
+            mask = torch.bernoulli(torch.ones(batch.batch_size, 1, 1, device=batch.time.device) * (1 - self.dropout_rate))
+            final_po_emb = mask * po_emb + (1 - mask) * self.null_po_embedding
+        else:
+            # 正常情况
+            final_po_emb = po_emb
+
+        # 将 PO Embedding 加到条件中
+        condition_embeddings = condition_embeddings + final_po_emb
+        
+        # ... (原有 Transformer 编码逻辑) ...
         condition_embeddings = self.position_embeddings(position_ids) + condition_embeddings
         encoded_conditions = self.condition_transformers(condition_embeddings)
-        
-        # [CFG 逻辑 2] 训练时随机丢弃
-        if self.training and self.dropout_rate > 0:
-            # Generate mask [B, 1, 1]
-            mask = torch.bernoulli(torch.ones(encoded_conditions.shape[0], 1, 1, device=encoded_conditions.device) * (1 - self.dropout_rate))
-            encoded_conditions = mask * encoded_conditions + (1 - mask) * self.null_embedding
-
         return encoded_conditions
 
 
@@ -447,7 +479,7 @@ class DiffusionTransformer(nn.Module):
                             guidance_scale=guidance_scale)
         else:
             raise ValueError
-        return log_model_pred, log_x_recon
+        return log_model_pred, log_x_start
 
     '''@torch.no_grad()
     def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None, diffusion_index=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
@@ -759,6 +791,7 @@ class DiffusionTransformer(nn.Module):
         self,
         batch,
         content_token = None,
+        baseline_method = None,
         guidance_scale = 0.0,
         **kwargs):
         B, L = batch.batch_size, batch.content_len
@@ -768,7 +801,7 @@ class DiffusionTransformer(nn.Module):
         batch.device = device
 
         print("tau before cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
-        cond_emb = self.condition_encoder(batch)
+        cond_emb = self.condition_encoder(batch,force_dropout=False)
         print("tau after  cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
          # [CFG 逻辑] 准备无条件 Embedding
         uncond_emb = None
