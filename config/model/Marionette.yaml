@@ -10,7 +10,7 @@ temporal_time_segments: 24
 spatial_hidden_dims: 256
 
 num_condition_types: 6
-
+cond_dropout_rate: 0.1  # 训练时丢弃条件的概率
 # Constraint Projection 参数
 use_constraint_projection: False
 projection_tau: 0

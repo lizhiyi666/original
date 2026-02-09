@@ -33,8 +33,8 @@ parser.add_argument("--debug_constraint_projection", action="store_true")
 
 # ========== Baseline 选择 ==========
 parser.add_argument("--baseline", type=str, default=None,
-    choices=["posthoc_swap", "energy_guidance"],
-    help="Baseline方法: posthoc_swap=Baseline2, energy_guidance=Baseline3")
+    choices=["posthoc_swap", "energy_guidance", "cfg"], # [新增 cfg]
+    help="Baseline方法: posthoc_swap=Baseline2, energy_guidance=Baseline3, cfg=Baseline4")
 
 # ========== Baseline 3: Energy-Based Guidance 参数 ==========
 parser.add_argument("--guidance_scale", type=float, default=10.0,
@@ -215,7 +215,11 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
         assert len(time_samples) == batch.batch_size, "not enough samples"
 
-        samples = task.discrete_diffusion.sample_fast(time_samples.to(task.device)).to_seq_list(gps_dict)
+        samples = task.discrete_diffusion.sample_fast(
+            time_samples.to(task.device),
+            baseline_method=args.baseline,      # [新增]
+            guidance_scale=args.guidance_scale  # [新增]
+        ).to_seq_list(gps_dict)
         assert len(samples) == batch.batch_size, "not enough samples"
         generated_seqs += samples
 

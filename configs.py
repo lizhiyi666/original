@@ -58,6 +58,7 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     gumbel_temperature = getattr(config, "gumbel_temperature", 1.0)
     projection_last_k_steps = getattr(config, 'projection_last_k_steps',60)
     projection_existence_weight = getattr(config, 'projection_existence_weight', 5.0)
+    cond_dropout_rate = getattr(config, 'cond_dropout_rate', 0.1)
 
     discrete_diffusion =  DiffusionTransformer(
         diffusion_step=config.spatial_hidden_dims,
@@ -80,6 +81,7 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         projection_inner_iters=projection_inner_iters,
         projection_mu_alpha=projection_mu_alpha,
         projection_delta_tol=projection_delta_tol,
+        cond_dropout_rate=cond_dropout_rate,
     )
     return tpp_model, discrete_diffusion
 

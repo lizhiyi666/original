@@ -99,15 +99,16 @@ def alpha_schedule(time_step, att_1 = 0.99999, att_T = 0.000009, ctt_1 = 0.00000
 class ConditionEmbeddingModel(nn.Module):
     def __init__(
         self,
-        cond_token_num = 200, # total number of all of condition tokens
+        cond_token_num = 200, 
         emb_dims = 256,
         num_condition_types = 6,
-        max_position_embeddings = 3000
+        max_position_embeddings = 3000,
+        dropout_rate = 0.1 # [新增]
     ):
         super().__init__()
         self.token_num = cond_token_num
         self.emb_dims = emb_dims
-        self.num_condition_types = num_condition_types + 1 # hour in day are discretized as additional condition
+        self.num_condition_types = num_condition_types + 1 
         self.max_position_embeddings = max_position_embeddings
         self.encoder = nn.Embedding(self.token_num, self.emb_dims)
         self.input_up_proj =  nn.Sequential(
@@ -119,11 +120,19 @@ class ConditionEmbeddingModel(nn.Module):
         self.register_buffer("position_ids", torch.arange(self.max_position_embeddings).expand((1, -1)))
         encoder_layer = TransformerEncoderLayer(d_model=self.emb_dims, nhead=4, batch_first=True)
         self.condition_transformers = TransformerEncoder(encoder_layer, num_layers=3)
+        
+        # [新增] CFG 参数
+        self.dropout_rate = dropout_rate
+        self.null_embedding = nn.Parameter(torch.randn(1, 1, self.emb_dims))
 
-
-    def forward(self, batch):
+    def forward(self, batch, force_dropout=False): # [修改] 增加参数
         seq_length = batch.time.size(1)
         position_ids = self.position_ids[:, : seq_length ]
+        
+        # [CFG 逻辑 1] 强制丢弃 (用于采样)
+        if force_dropout:
+            return self.null_embedding.expand(batch.batch_size, seq_length, -1)
+
         time_embeddings = self.encoder(batch.time.long()+1)
         condition1_embeddings = self.encoder(batch.condition1)
         condition2_embeddings = self.encoder(batch.condition2)
@@ -136,6 +145,13 @@ class ConditionEmbeddingModel(nn.Module):
             condition3_embeddings,condition4_embeddings,condition5_embeddings,condition6_embeddings],dim=-1))
         condition_embeddings = self.position_embeddings(position_ids) + condition_embeddings
         encoded_conditions = self.condition_transformers(condition_embeddings)
+        
+        # [CFG 逻辑 2] 训练时随机丢弃
+        if self.training and self.dropout_rate > 0:
+            # Generate mask [B, 1, 1]
+            mask = torch.bernoulli(torch.ones(encoded_conditions.shape[0], 1, 1, device=encoded_conditions.device) * (1 - self.dropout_rate))
+            encoded_conditions = mask * encoded_conditions + (1 - mask) * self.null_embedding
+
         return encoded_conditions
 
 
@@ -167,6 +183,7 @@ class DiffusionTransformer(nn.Module):
         projection_mu_alpha: float = 2.0,       # α 放大系数
         projection_delta_tol: float = 0.25,     # δ 容忍
         projection_existence_weight: float = 0.02,
+        cond_dropout_rate=0.1,
     ):
         super().__init__()  
 
@@ -272,7 +289,9 @@ class DiffusionTransformer(nn.Module):
         
         self.zero_vector = None
 
-        self.condition_encoder = ConditionEmbeddingModel(num_condition_types=self.num_condition_types)
+        self.condition_encoder = ConditionEmbeddingModel(num_condition_types=self.num_condition_types,
+            dropout_rate=cond_dropout_rate 
+        )
 
     def multinomial_kl(self, log_prob1, log_prob2):   # compute KL loss on log_prob
         kl = (log_prob1.exp() * (log_prob1 - log_prob2)).sum(dim=1)
@@ -352,7 +371,7 @@ class DiffusionTransformer(nn.Module):
             
         return log_probs
 
-    def predict_start(self, log_x_t, cond_emb, t, batch):          # p(x0|xt)
+    def predict_start(self, log_x_t, cond_emb, t, batch, uncond_emb=None, guidance_scale=0.0):          # p(x0|xt)
         x_t = log_onehot_to_index(log_x_t)
         if self.amp == True:
             with autocast():
@@ -364,8 +383,21 @@ class DiffusionTransformer(nn.Module):
         assert out.size()[2:] == x_t.size()[1:]
         
         log_pred = F.log_softmax(out.double(), dim=1).float()
-        batch_size = log_x_t.size()[0]
+        # [CFG 逻辑]
+        if uncond_emb is not None and guidance_scale > 1.0:
+            if self.amp == True:
+                with autocast():
+                    out_uncond = self.transformer(x_t, uncond_emb, t, batch)
+            else:
+                out_uncond = self.transformer(x_t, uncond_emb, t, batch)
+            
+            log_pred_uncond = F.log_softmax(out_uncond.double(), dim=1).float()
+            
+            # 线性插值: log_p = log_p_uncond + scale * (log_p_cond - log_p_uncond)
+            log_pred = log_pred_uncond + guidance_scale * (log_pred - log_pred_uncond)
 
+        # 后处理 (Zero vector padding)
+        batch_size = log_x_t.size()[0]
         zero_vector = torch.zeros(batch_size, 2, log_x_t.size(2)).type_as(log_x_t)- 70
         log_pred = torch.cat((log_pred, zero_vector), dim=1)
         log_pred = torch.clamp(log_pred, -70, 0)
@@ -403,13 +435,16 @@ class DiffusionTransformer(nn.Module):
         log_EV_xtmin_given_xt_given_xstart = self.q_pred(log_x_start, t - 1, batch)
         return torch.clamp(log_EV_xtmin_given_xt_given_xstart, -70, 0)
 
-    def p_pred(self, log_x, cond_emb, t, batch):             # if x0, first p(x0|xt), then sum(q(xt-1|xt,x0)*p(x0|xt))
+    def p_pred(self, log_x, cond_emb, t, batch, uncond_emb=None, guidance_scale=0.0):             # if x0, first p(x0|xt), then sum(q(xt-1|xt,x0)*p(x0|xt))
         if self.parametrization == 'x0':
-            log_x_recon = self.predict_start_with_truncate(log_x, cond_emb, t, batch)
-            log_model_pred = self.q_posterior(
-                log_x_start=log_x_recon, log_x_t=log_x, t=t, batch=batch)
+            log_x_start = self.predict_start(log_x, cond_emb, 
+            t, batch, uncond_emb=uncond_emb, 
+            guidance_scale=guidance_scale)
+            log_model_pred = self.q_posterior(log_x_start=log_x_start, log_x_t=log_x, t=t, batch=batch)
         elif self.parametrization == 'direct':
-            log_model_pred = self.predict_start(log_x, cond_emb, t, batch)
+            log_model_pred = self.predict_start(log_x, cond_emb, 
+                            t, batch, uncond_emb=uncond_emb, 
+                            guidance_scale=guidance_scale)
         else:
             raise ValueError
         return log_model_pred, log_x_recon
@@ -442,8 +477,9 @@ class DiffusionTransformer(nn.Module):
         out = self.log_sample_categorical(model_log_prob)
         return out'''
     @torch.no_grad()
-    def p_sample(self, log_x, cond_emb, t, batch, po_constraints=None, diffusion_index=None):
-        model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
+    def p_sample(self, log_x, cond_emb, t, batch, po_constraints=None, diffusion_index=None,
+                uncond_emb=None, guidance_scale=0.0):
+        model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch, uncond_emb=uncond_emb, guidance_scale=guidance_scale)
 
         # ========== 原有: Constraint Projection (ALM 投影) ==========
         last_k_steps = self.projection_last_k_steps
@@ -723,6 +759,7 @@ class DiffusionTransformer(nn.Module):
         self,
         batch,
         content_token = None,
+        guidance_scale = 0.0,
         **kwargs):
         B, L = batch.batch_size, batch.content_len
 
@@ -733,7 +770,10 @@ class DiffusionTransformer(nn.Module):
         print("tau before cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
         cond_emb = self.condition_encoder(batch)
         print("tau after  cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
-        
+         # [CFG 逻辑] 准备无条件 Embedding
+        uncond_emb = None
+        if baseline_method == "cfg" and guidance_scale > 1.0:
+            uncond_emb = self.condition_encoder(batch, force_dropout=True)
         mask_poi=self.num_classes-1
         mask_cat=self.num_classes-2
         
@@ -794,7 +834,11 @@ class DiffusionTransformer(nn.Module):
         with torch.no_grad():
             for diffusion_index in range(start_step - 1, -1, -1):
                 t = torch.full((B,), diffusion_index, device=device, dtype=torch.long)
-                log_z = self.p_sample(log_z, cond_emb, t, batch, po_constraints=po_constraints, diffusion_index=diffusion_index)
+                log_z = self.p_sample(log_z, cond_emb, t, batch, 
+                                      po_constraints=po_constraints, 
+                                      diffusion_index=diffusion_index,
+                                      uncond_emb=uncond_emb,       
+                                      guidance_scale=guidance_scale )
 
         content_token = log_onehot_to_index(log_z)
 
