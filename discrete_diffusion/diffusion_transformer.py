@@ -9,6 +9,7 @@ from torch.nn import TransformerEncoderLayer, TransformerEncoder
 from discrete_diffusion.conditional_attention import Transformer
 from datamodule import Batch
 from einops import rearrange
+from constraint_projection import ConstraintProjection, parse_po_matrix_to_constraints
 
 eps = 1e-8
 
@@ -98,15 +99,16 @@ def alpha_schedule(time_step, att_1 = 0.99999, att_T = 0.000009, ctt_1 = 0.00000
 class ConditionEmbeddingModel(nn.Module):
     def __init__(
         self,
-        cond_token_num = 200, # total number of all of condition tokens
+        cond_token_num = 200, 
         emb_dims = 256,
         num_condition_types = 6,
-        max_position_embeddings = 3000
+        max_position_embeddings = 3000,
+        dropout_rate = 0.1 # [新增]
     ):
         super().__init__()
         self.token_num = cond_token_num
         self.emb_dims = emb_dims
-        self.num_condition_types = num_condition_types + 1 # hour in day are discretized as additional condition
+        self.num_condition_types = num_condition_types + 1 
         self.max_position_embeddings = max_position_embeddings
         self.encoder = nn.Embedding(self.token_num, self.emb_dims)
         self.input_up_proj =  nn.Sequential(
@@ -118,11 +120,25 @@ class ConditionEmbeddingModel(nn.Module):
         self.register_buffer("position_ids", torch.arange(self.max_position_embeddings).expand((1, -1)))
         encoder_layer = TransformerEncoderLayer(d_model=self.emb_dims, nhead=4, batch_first=True)
         self.condition_transformers = TransformerEncoder(encoder_layer, num_layers=3)
+        
+        self.po_input_dim = 81 
+        self.po_encoder = nn.Sequential(
+            nn.Linear(self.po_input_dim, emb_dims),
+            nn.ReLU(),
+            nn.Linear(emb_dims, emb_dims)
+        )
+        # [新增] Null Embedding (用于 Unconditional)
+        self.null_po_embedding = nn.Parameter(torch.randn(1, 1, emb_dims))
+        self.dropout_rate = dropout_rate
 
-
-    def forward(self, batch):
+    def forward(self, batch, force_dropout=False): # [修改] 增加参数
         seq_length = batch.time.size(1)
         position_ids = self.position_ids[:, : seq_length ]
+        
+        # [CFG 逻辑 1] 强制丢弃 (用于采样)
+        if force_dropout:
+            return self.null_po_embedding.expand(batch.batch_size, seq_length, -1)
+
         time_embeddings = self.encoder(batch.time.long()+1)
         condition1_embeddings = self.encoder(batch.condition1)
         condition2_embeddings = self.encoder(batch.condition2)
@@ -131,8 +147,41 @@ class ConditionEmbeddingModel(nn.Module):
         condition5_embeddings = self.encoder(batch.condition5)
         condition6_embeddings = self.encoder(batch.condition6)
 
-        condition_embeddings = self.input_up_proj(torch.cat([time_embeddings,condition1_embeddings,condition2_embeddings,\
-            condition3_embeddings,condition4_embeddings,condition5_embeddings,condition6_embeddings],dim=-1))
+        raw_cond_emb = torch.cat([time_embeddings,condition1_embeddings,condition2_embeddings,\
+            condition3_embeddings,condition4_embeddings,condition5_embeddings,condition6_embeddings],dim=-1)
+        
+        condition_embeddings = self.input_up_proj(raw_cond_emb)
+        
+        # 2. [新增] 编码 PO Constraints 并处理 Dropout
+        # 获取 po_matrix，如果不存在则全0
+        if hasattr(batch, 'po_matrix') and batch.po_matrix is not None:
+            pm = batch.po_matrix.float() # [B, 9, 9]
+            pm_flat = pm.reshape(pm.size(0), -1) # [B, 81]
+        else:
+            # 兼容没有 po_matrix 的情况
+            pm_flat = torch.zeros(batch.batch_size, self.po_input_dim, device=batch.time.device)
+
+        po_emb = self.po_encoder(pm_flat).unsqueeze(1) # [B, 1, D]
+        
+        # 广播到序列长度 [B, L, D] (因为约束是对整个序列生效的)
+        po_emb = po_emb.expand(-1, seq_length, -1)
+
+        # === CFG Dropout 逻辑 ===
+        if force_dropout:
+            # 采样时的 Unconditional 分���：使用 Null Embedding
+            final_po_emb = self.null_po_embedding.expand(-1, seq_length, -1)
+        elif self.training and self.dropout_rate > 0:
+            # 训练时随机 Dropout
+            mask = torch.bernoulli(torch.ones(batch.batch_size, 1, 1, device=batch.time.device) * (1 - self.dropout_rate))
+            final_po_emb = mask * po_emb + (1 - mask) * self.null_po_embedding
+        else:
+            # 正常情况
+            final_po_emb = po_emb
+
+        # 将 PO Embedding 加到条件中
+        condition_embeddings = condition_embeddings + final_po_emb
+        
+        # ... (原有 Transformer 编码逻辑) ...
         condition_embeddings = self.position_embeddings(position_ids) + condition_embeddings
         encoded_conditions = self.condition_transformers(condition_embeddings)
         return encoded_conditions
@@ -150,7 +199,23 @@ class DiffusionTransformer(nn.Module):
         poi_classes=3477,
         num_spectial=4,
         num_classes=None,
-
+        use_constraint_projection=False,  # [新增] 是否使用约束投影
+        projection_tau=0.0,
+        projection_lambda=0.0,          # λinit
+        #projection_alm_iters=10,        # 保持兼容，但实际外层内层由下方参数控制
+        projection_eta=1.0,             # η
+        projection_mu=1.0,              # μinit
+        projection_frequency=10,
+        use_gumbel_softmax=True,
+        gumbel_temperature=1.0,
+        projection_last_k_steps: int = 60,
+        projection_mu_max: float = 1000.0,      # μmax
+        projection_outer_iters: int = 10,     # outer_itermax
+        projection_inner_iters: int = 10,      # inner_itermax
+        projection_mu_alpha: float = 2.0,       # α 放大系数
+        projection_delta_tol: float = 0.25,     # δ 容忍
+        projection_existence_weight: float = 0.02,
+        cond_dropout_rate=0.1,
     ):
         super().__init__()  
 
@@ -166,6 +231,33 @@ class DiffusionTransformer(nn.Module):
         self.loss_type = 'vb_stochastic'
         self.num_timesteps = diffusion_step
         self.parametrization = 'x0'
+        self.use_gumbel_softmax = use_gumbel_softmax
+        self.gumbel_temperature = gumbel_temperature
+        self.projection_last_k_steps = projection_last_k_steps
+        self.projection_existence_weight=projection_existence_weight
+
+        # [新增] 约束投影模块
+        self.use_constraint_projection = use_constraint_projection
+        self.projection_frequency = projection_frequency  # [新增] 投影频率
+        if self.use_constraint_projection:
+            self.constraint_projector = ConstraintProjection(
+                num_classes=self.num_classes,
+                type_classes=self.type_classes,
+                num_spectial=self.num_spectial,
+                tau=projection_tau,
+                lambda_init=projection_lambda,
+                mu_init=projection_mu,
+                mu_alpha=projection_mu_alpha,
+                mu_max=projection_mu_max,
+                outer_iterations=projection_outer_iters,
+                inner_iterations=projection_inner_iters,
+                eta=projection_eta,
+                delta_tol=projection_delta_tol,
+                device='cuda',
+                use_gumbel_softmax=self.use_gumbel_softmax,
+                gumbel_temperature=self.gumbel_temperature,
+                projection_existence_weight=projection_existence_weight, 
+            )
 
         at,at1, bt,bt1, ct,ct1, att,att1, btt1,btt2, ctt,ctt1 = alpha_schedule(self.num_timesteps, type_classes=self.type_classes, poi_classes = self.poi_classes)
 
@@ -229,7 +321,9 @@ class DiffusionTransformer(nn.Module):
         
         self.zero_vector = None
 
-        self.condition_encoder = ConditionEmbeddingModel(num_condition_types=self.num_condition_types)
+        self.condition_encoder = ConditionEmbeddingModel(num_condition_types=self.num_condition_types,
+            dropout_rate=cond_dropout_rate 
+        )
 
     def multinomial_kl(self, log_prob1, log_prob2):   # compute KL loss on log_prob
         kl = (log_prob1.exp() * (log_prob1 - log_prob2)).sum(dim=1)
@@ -309,7 +403,7 @@ class DiffusionTransformer(nn.Module):
             
         return log_probs
 
-    def predict_start(self, log_x_t, cond_emb, t, batch):          # p(x0|xt)
+    def predict_start(self, log_x_t, cond_emb, t, batch, uncond_emb=None, guidance_scale=0.0):          # p(x0|xt)
         x_t = log_onehot_to_index(log_x_t)
         if self.amp == True:
             with autocast():
@@ -321,8 +415,21 @@ class DiffusionTransformer(nn.Module):
         assert out.size()[2:] == x_t.size()[1:]
         
         log_pred = F.log_softmax(out.double(), dim=1).float()
-        batch_size = log_x_t.size()[0]
+        # [CFG 逻辑]
+        if uncond_emb is not None and guidance_scale > 1.0:
+            if self.amp == True:
+                with autocast():
+                    out_uncond = self.transformer(x_t, uncond_emb, t, batch)
+            else:
+                out_uncond = self.transformer(x_t, uncond_emb, t, batch)
+            
+            log_pred_uncond = F.log_softmax(out_uncond.double(), dim=1).float()
+            
+            # 线性插值: log_p = log_p_uncond + scale * (log_p_cond - log_p_uncond)
+            log_pred = log_pred_uncond + guidance_scale * (log_pred - log_pred_uncond)
 
+        # 后处理 (Zero vector padding)
+        batch_size = log_x_t.size()[0]
         zero_vector = torch.zeros(batch_size, 2, log_x_t.size(2)).type_as(log_x_t)- 70
         log_pred = torch.cat((log_pred, zero_vector), dim=1)
         log_pred = torch.clamp(log_pred, -70, 0)
@@ -360,21 +467,231 @@ class DiffusionTransformer(nn.Module):
         log_EV_xtmin_given_xt_given_xstart = self.q_pred(log_x_start, t - 1, batch)
         return torch.clamp(log_EV_xtmin_given_xt_given_xstart, -70, 0)
 
-    def p_pred(self, log_x, cond_emb, t, batch):             # if x0, first p(x0|xt), then sum(q(xt-1|xt,x0)*p(x0|xt))
+    def p_pred(self, log_x, cond_emb, t, batch, uncond_emb=None, guidance_scale=0.0):             # if x0, first p(x0|xt), then sum(q(xt-1|xt,x0)*p(x0|xt))
         if self.parametrization == 'x0':
-            log_x_recon = self.predict_start_with_truncate(log_x, cond_emb, t, batch)
-            log_model_pred = self.q_posterior(
-                log_x_start=log_x_recon, log_x_t=log_x, t=t, batch=batch)
+            log_x_start = self.predict_start(log_x, cond_emb, 
+            t, batch, uncond_emb=uncond_emb, 
+            guidance_scale=guidance_scale)
+            log_model_pred = self.q_posterior(log_x_start=log_x_start, log_x_t=log_x, t=t, batch=batch)
         elif self.parametrization == 'direct':
-            log_model_pred = self.predict_start(log_x, cond_emb, t, batch)
+            log_model_pred = self.predict_start(log_x, cond_emb, 
+                            t, batch, uncond_emb=uncond_emb, 
+                            guidance_scale=guidance_scale)
         else:
             raise ValueError
-        return log_model_pred, log_x_recon
+        return log_model_pred, log_x_start
 
-    @torch.no_grad()
-    def p_sample(self, log_x, cond_emb,  t, batch):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
+    '''@torch.no_grad()
+    def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None, diffusion_index=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
+        
+        # [新增] 应用约束投影（如果启用且有约束）
+        # 根据 projection_frequency 决定是否在当前步骤应用投影
+        should_apply_projection = False
+        if self.use_constraint_projection and po_constraints is not None:
+            if diffusion_index is not None:
+                # 当 diffusion_index % projection_frequency == 0 时应用投影
+                should_apply_projection = (diffusion_index % self.projection_frequency == 0)
+            else:
+                # 如果没有提供 diffusion_index，则每步都应用（向后兼容）
+                should_apply_projection = True
+                
+        if should_apply_projection:
+            # 只在类别采样时应用投影
+            # 投影应用于模型预测的分布
+            model_log_prob = self.constraint_projector.apply_projection_to_category_positions(
+                model_log_prob,
+                po_constraints,
+                batch.category_mask
+            )
+        
         # Gumbel sample
+        out = self.log_sample_categorical(model_log_prob)
+        return out'''
+    @torch.no_grad()
+    def p_sample(self, log_x, cond_emb, t, batch, po_constraints=None, diffusion_index=None,
+                uncond_emb=None, guidance_scale=0.0):
+        model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch, uncond_emb=uncond_emb, guidance_scale=guidance_scale)
+
+        # ========== 原有: Constraint Projection (ALM 投影) ==========
+        last_k_steps = self.projection_last_k_steps
+
+        should_apply_projection = False
+        if self.use_constraint_projection and po_constraints is not None:
+            if diffusion_index is not None:
+                should_apply_projection = (
+                    (diffusion_index % self.projection_frequency == 0)
+                    and (diffusion_index < last_k_steps)
+                )
+            else:
+                should_apply_projection = True
+
+        model_log_prob_after = model_log_prob
+
+        if should_apply_projection:
+            if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_projection_printed", False):
+                self._debug_projection_printed = True
+                print("[DEBUG][projection] CALLED in p_sample")
+                print(f"[DEBUG][projection] diffusion_index={diffusion_index}, projection_frequency={self.projection_frequency}")
+                print(f"[DEBUG][projection] model_log_prob.shape={tuple(model_log_prob.shape)}")
+                print(f"[DEBUG][projection] category_mask.sum={batch.category_mask.sum().item() if hasattr(batch,'category_mask') and batch.category_mask is not None else None}")
+                print(f"[DEBUG] Projection triggered at step {diffusion_index}")
+
+            debug_viol = getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_viol_printed", False)
+            if debug_viol:
+                self._debug_viol_printed = True
+
+            is_per_sample = (
+                isinstance(po_constraints, list)
+                and len(po_constraints) > 0
+                and isinstance(po_constraints[0], list)
+            )
+            if debug_viol:
+                print(f"[DEBUG] Constraint Type: {'Per-Sample (List of Lists)' if is_per_sample else 'Shared (List of Tuples)'}")
+
+            W_A, W_B, c_mask = None, None, None
+
+            if is_per_sample:
+                W_A, W_B, c_mask = self.constraint_projector.compile_batched_constraints(
+                    po_constraints, device=model_log_prob.device
+                )
+            else:
+                W_A, W_B = self.constraint_projector._compile_constraints(
+                    po_constraints, device=model_log_prob.device
+                )
+
+            if debug_viol and W_A is not None:
+                with torch.no_grad():
+                    viol_before, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                        model_log_prob, W_A, W_B, batch.category_mask, constraint_mask=c_mask, gumbel_noise=None
+                    )
+                    print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
+
+            if W_A is not None:
+                model_log_prob_after = self.constraint_projector.project_with_matrices(
+                    model_log_prob,
+                    W_A, W_B,
+                    batch.category_mask,
+                    constraint_mask=c_mask,
+                )
+            else:
+                model_log_prob_after = model_log_prob
+
+            if debug_viol and W_A is not None:
+                with torch.no_grad():
+                    viol_after, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                        model_log_prob_after, W_A, W_B, batch.category_mask, constraint_mask=c_mask, gumbel_noise=None
+                    )
+                    print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
+                    delta = (viol_before - viol_after).mean().item()
+                    print(f"[DEBUG][projection]  delta_mean={delta:.6f}")
+
+        model_log_prob = model_log_prob_after
+
+        # ========== Baseline 3 - Classifier-Based Guidance ==========
+        if getattr(self, 'use_guidance_baseline', False) and po_constraints is not None:
+            guidance_scale = getattr(self, 'guidance_scale', 10.0)
+            guidance_last_k = getattr(self, 'guidance_last_k_steps', 40)
+            guidance_freq = getattr(self, 'guidance_frequency', 4)
+            guidance_temperature = getattr(self, 'guidance_temperature', 1.0)
+
+            should_guide = False
+            if diffusion_index is not None:
+                should_guide = (
+                    (diffusion_index % guidance_freq == 0)
+                    and (diffusion_index < guidance_last_k)
+                )
+
+            if should_guide and hasattr(batch, 'category_mask') and batch.category_mask is not None:
+                # 1. 编译约束矩阵
+                is_per_sample = (
+                    isinstance(po_constraints, list)
+                    and len(po_constraints) > 0
+                    and isinstance(po_constraints[0], list)
+                )
+                g_W_A, g_W_B, g_c_mask = None, None, None
+                if is_per_sample:
+                    g_W_A, g_W_B, g_c_mask = self.constraint_projector.compile_batched_constraints(
+                        po_constraints, device=model_log_prob.device
+                    )
+                else:
+                    g_W_A, g_W_B = self.constraint_projector._compile_constraints(
+                        po_constraints, device=model_log_prob.device
+                    )
+
+                if g_W_A is not None:
+                    # 2. [关键] 只提取 category 部分的 logits 做梯度计算
+                    # log_x_recon: [B, V, L]
+                    # category 部分: [B, type_classes, L] (索引 num_spectial : num_spectial+type_classes)
+                    cat_start = self.num_spectial
+                    cat_end = self.num_spectial + self.type_classes
+                    
+                    # 对整个 log_x_recon 求梯度（compute_guidance_violation 内部只截取 category 部分）
+                    x0_logits = log_x_recon.detach().clone().requires_grad_(True)
+
+                    with torch.enable_grad():
+                        violation = self.constraint_projector.compute_guidance_violation(
+                            x0_logits, g_W_A, g_W_B, batch.category_mask,
+                            constraint_mask=g_c_mask,
+                            temperature=guidance_temperature,
+                        )
+                        energy = violation.sum()
+
+                    # 3. 计算梯度
+                    grad = torch.autograd.grad(energy, x0_logits)[0]
+
+                    # 4. 归一化 + 缩放
+                    grad_norm = grad.norm()
+                    if grad_norm > 1e-8:
+                        normalized_grad = grad / (grad_norm + 1e-8)
+                        guided_x0 = log_x_recon - guidance_scale * normalized_grad
+                        guided_x0 = guided_x0.clamp(-70, 0)
+                    else:
+                        guided_x0 = log_x_recon
+
+                    # 5. 用引导后的 x_0 重新计算转移概率
+                    if t.min().item() > 0:
+                        model_log_prob = self.q_posterior(
+                            log_x_start=guided_x0, log_x_t=log_x, t=t, batch=batch
+                        )
+                        model_log_prob = model_log_prob.clamp(-70, 0)
+                    else:
+                        model_log_prob = guided_x0
+
+                                        # debug
+                    if not getattr(self, '_guidance_printed', False):
+                        self._guidance_printed = True
+                        # 看 category 部分的梯度
+                        cat_grad = grad[:, cat_start:cat_end, :]
+                        cat_grad_on_mask = cat_grad[:, :, batch.category_mask[0].bool()]
+                        print(f"[Baseline3-Debug] category_mask.shape={tuple(batch.category_mask.shape)}, "
+                              f"category_mask.sum={batch.category_mask.sum().item()}")
+                        print(f"[Baseline3-Debug] cat_grad on mask: norm={cat_grad_on_mask.norm().item():.6f}, "
+                              f"min={cat_grad_on_mask.min().item():.6f}, max={cat_grad_on_mask.max().item():.6f}")
+                        print(f"[Baseline3-Debug] full grad: norm={grad_norm.item():.6f}, "
+                              f"cat_part_norm={cat_grad.norm().item():.6f}")
+                        
+                        with torch.no_grad():
+                            # [新增] 计算引导前的硬违规 (hard violation before)
+                            viol_before, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                                log_x_recon, g_W_A, g_W_B, batch.category_mask,
+                                constraint_mask=g_c_mask, gumbel_noise=None
+                            )
+                            # 计算引导后的硬违规 (hard violation after)
+                            viol_after, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                                guided_x0, g_W_A, g_W_B, batch.category_mask,
+                                constraint_mask=g_c_mask, gumbel_noise=None
+                            )
+                        
+                        # [修改] 打印对比结果
+                        print(f"[Baseline3-Guidance] step={diffusion_index}, "
+                              f"energy_soft={energy.item():.4f}, "
+                              f"hard_viol_before={viol_before.mean().item():.4f}, "
+                              f"hard_viol_after={viol_after.mean().item():.4f}, "
+                              f"raw_grad_norm={grad_norm.item():.6f}, "
+                              f"scale={guidance_scale}, temp={guidance_temperature}")
+
+        # ========== 最终采样 ==========
         out = self.log_sample_categorical(model_log_prob)
         return out
 
@@ -471,23 +788,35 @@ class DiffusionTransformer(nn.Module):
         return losses['loss'], log_x0_recon.transpose(1, 2)
 
     def sample_fast(
-            self,
-            batch,
-            content_token = None,
-            **kwargs):
+        self,
+        batch,
+        content_token = None,
+        baseline_method = None,
+        guidance_scale = 0.0,
+        **kwargs):
         B, L = batch.batch_size, batch.content_len
 
         device = self.log_at.device
 
         batch.device = device
 
-        cond_emb = self.condition_encoder(batch)
-
+        print("tau before cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
+        cond_emb = self.condition_encoder(batch,force_dropout=False)
+        print("tau after  cond_encoder:", batch.tau.shape, "time:", batch.time.shape)
+         # [CFG 逻辑] 准备无条件 Embedding
+        uncond_emb = None
+        if baseline_method == "cfg" and guidance_scale > 1.0:
+            uncond_emb = self.condition_encoder(batch, force_dropout=True)
         mask_poi=self.num_classes-1
         mask_cat=self.num_classes-2
         
         bottom=torch.tensor([2],device=device)
         input=torch.ones(B,L,dtype=torch.int64,device=device) *3 ##padding
+
+        # ========== [关键修复] 在循环之前就构建 content-level 的 category_mask / poi_mask ==========
+        # 这些 mask 的维度必须是 [B, content_len]，与 log_z 的 L 维度匹配
+        content_category_mask = torch.zeros((B, L), device=device, dtype=torch.int64)
+        content_poi_mask = torch.zeros((B, L), device=device, dtype=torch.int64)
 
         for i in range(B):
             seq_len = batch.unpadded_length[i]
@@ -497,14 +826,69 @@ class DiffusionTransformer(nn.Module):
             tmp=torch.cat([head,body,bottom],dim=-1)
             input[i][:len(tmp)]=tmp
 
+            # 构建 content-level masks
+            seq_len_i = int(seq_len.item())
+            content_category_mask[i, 1:1+seq_len_i] = 1
+            poi_start = seq_len_i + 2
+            content_poi_mask[i, poi_start:poi_start+seq_len_i] = 1
+
+        # [关键] 把 content-level mask 设置到 batch 上，供 p_sample 使用
+        batch.category_mask = content_category_mask
+        batch.poi_mask = content_poi_mask
+
         log_z = index_to_log_onehot(input,self.num_classes)
         start_step = self.num_timesteps
+        
+        # [新增] 从 batch 中提取偏序约束（支持每条样本独立 po_matrix）
+        po_constraints = None
+        if self.use_constraint_projection and hasattr(batch, "po_matrix") and batch.po_matrix is not None:
+            pm = batch.po_matrix
+            if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_po_printed", False):
+                self._debug_po_printed = True
+                print("[DEBUG][projection] sample_fast: batch has po_matrix=True")
+                print("[DEBUG][projection] po_matrix.dim()=", pm.dim(), "shape=", tuple(pm.shape))
+
+            if pm.dim() == 2:
+                po_constraints = parse_po_matrix_to_constraints(pm.to(device))
+            elif pm.dim() == 3:
+                po_constraints = [parse_po_matrix_to_constraints(pm[i].to(device)) for i in range(pm.shape[0])]
+            else:
+                raise ValueError(f"Unexpected po_matrix.dim()={pm.dim()}, expected 2 or 3")
+
+        # ========== [新增] 也为 guidance 解析 po_constraints（即使 projection 关闭） ==========
+        if po_constraints is None and getattr(self, 'use_guidance_baseline', False):
+            if hasattr(batch, "po_matrix") and batch.po_matrix is not None:
+                pm = batch.po_matrix
+                if pm.dim() == 2:
+                    po_constraints = parse_po_matrix_to_constraints(pm.to(device))
+                elif pm.dim() == 3:
+                    po_constraints = [parse_po_matrix_to_constraints(pm[i].to(device)) for i in range(pm.shape[0])]
+
         with torch.no_grad():
             for diffusion_index in range(start_step - 1, -1, -1):
                 t = torch.full((B,), diffusion_index, device=device, dtype=torch.long)
-                log_z = self.p_sample(log_z, cond_emb, t, batch)  # log_z is log_onehot
+                log_z = self.p_sample(log_z, cond_emb, t, batch, 
+                                      po_constraints=po_constraints, 
+                                      diffusion_index=diffusion_index,
+                                      uncond_emb=uncond_emb,       
+                                      guidance_scale=guidance_scale )
 
         content_token = log_onehot_to_index(log_z)
+
+        # content_token: [B, content_len]
+        content_len = content_token.shape[1]
+        device = content_token.device
+
+        # 使用已经构建好的 mask（不需要重新构建）
+        category_mask = content_category_mask
+        poi_mask = content_poi_mask
+
+        print("[DEBUG][shape] time", batch.time.shape)
+        print("[DEBUG][shape] mask", batch.mask.shape)
+        print("[DEBUG][shape] tau ", batch.tau.shape)
+        print("[DEBUG][shape] cond1", batch.condition1.shape)
+        print("[DEBUG][shape] unpadded_length", batch.unpadded_length.shape, batch.unpadded_length.max().item())
+        print("[DEBUG][shape] content_token", content_token.shape)
 
         return Batch(
             time=batch.time,
@@ -523,8 +907,8 @@ class DiffusionTransformer(nn.Module):
             mask=batch.mask, 
             tmax=batch.tmax,
             checkin_sequences=content_token,
-            category_mask=batch.category_mask,
-            poi_mask=batch.poi_mask,
+            category_mask=category_mask,
+            poi_mask=poi_mask,
             tau=batch.tau,
             unpadded_length=batch.unpadded_length
         )

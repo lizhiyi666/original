@@ -2,3 +2,11 @@ wandb/
 *.ckpt
 *.pth
 *.pt
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+# 忽略数据集
+data/
+dataset/

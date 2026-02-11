@@ -62,6 +62,68 @@ def _min_max_positions(cats: List) -> Tuple[Dict, Dict]:
             max_pos[c] = i
     return min_pos, max_pos
 
+def _pair_satisfied_in_generated(gen_cats: List, A, B) -> bool:
+    """
+    Return True iff:
+      - A and B both appear in gen_cats
+      - and all A are before all B (max_pos(A) < min_pos(B))
+    Missing A or B counts as violation -> return False.
+    """
+    min_pos, max_pos = _min_max_positions(gen_cats)
+    if (A not in min_pos) or (B not in min_pos):
+        return False
+    return max_pos[A] < min_pos[B]
+
+def sequence_unsat_ratio_by_test_reference(test_seq: dict, gen_seq: dict, poi_category: Dict) -> float:
+    """
+    For one test/gen pair:
+      - extract reference pairs from test
+      - count how many are NOT satisfied in generated (missing counts as violation)
+      - return violated / total_ref_pairs, or nan if total_ref_pairs==0
+    """
+    test_cats = _seq_cats_order(test_seq, poi_category)
+    gen_cats = _seq_cats_order(gen_seq, poi_category)
+    ref_pairs = _extract_reference_pairs_for_sequence(test_cats)
+    if len(ref_pairs) == 0:
+        return float("nan")
+
+    violated = 0
+    for (A, B) in ref_pairs:
+        if not _pair_satisfied_in_generated(gen_cats, A, B):
+            violated += 1
+    return float(violated / len(ref_pairs))
+
+def dataset_unsat_ratio_by_test_pairs(test_seqs: List[dict], gen_seqs: List[dict], poi_category: Dict, skip_nan: bool = True) -> float:
+    """
+    Dataset-level unsatisfied constraint ratio:
+      - strict boolean satisfaction for each reference pair
+      - missing A or B counts as violation
+    Returns violated/total over all sequences (micro-average).
+    """
+    if len(test_seqs) != len(gen_seqs):
+        raise ValueError("test_seqs and gen_seqs must have same length.")
+
+    total_ref = 0
+    total_viol = 0
+
+    for t_seq, g_seq in zip(test_seqs, gen_seqs):
+        test_cats = _seq_cats_order(t_seq, poi_category)
+        gen_cats = _seq_cats_order(g_seq, poi_category)
+        ref_pairs = _extract_reference_pairs_for_sequence(test_cats)
+        if len(ref_pairs) == 0:
+            if not skip_nan:
+                # 若你想把“无参考对”的序列当作 0 约束参与，micro-average 下其实等价于跳过
+                pass
+            continue
+
+        total_ref += len(ref_pairs)
+        for (A, B) in ref_pairs:
+            if not _pair_satisfied_in_generated(gen_cats, A, B):
+                total_viol += 1
+
+    if total_ref == 0:
+        return float("nan")
+    return float(total_viol / total_ref)
 
 def _extract_reference_pairs_for_sequence(test_cats: List) -> List[Tuple]:
     """
@@ -117,6 +179,69 @@ def _violation_rate_for_pair_in_generated(gen_cats: List, A, B) -> Tuple[int, in
     total_pairs = total_A * len(B_pos)
     return int(violations), int(total_pairs)
 
+def dataset_ovr_with_coverage(test_seqs, gen_seqs, poi_category, skip_nan=True):
+    """
+    Returns:
+      ovr_skip   : allow_skip=True 的 OVR
+      ovr_strict : allow_skip=False 的 OVR
+      coverage   : 微平均 coverage = sum(considered_pairs)/sum(ref_pairs)
+    """
+    per_seq_skip = []
+    per_seq_strict = []
+
+    total_ref_pairs = 0
+    total_considered_pairs = 0
+
+    for t_seq, g_seq in zip(test_seqs, gen_seqs):
+        test_cats = _seq_cats_order(t_seq, poi_category)
+        gen_cats = _seq_cats_order(g_seq, poi_category)
+        ref_pairs = _extract_reference_pairs_for_sequence(test_cats)
+
+        if len(ref_pairs) == 0:
+            per_seq_skip.append(float("nan"))
+            per_seq_strict.append(float("nan"))
+            continue
+
+        # 统计 coverage 用（allow_skip=True 下真正参与的 pairs）
+        rates_skip = []
+        rates_strict = []
+
+        for (A, B) in ref_pairs:
+            violations, total_pairs = _violation_rate_for_pair_in_generated(gen_cats, A, B)
+
+            # strict：缺失当作 1.0
+            if total_pairs == 0:
+                rates_strict.append(1.0)
+            else:
+                rates_strict.append(violations / total_pairs)
+
+            # skip：缺失跳过
+            if total_pairs == 0:
+                continue
+            rates_skip.append(violations / total_pairs)
+
+        # coverage 计数（ref_pairs 全部算分母；considered_pairs 是 skip 下没被跳过的）
+        total_ref_pairs += len(ref_pairs)
+        total_considered_pairs += len(rates_skip)
+
+        per_seq_skip.append(float(np.mean(rates_skip)) if len(rates_skip) > 0 else float("nan"))
+        per_seq_strict.append(float(np.mean(rates_strict)) if len(rates_strict) > 0 else float("nan"))
+
+    arr_skip = np.array(per_seq_skip, dtype=np.float64)
+    arr_strict = np.array(per_seq_strict, dtype=np.float64)
+
+    if skip_nan:
+        valid_skip = ~np.isnan(arr_skip)
+        valid_strict = ~np.isnan(arr_strict)
+
+        ovr_skip = float(np.mean(arr_skip[valid_skip])) if valid_skip.sum() > 0 else float("nan")
+        ovr_strict = float(np.mean(arr_strict[valid_strict])) if valid_strict.sum() > 0 else float("nan")
+    else:
+        ovr_skip = float(np.nanmean(arr_skip))
+        ovr_strict = float(np.nanmean(arr_strict))
+
+    coverage = float(total_considered_pairs / total_ref_pairs) if total_ref_pairs > 0 else float("nan")
+    return ovr_skip, ovr_strict, coverage
 
 def sequence_ovr_by_test_reference(test_seq: dict, gen_seq: dict, poi_category: Dict, allow_skip: bool = True) -> float:
     """

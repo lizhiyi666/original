@@ -41,12 +41,47 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         time_segments=config.temporal_time_segments,
     )
 
+    # [新增] 从配置中读取约束投影参数
+    use_constraint_projection = getattr(config, 'use_constraint_projection', False)
+    projection_tau = getattr(config, 'projection_tau', 0.0)
+    projection_lambda = getattr(config, 'projection_lambda', 0.0)
+    #projection_alm_iters = getattr(config, 'projection_alm_iters', 10)
+    projection_eta = getattr(config, 'projection_eta', 1.0)
+    projection_mu = getattr(config, 'projection_mu', 1.0)
+    projection_frequency = getattr(config, 'projection_frequency', 10)
+    projection_mu_max = getattr(config, 'projection_mu_max', 1000.0)
+    projection_outer_iters = getattr(config, 'projection_outer_iters', 10)
+    projection_inner_iters = getattr(config, 'projection_inner_iters', 10)
+    projection_mu_alpha = getattr(config, 'projection_mu_alpha', 2.0)
+    projection_delta_tol = getattr(config, 'projection_delta_tol', 1e-6)
+    use_gumbel_softmax = getattr(config, "use_gumbel_softmax", True)
+    gumbel_temperature = getattr(config, "gumbel_temperature", 1.0)
+    projection_last_k_steps = getattr(config, 'projection_last_k_steps',60)
+    projection_existence_weight = getattr(config, 'projection_existence_weight', 5.0)
+    cond_dropout_rate = getattr(config, 'cond_dropout_rate', 0.1)
+
     discrete_diffusion =  DiffusionTransformer(
         diffusion_step=config.spatial_hidden_dims,
         alpha_init_type='alpha1',
         type_classes=datamodule.num_category,
         poi_classes=datamodule.num_poi,
         num_condition_types=config.num_condition_types,
+        use_constraint_projection=use_constraint_projection,
+        projection_tau=projection_tau,
+        projection_lambda=projection_lambda,
+        #projection_alm_iters=projection_alm_iters,
+        projection_eta=projection_eta,
+        projection_mu=projection_mu,
+        projection_frequency=projection_frequency,
+        use_gumbel_softmax=use_gumbel_softmax,
+        gumbel_temperature=gumbel_temperature,
+        projection_last_k_steps=projection_last_k_steps,
+        projection_mu_max=projection_mu_max,
+        projection_outer_iters=projection_outer_iters,
+        projection_inner_iters=projection_inner_iters,
+        projection_mu_alpha=projection_mu_alpha,
+        projection_delta_tol=projection_delta_tol,
+        cond_dropout_rate=cond_dropout_rate,
     )
     return tpp_model, discrete_diffusion
 
