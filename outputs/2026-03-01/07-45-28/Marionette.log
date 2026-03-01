@@ -1,0 +1,7 @@
+[07:45:31][__main__][INFO] /root/original/wandb/run-20260301_074529-ld1rcykx/files
+[07:45:31][__main__][INFO] Loading data
+[07:46:14][__main__][INFO] Istanbul_PO1
+[07:46:14][__main__][INFO] Instantiating model
+[07:46:14][__main__][INFO] Loading checkpoint
+[07:46:14][__main__][INFO] Instantiating trainer
+[07:46:14][__main__][INFO] Starting training!
