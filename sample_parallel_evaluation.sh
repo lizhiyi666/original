@@ -32,8 +32,8 @@ do
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
       --projection_frequency 4 \
-      --projection_outer_iters 200 \
-      --projection_inner_iters 100\
+      --projection_outer_iters 10 \
+      --projection_inner_iters 10\
       --projection_tau 0 \
       --projection_lambda 1.0 \
       --projection_eta 1.0 \
