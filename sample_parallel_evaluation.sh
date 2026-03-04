@@ -32,12 +32,12 @@ do
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
       --projection_frequency 4 \
-      --projection_outer_iters 10 \
-      --projection_inner_iters 10\
+      --projection_outer_iters 50 \
+      --projection_inner_iters 50\
       --projection_tau 0 \
-      --projection_lambda 1.0 \
+      --projection_lambda 10.0 \
       --projection_eta 1.0 \
-      --projection_mu 1.0 \
+      --projection_mu 10.0 \
       --projection_mu_max 1000.0 \
       --projection_mu_alpha 2.0 \
       --projection_delta_tol 0.000001\

@@ -187,3 +187,28 @@ Distance: 0.07418824138121788, Radius: 0.027710821624322292, Interval: 0.0074299
 Distance: 0.11774457271908903, Radius: 0.058649878307849804, Interval: 0.007412911684554212, DailyLoc: 0.034267046287616246, Category: 0.009704350122344921, 'G-RANK': 0.1493522595203045, OVR_ref_skip: 0.463756283068783, OVR_ref_strict: 0.7677140410794677, coverage: 0.39603425661600183, Unsat_ref: 0.8321888743152535
 #CDD 
 Distance: 0.12004400597902017, Radius: 0.060440710165329495, Interval: 0.007877959818273507, DailyLoc: 0.03482881809460335, Category: 0.007576394711723761, 'G-RANK': 0.1477585327764745, OVR_ref_skip: 0.3804045194003528, OVR_ref_strict: 0.7442111039346473, coverage: 0.3947997839672865, Unsat_ref: 0.7818841138801018
+#independent multiplier
+projection_lambda: 1.0          # λinit
+projection_mu: 1.0              # μinit
+projection_mu_max: 1000.0       # μmax
+projection_outer_iters: 10    # outer_itermax
+projection_inner_iters: 10     # inner_itermax
+projection_mu_alpha: 2.0        # α，放大 μ
+projection_eta: 1.0             # η
+projection_alm_iters: 10
+projection_frequency: 4
+use_gumbel_softmax: true
+gumbel_temperature: 0.1
+projection_last_k_steps: 40
+Distance: 0.06711507932054783, Radius: 0.024323789924902122, Interval: 0.007910163398025296, DailyLoc: 0.036892735401289206, Category: 0.0021299883878319647, 'G-RANK': 0.11263301808288863, OVR_ref_skip: 0.4613506250730225, OVR_ref_strict: 0.8885546906370023, coverage: 0.19165187871306227, Unsat_ref: 0.9329527042666461
+#projection_lambda: 10.0          # λinit
+#projection_mu: 10.0              # μinit
+Distance: 0.06737982293016989, Radius: 0.02439039567022474, Interval: 0.007910163398025296, DailyLoc: 0.036758063542873684, Category: 0.002114590986663569, 'G-RANK': 0.1118007977377056, OVR_ref_skip: 0.46107729265789715, OVR_ref_strict: 0.8880833826054533, coverage: 0.19203765141578583, Unsat_ref: 0.9327983951855566
+#乘子更新独立停止
+Distance: 0.06698396266400442, Radius: 0.023866427403680036, Interval: 0.007910163398025296, DailyLoc: 0.03689370282511349, Category: 0.0021241261702864616, 'G-RANK': 0.11306092763665704, OVR_ref_skip: 0.46264460304132843, OVR_ref_strict: 0.8884646340446206, coverage: 0.19149756963197284, Unsat_ref: 0.9333384769693697
+#增大惩罚力度
+Distance: 0.09205471178137563, Radius: 0.04084385231497752, Interval: 0.007911061536983493, DailyLoc: 0.03206051745984249, Category: 0.0012810483219463792, 'G-RANK': 0.12747116666031383, OVR_ref_skip: 0.39846330669416513, OVR_ref_strict: 0.786268575778246, coverage: 0.3363937967749402, Unsat_ref: 0.8380526193966515
+#constraint_loss不求均值
+Distance: 0.11915799309667958, Radius: 0.06420777153076193, Interval: 0.007907289129172816, DailyLoc: 0.03184116146796262, Category: 0.005928484642457055, 'G-RANK': 0.14866248229811152, OVR_ref_skip: 0.3471358893091277, OVR_ref_strict: 0.6462988004620852, coverage: 0.5028161407298819, Unsat_ref: 0.7031093279839519
+#projection_outer_iters: 50    # outer_itermax
+#projection_inner_iters: 50     # inner_itermax

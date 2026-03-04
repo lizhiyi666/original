@@ -96,89 +96,54 @@ class ConstraintProjection:
         W_B: torch.Tensor,       # [V_type, K]
         category_mask: torch.Tensor,
         constraint_mask: torch.Tensor = None,
-    ) -> torch.Tensor:
-        """
-        [高效版] 基于 Argmax 的硬违规计算
-        复用 W_A/W_B 矩阵，逻辑与 Soft 版本完全一致，但输入是 One-Hot。
-        """
+        ):
         B, V, L = log_probs.shape
         
-        # 1. 硬解码 (Argmax -> One-Hot)
-        # log_probs: [B, V, L] -> argmax dim=1 -> [B, L]
         idx = log_probs.argmax(dim=1)
-        
-        # 转为 One-Hot Float [B, L, V]
         probs_hard = F.one_hot(idx, num_classes=self.num_classes).float()
         
-        # 2. 应用 Mask (序列长度 Mask)
         if category_mask is not None:
             probs_hard = probs_hard * category_mask.unsqueeze(-1).float()
 
-        # 3. 截取类别段 [B, L, V_type]
         probs_type = probs_hard[:, :, self.category_start : self.category_end]
 
-        # 4. 投影到约束空间 [B, L, K]
-        # P_A_all 现在的含义是：在位置 L, 约束 K 的 A 类是否出现 (0 或 1)
         P_A_all = torch.matmul(probs_type, W_A) 
         P_B_all = torch.matmul(probs_type, W_B)
 
-        # 5. Mask 掉无效约束 (针对 Batched 且约束数量不一的情况)
         if constraint_mask is not None:
             mask_expanded = constraint_mask.unsqueeze(1) # [B, 1, K]
             P_A_all = P_A_all * mask_expanded
             P_B_all = P_B_all * mask_expanded
 
-        # ==========================================
-        # 6. 计算顺序违规 (Order Violation) - 硬逻辑
-        # ==========================================
-        # 计算前缀和 (Prefix Sum)
+        # 顺序违规
         P_B_cumsum = torch.cumsum(P_B_all, dim=1)
         P_B_prefix = torch.zeros_like(P_B_cumsum)
         P_B_prefix[:, 1:, :] = P_B_cumsum[:, :-1, :]
-        
-        # 如果 A 在这里出现 (1.0), 且前面出现过 N 次 B, 则违规 N 次
         order_per_k = (P_B_prefix * P_A_all).sum(dim=1) # [B, K]
 
-        # ==========================================
-        # 7. 计算存在性违规 (Existence Violation) - 硬逻辑
-        # ==========================================
+        # 存在性违规
         count_A = P_A_all.sum(dim=1) # [B, K]
         count_B = P_B_all.sum(dim=1) # [B, K]
-
-        # 硬阈值检查：如果没有出现 (count=0), 则违规为 1.0
+        
         target_count = 1.0
         viol_exist_A = F.relu(target_count - count_A)
         viol_exist_B = F.relu(target_count - count_B)
-        
-        exist_per_k = viol_exist_A + viol_exist_B
+        exist_per_k = viol_exist_A + viol_exist_B # [B, K]
 
-        # ==========================================
-        # 8. 总和
-        # ==========================================
-        # 注意：这里也必须加上 existence_weight，保持与内层优化目标一致
-        total_violation = order_per_k.sum(dim=1) + self.projection_existence_weight * exist_per_k.sum(dim=1)
-
-        return total_violation
+        # [修改] 独立返回
+        return order_per_k, exist_per_k
 
     def compute_constraint_violation_optimized(
         self,
         log_probs: torch.Tensor,
-        W_A: torch.Tensor, # [V_type, K] 预计算好的矩阵
-        W_B: torch.Tensor, # [V_type, K]
+        W_A: torch.Tensor,
+        W_B: torch.Tensor,
         category_mask: torch.Tensor,
         constraint_mask: torch.Tensor = None,
         gumbel_noise=None,
-        #projection_existence_weight: float = 0.02,  # [新增] 存在性约束的权重
-    ) -> torch.Tensor:
-        """
-        优化版 g(Y) 计算：
-        复杂度: O(L) (相对于 O(L^2) 的矩阵乘法)
-        并行度: 同时计算所有 K 个约束
-        """
-        # log_probs: [B, V, L]
+        ):
         B, V, L = log_probs.shape
         
-        # 1. 获取概率分布 [B, L, V]
         logits_lv = log_probs.transpose(1, 2)
         if self.use_gumbel_softmax:
             probs, gumbel_noise = self._gumbel_softmax_relax(
@@ -187,74 +152,40 @@ class ConstraintProjection:
         else:
             probs = torch.softmax(logits_lv, dim=-1)
 
-        # 2. 应用 Category Mask (只保留类别位置的概率)
-        # category_mask: [B, L] -> [B, L, 1]
         if category_mask is not None:
             probs = probs * category_mask.unsqueeze(-1).float()
 
-        # 3. 截取类别部分的概率 [B, L, V_type]
-        # 假设 category 在中间段
         probs_type = probs[:, :, self.category_start : self.category_end]
 
-        # 4. 投影到约束空间 [B, L, K]
-        # P_A[b, l, k] 表示在 batch b, 时刻 l, 约束 k 的 A 类发生概率
-        # 矩阵乘法: [B, L, V_type] @ [V_type, K] -> [B, L, K]
         P_A_all = torch.matmul(probs_type, W_A) 
         P_B_all = torch.matmul(probs_type, W_B)
 
-        # [新增] 在计算前缀和之前，先 Mask 掉无效约束的概率值
-        # 这样无效约束列的全是 0，cumsum 也是 0，彻底杜绝干扰
         if constraint_mask is not None:
-            # constraint_mask: [B, K] -> 广播到 [B, L, K]
             mask_expanded = constraint_mask.unsqueeze(1)
             P_A_all = P_A_all * mask_expanded
             P_B_all = P_B_all * mask_expanded
-        # 5. 计算前缀和 (Prefix Sum) 代替矩阵乘法 M
-        # 我们需要 sum_{i < j} P_B(i) * P_A(j)
-        # 令 Cum_P_B(j) = sum_{i=0}^{j} P_B(i)
-        # 则 sum_{i < j} P_B(i) = Cum_P_B(j-1)
-        # 也就是 P_B_all 的 exclusive cumsum
-        
-        # 计算包含当前位置的累加和 [B, L, K]
+            
+        # 顺序违规
         P_B_cumsum = torch.cumsum(P_B_all, dim=1)
-        
-        # 偏移一位得到 exclusive cumsum (第0位补0)
-        # [B, L, K] -> shift -> [B, L, K]
         P_B_prefix = torch.zeros_like(P_B_cumsum)
         P_B_prefix[:, 1:, :] = P_B_cumsum[:, :-1, :]
-        
-        # 6. 计算违规积并求和
-        # term[b, l, k] = (在此之前出现过B的概率总和) * (当前是A的概率)
         violation_matrix = P_B_prefix * P_A_all # [B, L, K]
-        
-        # 对 Time(L) 和 Constraints(K) 维度求和，得到每个 Batch 的总违规
-        order_per_k = violation_matrix.sum(dim=1) # [b,k]
+        order_per_k = violation_matrix.sum(dim=1) # [B, K]
 
-        # -----------------------------------------------------------
-        # 2. 新增：存在性违规 (Existence Violation)
-        # -----------------------------------------------------------
-        # 计算整条序列中，A 和 B 的期望出现次数 (Expected Count)
-        # sum over Length -> [Batch, K]
+        # 存在性违规
         count_A = P_A_all.sum(dim=1)
         count_B = P_B_all.sum(dim=1)
-
-        # 目标：期望次数至少为 1.0 (或者 0.9 以留有余地)
-        # 如果 count < 1.0, 产生惩罚 (1.0 - count)
-        # 使用 ReLU 确保如果次数 > 1.0 则无惩罚
         target_count = 1.0
         viol_exist_A = F.relu(target_count - count_A)
         viol_exist_B = F.relu(target_count - count_B)
-
-        # 对所有约束 K 求和 -> [B]
-        exist_per_k = (viol_exist_A + viol_exist_B)
+        exist_per_k = (viol_exist_A + viol_exist_B) # [B, K]
 
         if constraint_mask is not None:
             order_per_k = order_per_k * constraint_mask
             exist_per_k = exist_per_k * constraint_mask
 
-        total_violation = order_per_k.sum(dim=1) + self.projection_existence_weight * exist_per_k.sum(dim=1)
-
-        return total_violation, gumbel_noise
+        # [修改] 独立返回，不再求和
+        return order_per_k, exist_per_k, gumbel_noise
 
     def project_with_matrices(
             self,
@@ -265,89 +196,74 @@ class ConstraintProjection:
             constraint_mask = None,
         ) -> torch.Tensor:
             
-        # 1. 准备优化变量 (Detach from original graph, create new leaf)
-        # log_probs: [B, V, L] -> [B, L, V]
         y_model = log_probs.transpose(1, 2).detach() 
         y = y_model.clone().detach().requires_grad_(True)
         
-        # 使用优化器
         optimizer = torch.optim.SGD([y], lr=self.eta)
         B = log_probs.shape[0] 
+        K = W_A.shape[-1]
             
-        # [修正] 初始化为形状 [B] 的向量，而不是标量
-        lambda_multiplier = torch.full((B,), self.lambda_init, device=log_probs.device)
-        #lambda_multiplier = torch.tensor(self.lambda_init, device=log_probs.device)
-        mu = torch.tensor(self.mu_init, device=log_probs.device)
+        # 独立初始化乘子
+        lambda_order = torch.full((B, K), self.lambda_init, device=log_probs.device)
+        mu_order = torch.full((B, K), self.mu_init, device=log_probs.device)
+        lambda_exist = torch.full((B, K), self.lambda_init, device=log_probs.device)
+        mu_exist = torch.full((B, K), self.mu_init, device=log_probs.device)
 
-        # ========================================================
-        # [CRITICAL FIX] 显式开启梯度计算，覆盖外部的 @torch.no_grad()
-        # ========================================================
         with torch.enable_grad(): 
             for _ in range(self.outer_iterations):
-                # 1. 硬判定 (Optional: 只有在外层需要检查时才做，为了速度可以跳过)
-                # ...
 
-                # 2. 内层循环 (ALM Optimization)
                 gumbel_noise = None
                 for _ in range(self.inner_iterations):
                     optimizer.zero_grad()
                     
-                    # [重要] 这里的计算现在会构建计算图了
-                    g_soft, gumbel_noise = self.compute_constraint_violation_optimized(
-                        y.transpose(1, 2), # compute 需要 [B, V, L] 格式? 
-                        # 修正：compute_constraint_violation_optimized 第一行是 transpose(1,2)
-                        # 这意味着它期望输入是 [B, V, L]。
-                        # 而这里的 y 是 [B, L, V]。
-                        # 所以这里应该传入 y.transpose(1, 2) 是对的！
-                        W_A, W_B, 
-                        category_mask, 
-                        constraint_mask,
-                        gumbel_noise=gumbel_noise
+                    g_soft_order, g_soft_exist, gumbel_noise = self.compute_constraint_violation_optimized(
+                        y.transpose(1, 2), W_A, W_B, 
+                        category_mask, constraint_mask, gumbel_noise=gumbel_noise
                     )
                     
-                    delta_soft = F.relu(g_soft - self.tau)
+                    delta_soft_order = F.relu(g_soft_order - self.tau)
+                    delta_soft_exist = F.relu(g_soft_exist - self.tau)
                     
-                    # KL 计算
                     log_p = F.log_softmax(y, dim=-1)
-                    # y_model 是 detach 过的，且不需要梯度，视为 Target
                     log_q = F.log_softmax(y_model, dim=-1) 
-                    
-                    # Forward KL: sum P_new * (log P_new - log P_old)
-                    kl_loss = F.kl_div(log_p, log_q, reduction='batchmean',log_target=True) 
+                    kl_loss = F.kl_div(log_p, log_q, reduction='batchmean', log_target=True) 
 
-                    constraint_loss = (lambda_multiplier * delta_soft + 0.5 * mu * (delta_soft ** 2)).mean()
+                    # 独立计算惩罚项
+                    penalty_order = lambda_order * delta_soft_order + 0.5 * mu_order * (delta_soft_order ** 2)
+                    penalty_exist = lambda_exist * delta_soft_exist + 0.5 * mu_exist * (delta_soft_exist ** 2)
+                    
+                    # 惩罚项在 K 维度累加成为每个 Batch 的标量
+                    constraint_loss = (penalty_order.sum(dim=1) + self.projection_existence_weight * penalty_exist.sum(dim=1)).sum()
                     
                     loss = kl_loss + constraint_loss
-                    
-                    # 现在这里可以正常反向传播了
                     loss.backward()
-                    
-                    # grad_norm = y.grad.norm().item()
-                    # if _ == 0: # 只在第一次迭代打印
-                    #     print(f"[DEBUG] Inner Iter 0: Loss={loss.item():.4f}, Grad Norm={grad_norm:.4f}")
-                    #     print(f"[DEBUG] Params: exist_w={self.projection_existence_weight}, eta={self.eta}")
-
-                    # 梯度裁剪 (建议加上，防止 NaN)
-                    #torch.nn.utils.clip_grad_norm_([y], 1.0)
-                    #print(f"GRAD NORM: {y.grad.norm().item()}") # 如果是 0，说明梯度没传回来
                     optimizer.step()
                 
-                # 3. 外层参数更新 (不需要梯度)
+                                # 3. 外层参数更新 (不需要梯度)
                 with torch.no_grad():
-                    g_hard = self.compute_hard_constraint_violation_optimized(
-                    y.transpose(1, 2), W_A, W_B,  category_mask,constraint_mask
+                    g_hard_order, g_hard_exist = self.compute_hard_constraint_violation_optimized(
+                        y.transpose(1, 2), W_A, W_B, category_mask, constraint_mask
                     )
-                    delta_hard = F.relu(g_hard - self.tau)
                     
-                    # 更新 lambda 和 mu
-                    lambda_multiplier += mu * delta_hard
-                    mu = torch.clamp(mu * self.mu_alpha, max=self.mu_max)
+                    delta_hard_order = F.relu(g_hard_order - self.tau)
+                    delta_hard_exist = F.relu(g_hard_exist - self.tau)
                     
-                    # 早停检查 (可选)
-                    if delta_hard.max() < self.delta_tol:
+                    # 独立更新 lambda
+                    lambda_order += mu_order * delta_hard_order
+                    lambda_exist += mu_exist * delta_hard_exist
+                    
+                    # [关键修复] 只有当该约束的硬违规依然存在时，才放大对应的 mu
+                    mu_order = torch.where(delta_hard_order > self.delta_tol, mu_order * self.mu_alpha, mu_order)
+                    mu_order = torch.clamp(mu_order, max=self.mu_max)
+                    
+                    mu_exist = torch.where(delta_hard_exist > self.delta_tol, mu_exist * self.mu_alpha, mu_exist)
+                    mu_exist = torch.clamp(mu_exist, max=self.mu_max)
+                    
+                    # 早停检查
+                    max_delta = torch.max(delta_hard_order.max(), delta_hard_exist.max())
+                    if max_delta < self.delta_tol:
                         break
 
-        # 返回优化后的结果 [B, V, L]
         return y.transpose(1, 2).detach()
 
     # def project_to_constraint_space(
