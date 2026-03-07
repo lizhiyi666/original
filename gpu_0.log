@@ -2,7 +2,7 @@
   __import__("pkg_resources").declare_namespace(__name__)
 [DEBUG] Force updated projector.projection_existence_weight to 5.0
 [DEBUG] sample.py forced use_constraint_projection=True
-[DEBUG] projection params: {'freq': 2, 'tau': 0.0, 'lambda_init': 0.0, 'mu_init': 1.0, 'mu_alpha': 2.0, 'mu_max': 1000.0, 'outer_iterations': 100, 'inner_iterations': 10, 'eta': 0.2, 'delta_tol': 1e-06, 'projection_existence_weight': 5.0, 'use_gumbel_softmax': True, 'gumbel_temperature': 0.1, 'mu': 1.0}
+[DEBUG] projection params: {'freq': 2, 'tau': 0.0, 'lambda_init': 0.0, 'mu_init': 1.0, 'mu_alpha': 2.0, 'mu_max': 1000.0, 'outer_iterations': 100, 'inner_iterations': 20, 'eta': 0.1, 'delta_tol': 1e-06, 'projection_existence_weight': 5.0, 'use_gumbel_softmax': True, 'gumbel_temperature': 1.0, 'mu': 1.0}
 [GPU 0] Processing 1198 sequences (Range: 0 -> 1198)
 po_matrix shape: torch.Size([512, 9, 9]) sum0: 25.0
 tau before cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])

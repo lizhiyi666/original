@@ -33,16 +33,16 @@ do
       --use_constraint_projection \
       --projection_frequency 2 \
       --projection_outer_iters 100 \
-      --projection_inner_iters 10\
+      --projection_inner_iters 20\
       --projection_tau 0 \
       --projection_lambda 0 \
-      --projection_eta 0.2 \
+      --projection_eta 0.1 \
       --projection_mu 1.0 \
       --projection_mu_max 1000.0 \
       --projection_mu_alpha 2.0 \
       --projection_delta_tol 0.000001\
       --use_gumbel_softmax \
-      --gumbel_temperature 0.1 \
+      --gumbel_temperature 1.0 \
       --projection_last_k_steps 100 \
       --projection_existence_weight 5 \
       > "gpu_${rank}.log" 2>&1 &  

@@ -145,12 +145,17 @@ class ConstraintProjection:
         B, V, L = log_probs.shape
         
         logits_lv = log_probs.transpose(1, 2)
+        T = float(self.gumbel_temperature)
+        if T <= 0:
+            T = 1.0
         if self.use_gumbel_softmax:
             probs, gumbel_noise = self._gumbel_softmax_relax(
-                logits_lv, tau=self.gumbel_temperature, gumbel_noise=gumbel_noise
+                logits_lv, tau=T, gumbel_noise=gumbel_noise
             )
         else:
-            probs = torch.softmax(logits_lv, dim=-1)
+            probs, gumbel_noise = self._gumbel_softmax_relax(
+                logits_lv, tau=T, gumbel_noise=gumbel_noise
+            )
 
         if category_mask is not None:
             probs = probs * category_mask.unsqueeze(-1).float()

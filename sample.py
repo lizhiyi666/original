@@ -96,7 +96,15 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             dd.constraint_projector.eta = args.projection_eta
             dd.constraint_projector.inner_iterations = args.projection_inner_iters
             dd.constraint_projector.outer_iterations = args.projection_outer_iters
+            # [关键修复] 漏掉的 Mu 参数群
+            dd.constraint_projector.mu_init = args.projection_mu
+            dd.constraint_projector.mu_max = args.projection_mu_max
+            dd.constraint_projector.mu_alpha = args.projection_mu_alpha
+            dd.constraint_projector.delta_tol = args.projection_delta_tol
             
+            # [关键修复] 漏掉的 Gumbel Softmax 参数群
+            dd.constraint_projector.use_gumbel_softmax = args.use_gumbel_softmax
+            dd.constraint_projector.gumbel_temperature = args.gumbel_temperature
             print(f"[DEBUG] Force updated projector.projection_existence_weight to {dd.constraint_projector.projection_existence_weight}")
 
 
