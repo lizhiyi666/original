@@ -446,7 +446,6 @@ class DiffusionTransformer(nn.Module):
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
 
         # 根据 projection_frequency 决定是否应用投影
-        # 只在后期 step 投影（速度优先）
         last_k_steps = self.projection_last_k_steps
 
         should_apply_projection = False
@@ -459,62 +458,64 @@ class DiffusionTransformer(nn.Module):
             else:
                 should_apply_projection = True
 
-        # [关键] 默认不投影时 after=before，避免未定义变量
         model_log_prob_after = model_log_prob
 
         if should_apply_projection:
-            # 只打印一次，避免刷屏
+            # 1. 基础 Debug 信息打印
             if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_projection_printed", False):
                 self._debug_projection_printed = True
                 print("[DEBUG][projection] CALLED in p_sample")
-                print(f"[DEBUG][projection] diffusion_index={diffusion_index}, projection_frequency={self.projection_frequency}")
-                print(f"[DEBUG][projection] model_log_prob.shape={tuple(model_log_prob.shape)}")
-                print(f"[DEBUG][projection] category_mask.sum={batch.category_mask.sum().item() if hasattr(batch,'category_mask') and batch.category_mask is not None else None}")
-                print(f"[DEBUG] Projection triggered at step {diffusion_index}")
-                
-            # viol debug：只打印一次（很耗时）
+                print(f"[DEBUG][projection] index={diffusion_index}, freq={self.projection_frequency}")
+                print(f"[DEBUG][projection] shape={tuple(model_log_prob.shape)}")
+
             debug_viol = getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_viol_printed", False)
             if debug_viol:
                 self._debug_viol_printed = True
 
-            # 判断是否为 per-sample constraints（list-of-list）
-            is_per_sample = (
-                isinstance(po_constraints, list)
-                and len(po_constraints) > 0
-                and isinstance(po_constraints[0], list)
-            )
-            if debug_viol:
-                print(f"[DEBUG] Constraint Type: {'Per-Sample (List of Lists)' if is_per_sample else 'Shared (List of Tuples)'}")
+            # 2. 准备约束矩阵
+            is_per_sample = (isinstance(po_constraints, list) and len(po_constraints) > 0 and isinstance(po_constraints[0], list))
             
-            # 1. 编译约束矩阵 (Compiling Constraint Matrices)
             W_A, W_B, c_mask = None, None, None
             
             if is_per_sample:
-                # Case A: 每条样本约束不同 -> W_A, W_B shape: [B, V_type, K_max]
-                # 这是一个新函数，需要在 ConstraintProjection 中实现 (见上文)
                 W_A, W_B, c_mask = self.constraint_projector.compile_batched_constraints(
                     po_constraints, device=model_log_prob.device
                 )
             else:
-                # Case B: 全 Batch 共享约束 -> W_A, W_B shape: [V_type, K]
-                # 这是上一轮建议的 compile_constraints 函数
                 W_A, W_B = self.constraint_projector._compile_constraints(
                     po_constraints, device=model_log_prob.device
                 )
+                # 共享约束通常不需要 mask，或者在这里构造全 1 mask
+                c_mask = None 
 
-            # 2. 执行 Debug (Before Projection)
+            # ------------------------------------------------------------------
+            # 3. Debug: 投影前违规计算 (Before Projection)
+            # ------------------------------------------------------------------
+            viol_before_val = 0.0
             if debug_viol and W_A is not None:
                 with torch.no_grad():
-                    # 复用优化后的计算函数，速度极快
-                    viol_before, _ = self.constraint_projector.compute_constraint_violation_optimized(
-                        model_log_prob, W_A, W_B,  batch.category_mask,constraint_mask=c_mask, gumbel_noise=None
+                    # [修正] 接收 3 个返回值
+                    order_v, exist_v, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                        model_log_prob, W_A, W_B, batch.category_mask, 
+                        constraint_mask=c_mask, gumbel_noise=None
                     )
-                    # 打印 Batch 中第一个样本的违规，以及平均违规
-                    print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
+                    
+                    # [修正] 将 [B, K] 聚合为 [B] 以便打印总违规值
+                    # Total = Order + Weight * Exist
+                    # 注意：如果 constraint_projector 内部有 mask，这里返回的已经是 mask 过的
+                    weight = self.constraint_projector.projection_existence_weight
+                    total_v = (order_v + weight * exist_v).sum(dim=1) # [B]
+                    
+                    viol_before_val = total_v.mean().item()
+                    print(f"[DEBUG][projection] viol_before[0]={total_v[0].item():.4f}, mean={viol_before_val:.4f}")
+                    print(f"[DEBUG][projection]   -> Order Mean: {order_v.sum(dim=1).mean().item():.4f}")
+                    print(f"[DEBUG][projection]   -> Exist Mean: {exist_v.sum(dim=1).mean().item():.4f}")
 
-            # 3. 执行投影 (Project)
-            # 无论 W_A 是 2D 还是 3D，project_with_matrices 内部的 matmul 都能自动广播处理
+            # ------------------------------------------------------------------
+            # 4. 执行投影 (Project) - 核心
+            # ------------------------------------------------------------------
             if W_A is not None:
+                # project_with_matrices 内部已经实现了独立的 lambda/mu 更新逻辑
                 model_log_prob_after = self.constraint_projector.project_with_matrices(
                     model_log_prob,
                     W_A, W_B,
@@ -524,20 +525,26 @@ class DiffusionTransformer(nn.Module):
             else:
                 model_log_prob_after = model_log_prob
 
-            # 4. 执行 Debug (After Projection)
+            # ------------------------------------------------------------------
+            # 5. Debug: 投影后违规计算 (After Projection)
+            # ------------------------------------------------------------------
             if debug_viol and W_A is not None:
                 with torch.no_grad():
-                    viol_after, _ = self.constraint_projector.compute_constraint_violation_optimized(
-                        model_log_prob_after, W_A, W_B, batch.category_mask, constraint_mask=c_mask, gumbel_noise=None
+                    order_v, exist_v, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                        model_log_prob_after, W_A, W_B, batch.category_mask, 
+                        constraint_mask=c_mask, gumbel_noise=None
                     )
-                    print(f"[DEBUG][projection]  viol_after[0]={viol_after[0].item():.6f}, mean={viol_after.mean().item():.6f}")
-                    delta = (viol_before - viol_after).mean().item()
-                    print(f"[DEBUG][projection]  delta_mean={delta:.6f}")
-            
+                    
+                    weight = self.constraint_projector.projection_existence_weight
+                    total_v = (order_v + weight * exist_v).sum(dim=1)
+                    
+                    viol_after_val = total_v.mean().item()
+                    print(f"[DEBUG][projection]  viol_after[0]={total_v[0].item():.4f}, mean={viol_after_val:.4f}")
+                    
+                    delta = viol_before_val - viol_after_val
+                    print(f"[DEBUG][projection]  delta_mean={delta:.4f}")
 
-        # 用 after（不投影时等于 before）
         model_log_prob = model_log_prob_after
-
         out = self.log_sample_categorical(model_log_prob)
         return out
 
