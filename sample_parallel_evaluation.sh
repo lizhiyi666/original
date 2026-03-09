@@ -33,10 +33,10 @@ do
       --use_constraint_projection \
       --projection_frequency 2 \
       --projection_outer_iters 50 \
-      --projection_inner_iters 20\
+      --projection_inner_iters 10\
       --projection_tau 0 \
       --projection_lambda 0 \
-      --projection_eta 0.2 \
+      --projection_eta 0.1 \
       --projection_mu 1.0 \
       --projection_mu_max 1000.0 \
       --projection_mu_alpha 2.0 \
