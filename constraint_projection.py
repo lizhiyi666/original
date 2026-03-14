@@ -214,10 +214,16 @@ class ConstraintProjection:
         lambda_exist = torch.full((B, K), self.lambda_init, device=log_probs.device)
         mu_exist = torch.full((B, K), self.mu_init, device=log_probs.device)
 
+        # 增加一个标记打印起始点
+        print(f"\n[Projection Start] Batch: {B}, Constraints: {K}")
+
         with torch.enable_grad(): 
-            for _ in range(self.outer_iterations):
+            for outer_idx in range(self.outer_iterations):
 
                 gumbel_noise = None
+                last_kl_loss = 0.0
+                last_const_loss = 0.0
+                
                 for _ in range(self.inner_iterations):
                     optimizer.zero_grad()
                     
@@ -243,6 +249,12 @@ class ConstraintProjection:
                     loss = kl_loss + constraint_loss
                     loss.backward()
                     optimizer.step()
+
+                    # 记录最后一次内层循环的 Loss 用于打印
+                    last_kl_loss = kl_loss.item()
+                    #[关键修复] 强制限制梯度最大范数，防止 mu 和 lambda 变大时梯度爆炸
+                    torch.nn.utils.clip_grad_norm_([y], max_norm=10.0) 
+                    last_const_loss = constraint_loss.item()
                 
                                 # 3. 外层参数更新 (不需要梯度)
                 with torch.no_grad():
@@ -253,6 +265,18 @@ class ConstraintProjection:
                     delta_hard_order = F.relu(g_hard_order - self.tau)
                     delta_hard_exist = F.relu(g_hard_exist - self.tau)
                     
+
+                     # ===============================================================
+                    # [新增日志输出] 每隔 10 次外层循环，或者在第一次和最后一次打印状态
+                    # ===============================================================
+                    if outer_idx == 0 or (outer_idx + 1) % 10 == 0 or outer_idx == self.outer_iterations - 1:
+                        print(f"  [Outer {outer_idx+1:02d}/{self.outer_iterations}] "
+                              f"Loss (KL={last_kl_loss:.4f}, Const={last_const_loss:.4f}) | "
+                              f"Viol_Order(max={delta_hard_order.max():.2f}, mean={delta_hard_order.mean():.4f}) | "
+                              f"Viol_Exist(max={delta_hard_exist.max():.2f}, mean={delta_hard_exist.mean():.4f}) | "
+                              f"Mu_O(max={mu_order.max():.1f}) Mu_E(max={mu_exist.max():.1f}) | "
+                              f"Lam_O(max={lambda_order.max():.2f}) Lam_E(max={lambda_exist.max():.2f})")
+
                     # 独立更新 lambda
                     lambda_order += mu_order * delta_hard_order
                     lambda_exist += mu_exist * delta_hard_exist

@@ -32,18 +32,18 @@ do
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
       --projection_frequency 2 \
-      --projection_outer_iters 50 \
-      --projection_inner_iters 10\
+      --projection_outer_iters 15 \
+      --projection_inner_iters 20\
       --projection_tau 0 \
       --projection_lambda 0 \
-      --projection_eta 0.1 \
+      --projection_eta 0.2 \
       --projection_mu 1.0 \
-      --projection_mu_max 1000.0 \
-      --projection_mu_alpha 2.0 \
+      --projection_mu_max 100.0 \
+      --projection_mu_alpha 1.5 \
       --projection_delta_tol 0.000001\
       --use_gumbel_softmax \
       --gumbel_temperature 1.0 \
-      --projection_last_k_steps 100 \
+      --projection_last_k_steps 1000 \
       --projection_existence_weight 1 \
       > "gpu_${rank}.log" 2>&1 &  
     
