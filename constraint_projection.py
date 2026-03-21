@@ -248,12 +248,12 @@ class ConstraintProjection:
                     
                     loss = kl_loss + constraint_loss
                     loss.backward()
+                    #[关键修复] 强制限制梯度最大范数，防止 mu 和 lambda 变大时梯度爆炸
                     optimizer.step()
 
                     # 记录最后一次内层循环的 Loss 用于打印
                     last_kl_loss = kl_loss.item()
-                    #[关键修复] 强制限制梯度最大范数，防止 mu 和 lambda 变大时梯度爆炸
-                    torch.nn.utils.clip_grad_norm_([y], max_norm=10.0) 
+                    torch.nn.utils.clip_grad_norm_([y], max_norm=10.0)
                     last_const_loss = constraint_loss.item()
                 
                                 # 3. 外层参数更新 (不需要梯度)
