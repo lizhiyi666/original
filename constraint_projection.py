@@ -246,7 +246,12 @@ class ConstraintProjection:
                     # 惩罚项在 K 维度累加成为每个 Batch 的标量
                     constraint_loss = (penalty_order.sum(dim=1) + self.projection_existence_weight * penalty_exist.sum(dim=1)).sum()
                     
-                    loss = kl_loss + constraint_loss
+                    # 原代码：
+                    # loss = kl_loss + constraint_loss
+
+                    # 【修改为】：强行削弱原分布拉扯力
+                    kl_weight = 0.8  # 尝试 0.1 或者更极端的 0.01
+                    loss = kl_weight * kl_loss + constraint_loss
                     loss.backward()
                     #[关键修复] 强制限制梯度最大范数，防止 mu 和 lambda 变大时梯度爆炸
                     optimizer.step()
