@@ -189,7 +189,7 @@ class ConstraintProjection:
             order_per_k = order_per_k * constraint_mask
             exist_per_k = exist_per_k * constraint_mask
 
-        # [修改] 独立返回，不再求和
+        
         return order_per_k, exist_per_k, gumbel_noise
 
     def project_with_matrices(
@@ -249,11 +249,10 @@ class ConstraintProjection:
                     # 原代码：
                     # loss = kl_loss + constraint_loss
 
-                    # 【修改为】：强行削弱原分布拉扯力
-                    kl_weight = 0.8  # 尝试 0.1 或者更极端的 0.01
+                
+                    kl_weight = 0.8  
                     loss = kl_weight * kl_loss + constraint_loss
                     loss.backward()
-                    #[关键修复] 强制限制梯度最大范数，防止 mu 和 lambda 变大时梯度爆炸
                     optimizer.step()
 
                     # 记录最后一次内层循环的 Loss 用于打印
