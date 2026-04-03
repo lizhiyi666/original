@@ -250,7 +250,7 @@ class ConstraintProjection:
                     # loss = kl_loss + constraint_loss
 
                 
-                    kl_weight = 0.8  
+                    kl_weight = 1.0  
                     loss = kl_weight * kl_loss + constraint_loss
                     loss.backward()
                     optimizer.step()

@@ -9,7 +9,7 @@ fi
 
 RUN_ID=$1
 WORLD_SIZE=4
-DATA_NAME="Istanbul_PO1"
+DATA_NAME="Istanbul_PO1_OOD"
 
 echo "====================================================="
 echo "Starting Parallel Sampling for Run ID: $RUN_ID"
@@ -32,7 +32,7 @@ do
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
       --projection_frequency 2 \
-      --projection_outer_iters 20 \
+      --projection_outer_iters 30 \
       --projection_inner_iters 25\
       --projection_tau 0 \
       --projection_lambda 0 \
@@ -43,8 +43,8 @@ do
       --projection_delta_tol 0.00000001\
       --use_gumbel_softmax \
       --gumbel_temperature 1.0 \
-      --projection_last_k_steps 1000 \
-      --projection_existence_weight 0.8 \
+      --projection_last_k_steps 300 \
+      --projection_existence_weight 0.6 \
       > "gpu_${rank}.log" 2>&1 &  
     
     # 保存后台进程 PID (可选，用于调试)
