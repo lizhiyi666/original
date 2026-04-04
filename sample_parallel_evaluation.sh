@@ -9,7 +9,7 @@ fi
 
 RUN_ID=$1
 WORLD_SIZE=4
-DATA_NAME="Istanbul_PO1"
+DATA_NAME="Istanbul_PO1_OOD"
 
 echo "====================================================="
 echo "Starting Parallel Sampling for Run ID: $RUN_ID"

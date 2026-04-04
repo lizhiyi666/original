@@ -1,4 +1,4 @@
 root: data/
 batch_size: 512
-name: Istanbul_PO1
+name: Istanbul_PO1_OOD
 

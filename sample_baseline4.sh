@@ -12,7 +12,7 @@ fi
 RUN_ID=$1
 CFG_SCALE=${2:-2.0} # CFG 不需要像 Energy Guidance 那么大的 scale，通常 1.5 - 3.0 即可
 WORLD_SIZE=4
-DATA_NAME="Istanbul_PO1"
+DATA_NAME="Istanbul_PO1_OOD"
 
 echo "====================================================="
 echo "Baseline 4: Classifier-Free Guidance"
