@@ -13,7 +13,7 @@ RUN_ID=$1
 GUIDANCE_SCALE=${2:-10.0}
 GUIDANCE_TEMP=${3:-1.0}
 WORLD_SIZE=4
-DATA_NAME="Istanbul_PO1"
+DATA_NAME="Istanbul_PO1_OOD"
 
 echo "====================================================="
 echo "Baseline 3: Classifier-Based Guidance"
@@ -31,9 +31,12 @@ do
       --baseline energy_guidance \
       --guidance_scale $GUIDANCE_SCALE \
       --guidance_temperature $GUIDANCE_TEMP \
-      --guidance_last_k_steps 100 \
+      --projection_outer_iters 100 \
+      --projection_inner_iters 25 \
+      --guidance_last_k_steps 300 \
       --guidance_frequency 1 \
-      --projection_existence_weight 20.0 \
+      --cond_dropout_rate 0 \
+      --projection_existence_weight 0.8 \
       > "gpu_${rank}_baseline3.log" 2>&1 &
 
     pids[$rank]=$!

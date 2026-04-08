@@ -23,6 +23,7 @@ parser.add_argument("--projection_existence_weight", type=float, default=0.02)
 parser.add_argument("--use_gumbel_softmax", action="store_true", help="Enable Gumbel-Softmax for gradient estimation")
 parser.add_argument("--gumbel_temperature", type=float, default=1.0)
 parser.add_argument("--projection_last_k_steps", type=int, default=60)
+parser.add_argument("--cond_dropout_rate", type=float, default=0.1, help="CFG dropout rate")
 
 # 并行采样参数
 parser.add_argument("--rank", type=int, default=0, help="当前进程的索引 (0 ~ world_size-1)")

@@ -28,14 +28,4 @@ tau after  cond_encoder: torch.Size([205, 12]) time: torch.Size([205, 12])
 [DEBUG][shape] cond1 torch.Size([205, 12])
 [DEBUG][shape] unpadded_length torch.Size([205]) 11
 [DEBUG][shape] content_token torch.Size([205, 25])
-
-[Baseline2] Applying post-hoc swap to 1229 sequences...
-[Baseline2 Post-hoc Swap] Summary:
-  Total sequences: 1229
-  Total constraints checked: 27335
-  Violated before swap: 26268
-  Violated after swap:  24039
-  Reduction: 0.0849
-  NOTE: Remaining violations are due to missing categories (category absent from generated sequence, cannot fix by reordering)
-[Baseline2] Done. Summary: {'total_seqs': 1229, 'total_constraints_checked': 27335, 'total_violated_before': 26268, 'total_violated_after': 24039, 'reduction_ratio': 0.08485609867519417}
 [GPU 0] Saved part file to ./data/Istanbul_PO1_OOD/Istanbul_PO1_OOD_e70zggrj_generated_part0.pkl
