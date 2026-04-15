@@ -22,9 +22,9 @@ do
     echo "Launching process on GPU $rank (Logs -> gpu_${rank}.log)..."
     
     # -----------------------------------------------------------
-    # 关键点 1: CUDA_VISIBLE_DEVICES=$rank 指定不同显卡
-    # 关键点 2: 命令最后面的 '&' 符号，表示后台运行，不阻塞循环
-    # 关键点 3: > gpu_${rank}.log 2>&1 将输出重定向，防止屏幕混乱
+    #  CUDA_VISIBLE_DEVICES=$rank 指定不同显卡
+    #  命令最后面的 '&' 符号，表示后台运行，不阻塞循环
+    #  > gpu_${rank}.log 2>&1 将输出重定向，防止屏幕混乱
     # -----------------------------------------------------------
     CUDA_VISIBLE_DEVICES=$rank python sample.py \
       --run_id "$RUN_ID" \
@@ -32,7 +32,7 @@ do
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
       --projection_frequency 2 \
-      --projection_outer_iters 30 \
+      --projection_outer_iters 20 \
       --projection_inner_iters 25\
       --projection_tau 0 \
       --projection_lambda 0 \
@@ -42,7 +42,7 @@ do
       --projection_mu_alpha 1.3 \
       --projection_delta_tol 0.00000001\
       --use_gumbel_softmax \
-      --gumbel_temperature 1.0 \
+      --gumbel_temperature 3.0 \
       --projection_last_k_steps 300 \
       --projection_existence_weight 0.6 \
       > "gpu_${rank}.log" 2>&1 &  
