@@ -137,10 +137,19 @@ def Get_Statistical_Metrics(real_data, generated_data, min_seq_len=1,top=1000):
 
     metrics_dicts = [Generated_Statistics,Real_Statistics]
     for idx,seqs in enumerate(data):
-        for seq in seqs:
+        for i, seq in enumerate(seqs):
             if len(seq['gps'])>min_seq_len:
                 gps = np.array(seq['gps'])
-                metrics_dicts[idx]['Distance'].append(travel_distance(gps))
+                
+                # 获取对应的 test 和 gen 序列用于起止点判断
+                gen_seq = generated_data[i]
+                real_seq = real_data[i]
+                
+                # 只在 起止点类别一致 时计算 Distance
+                if len(gen_seq.get('marks', [])) > 0 and len(real_seq.get('marks', [])) > 0:
+                    if gen_seq['marks'][0] == real_seq['marks'][0] and gen_seq['marks'][-1] == real_seq['marks'][-1]:
+                        metrics_dicts[idx]['Distance'].append(travel_distance(gps))
+                        
                 metrics_dicts[idx]['Radius'].append(radius(gps))
                 metrics_dicts[idx]['DailyLoc'].append(len(set(seq['checkins'])))
                 metrics_dicts[idx]['Interval'].extend(np.ediff1d(np.concatenate([[0],seq["arrival_times"]])).tolist())
@@ -153,8 +162,14 @@ def Get_Statistical_Metrics(real_data, generated_data, min_seq_len=1,top=1000):
         elif metric == 'G-RANK':
             JSD[metric] = grank_jsd(Generated_Statistics[metric],Real_Statistics[metric],top)
         elif metric != 'totalJSD':
-            JSD[metric] = evaluation(Generated_Statistics[metric],Real_Statistics[metric])
+            if len(Generated_Statistics[metric]) > 0 and len(Real_Statistics[metric]) > 0:
+                JSD[metric] = evaluation(Generated_Statistics[metric],Real_Statistics[metric])
+            else:
+                JSD[metric] = float('nan') # 如果过滤后无满足条件的数据，记为 nan
         else:
             break
-        JSD['totalJSD'] = sum([JSD[metric] for metric in JSD.keys() if metric != 'totalJSD'])
+        
+        valid_jsds = [JSD[m] for m in JSD.keys() if m != 'totalJSD' and not np.isnan(JSD[m])]
+        JSD['totalJSD'] = sum(valid_jsds) if len(valid_jsds) > 0 else float('nan')
+        
     return JSD
