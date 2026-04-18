@@ -32,7 +32,7 @@ do
       --world_size $WORLD_SIZE \
       --use_constraint_projection \
       --projection_frequency 2 \
-      --projection_outer_iters 20 \
+      --projection_outer_iters 15 \
       --projection_inner_iters 25\
       --projection_tau 0 \
       --projection_lambda 0 \
@@ -44,7 +44,7 @@ do
       --use_gumbel_softmax \
       --gumbel_temperature 3.0 \
       --projection_last_k_steps 300 \
-      --projection_existence_weight 0.6 \
+      --projection_existence_weight 0.7 \
       > "gpu_${rank}.log" 2>&1 &  
     
     # 保存后台进程 PID (可选，用于调试)
