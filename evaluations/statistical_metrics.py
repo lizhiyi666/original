@@ -172,4 +172,8 @@ def Get_Statistical_Metrics(real_data, generated_data, min_seq_len=1,top=1000):
         valid_jsds = [JSD[m] for m in JSD.keys() if m != 'totalJSD' and not np.isnan(JSD[m])]
         JSD['totalJSD'] = sum(valid_jsds) if len(valid_jsds) > 0 else float('nan')
         
+<<<<<<< HEAD
     return JSD
+=======
+    return JSD
+>>>>>>> e502808576fb65a310f3586daa9208237372b6ca

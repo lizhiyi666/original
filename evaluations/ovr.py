@@ -251,7 +251,13 @@ def dataset_ovr_with_coverage(test_seqs, gen_seqs, poi_category, skip_nan=True):
     # 计算新的 coverage（约束类别的覆盖率）
     coverage = float(total_covered_cats / total_involved_cats) if total_involved_cats > 0 else float("nan")
     return ovr_skip, ovr_strict, coverage
+<<<<<<< HEAD
     
+=======
+
+
+
+>>>>>>> e502808576fb65a310f3586daa9208237372b6ca
 def sequence_ovr_by_test_reference(test_seq: dict, gen_seq: dict, poi_category: Dict, allow_skip: bool = True) -> float:
     """
     Compute per-sequence OVR:
