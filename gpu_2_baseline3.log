@@ -2,12 +2,12 @@
   __import__("pkg_resources").declare_namespace(__name__)
 [Baseline3] existence_weight 0.8
 [Baseline3] Classifier-Based Guidance enabled
-[Baseline3] scale=5000000.0, temp=0.5, last_k=300, freq=1
+[Baseline3] scale=5000000.0, temp=3.0, last_k=300, freq=2
 [GPU 2] Processing 1229 sequences (Range: 2458 -> 3687)
 po_matrix shape: torch.Size([512, 9, 9]) sum0: 26.0
 tau before cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
 tau after  cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
-[Baseline3-Guidance] Applied at step 255, energy=18127.1855, grad_norm=5.5454, scale=5000000.0
+[Baseline3-Guidance] Applied at step 254, energy=17866.9375, grad_norm=10.8176, scale=5000000.0
 [DEBUG][shape] time torch.Size([512, 14])
 [DEBUG][shape] mask torch.Size([512, 14])
 [DEBUG][shape] tau  torch.Size([512, 14])

@@ -2,6 +2,15 @@
   __import__("pkg_resources").declare_namespace(__name__)
 [GPU 1] Processing 1229 sequences (Range: 1229 -> 2458)
 po_matrix shape: torch.Size([512, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
+tau after  cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
+[DEBUG][shape] time torch.Size([512, 14])
+[DEBUG][shape] mask torch.Size([512, 14])
+[DEBUG][shape] tau  torch.Size([512, 14])
+[DEBUG][shape] cond1 torch.Size([512, 14])
+[DEBUG][shape] unpadded_length torch.Size([512]) 13
+[DEBUG][shape] content_token torch.Size([512, 29])
+po_matrix shape: torch.Size([512, 9, 9]) sum0: 20.0
 tau before cond_encoder: torch.Size([512, 15]) time: torch.Size([512, 15])
 tau after  cond_encoder: torch.Size([512, 15]) time: torch.Size([512, 15])
 [DEBUG][shape] time torch.Size([512, 15])
@@ -10,22 +19,13 @@ tau after  cond_encoder: torch.Size([512, 15]) time: torch.Size([512, 15])
 [DEBUG][shape] cond1 torch.Size([512, 15])
 [DEBUG][shape] unpadded_length torch.Size([512]) 14
 [DEBUG][shape] content_token torch.Size([512, 31])
-po_matrix shape: torch.Size([512, 9, 9]) sum0: 20.0
-tau before cond_encoder: torch.Size([512, 13]) time: torch.Size([512, 13])
-tau after  cond_encoder: torch.Size([512, 13]) time: torch.Size([512, 13])
-[DEBUG][shape] time torch.Size([512, 13])
-[DEBUG][shape] mask torch.Size([512, 13])
-[DEBUG][shape] tau  torch.Size([512, 13])
-[DEBUG][shape] cond1 torch.Size([512, 13])
-[DEBUG][shape] unpadded_length torch.Size([512]) 12
-[DEBUG][shape] content_token torch.Size([512, 27])
 po_matrix shape: torch.Size([205, 9, 9]) sum0: 24.0
-tau before cond_encoder: torch.Size([205, 13]) time: torch.Size([205, 13])
-tau after  cond_encoder: torch.Size([205, 13]) time: torch.Size([205, 13])
-[DEBUG][shape] time torch.Size([205, 13])
-[DEBUG][shape] mask torch.Size([205, 13])
-[DEBUG][shape] tau  torch.Size([205, 13])
-[DEBUG][shape] cond1 torch.Size([205, 13])
-[DEBUG][shape] unpadded_length torch.Size([205]) 12
-[DEBUG][shape] content_token torch.Size([205, 27])
-[GPU 1] Saved part file to ./data/Istanbul_PO1_OOD/Istanbul_PO1_OOD_b9t2k0mk_generated_part1.pkl
+tau before cond_encoder: torch.Size([205, 12]) time: torch.Size([205, 12])
+tau after  cond_encoder: torch.Size([205, 12]) time: torch.Size([205, 12])
+[DEBUG][shape] time torch.Size([205, 12])
+[DEBUG][shape] mask torch.Size([205, 12])
+[DEBUG][shape] tau  torch.Size([205, 12])
+[DEBUG][shape] cond1 torch.Size([205, 12])
+[DEBUG][shape] unpadded_length torch.Size([205]) 11
+[DEBUG][shape] content_token torch.Size([205, 25])
+[GPU 1] Saved part file to ./data/Istanbul_PO1_OOD/Istanbul_PO1_OOD_s65813lj_generated_part1.pkl

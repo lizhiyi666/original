@@ -184,13 +184,13 @@ def dataset_ovr_with_coverage(test_seqs, gen_seqs, poi_category, skip_nan=True):
     Returns:
       ovr_skip   : allow_skip=True 的 OVR
       ovr_strict : allow_skip=False 的 OVR
-      coverage   : 微平均 coverage = sum(considered_pairs)/sum(ref_pairs)
+      coverage   : 修改为针对偏序约束所涉及类别的覆盖率
     """
     per_seq_skip = []
     per_seq_strict = []
 
-    total_ref_pairs = 0
-    total_considered_pairs = 0
+    total_involved_cats = 0
+    total_covered_cats = 0
 
     for t_seq, g_seq in zip(test_seqs, gen_seqs):
         test_cats = _seq_cats_order(t_seq, poi_category)
@@ -202,11 +202,16 @@ def dataset_ovr_with_coverage(test_seqs, gen_seqs, poi_category, skip_nan=True):
             per_seq_strict.append(float("nan"))
             continue
 
-        # 统计 coverage 用（allow_skip=True 下真正参与的 pairs）
         rates_skip = []
         rates_strict = []
+        
+        # 提取当前序列的偏序约束涉及的所有类别
+        involved_cats = set()
 
         for (A, B) in ref_pairs:
+            involved_cats.add(A)
+            involved_cats.add(B)
+            
             violations, total_pairs = _violation_rate_for_pair_in_generated(gen_cats, A, B)
 
             # strict：缺失当作 1.0
@@ -220,9 +225,12 @@ def dataset_ovr_with_coverage(test_seqs, gen_seqs, poi_category, skip_nan=True):
                 continue
             rates_skip.append(violations / total_pairs)
 
-        # coverage 计数（ref_pairs 全部算分母；considered_pairs 是 skip 下没被跳过的）
-        total_ref_pairs += len(ref_pairs)
-        total_considered_pairs += len(rates_skip)
+        # 统计 coverage: 所涉及类别中有多少出现在了生成的轨迹类别列表中
+        gen_cats_set = set(c for c in gen_cats if c is not None)
+        covered_cats = involved_cats.intersection(gen_cats_set)
+        
+        total_involved_cats += len(involved_cats)
+        total_covered_cats += len(covered_cats)
 
         per_seq_skip.append(float(np.mean(rates_skip)) if len(rates_skip) > 0 else float("nan"))
         per_seq_strict.append(float(np.mean(rates_strict)) if len(rates_strict) > 0 else float("nan"))
@@ -240,9 +248,10 @@ def dataset_ovr_with_coverage(test_seqs, gen_seqs, poi_category, skip_nan=True):
         ovr_skip = float(np.nanmean(arr_skip))
         ovr_strict = float(np.nanmean(arr_strict))
 
-    coverage = float(total_considered_pairs / total_ref_pairs) if total_ref_pairs > 0 else float("nan")
+    # 计算新的 coverage（约束类别的覆盖率）
+    coverage = float(total_covered_cats / total_involved_cats) if total_involved_cats > 0 else float("nan")
     return ovr_skip, ovr_strict, coverage
-
+    
 def sequence_ovr_by_test_reference(test_seq: dict, gen_seq: dict, poi_category: Dict, allow_skip: bool = True) -> float:
     """
     Compute per-sequence OVR:

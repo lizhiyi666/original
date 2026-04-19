@@ -34,7 +34,7 @@ do
       --projection_outer_iters 100 \
       --projection_inner_iters 25 \
       --guidance_last_k_steps 300 \
-      --guidance_frequency 1 \
+      --guidance_frequency 2 \
       --cond_dropout_rate 0 \
       --projection_existence_weight 0.8 \
       > "gpu_${rank}_baseline3.log" 2>&1 &
