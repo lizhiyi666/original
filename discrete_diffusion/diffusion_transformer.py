@@ -124,7 +124,13 @@ class ConditionEmbeddingModel(nn.Module):
     def forward(self, batch):
         seq_length = batch.time.size(1)
         position_ids = self.position_ids[:, : seq_length ]
-        time_embeddings = self.encoder(batch.time.long()+1)
+        
+        # ========== [修改这里] ==========
+        # 原代码: time_embeddings = self.encoder(batch.time.long()+1)
+        # 修改为: 对 24 取余，提取当前是全天的第几个小时
+        time_embeddings = self.encoder((batch.time.long() % 24) + 1)
+        # ===============================
+        
         condition1_embeddings = self.encoder(batch.condition1)
         condition2_embeddings = self.encoder(batch.condition2)
         condition3_embeddings = self.encoder(batch.condition3)

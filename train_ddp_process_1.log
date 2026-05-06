@@ -1,0 +1,107 @@
+[03:29:54][__main__][INFO] /root/original/wandb/run-20260506_032952-n2hhmnc8/files
+[03:29:54][__main__][INFO] Loading data
+[03:31:14][__main__][INFO] NewYork_PO1_OOD
+[03:31:14][__main__][INFO] Instantiating model
+[03:31:14][__main__][INFO] Loading checkpoint
+[03:31:14][__main__][INFO] Instantiating trainer
+[03:31:14][__main__][INFO] Starting training!
+[03:31:15][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[03:31:15][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:31:21][asyncio][WARNING] socket.send() raised exception.
+[03:34:07][__main__][INFO] /root/original/wandb/run-20260506_033404-itrg19yz/files
+[03:34:07][__main__][INFO] Loading data
+[03:35:26][__main__][INFO] NewYork_PO1_OOD
+[03:35:26][__main__][INFO] Instantiating model
+[03:35:26][__main__][INFO] Loading checkpoint
+[03:35:26][__main__][INFO] Instantiating trainer
+[03:35:26][__main__][INFO] Starting training!
+[03:35:27][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[03:35:27][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[06:40:55][__main__][INFO] /root/original/wandb/run-20260506_064053-u485017k/files
+[06:40:55][__main__][INFO] Loading data
+[06:42:14][__main__][INFO] NewYork_PO1_OOD
+[06:42:14][__main__][INFO] Instantiating model
+[06:42:15][__main__][INFO] Loading checkpoint
+[06:42:15][__main__][INFO] Instantiating trainer
+[06:42:15][__main__][INFO] Starting training!
+[06:42:15][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[06:42:15][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[06:47:52][__main__][INFO] /root/original/wandb/run-20260506_064749-oe3723sy/files
+[06:47:52][__main__][INFO] Loading data
+[06:49:11][__main__][INFO] NewYork_PO1_OOD
+[06:49:11][__main__][INFO] Instantiating model
+[06:49:12][__main__][INFO] Loading checkpoint
+[06:49:12][__main__][INFO] Instantiating trainer
+[06:49:12][__main__][INFO] Starting training!
+[06:49:12][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[06:49:12][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[06:54:21][__main__][INFO] /root/original/wandb/run-20260506_065418-2l8audxp/files
+[06:54:21][__main__][INFO] Loading data
+[06:55:39][__main__][INFO] NewYork_PO1_OOD
+[06:55:39][__main__][INFO] Instantiating model
+[06:55:40][__main__][INFO] Loading checkpoint
+[06:55:40][__main__][INFO] Instantiating trainer
+[06:55:40][__main__][INFO] Starting training!
+[06:55:40][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[06:55:40][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[07:00:51][__main__][INFO] /root/original/wandb/run-20260506_070048-2z8tnbvm/files
+[07:00:51][__main__][INFO] Loading data
+[07:02:10][__main__][INFO] NewYork_PO1_OOD
+[07:02:10][__main__][INFO] Instantiating model
+[07:02:10][__main__][INFO] Loading checkpoint
+[07:02:10][__main__][INFO] Instantiating trainer
+[07:02:10][__main__][INFO] Starting training!
+[07:02:10][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[07:02:11][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[07:10:56][__main__][INFO] /root/original/wandb/run-20260506_071054-z96ftm80/files
+[07:10:56][__main__][INFO] Loading data
+[07:11:47][__main__][INFO] NewYork_PO1_OOD
+[07:11:47][__main__][INFO] Instantiating model
+[07:11:47][__main__][INFO] Loading checkpoint
+[07:11:47][__main__][INFO] Instantiating trainer
+[07:11:47][__main__][INFO] Starting training!
+[07:11:47][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[07:11:48][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[07:14:49][__main__][INFO] /root/original/wandb/run-20260506_071447-w42ptbip/files
+[07:14:49][__main__][INFO] Loading data
+[07:15:40][__main__][INFO] NewYork_PO1_OOD
+[07:15:40][__main__][INFO] Instantiating model
+[07:15:40][__main__][INFO] Loading checkpoint
+[07:15:40][__main__][INFO] Instantiating trainer
+[07:15:40][__main__][INFO] Starting training!
+[07:15:40][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 1
+[07:15:40][torch.distributed.distributed_c10d][INFO] Rank 1: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.

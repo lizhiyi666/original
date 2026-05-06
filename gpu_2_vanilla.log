@@ -1,0 +1,1525 @@
+/opt/conda/envs/marionette/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  __import__("pkg_resources").declare_namespace(__name__)
+[DEBUG] Force updated projector.projection_existence_weight to 0.02
+[DEBUG] sample.py forced use_constraint_projection=True
+[DEBUG] projection params: {'freq': 10, 'tau': 0.0, 'lambda_init': 0.0, 'mu_init': 1.0, 'mu_alpha': 2.0, 'mu_max': 1000.0, 'outer_iterations': 10, 'inner_iterations': 10, 'eta': 1.0, 'delta_tol': 1e-06, 'projection_existence_weight': 0.02, 'use_gumbel_softmax': False, 'gumbel_temperature': 1.0, 'mu': 1.0}
+[GPU 2] Processing 1445 sequences (Range: 2890 -> 4335)
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 8.0
+tau before cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+tau after  cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9927) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 3])
+[DEBUG][shape] mask torch.Size([32, 3])
+[DEBUG][shape] tau  torch.Size([32, 3])
+[DEBUG][shape] cond1 torch.Size([32, 3])
+[DEBUG][shape] unpadded_length torch.Size([32]) 2
+[DEBUG][shape] content_token torch.Size([32, 7])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9941) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9941) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9941) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9902) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 20.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+tau after  cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9892) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 3])
+[DEBUG][shape] mask torch.Size([32, 3])
+[DEBUG][shape] tau  torch.Size([32, 3])
+[DEBUG][shape] cond1 torch.Size([32, 3])
+[DEBUG][shape] unpadded_length torch.Size([32]) 2
+[DEBUG][shape] content_token torch.Size([32, 7])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 22.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 20.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 20.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9904) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 22.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 23.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9946) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9979) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 31
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9969) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+tau after  cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 3])
+[DEBUG][shape] mask torch.Size([32, 3])
+[DEBUG][shape] tau  torch.Size([32, 3])
+[DEBUG][shape] cond1 torch.Size([32, 3])
+[DEBUG][shape] unpadded_length torch.Size([32]) 2
+[DEBUG][shape] content_token torch.Size([32, 7])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 19.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9978) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9978) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9978) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9925) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 4]) time: torch.Size([32, 4])
+tau after  cond_encoder: torch.Size([32, 4]) time: torch.Size([32, 4])
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9981) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 4])
+[DEBUG][shape] mask torch.Size([32, 4])
+[DEBUG][shape] tau  torch.Size([32, 4])
+[DEBUG][shape] cond1 torch.Size([32, 4])
+[DEBUG][shape] unpadded_length torch.Size([32]) 3
+[DEBUG][shape] content_token torch.Size([32, 9])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 24.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 32
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 23.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 26
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 20.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 28
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 28
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 28
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 28
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 28
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 28
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9967) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9896) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 23.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 14.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+tau after  cond_encoder: torch.Size([32, 2]) time: torch.Size([32, 2])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9826) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 2])
+[DEBUG][shape] mask torch.Size([32, 2])
+[DEBUG][shape] tau  torch.Size([32, 2])
+[DEBUG][shape] cond1 torch.Size([32, 2])
+[DEBUG][shape] unpadded_length torch.Size([32]) 1
+[DEBUG][shape] content_token torch.Size([32, 5])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 27.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 29
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 18.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 33
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 15.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 29.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 8.0
+tau before cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+tau after  cond_encoder: torch.Size([32, 1]) time: torch.Size([32, 1])
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 27
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 1])
+[DEBUG][shape] mask torch.Size([32, 1])
+[DEBUG][shape] tau  torch.Size([32, 1])
+[DEBUG][shape] cond1 torch.Size([32, 1])
+[DEBUG][shape] unpadded_length torch.Size([32]) 0
+[DEBUG][shape] content_token torch.Size([32, 3])
+po_matrix shape: torch.Size([32, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+tau after  cond_encoder: torch.Size([32, 3]) time: torch.Size([32, 3])
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 32, Constraints: 30
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=1.9958) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([32, 3])
+[DEBUG][shape] mask torch.Size([32, 3])
+[DEBUG][shape] tau  torch.Size([32, 3])
+[DEBUG][shape] cond1 torch.Size([32, 3])
+[DEBUG][shape] unpadded_length torch.Size([32]) 2
+[DEBUG][shape] content_token torch.Size([32, 7])
+po_matrix shape: torch.Size([5, 9, 9]) sum0: 24.0
+tau before cond_encoder: torch.Size([5, 1]) time: torch.Size([5, 1])
+tau after  cond_encoder: torch.Size([5, 1]) time: torch.Size([5, 1])
+
+[Projection Start] Batch: 5, Constraints: 24
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 5, Constraints: 24
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 5, Constraints: 24
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 5, Constraints: 24
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 5, Constraints: 24
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+
+[Projection Start] Batch: 5, Constraints: 24
+  [Outer 01/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/10] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=512.0) | Lam_O(max=0.00) Lam_E(max=1022.00)
+[DEBUG][shape] time torch.Size([5, 1])
+[DEBUG][shape] mask torch.Size([5, 1])
+[DEBUG][shape] tau  torch.Size([5, 1])
+[DEBUG][shape] cond1 torch.Size([5, 1])
+[DEBUG][shape] unpadded_length torch.Size([5]) 0
+[DEBUG][shape] content_token torch.Size([5, 3])
+[GPU 2] Saved part file to ./data/NewYork_PO1_OOD/NewYork_PO1_OOD_yurdja1m_generated_part2.pkl

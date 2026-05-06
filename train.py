@@ -6,6 +6,7 @@ import warnings
 import hydra
 import torch
 import wandb
+import os
 
 
 from hydra.utils import instantiate
@@ -90,19 +91,21 @@ def main(config: DictConfig):
     OmegaConf.resolve(config)
 
     print_config(config)
-    wandb.init(
-        entity=config.entity,
-        project=config.project,
-        group=config.group,
-        name=config.name,
-        resume="allow",
-        id=config.id,
-        mode=config.mode,
-        dir=config.run_dir,
-        anonymous="must",
-    )
-
-    OmegaConf.save(config, wandb.run.dir + "/config_hydra.yaml")
+    # 只有在 global_rank 为 0 的时候才初始化 wandb
+    if int(os.environ.get("LOCAL_RANK", 0)) == 0:
+        wandb.init(
+            entity=config.entity,
+            project=config.project,
+            group=config.group,
+            name=config.name,
+            resume="allow",
+            id=config.id,
+            mode=config.mode,
+            dir=config.run_dir,
+            anonymous="must",
+        )
+        OmegaConf.save(config, wandb.run.dir + "/config_hydra.yaml")
+    
     log.info(wandb.run.dir)
     log.info("Loading data")
     datamodule = instantiate_datamodule(config.data)

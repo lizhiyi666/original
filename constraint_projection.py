@@ -209,11 +209,14 @@ class ConstraintProjection:
         K = W_A.shape[-1]
             
         # 独立初始化乘子
-        lambda_order = torch.full((B, K), self.lambda_init, device=log_probs.device)
-        mu_order = torch.full((B, K), self.mu_init, device=log_probs.device)
-        lambda_exist = torch.full((B, K), self.lambda_init, device=log_probs.device)
-        mu_exist = torch.full((B, K), self.mu_init, device=log_probs.device)
-
+        # lambda_order = torch.full((B, K), self.lambda_init, device=log_probs.device)
+        # mu_order = torch.full((B, K), self.mu_init, device=log_probs.device)
+        # lambda_exist = torch.full((B, K), self.lambda_init, device=log_probs.device)
+        # mu_exist = torch.full((B, K), self.mu_init, device=log_probs.device)
+        lambda_order = torch.full((B, K), float(self.lambda_init), device=log_probs.device, dtype=torch.float32)
+        lambda_exist = torch.full((B, K), float(self.lambda_init), device=log_probs.device, dtype=torch.float32)
+        mu_order = torch.full((B, K), float(self.mu_init), device=log_probs.device, dtype=torch.float32)
+        mu_exist = torch.full((B, K), float(self.mu_init), device=log_probs.device, dtype=torch.float32)
         # 增加一个标记打印起始点
         print(f"\n[Projection Start] Batch: {B}, Constraints: {K}")
 

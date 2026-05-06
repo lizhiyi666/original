@@ -1,0 +1,7 @@
+[03:15:36][__main__][INFO] /root/original/wandb/run-20260506_031533-0w6efzaj/files
+[03:15:36][__main__][INFO] Loading data
+[03:16:54][__main__][INFO] NewYork_PO1_OOD
+[03:16:54][__main__][INFO] Instantiating model
+[03:16:55][__main__][INFO] Loading checkpoint
+[03:16:55][__main__][INFO] Instantiating trainer
+[03:16:55][__main__][INFO] Starting training!
