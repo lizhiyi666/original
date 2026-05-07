@@ -58,7 +58,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         from constraint_projection import ConstraintProjection
 
         dd = task.discrete_diffusion
-        dd.use_constraint_projection = True
+        #dd.use_constraint_projection = True
         dd.projection_frequency = args.projection_frequency
         dd.debug_constraint_projection = args.debug_constraint_projection
         dd._debug_projection_printed = False

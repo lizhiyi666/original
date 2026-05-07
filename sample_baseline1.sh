@@ -12,7 +12,7 @@ fi
 
 RUN_ID=$1
 # 默认使用 OOD 数据集，如果你想测普通数据集，可以在执行时传入第二个参数
-DATA_NAME=${2:-"Istanbul_PO1_OOD"} 
+DATA_NAME=${2:-"NewYork_PO1_OOD"} 
 WORLD_SIZE=4
 
 echo "====================================================="
