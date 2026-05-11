@@ -7,8 +7,8 @@ from sklearn.preprocessing import StandardScaler
 
 # -------------------------- 1. 全局配置 --------------------------
 PO_ENCODING_DIM = 32  # 偏序编码后的固定维度（可根据N调整）
-DATA_ROOT = "data/Istanbul"
-OUTPUT_ROOT = "data/Istanbul_PO1"
+DATA_ROOT = "data/NewYork"
+OUTPUT_ROOT = "data/NewYork_PO1"
 
 
 # -------------------------- 2. 工具函数 --------------------------
@@ -120,8 +120,8 @@ def process_dataset(original_data, cat2idx, scaler, svd, svd_components):
 # -------------------------- 4. 执行流程 --------------------------
 def main():
     # 1. 加载原始数据
-    train_path = os.path.join(DATA_ROOT, 'Istanbul_train.pkl')
-    test_path = os.path.join(DATA_ROOT, 'Istanbul_test.pkl')
+    train_path = os.path.join(DATA_ROOT, 'NewYork_train.pkl')
+    test_path = os.path.join(DATA_ROOT, 'NewYork_test.pkl')
     train_data = torch.load(train_path)
     test_data = torch.load(test_path)
 
@@ -139,8 +139,8 @@ def main():
     new_test = process_dataset(test_data, cat2idx, scaler, svd, svd_components)
 
     # 5. 保存新数据集（不修改原有字段，仅新增）
-    torch.save(new_train, os.path.join(OUTPUT_ROOT, 'Istanbul_PO1_train.pkl'))
-    torch.save(new_test, os.path.join(OUTPUT_ROOT, 'Istanbul_PO1_test.pkl'))
+    torch.save(new_train, os.path.join(OUTPUT_ROOT, 'NewYork_train.pkl'))
+    torch.save(new_test, os.path.join(OUTPUT_ROOT, 'NewYork_PO1_test.pkl'))
     print(f"新数据集已保存至 {OUTPUT_ROOT}")
 
     # 验证：打印第一个序列的编码结果
