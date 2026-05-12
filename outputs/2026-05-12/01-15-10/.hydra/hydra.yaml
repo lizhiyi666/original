@@ -1,6 +1,6 @@
 hydra:
   run:
-    dir: /root/original
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.num}
@@ -112,12 +112,10 @@ hydra:
   output_subdir: .hydra
   overrides:
     hydra:
-    - hydra.run.dir="/root/original"
-    - hydra.job.name=train_ddp_process_1
     - hydra.mode=RUN
     task: []
   job:
-    name: train_ddp_process_1
+    name: ${project}
     chdir: null
     override_dirname: ''
     id: ???
@@ -144,7 +142,7 @@ hydra:
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /root/original
+    output_dir: /root/original/outputs/2026-05-12/01-15-10
     choices:
       model: Marionette
       hydra: default

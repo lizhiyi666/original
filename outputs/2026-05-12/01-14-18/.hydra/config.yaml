@@ -1,6 +1,6 @@
 data:
   root: data/
-  batch_size: 48
+  batch_size: 32
   name: NewYork_PO1_OOD
 task:
   learning_rate1: 0.0001

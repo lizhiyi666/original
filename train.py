@@ -8,16 +8,10 @@ import torch
 import wandb
 import os
 
-
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import Trainer
-# pytorch_lightning.__version__
-# 1.9.5
-from pytorch_lightning.callbacks import (
-    EarlyStopping,
-    TQDMProgressBar,
-)
+from pytorch_lightning.callbacks import EarlyStopping, TQDMProgressBar
 from pytorch_lightning.loggers import WandbLogger
 
 from configs import (
@@ -34,6 +28,7 @@ from add_thin.utils import (
     print_exceptions,
     set_seed,
 )
+
 
 def get_callbacks(config):
     monitor = {"monitor": None, "mode": "min"}
@@ -60,7 +55,6 @@ def get_callbacks(config):
     return callbacks
 
 
-
 # Log to traceback to stderr on segfault
 faulthandler.enable(all_threads=False)
 
@@ -80,6 +74,18 @@ logging.getLogger("pytorch_lightning.utilities.rank_zero").addFilter(
 )
 log = get_logger()
 
+
+def _get_rank_info():
+    """
+    Works for DDP launched by Lightning/torchrun.
+    Prefer RANK if present; fall back to LOCAL_RANK.
+    """
+    global_rank = int(os.environ.get("RANK", os.environ.get("GLOBAL_RANK", "0")))
+    local_rank = int(os.environ.get("LOCAL_RANK", "0"))
+    world_size = int(os.environ.get("WORLD_SIZE", "1"))
+    return global_rank, local_rank, world_size
+
+
 @hydra.main(config_path="config", config_name="train", version_base=None)
 @print_exceptions
 def main(config: DictConfig):
@@ -91,8 +97,12 @@ def main(config: DictConfig):
     OmegaConf.resolve(config)
 
     print_config(config)
-    # 只有在 global_rank 为 0 的时候才初始化 wandb
-    if int(os.environ.get("LOCAL_RANK", 0)) == 0:
+
+    global_rank, local_rank, world_size = _get_rank_info()
+    is_rank0 = (global_rank == 0)
+
+    # ========== W&B init only on rank0 ==========
+    if is_rank0:
         wandb.init(
             entity=config.entity,
             project=config.project,
@@ -104,9 +114,12 @@ def main(config: DictConfig):
             dir=config.run_dir,
             anonymous="must",
         )
-        OmegaConf.save(config, wandb.run.dir + "/config_hydra.yaml")
-    
-    log.info(wandb.run.dir)
+        # Only rank0 can safely access wandb.run
+        OmegaConf.save(config, os.path.join(wandb.run.dir, "config_hydra.yaml"))
+        log.info(f"[rank0] wandb.run.dir = {wandb.run.dir}")
+    else:
+        log.info(f"[rank{global_rank}] Skip wandb.init()")
+
     log.info("Loading data")
     datamodule = instantiate_datamodule(config.data)
     datamodule.prepare_data()
@@ -115,16 +128,20 @@ def main(config: DictConfig):
 
     log.info("Instantiating model")
     tpp_model, discrete_diffusion = instantiate_model(config.model, datamodule)
+    task = instantiate_task(config.task, tpp_model, discrete_diffusion, datamodule=datamodule)
 
-    task = instantiate_task(config.task, tpp_model, discrete_diffusion,datamodule=datamodule)
-
-    logger = WandbLogger()
+    # ========== Logger handling ==========
+    # Safest option: only create WandbLogger on rank0.
+    # Other ranks: logger=False to avoid WandB touching in subprocesses.
+    if is_rank0:
+        logger = WandbLogger()
+    else:
+        logger = False
 
     log.info("Loading checkpoint")
     callbacks = get_callbacks(config)
 
     log.info("Instantiating trainer")
-
     trainer: Trainer = instantiate(
         config.trainer,
         callbacks=callbacks,
@@ -138,7 +155,9 @@ def main(config: DictConfig):
         log.info("Starting testing!")
         trainer.test(ckpt_path="best", datamodule=datamodule)
 
-    wandb.finish()
+    # ========== W&B finish only on rank0 ==========
+    if is_rank0 and wandb.run is not None:
+        wandb.finish()
 
 
 if __name__ == "__main__":

@@ -75,3 +75,12 @@
 [07:15:40][__main__][INFO] Starting training!
 [07:15:40][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 2
 [07:15:40][torch.distributed.distributed_c10d][INFO] Rank 2: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
+[01:20:50][__main__][INFO] [rank0] wandb.run.dir = /root/original/wandb/run-20260512_012048-2yjpn7yw/files
+[01:20:50][__main__][INFO] Loading data
+[01:21:40][__main__][INFO] NewYork_PO1_OOD
+[01:21:40][__main__][INFO] Instantiating model
+[01:21:40][__main__][INFO] Loading checkpoint
+[01:21:40][__main__][INFO] Instantiating trainer
+[01:21:40][__main__][INFO] Starting training!
+[01:21:40][torch.distributed.distributed_c10d][INFO] Added key: store_based_barrier_key:1 to store for rank: 2
+[01:21:41][torch.distributed.distributed_c10d][INFO] Rank 2: Completed store-based barrier for key:store_based_barrier_key:1 with 4 nodes.
