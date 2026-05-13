@@ -1,6 +1,6 @@
 data:
   root: data/
-  batch_size: 64
+  batch_size: 512
   name: OOD_NewYork_PO1
 task:
   learning_rate1: 0.0001
@@ -11,8 +11,8 @@ task:
 trainer:
   _target_: pytorch_lightning.Trainer
   accelerator: gpu
-  devices: 4
-  strategy: ddp
+  devices:
+  - 0
   max_epochs: 1000
   log_every_n_steps: 1
   resume_from_checkpoint: null

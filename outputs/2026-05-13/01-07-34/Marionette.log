@@ -1,0 +1,7 @@
+[01:07:37][__main__][INFO] [rank0] wandb.run.dir = /root/original/wandb/run-20260513_010735-o4t71zl9/files
+[01:07:37][__main__][INFO] Loading data
+[01:07:59][__main__][INFO] OOD_NewYork_PO1
+[01:07:59][__main__][INFO] Instantiating model
+[01:07:59][__main__][INFO] Loading checkpoint
+[01:07:59][__main__][INFO] Instantiating trainer
+[01:07:59][__main__][INFO] Starting training!
