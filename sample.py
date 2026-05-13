@@ -53,11 +53,21 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     data_name, seed, run_path = get_run_data(RUN_ID, WANDB_DIR)
     task, datamodule = get_task(run_path, data_root=PROJECT_ROOT)
 
+    dd = task.discrete_diffusion
+
+    # ========== Baseline1: 强制关闭投影 ==========
+    # 规则A：baseline=None 且未显式 --use_constraint_projection 时，视为 baseline1
+    if args.baseline is None and (not args.use_constraint_projection):
+        dd.use_constraint_projection = False
+        dd.debug_constraint_projection = False
+        dd.projection_last_k_steps = 0
+        dd.projection_frequency = 10**9  # 防止内部误触发
+        dd.constraint_projector = None
+
     # ========== 采样时强制开启投影，并补建 projector ==========
     if args.use_constraint_projection:
         from constraint_projection import ConstraintProjection
 
-        dd = task.discrete_diffusion
         #dd.use_constraint_projection = True
         dd.projection_frequency = args.projection_frequency
         dd.debug_constraint_projection = args.debug_constraint_projection
@@ -130,8 +140,6 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         # ========== Baseline 3: Classifier-Based Guidance 设置 ==========
     if args.baseline == "energy_guidance":
         from constraint_projection import ConstraintProjection
-
-        dd = task.discrete_diffusion
 
         # 设置 guidance 标志和参数
         dd.use_guidance_baseline = True

@@ -12,7 +12,7 @@ fi
 
 RUN_ID=$1
 WORLD_SIZE=4
-DATA_NAME="Istanbul_PO1_OOD"
+DATA_NAME="OOD_NewYork_PO1"
 
 echo "====================================================="
 echo "Baseline 2: Post-hoc Swap (no projection during sampling)"

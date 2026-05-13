@@ -1,31 +1,22 @@
 /opt/conda/envs/marionette/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   __import__("pkg_resources").declare_namespace(__name__)
-[GPU 2] Processing 1229 sequences (Range: 2458 -> 3687)
-po_matrix shape: torch.Size([512, 9, 9]) sum0: 26.0
-tau before cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
-tau after  cond_encoder: torch.Size([512, 14]) time: torch.Size([512, 14])
-[DEBUG][shape] time torch.Size([512, 14])
-[DEBUG][shape] mask torch.Size([512, 14])
-[DEBUG][shape] tau  torch.Size([512, 14])
-[DEBUG][shape] cond1 torch.Size([512, 14])
-[DEBUG][shape] unpadded_length torch.Size([512]) 13
-[DEBUG][shape] content_token torch.Size([512, 29])
-po_matrix shape: torch.Size([512, 9, 9]) sum0: 25.0
-tau before cond_encoder: torch.Size([512, 13]) time: torch.Size([512, 13])
-tau after  cond_encoder: torch.Size([512, 13]) time: torch.Size([512, 13])
-[DEBUG][shape] time torch.Size([512, 13])
-[DEBUG][shape] mask torch.Size([512, 13])
-[DEBUG][shape] tau  torch.Size([512, 13])
-[DEBUG][shape] cond1 torch.Size([512, 13])
-[DEBUG][shape] unpadded_length torch.Size([512]) 12
-[DEBUG][shape] content_token torch.Size([512, 27])
-po_matrix shape: torch.Size([205, 9, 9]) sum0: 15.0
-tau before cond_encoder: torch.Size([205, 13]) time: torch.Size([205, 13])
-tau after  cond_encoder: torch.Size([205, 13]) time: torch.Size([205, 13])
-[DEBUG][shape] time torch.Size([205, 13])
-[DEBUG][shape] mask torch.Size([205, 13])
-[DEBUG][shape] tau  torch.Size([205, 13])
-[DEBUG][shape] cond1 torch.Size([205, 13])
-[DEBUG][shape] unpadded_length torch.Size([205]) 12
-[DEBUG][shape] content_token torch.Size([205, 27])
-[GPU 2] Saved part file to ./data/Istanbul_PO1_OOD/Istanbul_PO1_OOD_e70zggrj_generated_part2.pkl
+[GPU 2] Processing 732 sequences (Range: 1464 -> 2196)
+po_matrix shape: torch.Size([512, 9, 9]) sum0: 20.0
+tau before cond_encoder: torch.Size([512, 5]) time: torch.Size([512, 5])
+tau after  cond_encoder: torch.Size([512, 5]) time: torch.Size([512, 5])
+[DEBUG][shape] time torch.Size([512, 5])
+[DEBUG][shape] mask torch.Size([512, 5])
+[DEBUG][shape] tau  torch.Size([512, 5])
+[DEBUG][shape] cond1 torch.Size([512, 5])
+[DEBUG][shape] unpadded_length torch.Size([512]) 4
+[DEBUG][shape] content_token torch.Size([512, 11])
+po_matrix shape: torch.Size([220, 9, 9]) sum0: 20.0
+tau before cond_encoder: torch.Size([220, 5]) time: torch.Size([220, 5])
+tau after  cond_encoder: torch.Size([220, 5]) time: torch.Size([220, 5])
+[DEBUG][shape] time torch.Size([220, 5])
+[DEBUG][shape] mask torch.Size([220, 5])
+[DEBUG][shape] tau  torch.Size([220, 5])
+[DEBUG][shape] cond1 torch.Size([220, 5])
+[DEBUG][shape] unpadded_length torch.Size([220]) 4
+[DEBUG][shape] content_token torch.Size([220, 11])
+[GPU 2] Saved part file to ./data/OOD_NewYork_PO1/OOD_NewYork_PO1_o4t71zl9_generated_part2.pkl
