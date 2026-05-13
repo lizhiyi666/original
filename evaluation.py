@@ -5,6 +5,8 @@ from evaluations.preprocessing import preprocessing_data
 from evaluations import Get_Statistical_Metrics, run_SemLoc_task, run_EpiSim_task
 # use the per-test-sequence OVR implementation
 from evaluations.ovr import dataset_ovr_by_test_pairs
+from evaluations.ovr import dataset_ovr_with_coverage
+from evaluations.ovr import dataset_unsat_ratio_by_test_pairs
 import torch
 import pandas as pd
 import numpy as np
@@ -128,17 +130,23 @@ def run_Statistical(dataset, experiment_comments):
 
     # existing statistical metrics
     JSD_Values = Get_Statistical_Metrics(test_seqs, generated_seqs)
-
+    unsat_ratio = dataset_unsat_ratio_by_test_pairs(test_seqs, generated_seqs, poi_category, skip_nan=True)
     # compute per-test-sequence reference-based OVR: for each test sequence, extract its reference pairs
     # and compute average violation rate in the corresponding generated sequence.
     try:
-        OVR_ref = dataset_ovr_by_test_pairs(test_seqs, generated_seqs, poi_category, allow_skip=True, skip_nan=True)
+        #OVR_ref = dataset_ovr_by_test_pairs(test_seqs, generated_seqs, poi_category, allow_skip=False, skip_nan=True)
+        OVR_ref_skip, OVR_ref_strict, coverage = dataset_ovr_with_coverage(
+        test_seqs, generated_seqs, poi_category, skip_nan=True
+        )
     except Exception as e:
         # in case of errors, record nan and continue
         print(f"Warning: OVR computation failed: {e}")
         OVR_ref = float('nan')
+        OVR_ref_skip = float("nan")
+        OVR_ref_strict = float("nan")
+        coverage = float("nan")
 
-    return JSD_Values, OVR_ref
+    return JSD_Values, OVR_ref_skip,OVR_ref_strict,coverage,unsat_ratio
 
 
 def evaluation(task, dataset, cuda, results_log, experiment_comments, generated_only, init_exposed_num, exp_num, max_weeks):
@@ -155,9 +163,9 @@ def evaluation(task, dataset, cuda, results_log, experiment_comments, generated_
             f.writelines(f"{dataset} {task} MAPE : {MAPE}, MSPE : {MSPE} \n")
     else:
         # Statistical metrics + OVR_ref
-        JSD_Values, OVR_ref = run_Statistical(dataset, experiment_comments)
+        JSD_Values, OVR_ref_skip,OVR_ref_strict,coverage,unsat_ratio = run_Statistical(dataset, experiment_comments)
         with open(results_log, "a+") as f:
-            f.writelines(f"Distance: {JSD_Values['Distance']}, Radius: {JSD_Values['Radius']}, Interval: {JSD_Values['Interval']}, DailyLoc: {JSD_Values['DailyLoc']}, Category: {JSD_Values['Category']}, 'G-RANK': {JSD_Values['G-RANK']}, OVR_ref: {OVR_ref}\n")
+            f.writelines(f"Distance: {JSD_Values['Distance']}, Radius: {JSD_Values['Radius']}, Interval: {JSD_Values['Interval']}, DailyLoc: {JSD_Values['DailyLoc']}, Category: {JSD_Values['Category']}, 'G-RANK': {JSD_Values['G-RANK']}, OVR_ref_skip: {OVR_ref_skip}, OVR_ref_strict: {OVR_ref_strict}, coverage: {coverage}, Unsat_ref: {unsat_ratio}\n")
 
 
 if __name__ == "__main__":

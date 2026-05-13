@@ -1,0 +1,22 @@
+/opt/conda/envs/marionette/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  __import__("pkg_resources").declare_namespace(__name__)
+[GPU 3] Processing 729 sequences (Range: 2196 -> 2925)
+po_matrix shape: torch.Size([512, 9, 9]) sum0: 21.0
+tau before cond_encoder: torch.Size([512, 5]) time: torch.Size([512, 5])
+tau after  cond_encoder: torch.Size([512, 5]) time: torch.Size([512, 5])
+[DEBUG][shape] time torch.Size([512, 5])
+[DEBUG][shape] mask torch.Size([512, 5])
+[DEBUG][shape] tau  torch.Size([512, 5])
+[DEBUG][shape] cond1 torch.Size([512, 5])
+[DEBUG][shape] unpadded_length torch.Size([512]) 4
+[DEBUG][shape] content_token torch.Size([512, 11])
+po_matrix shape: torch.Size([217, 9, 9]) sum0: 26.0
+tau before cond_encoder: torch.Size([217, 5]) time: torch.Size([217, 5])
+tau after  cond_encoder: torch.Size([217, 5]) time: torch.Size([217, 5])
+[DEBUG][shape] time torch.Size([217, 5])
+[DEBUG][shape] mask torch.Size([217, 5])
+[DEBUG][shape] tau  torch.Size([217, 5])
+[DEBUG][shape] cond1 torch.Size([217, 5])
+[DEBUG][shape] unpadded_length torch.Size([217]) 4
+[DEBUG][shape] content_token torch.Size([217, 11])
+[GPU 3] Saved part file to ./data/OOD_NewYork_PO1/OOD_NewYork_PO1_o4t71zl9_generated_part3.pkl

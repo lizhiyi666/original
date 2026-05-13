@@ -1,0 +1,82 @@
+/opt/conda/envs/marionette/lib/python3.10/site-packages/lightning_fabric/__init__.py:29: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  __import__("pkg_resources").declare_namespace(__name__)
+[GPU 1] Processing 732 sequences (Range: 732 -> 1464)
+po_matrix shape: torch.Size([512, 9, 9]) sum0: 25.0
+tau before cond_encoder: torch.Size([512, 5]) time: torch.Size([512, 5])
+tau after  cond_encoder: torch.Size([512, 5]) time: torch.Size([512, 5])
+
+[Projection Start] Batch: 512, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 512, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 512, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 512, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 512, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+[DEBUG][shape] time torch.Size([512, 5])
+[DEBUG][shape] mask torch.Size([512, 5])
+[DEBUG][shape] tau  torch.Size([512, 5])
+[DEBUG][shape] cond1 torch.Size([512, 5])
+[DEBUG][shape] unpadded_length torch.Size([512]) 4
+[DEBUG][shape] content_token torch.Size([512, 11])
+po_matrix shape: torch.Size([220, 9, 9]) sum0: 27.0
+tau before cond_encoder: torch.Size([220, 5]) time: torch.Size([220, 5])
+tau after  cond_encoder: torch.Size([220, 5]) time: torch.Size([220, 5])
+
+[Projection Start] Batch: 220, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 220, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 220, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 220, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+
+[Projection Start] Batch: 220, Constraints: 34
+  [Outer 01/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=1.0) | Lam_O(max=0.00) Lam_E(max=0.00)
+  [Outer 10/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=38.4) | Lam_O(max=0.00) Lam_E(max=149.77)
+  [Outer 15/15] Loss (KL=nan, Const=nan) | Viol_Order(max=0.00, mean=0.0000) | Viol_Exist(max=2.00, mean=2.0000) | Mu_O(max=1.0) Mu_E(max=291.9) | Lam_O(max=0.00) Lam_E(max=1163.72)
+[DEBUG][shape] time torch.Size([220, 5])
+[DEBUG][shape] mask torch.Size([220, 5])
+[DEBUG][shape] tau  torch.Size([220, 5])
+[DEBUG][shape] cond1 torch.Size([220, 5])
+[DEBUG][shape] unpadded_length torch.Size([220]) 4
+[DEBUG][shape] content_token torch.Size([220, 11])
+
+[Baseline2] Applying post-hoc swap to 732 sequences...
+[Baseline2 Post-hoc Swap] Summary:
+  Total sequences: 732
+  Total constraints checked: 2348
+  Violated before swap: 2348
+  Violated after swap:  2348
+  Reduction: 0.0000
+  NOTE: Remaining violations are due to missing categories (category absent from generated sequence, cannot fix by reordering)
+[Baseline2] Done. Summary: {'total_seqs': 732, 'total_constraints_checked': 2348, 'total_violated_before': 2348, 'total_violated_after': 2348, 'reduction_ratio': 0.0}
+[GPU 1] Saved part file to ./data/OOD_NewYork_PO1/OOD_NewYork_PO1_o4t71zl9_generated_part1.pkl

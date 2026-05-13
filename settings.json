@@ -1,0 +1,19 @@
+{
+			"working_dir":"",
+			"require_cpu_core":4,
+			"require_gpu_num":1,
+			"require_mem":"16",
+			"require_shm":"8",
+			"cmd":"",
+			"cache_path":"",
+			"selectedGpus":[
+		
+			],
+			"selectedImage":[
+				"systemImage",
+				"10.249.176.128:8084/system_image/default_image:v2.0.3"
+			],
+			"take_snapshot":true,
+			"allow_multi_node_allocation":false,
+			"task_description":""
+		}
