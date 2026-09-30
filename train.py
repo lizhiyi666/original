@@ -99,7 +99,6 @@ def main(config: DictConfig):
         id=config.id,
         mode=config.mode,
         dir=config.run_dir,
-        anonymous="must",
     )
 
     OmegaConf.save(config, wandb.run.dir + "/config_hydra.yaml")
