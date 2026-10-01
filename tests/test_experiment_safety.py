@@ -11,6 +11,22 @@ from constraint_projection import ConstraintProjection
 from discrete_diffusion.diffusion_transformer import DiffusionTransformer, ConditionEmbeddingModel
 
 
+class TrainingProfileTests(unittest.TestCase):
+    def test_approved_preflight_budget(self):
+        from tools.run_newyork_ood import training_profile
+        profile = training_profile(True)
+        self.assertEqual(profile["train_batch_size"], 64)
+        self.assertEqual(profile["epochs"] * profile["limit_train_batches"], 100)
+        self.assertEqual(profile["expected_train_batches"], 100)
+
+    def test_formal_profile_unchanged(self):
+        from tools.run_newyork_ood import training_profile
+        profile = training_profile(False)
+        self.assertEqual(profile["epochs"], 1000)
+        self.assertEqual(profile["train_batch_size"], 64)
+        self.assertIsNone(profile["limit_train_batches"])
+
+
 class ConstraintTests(unittest.TestCase):
     def test_position_overflow_rejected_before_allocating_embeddings(self):
         model = SimpleNamespace(max_position_embeddings=3000)

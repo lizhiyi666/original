@@ -48,6 +48,14 @@ PROJECTION = dict(projection_last_k_steps=40, projection_frequency=4,
                   projection_existence_weight=5.0)
 
 
+def training_profile(preflight):
+    # 3160 sequences / batch 64 => 50 batches per epoch (last batch is partial).
+    # User-approved warm-up: 2 full epochs, exactly 100 batches, always a new run.
+    return dict(epochs=2 if preflight else 1000, train_batch_size=64,
+                limit_train_batches=50 if preflight else None,
+                expected_train_batches=100 if preflight else 50000)
+
+
 def disk_guard():
     if shutil.disk_usage(ROOT).free < 5 * 1024**3:
         raise RuntimeError("Less than 5 GiB free; stopping before the next stage")
@@ -106,8 +114,8 @@ class Experiment:
         self.manifest = dict(
             run_id=self.run_id, profile="preflight" if self.preflight else "formal",
             dataset=DATASET, data_sha256=DATA_HASHES, code_sha256=code_fingerprint(),
-            seed=SEED, epochs=1 if self.preflight else 1000,
-            train_batch_size=8 if self.preflight else 64, sample_batch_size=4 if self.preflight else 64,
+            seed=SEED, **training_profile(self.preflight),
+            sample_batch_size=4 if self.preflight else 64,
             po_loss_weight=0, temporal_steps=100, spatial_steps_effective=256,
             sample_count=4 if self.preflight else 2108, world_size=2,
             constraint_source="strict_test", projection=PROJECTION,
@@ -163,7 +171,8 @@ class Experiment:
                      "mode=online", f"entity={self.entity}", f"id={self.run_id}",
                      f"name={self.run_id}", f"group={self.run_id}", "run_dir=."]
         if self.preflight:
-            arguments += ["+trainer.limit_train_batches=3", "+trainer.enable_progress_bar=false"]
+            arguments += [f"+trainer.limit_train_batches={self.manifest['limit_train_batches']}",
+                          "+trainer.enable_progress_bar=false"]
         else:
             arguments += ["+trainer.enable_progress_bar=false"]
         if self.args.resume:
