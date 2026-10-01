@@ -123,6 +123,8 @@ class ConditionEmbeddingModel(nn.Module):
 
     def forward(self, batch):
         seq_length = batch.time.size(1)
+        if seq_length > self.max_position_embeddings:
+            raise ValueError(f"Condition sequence length {seq_length} exceeds positional capacity {self.max_position_embeddings}")
         position_ids = self.position_ids[:, : seq_length ]
         time_embeddings = self.encoder(batch.time.long()+1)
         condition1_embeddings = self.encoder(batch.condition1)
@@ -502,6 +504,7 @@ class DiffusionTransformer(nn.Module):
                     print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
 
             if W_A is not None:
+                self.projection_call_count = getattr(self, "projection_call_count", 0) + 1
                 model_log_prob_after = self.constraint_projector.project_with_matrices(
                     model_log_prob,
                     W_A, W_B,

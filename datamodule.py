@@ -854,7 +854,7 @@ class DataModule(pl.LightningDataModule):
         self.gps_dict = gps_dict
         
         # [修改点 3] 将 SVD 矩阵保存到 DataModule 中，供 Task 使用
-        self.svd_components = None
+        self.svd_components = svd_components
 
         self.get_statistics()
 
@@ -906,6 +906,8 @@ def load_sequences(root, name: str) -> List[Sequence]:
     path = os.path.join(root, f"{name}.pkl")
     loader = torch.load(path, map_location=torch.device("cpu"),weights_only=False)
 
+    _validate_loaded_dataset(loader, path)
+
     sequences = loader["sequences"]
     tmax = loader["t_max"]
     num_category = loader["num_marks"]
@@ -939,3 +941,141 @@ def load_sequences(root, name: str) -> List[Sequence]:
         for seq in sequences
     ]
     return time_sequences, num_category, num_poi, gps_dict, svd_components
+
+
+def _validate_loaded_dataset(loader: dict, path: str) -> None:
+    """Fail fast on malformed Marionette/PO1 datasets.
+
+    Plain Marionette datasets may omit PO1 fields, so the PO-specific checks
+    are enabled when the metadata or sequence fields are present.
+    """
+    required = {"sequences", "t_max", "num_marks", "num_pois", "poi_gps"}
+    missing = required.difference(loader)
+    if missing:
+        raise ValueError(f"{path}: missing top-level fields: {sorted(missing)}")
+
+    try:
+        t_max = float(np.asarray(loader["t_max"]).item())
+    except Exception as exc:
+        raise ValueError(f"{path}: t_max must be a scalar numeric value") from exc
+    if not np.isclose(t_max, 24.0):
+        raise ValueError(f"{path}: t_max={t_max}, expected 24.0")
+
+    poi_gps = loader["poi_gps"]
+    if not isinstance(poi_gps, dict):
+        raise ValueError(f"{path}: poi_gps must be a dictionary")
+    poi_category = loader.get("poi_category")
+    if poi_category is not None and set(poi_gps) != set(poi_category):
+        raise ValueError(f"{path}: poi_gps and poi_category keys differ")
+
+    category_mapping = loader.get("category_mapping")
+    sequences = loader["sequences"]
+    if category_mapping is not None:
+        if not isinstance(category_mapping, dict):
+            raise ValueError(f"{path}: category_mapping must be a dictionary")
+        category_count = len(category_mapping)
+        if category_count <= 0:
+            raise ValueError(f"{path}: category_mapping is empty")
+        mapping_values = sorted(int(v) for v in category_mapping.values())
+        if mapping_values != list(range(category_count)):
+            raise ValueError(f"{path}: category_mapping values must be 0..C-1")
+    else:
+        category_count = int(loader["num_marks"])
+        # Legacy Istanbul files reserve one category slot: num_marks is 10,
+        # while the actual model vocabulary contains categories 4..12 and
+        # POIs start at 13.  Infer that layout from the observed tokens.
+        observed_marks = [
+            int(value)
+            for seq in sequences
+            for value in np.asarray(seq.get("marks", []), dtype=np.int64).reshape(-1)
+        ]
+        observed_pois = [
+            int(value)
+            for seq in sequences
+            for value in np.asarray(seq.get("checkins", []), dtype=np.int64).reshape(-1)
+        ]
+        if (
+            category_count == 10
+            and observed_marks
+            and max(observed_marks) <= 12
+            and observed_pois
+            and min(observed_pois) >= 13
+        ):
+            category_count = 9
+
+    # PO1 fields are optional for the original Marionette dataset.  If one is
+    # present, every sequence must carry both fields with the expected shape.
+    has_po = bool(loader.get("svd_components") is not None or any(
+        isinstance(seq, dict) and (seq.get("po_matrix") is not None or seq.get("po_encoding") is not None)
+        for seq in sequences
+    ))
+    if has_po:
+        if poi_category is None:
+            raise ValueError(f"{path}: PO1 data requires poi_category")
+        expected_categories = int(loader.get("num_categories", category_count))
+        if expected_categories != category_count:
+            raise ValueError(f"{path}: num_categories disagrees with category_mapping")
+        svd = loader.get("svd_components")
+        if svd is None or tuple(svd.shape) != (32, expected_categories * expected_categories):
+            raise ValueError(
+                f"{path}: svd_components must have shape (32,{expected_categories * expected_categories})"
+            )
+
+    category_start = 4
+    poi_start = category_start + category_count
+    poi_end = poi_start + int(loader["num_pois"])
+
+    for index, seq in enumerate(sequences):
+        if not isinstance(seq, dict):
+            raise ValueError(f"{path}: sequence {index} is not a dictionary")
+        fields = ["arrival_times", "marks", "checkins"] + [f"condition{i}" for i in range(1, 7)]
+        absent = [field for field in fields if field not in seq]
+        if absent:
+            raise ValueError(f"{path}: sequence {index} missing fields: {absent}")
+        n = len(seq["arrival_times"])
+        if len(seq["marks"]) != n or len(seq["checkins"]) != n:
+            raise ValueError(f"{path}: sequence {index} has inconsistent event lengths")
+        for condition in range(1, 7):
+            if len(seq[f"condition{condition}"]) != n:
+                raise ValueError(f"{path}: sequence {index} condition{condition} length != {n}")
+
+        times = np.asarray(seq["arrival_times"], dtype=np.float64)
+        if np.any(~np.isfinite(times)) or np.any(times < 0) or np.any(times >= 24):
+            raise ValueError(f"{path}: sequence {index} arrival_times must be finite and in [0,24)")
+        if n > 1 and np.any(np.diff(times) <= 0):
+            raise ValueError(f"{path}: sequence {index} arrival_times must be strictly increasing")
+
+        marks = np.asarray(seq["marks"], dtype=np.int64)
+        checkins = np.asarray(seq["checkins"], dtype=np.int64)
+        if marks.size and (marks.min() < category_start or marks.max() >= poi_start):
+            raise ValueError(
+                f"{path}: sequence {index} marks range [{marks.min()},{marks.max()}] "
+                f"outside category token range [{category_start},{poi_start})"
+            )
+        if checkins.size and (checkins.min() < poi_start or checkins.max() >= poi_end):
+            raise ValueError(
+                f"{path}: sequence {index} checkins range [{checkins.min()},{checkins.max()}] "
+                f"outside POI token range [{poi_start},{poi_end})"
+            )
+
+        if poi_category is not None:
+            for poi, category in zip(checkins.tolist(), marks.tolist()):
+                if int(poi) not in poi_category:
+                    raise ValueError(f"{path}: sequence {index} POI {poi} missing from poi_category")
+                if int(poi_category[int(poi)]) != int(category):
+                    raise ValueError(
+                        f"{path}: sequence {index} POI/category mismatch for POI {poi}: "
+                        f"marks={category}, poi_category={poi_category[int(poi)]}"
+                    )
+
+        if has_po:
+            matrix = seq.get("po_matrix")
+            encoding = seq.get("po_encoding")
+            if matrix is None or tuple(np.asarray(matrix).shape) != (category_count, category_count):
+                raise ValueError(f"{path}: sequence {index} po_matrix shape is invalid")
+            if encoding is None or tuple(np.asarray(encoding).shape) != (32,):
+                raise ValueError(f"{path}: sequence {index} po_encoding shape is invalid")
+            for condition in range(1, 7):
+                indicator = seq.get(f"condition{condition}_indicator")
+                if indicator is None or len(indicator) != 24:
+                    raise ValueError(f"{path}: sequence {index} condition{condition}_indicator must have length 24")

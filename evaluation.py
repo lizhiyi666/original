@@ -119,6 +119,10 @@ def run_Statistical(dataset, experiment_comments):
     generated_seqs = generated_data.get('sequences')
 
     poi_category = test_data['poi_category']
+    if len(test_seqs) != len(generated_seqs):
+        raise ValueError("Statistical evaluation requires one generation per test sequence")
+    if "test_indices" in generated_data and generated_data["test_indices"] != list(range(len(test_seqs))):
+        raise ValueError("Generated sequences are not aligned with the test set")
 
     # adjust generated sequences marks if downstream code expects 'marks' (keep existing behavior)
     for seq in generated_seqs:

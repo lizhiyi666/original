@@ -1,39 +1,63 @@
-import torch
+"""Fail-closed merge: retain shards and never publish incomplete generations."""
 import argparse
-import os
+import math
+from pathlib import Path
+import torch
+from experiment_io import publish_torch, safe_tag, sha256_file, validate_part
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--run_id", type=str, required=True)
-parser.add_argument("--data_name", type=str, required=True) # 例如 Istanbul_PO1
-parser.add_argument("--world_size", type=int, default=4)
-args = parser.parse_args()
 
-all_sequences = []
-t_max = None
+def merge_parts(data_name, run_id, world_size=4, output_tag=None, data_dir="data", expected_count=None):
+    if world_size < 1:
+        raise ValueError("world_size must be positive")
+    tag = safe_tag(output_tag or run_id)
+    base = Path(data_dir) / safe_tag(data_name)
+    paths = [base / f"{data_name}_{tag}_generated_part{rank}.pkl" for rank in range(world_size)]
+    missing = [str(path) for path in paths if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Missing shards; nothing merged: {missing}")
+    parts = [torch.load(path, map_location="cpu", weights_only=False) for path in paths]
+    metadata = parts[0].get("metadata")
+    if not metadata:
+        raise ValueError("Legacy shards lack validation metadata; regenerate with the current sampler")
+    total = metadata["total_samples"]
+    if expected_count is not None and total != expected_count:
+        raise ValueError("Unexpected total sample count")
+    if (metadata["world_size"], metadata["run_id"], metadata["output_tag"], metadata["data_name"]) != (world_size, run_id, tag, data_name):
+        raise ValueError("Requested experiment does not match shards")
+    if metadata["dataset_sha256"] != sha256_file(base / f"{data_name}_test.pkl"):
+        raise ValueError("Test dataset changed since sampling")
+    sequences, indices = [], []
+    chunk = math.ceil(total / world_size)
+    for rank, part in enumerate(parts):
+        expected_indices = list(range(min(rank * chunk, total), min((rank + 1) * chunk, total)))
+        validate_part(part, metadata, rank, expected_indices)
+        sequences.extend(part["sequences"])
+        indices.extend(part["test_indices"])
+    if indices != list(range(total)) or len(sequences) != total:
+        raise ValueError("Missing, duplicate, or out-of-order test indices")
+    destination = base / f"{data_name}_{tag}_generated.pkl"
+    merged = dict(sequences=sequences, t_max=24.0, test_indices=indices, metadata=metadata,
+                  projection_calls=sum(p.get("projection_calls", 0) for p in parts),
+                  elapsed_seconds=max(p.get("elapsed_seconds", 0) for p in parts),
+                  shard_sha256=[sha256_file(path) for path in paths])
+    if destination.exists():
+        previous = torch.load(destination, map_location="cpu", weights_only=False)
+        if any(previous.get(k) != merged[k] for k in ("metadata", "test_indices", "shard_sha256")):
+            raise FileExistsError("Existing merged result belongs to different inputs")
+        if len(previous["sequences"]) != total:
+            raise ValueError("Existing merged result is incomplete")
+    else:
+        publish_torch(destination, merged)
+    print(f"Verified {total} samples: {destination}; all source shards retained")
+    return destination
 
-base_dir = f'./data/{args.data_name}'
 
-for rank in range(args.world_size):
-    filename = f'{base_dir}/{args.data_name}_{args.run_id}_generated_part{rank}.pkl'
-    if not os.path.exists(filename):
-        print(f"Error: Missing file {filename}")
-        continue
-        
-    print(f"Loading {filename}...")
-    data = torch.load(filename)
-    all_sequences.extend(data['sequences'])
-    
-    # 假设 t_max 是一样的，取第一个即可
-    if t_max is None:
-        t_max = data['t_max']
-
-# 保存合并后的文件
-final_filename = f'{base_dir}/{args.data_name}_{args.run_id}_generated.pkl'
-final_data = {'sequences': all_sequences, 't_max': t_max}
-torch.save(final_data, final_filename)
-
-print(f"Successfully merged {len(all_sequences)} sequences into {final_filename}")
-
-# 删除分片文件
-for rank in range(args.world_size):
-    os.remove(f'{base_dir}/{args.data_name}_{args.run_id}_generated_part{rank}.pkl')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run_id", required=True)
+    parser.add_argument("--data_name", required=True)
+    parser.add_argument("--world_size", type=int, default=4)
+    parser.add_argument("--output_tag")
+    parser.add_argument("--expected_count", type=int)
+    args = parser.parse_args()
+    merge_parts(args.data_name, args.run_id, args.world_size, args.output_tag, expected_count=args.expected_count)

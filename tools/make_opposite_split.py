@@ -270,6 +270,7 @@ def make_strict_opposite_split(
     data_dir: str = "./data",
     max_iters: int = 5,
     seed: int = 135398,
+    out_name: str | None = None,
 ):
     random.seed(seed)
     np.random.seed(seed)
@@ -285,13 +286,19 @@ def make_strict_opposite_split(
     train_dict = load_pickle(train_path)
     test_dict = load_pickle(test_path)
 
-    # preserve metadata where possible
+    # Preserve *all* dataset-level metadata (everything except the per-sequence
+    # payload).  The current datamodule validator requires the PO-encoding
+    # metadata (svd_components, category_mapping, num_categories,
+    # po_encoding_dim, svd_mean/scale, ...) whenever sequences carry
+    # po_matrix/po_encoding, so dropping it makes the OOD split unloadable for
+    # training and sampling.  Splitting only reassigns whole sequences, so the
+    # per-sequence po_encoding and the shared svd_components stay consistent.
     merged_meta = {}
-    for k in ("t_max", "num_marks", "num_pois", "poi_gps", "poi_category"):
-        if k in train_dict:
-            merged_meta[k] = train_dict[k]
-        elif k in test_dict:
-            merged_meta[k] = test_dict[k]
+    for source in (test_dict, train_dict):  # train_dict wins on key conflicts
+        for k, v in source.items():
+            if k == "sequences":
+                continue
+            merged_meta[k] = v
 
     poi_category = merged_meta.get("poi_category", {}) or {}
 
@@ -403,8 +410,11 @@ def make_strict_opposite_split(
 
     print(f"Refinement finished. final objective={obj:.6g}, total swapped sequences ~ {total_swaps}")
 
-    # Build new train/test lists and save under data/new_<dataset>/new_<dataset>_train.pkl
-    out_dir = os.path.join(data_dir, f"new_{dataset}")
+    # Build new train/test lists and save under data/<out_name>/<out_name>_train.pkl.
+    # The datamodule loads data/<name>/<name>_{train,test}.pkl, so the folder
+    # name and file prefix must both equal out_name.
+    out_name = out_name or f"new_{dataset}"
+    out_dir = os.path.join(data_dir, out_name)
     os.makedirs(out_dir, exist_ok=True)
 
     new_train_seqs = [full_seqs[i] for i in sorted(list(train_idx))]
@@ -413,10 +423,12 @@ def make_strict_opposite_split(
     train_out = copy.deepcopy(merged_meta)
     test_out = copy.deepcopy(merged_meta)
     train_out["sequences"] = new_train_seqs
+    train_out["num_seqs"] = len(new_train_seqs)
     test_out["sequences"] = new_test_seqs
+    test_out["num_seqs"] = len(new_test_seqs)
 
-    train_out_path = os.path.join(out_dir, f"new_{dataset}_train.pkl")
-    test_out_path = os.path.join(out_dir, f"new_{dataset}_test.pkl")
+    train_out_path = os.path.join(out_dir, f"{out_name}_train.pkl")
+    test_out_path = os.path.join(out_dir, f"{out_name}_test.pkl")
 
     print(f"Saving new train to: {train_out_path}")
     save_pickle(train_out, train_out_path)
@@ -447,8 +459,9 @@ def cli():
     parser.add_argument("--data-dir", type=str, default="./data", help="Root data directory")
     parser.add_argument("--max-iters", type=int, default=5, help="Max greedy refinement passes")
     parser.add_argument("--seed", type=int, default=135398, help="Random seed")
+    parser.add_argument("--out-name", type=str, default=None, help="Output dataset name/folder (default: new_<dataset>)")
     args = parser.parse_args()
-    make_strict_opposite_split(dataset=args.dataset, data_dir=args.data_dir, max_iters=args.max_iters, seed=args.seed)
+    make_strict_opposite_split(dataset=args.dataset, data_dir=args.data_dir, max_iters=args.max_iters, seed=args.seed, out_name=args.out_name)
 
 
 if __name__ == "__main__":

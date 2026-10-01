@@ -1,10 +1,21 @@
 import torch
 import argparse
 import math
+import time
+from pathlib import Path
 from evaluate_utils import get_task, get_run_data
+from experiment_io import (publish_torch, safe_tag, seed_sampling, sha256_file,
+                           strict_test_matrix, validate_part, validate_sequences)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--run_id", type=str, default="marionette")
+parser.add_argument("--output_tag", default=None)
+parser.add_argument("--checkpoint", default=None)
+parser.add_argument("--seed", type=int, default=None)
+parser.add_argument("--batch_size", type=int, default=None)
+parser.add_argument("--max_samples", type=int, default=None)
+parser.add_argument("--constraint_source", choices=["stored", "strict_test"], default="stored")
+parser.add_argument("--resume", action="store_true")
 
 parser.add_argument("--use_constraint_projection", action="store_true")
 
@@ -46,14 +57,52 @@ parser.add_argument("--guidance_frequency", type=int, default=4,
     help="Apply guidance every N steps")
 parser.add_argument("--guidance_temperature", type=float, default=1.0,
                     help="Softmax temperature for guidance violation (higher = softer = better gradients)")
-args = parser.parse_args()
+args = None
 
 
 def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     data_name, seed, run_path = get_run_data(RUN_ID, WANDB_DIR)
-    task, datamodule = get_task(run_path, data_root=PROJECT_ROOT)
+    if args.world_size < 1 or not 0 <= args.rank < args.world_size:
+        raise ValueError("Invalid rank/world_size")
+    if args.max_samples is not None and args.max_samples < 1:
+        raise ValueError("max_samples must be positive")
+    if args.batch_size is not None and args.batch_size < 1:
+        raise ValueError("batch_size must be positive")
+    task, datamodule = get_task(run_path, data_root=PROJECT_ROOT, checkpoint=args.checkpoint)
+    if args.batch_size is not None:
+        datamodule.batch_size = args.batch_size
+    checkpoint = Path(args.checkpoint or Path(run_path) / "checkpoints/last.ckpt")
+    test_path = Path(datamodule.root) / data_name / f"{data_name}_test.pkl"
+    test_data = torch.load(test_path, map_location="cpu", weights_only=False)
+    output_tag = safe_tag(args.output_tag or RUN_ID)
+    seed_base = int(seed if args.seed is None else args.seed)
+    total_len = min(len(datamodule.test_data.sequences), args.max_samples or len(datamodule.test_data.sequences))
+    chunk_size = int(math.ceil(total_len / args.world_size))
+    start_idx = min(args.rank * chunk_size, total_len)
+    end_idx = min((args.rank + 1) * chunk_size, total_len)
+    indices = list(range(start_idx, end_idx))
+    sampling_config = {key: value for key, value in vars(args).items()
+                       if key not in {"rank", "resume", "checkpoint", "output_tag", "run_id"}}
+    sampling_config.update(batch_size=datamodule.batch_size, seed=seed_base)
+    metadata = dict(schema_version=1, data_name=data_name, run_id=RUN_ID,
+                    output_tag=output_tag, total_samples=total_len, world_size=args.world_size,
+                    checkpoint_sha256=sha256_file(checkpoint),
+                    dataset_sha256=sha256_file(test_path), sampling_config=sampling_config)
+    save_name = test_path.parent / f"{data_name}_{output_tag}_generated_part{args.rank}.pkl"
+    if save_name.exists():
+        if not args.resume:
+            raise FileExistsError(f"Refusing to overwrite {save_name}")
+        previous = torch.load(save_name, map_location="cpu", weights_only=False)
+        validate_part(previous, metadata, args.rank, indices)
+        print(f"Verified existing shard: {save_name}")
+        return
+    if args.constraint_source == "strict_test":
+        for index in indices:
+            datamodule.test_data.sequences[index].po_matrix = strict_test_matrix(
+                test_data["sequences"][index], test_data["poi_category"], test_data["category_mapping"])
 
     dd = task.discrete_diffusion
+    dd.projection_call_count = 0
 
     # ========== Baseline1: 强制关闭投影 ==========
     # 规则A：baseline=None 且未显式 --use_constraint_projection 时，视为 baseline1
@@ -68,7 +117,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     if args.use_constraint_projection:
         from constraint_projection import ConstraintProjection
 
-        #dd.use_constraint_projection = True
+        dd.use_constraint_projection = True
         dd.projection_frequency = args.projection_frequency
         dd.debug_constraint_projection = args.debug_constraint_projection
         dd._debug_projection_printed = False
@@ -187,40 +236,49 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
     # ======================================================
     all_sequences = datamodule.test_data.sequences
-    total_len = len(all_sequences)
-
-    chunk_size = int(math.ceil(total_len / args.world_size))
-    start_idx = args.rank * chunk_size
-    end_idx = min((args.rank + 1) * chunk_size, total_len)
-
     my_sequences = all_sequences[start_idx:end_idx]
     datamodule.test_data.sequences = my_sequences
 
     print(f"[GPU {args.rank}] Processing {len(my_sequences)} sequences (Range: {start_idx} -> {end_idx})")
 
     if len(my_sequences) == 0:
-        print(f"[GPU {args.rank}] No data to process, exiting.")
+        publish_torch(save_name, dict(sequences=[], t_max=24.0, test_indices=[],
+                                     metadata=metadata, rank=args.rank, projection_calls=0, elapsed_seconds=0))
+        print(f"[GPU {args.rank}] Published verified empty shard.")
         return
 
-    test_data = torch.load(PROJECT_ROOT + 'data/' + data_name + f'/{data_name}_test.pkl', weights_only=False)
     gps_dict = test_data['poi_gps']
 
     collected_po_matrices = []
 
     generated_seqs = []
+    started = time.monotonic()
     for batch in datamodule.test_dataloader():
-        time_samples = task.tpp_model.sample(
-            batch.batch_size,
-            tmax=batch.tmax.to(task.device),
-            x_n=batch.to(task.device)
-        ).mask_check()
+        # Paired methods start each global batch from the same RNG state.
+        seed_sampling(seed_base + start_idx + len(generated_seqs))
+        with torch.no_grad():
+            time_samples = task.tpp_model.sample(
+                batch.batch_size,
+                tmax=batch.tmax.to(task.device),
+                x_n=batch.to(task.device)
+            )
+        generated_length = int(time_samples.unpadded_length.max().item())
+        max_supported = min(dd.condition_encoder.max_position_embeddings,
+                            (dd.transformer.positional_encoding.num_embeddings - 3) // 2)
+        if generated_length > max_supported:
+            raise RuntimeError(
+                f"Temporal sampler generated {generated_length} events, but the unchanged "
+                f"spatial model supports at most {max_supported}. Stopping without truncating "
+                "trajectories or changing batch size; inspect temporal model convergence.")
+        time_samples = time_samples.mask_check()
 
         if hasattr(batch, "po_matrix"):
             if batch.po_matrix is not None:
                 print("po_matrix shape:", batch.po_matrix.shape, "sum0:", batch.po_matrix[0].sum().item())
             else:
                 print("po_matrix missing")
-            time_samples.po_matrix = batch.po_matrix.to(task.device)
+            if batch.po_matrix is not None:
+                time_samples.po_matrix = batch.po_matrix.to(task.device)
 
         assert len(time_samples) == batch.batch_size, "not enough samples"
 
@@ -266,9 +324,20 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         print(f"[Baseline2] Done. Summary: {swap_summary}")
 
     # ================= 保存 =================
-    save_name = f'./data/{data_name}/{data_name}_{RUN_ID}_generated_part{args.rank}.pkl'
-    data_new = {'sequences': generated_seqs, 't_max': batch.tmax.detach().cpu().numpy()}
-    torch.save(data_new, save_name)
+    validate_sequences(generated_seqs, test_data["poi_category"])
+    if len(generated_seqs) != len(indices):
+        raise ValueError("Generated sample count mismatch")
+    if args.use_constraint_projection and any(s.po_matrix is not None and s.po_matrix.any() for s in my_sequences):
+        if dd.projection_call_count == 0:
+            raise RuntimeError("Projection requested but never executed")
+    if not args.use_constraint_projection and args.baseline is None and dd.projection_call_count:
+        raise RuntimeError("Native sampling unexpectedly executed projection")
+    data_new = dict(sequences=generated_seqs, t_max=24.0, test_indices=indices,
+                    metadata=metadata, rank=args.rank, projection_calls=dd.projection_call_count,
+                    elapsed_seconds=time.monotonic() - started)
+    publish_torch(save_name, data_new)
     print(f"[GPU {args.rank}] Saved part file to {save_name}")
 
-simulation(RUN_ID=args.run_id)
+if __name__ == "__main__":
+    args = parser.parse_args()
+    simulation(RUN_ID=args.run_id)

@@ -8,5 +8,9 @@ __pycache__/
 *.pyd
 .Python
 # 忽略数据集
-data/
-dataset/
+/data/
+/dataset/
+/experiment_runs/
+.env
+.env.*
+.netrc

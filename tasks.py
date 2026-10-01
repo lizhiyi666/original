@@ -209,6 +209,9 @@ class DensityEstimation(Tasks):
     def training_step(self, batch, batch_idx):
         loss_temporal, loss_spatial, loss_all = self.step(batch, "train")
 
+        if not all(torch.isfinite(loss).all() for loss in (loss_temporal, loss_spatial, loss_all)):
+            raise FloatingPointError("Non-finite training loss; refusing optimizer update")
+
         opt1, opt2 = self.optimizers()
 
         opt1.zero_grad()

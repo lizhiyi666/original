@@ -214,6 +214,8 @@ class ConstraintProjection:
                     ).sum()
 
                     loss = 1.0 * kl_loss + constraint_loss
+                    if not torch.isfinite(loss):
+                        raise FloatingPointError("Non-finite projection objective")
                     loss.backward()
                     torch.nn.utils.clip_grad_norm_([y], max_norm=10.0)
                     optimizer.step()

@@ -44,8 +44,9 @@ def get_callbacks(config):
             filename="{epoch}",
             **monitor,
         ),
-        TQDMProgressBar(refresh_rate=1),
     ]
+    if config.trainer.get("enable_progress_bar", True):
+        callbacks.append(TQDMProgressBar(refresh_rate=1))
 
     if config.early_stopping is not None:
         stopper = EarlyStopping(
