@@ -1,4 +1,6 @@
 import copy
+import json
+import os
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -9,6 +11,57 @@ from experiment_io import strict_test_matrix, publish_torch, sha256_file, valida
 from merge_results import merge_parts
 from constraint_projection import ConstraintProjection
 from discrete_diffusion.diffusion_transformer import DiffusionTransformer, ConditionEmbeddingModel
+from add_thin.distributions.intensities import _normalize_sample_counts
+
+
+class SingletonSamplingTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "posix", "Continuation uses Linux file locks")
+    def test_continuation_only_accepts_known_post_training_failure(self):
+        from tools.continue_newyork_sampling import SamplingContinuation
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "manifest.json").write_text("{}")
+            (folder / "pipeline.lock").touch()
+            continuation = SamplingContinuation.__new__(SamplingContinuation)
+            continuation.source_directory = folder
+            continuation.source_manifest_hash = sha256_file(folder / "manifest.json")
+            continuation.args = SimpleNamespace(wait=False)
+            continuation.status = lambda *args, **kwargs: None
+            for state in ({"state": "running", "phase": "train"},
+                          {"state": "failed", "phase": "train"},
+                          {"state": "complete", "phase": "complete"}):
+                (folder / "status.json").write_text(json.dumps(state))
+                with self.assertRaises(RuntimeError):
+                    continuation.wait_for_source()
+            (folder / "status.json").write_text(json.dumps({"state": "failed", "phase": "projection-benchmark"}))
+            log = folder / "benchmark.log"
+            (folder / "command-projection-benchmark.json").write_text(json.dumps({"log": str(log)}))
+            log.write_text("RuntimeError: unrelated failure")
+            with self.assertRaises(RuntimeError):
+                continuation.wait_for_source()
+            log.write_text("distributions/intensities.py\nsequence_len[:, None]\nIndexError: too many indices for tensor of dimension 0")
+            continuation.wait_for_source()
+
+    def test_only_approved_inference_file_may_change(self):
+        from tools.continue_newyork_sampling import verify_compatible_sources, PATCHED_FILE
+        original = {PATCHED_FILE: "old", "train.py": "same"}
+        verify_compatible_sources(original, {PATCHED_FILE: "new", "train.py": "same"})
+        with self.assertRaises(RuntimeError):
+            verify_compatible_sources(original, {PATCHED_FILE: "new", "train.py": "changed"})
+        with self.assertRaises(RuntimeError):
+            verify_compatible_sources(original, original)
+
+    def test_single_sequence_retains_batch_axis(self):
+        for value in (0, 1, 12):
+            counts = _normalize_sample_counts(torch.tensor([[float(value)]]))
+            self.assertEqual(tuple(counts.shape), (1,))
+            self.assertEqual(counts[:, None].item(), value)
+            self.assertEqual(counts.dtype, torch.long)
+
+    def test_existing_non_scalar_results_unchanged(self):
+        for shape in ((1, 2), (1, 64), (2, 3)):
+            counts = torch.arange(torch.tensor(shape).prod()).reshape(shape).float()
+            self.assertTrue(torch.equal(_normalize_sample_counts(counts), counts.squeeze().long()))
 
 
 class TrainingProfileTests(unittest.TestCase):

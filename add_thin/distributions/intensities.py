@@ -14,6 +14,11 @@ from add_thin.distributions.densities import DISTRIBUTIONS
 patch_typeguard()
 
 
+def _normalize_sample_counts(counts):
+    """Keep a batch axis for one sequence; preserve existing non-scalar shapes."""
+    return torch.atleast_1d(counts.squeeze()).long()
+
+
 @typechecked
 class MixtureIntensity(nn.Module):
     """
@@ -226,9 +231,7 @@ class MixtureIntensity(nn.Module):
                 torch.ones(n_samples, 1, device=event_emb.device)
             ).squeeze()
         )
-        sequence_len = (
-            count_distribution.sample((n_samples,)).squeeze()
-        ).long()
+        sequence_len = _normalize_sample_counts(count_distribution.sample((n_samples,)))
 
         # TODO implement smarter truncated normal, without rejection sampling.
         max_seq_len = sequence_len.max()

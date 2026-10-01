@@ -52,3 +52,37 @@ are grouped with the training ID. Non-finite metrics are rejected, not reported 
 
 At least 5 GiB free disk is required at each phase boundary. No automatic changes to batch size,
 precision, epochs or projection parameters are allowed on errors.
+
+## Approved singleton fix while training is running
+
+`MixtureIntensity.sample` previously squeezed a one-sequence count tensor into a scalar.
+The fix keeps at least one dimension; non-scalar count values and shapes are unchanged.
+Do not replace files in the active training directory or rewrite its immutable manifest.
+
+For the running `nyood1000s13539820261001` experiment, the fixed inference snapshot is
+`/root/experiments/pcdg/sampling-singleton-fix`. It has independent copies of the two input
+PKLs, and a `wandb` symlink for reading the existing training/preflight checkpoints.
+
+```bash
+# Run the regression test on the idle GPU, using the completed 20-epoch preflight:
+CUDA_VISIBLE_DEVICES=1 python tools/validate_singleton_fix.py \
+  --source-experiment /root/experiments/pcdg/original/experiment_runs/nyood1000s13539820261001 \
+  --preflight-run-id nyoodpf1000b20261001d
+
+# From the fixed snapshot, inside a separate tmux session:
+python tools/continue_newyork_sampling.py --wait \
+  --source-experiment /root/experiments/pcdg/original/experiment_runs/nyood1000s13539820261001 \
+  --validation-receipt validation/singleton-validation.json
+```
+
+The continuation waits without interrupting training. It accepts only the original
+controller's specifically verified singleton `IndexError` in the benchmark phase, after
+the training lock is released and W&B/checkpoint verification confirms all 1000 epochs.
+Any other failure stops the continuation. It does not silently recover training failures.
+The old controller's expected benchmark failure is separate from successful model training.
+
+The new sampling manifest records both code fingerprints, the untouched source manifest's
+hash, the validation receipt, and the source experiment. Only the approved intensity file
+may differ; architecture, parameters, package versions, data and checkpoints must match.
+Sampling results and `status.json` are under the fixed snapshot, not the training directory.
+Use `--resume` explicitly to retry that continuation with matching inputs and code.
