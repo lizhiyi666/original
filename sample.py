@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from evaluate_utils import get_task, get_run_data
 from experiment_io import (publish_torch, safe_tag, seed_sampling, sha256_file,
-                           strict_test_matrix, validate_part, validate_sequences)
+                           strict_test_matrix, validate_part, validate_sequences, decode_preserving_empty)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--run_id", type=str, default="marionette")
@@ -14,6 +14,8 @@ parser.add_argument("--checkpoint", default=None)
 parser.add_argument("--seed", type=int, default=None)
 parser.add_argument("--batch_size", type=int, default=None)
 parser.add_argument("--max_samples", type=int, default=None)
+parser.add_argument("--start_index", type=int, default=0, help="Diagnostic slice; retains global test indices/seeds")
+parser.add_argument("--sampling_revision", default="emptyfix-v1")
 parser.add_argument("--constraint_source", choices=["stored", "strict_test"], default="stored")
 parser.add_argument("--resume", action="store_true")
 
@@ -69,6 +71,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     if args.batch_size is not None and args.batch_size < 1:
         raise ValueError("batch_size must be positive")
     task, datamodule = get_task(run_path, data_root=PROJECT_ROOT, checkpoint=args.checkpoint)
+    if not 0 <= args.start_index < len(datamodule.test_data.sequences):
+        raise ValueError("start_index must identify an existing test sequence")
     if args.batch_size is not None:
         datamodule.batch_size = args.batch_size
     checkpoint = Path(args.checkpoint or Path(run_path) / "checkpoints/last.ckpt")
@@ -76,16 +80,18 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     test_data = torch.load(test_path, map_location="cpu", weights_only=False)
     output_tag = safe_tag(args.output_tag or RUN_ID)
     seed_base = int(seed if args.seed is None else args.seed)
-    total_len = min(len(datamodule.test_data.sequences), args.max_samples or len(datamodule.test_data.sequences))
+    remaining = len(datamodule.test_data.sequences) - args.start_index
+    total_len = min(remaining, args.max_samples or remaining)
     chunk_size = int(math.ceil(total_len / args.world_size))
-    start_idx = min(args.rank * chunk_size, total_len)
-    end_idx = min((args.rank + 1) * chunk_size, total_len)
+    start_idx = args.start_index + min(args.rank * chunk_size, total_len)
+    end_idx = args.start_index + min((args.rank + 1) * chunk_size, total_len)
     indices = list(range(start_idx, end_idx))
     sampling_config = {key: value for key, value in vars(args).items()
                        if key not in {"rank", "resume", "checkpoint", "output_tag", "run_id"}}
     sampling_config.update(batch_size=datamodule.batch_size, seed=seed_base)
     metadata = dict(schema_version=1, data_name=data_name, run_id=RUN_ID,
                     output_tag=output_tag, total_samples=total_len, world_size=args.world_size,
+                    start_index=args.start_index, empty_policy="keep", sampling_revision=args.sampling_revision,
                     checkpoint_sha256=sha256_file(checkpoint),
                     dataset_sha256=sha256_file(test_path), sampling_config=sampling_config)
     save_name = test_path.parent / f"{data_name}_{output_tag}_generated_part{args.rank}.pkl"
@@ -243,7 +249,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
     if len(my_sequences) == 0:
         publish_torch(save_name, dict(sequences=[], t_max=24.0, test_indices=[],
-                                     metadata=metadata, rank=args.rank, projection_calls=0, elapsed_seconds=0))
+                                     metadata=metadata, rank=args.rank, projection_calls=0, elapsed_seconds=0,
+                                     empty_test_indices=[], temporal_empty_test_indices=[], eligible_projection_samples=0))
         print(f"[GPU {args.rank}] Published verified empty shard.")
         return
 
@@ -252,6 +259,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     collected_po_matrices = []
 
     generated_seqs = []
+    temporal_empty_indices = []
+    eligible_projection_samples = 0
     started = time.monotonic()
     for batch in datamodule.test_dataloader():
         # Paired methods start each global batch from the same RNG state.
@@ -280,13 +289,20 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             if batch.po_matrix is not None:
                 time_samples.po_matrix = batch.po_matrix.to(task.device)
 
+        batch_global_start = start_idx + len(generated_seqs)
+        temporal_empty_indices.extend(batch_global_start + i for i in
+                                      torch.where(time_samples.unpadded_length == 0)[0].tolist())
+        if batch.po_matrix is not None:
+            eligible_projection_samples += int(((time_samples.unpadded_length > 0) &
+                                                 batch.po_matrix.bool().flatten(1).any(1)).sum().item())
+
         assert len(time_samples) == batch.batch_size, "not enough samples"
 
-        samples = task.discrete_diffusion.sample_fast(
-            time_samples.to(task.device),
+        samples = decode_preserving_empty(
+            task, time_samples, gps_dict,
             baseline_method=args.baseline,      # [新增]
             guidance_scale=args.guidance_scale  # [新增]
-        ).to_seq_list(gps_dict)
+        )
         assert len(samples) == batch.batch_size, "not enough samples"
         generated_seqs += samples
 
@@ -327,13 +343,16 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     validate_sequences(generated_seqs, test_data["poi_category"])
     if len(generated_seqs) != len(indices):
         raise ValueError("Generated sample count mismatch")
-    if args.use_constraint_projection and any(s.po_matrix is not None and s.po_matrix.any() for s in my_sequences):
+    if args.use_constraint_projection and eligible_projection_samples > 0:
         if dd.projection_call_count == 0:
             raise RuntimeError("Projection requested but never executed")
     if not args.use_constraint_projection and args.baseline is None and dd.projection_call_count:
         raise RuntimeError("Native sampling unexpectedly executed projection")
     data_new = dict(sequences=generated_seqs, t_max=24.0, test_indices=indices,
                     metadata=metadata, rank=args.rank, projection_calls=dd.projection_call_count,
+                    empty_test_indices=[i for i, seq in zip(indices, generated_seqs) if len(seq['checkins']) == 0],
+                    temporal_empty_test_indices=temporal_empty_indices,
+                    eligible_projection_samples=eligible_projection_samples,
                     elapsed_seconds=time.monotonic() - started)
     publish_torch(save_name, data_new)
     print(f"[GPU {args.rank}] Saved part file to {save_name}")

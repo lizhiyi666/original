@@ -28,15 +28,19 @@ def merge_parts(data_name, run_id, world_size=4, output_tag=None, data_dir="data
         raise ValueError("Test dataset changed since sampling")
     sequences, indices = [], []
     chunk = math.ceil(total / world_size)
+    start_index = metadata.get("start_index", 0)
     for rank, part in enumerate(parts):
-        expected_indices = list(range(min(rank * chunk, total), min((rank + 1) * chunk, total)))
+        expected_indices = list(range(start_index + min(rank * chunk, total), start_index + min((rank + 1) * chunk, total)))
         validate_part(part, metadata, rank, expected_indices)
         sequences.extend(part["sequences"])
         indices.extend(part["test_indices"])
-    if indices != list(range(total)) or len(sequences) != total:
+    if indices != list(range(start_index, start_index + total)) or len(sequences) != total:
         raise ValueError("Missing, duplicate, or out-of-order test indices")
     destination = base / f"{data_name}_{tag}_generated.pkl"
     merged = dict(sequences=sequences, t_max=24.0, test_indices=indices, metadata=metadata,
+                  empty_test_indices=[i for i, seq in zip(indices, sequences) if len(seq['checkins']) == 0],
+                  temporal_empty_test_indices=[i for part in parts for i in part.get('temporal_empty_test_indices', [])],
+                  eligible_projection_samples=sum(part.get('eligible_projection_samples', len(part['sequences'])) for part in parts),
                   projection_calls=sum(p.get("projection_calls", 0) for p in parts),
                   elapsed_seconds=max(p.get("elapsed_seconds", 0) for p in parts),
                   shard_sha256=[sha256_file(path) for path in paths])

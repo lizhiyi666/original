@@ -52,6 +52,29 @@ def seed_sampling(seed):
         torch.cuda.manual_seed_all(seed)
 
 
+def empty_generated_record(batch, index):
+    """Serialize an empty trajectory without inventing events or losing conditions."""
+    record = dict(arrival_times=np.empty(0, dtype=np.float32),
+                  marks=np.empty(0, dtype=np.int64), checkins=np.empty(0, dtype=np.int64),
+                  gps=[], generation_status="empty_temporal")
+    for condition in range(1, 7):
+        record[f"condition{condition}"] = np.empty(0, dtype=np.int64)
+        record[f"condition{condition}_indicator"] = getattr(
+            batch, f"condition{condition}_indicator")[index].detach().cpu().numpy().copy()
+    return record
+
+
+def decode_preserving_empty(task, time_samples, gps_dict, **sample_kwargs):
+    """Retain the original mixed batch shape/RNG layout, bypass only all-empty batches."""
+    empty = time_samples.unpadded_length == 0
+    if bool(empty.all()):
+        return [empty_generated_record(time_samples, i) for i in range(time_samples.batch_size)]
+    samples = task.discrete_diffusion.sample_fast(time_samples.to(task.device), **sample_kwargs).to_seq_list(gps_dict)
+    for index in torch.where(empty)[0].tolist():
+        samples[index] = empty_generated_record(time_samples, index)
+    return samples
+
+
 def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -102,3 +125,10 @@ def validate_part(part, metadata, rank, indices):
     if float(np.asarray(part["t_max"]).item()) != 24.0:
         raise ValueError("Shard t_max mismatch")
     validate_sequences(part["sequences"])
+    if "empty_test_indices" in part:
+        actual = [i for i, seq in zip(indices, part["sequences"]) if len(seq["checkins"]) == 0]
+        if part["empty_test_indices"] != actual:
+            raise ValueError("Empty trajectory indices do not match the output")
+        temporal = part.get("temporal_empty_test_indices", [])
+        if temporal != sorted(set(temporal)) or not set(temporal).issubset(actual):
+            raise ValueError("Invalid temporal-empty trajectory indices")

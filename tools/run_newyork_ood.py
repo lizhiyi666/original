@@ -76,13 +76,19 @@ class Experiment:
     def __init__(self, args):
         self.args = args
         self.run_id = safe_tag(args.run_id)
+        self.sampling_revision = getattr(args, "sampling_revision", None)
+        self.result_id = (f"{self.run_id}_{safe_tag(self.sampling_revision)}"
+                          if self.sampling_revision else self.run_id)
         self.preflight = args.stage == "preflight"
-        self.directory = ROOT / "experiment_runs" / self.run_id
+        self.directory = ROOT / "experiment_runs" / self.result_id
         self.directory.mkdir(parents=True, exist_ok=True)
         self.phase = "precheck"
         self.entity = None
         self.command_number = 0
         self.manifest = None
+
+    def output_tag(self, method):
+        return f"{self.result_id}_{method}"
 
     def status(self, state, **extra):
         atomic_json(self.directory / "status.json", dict(
@@ -209,6 +215,8 @@ class Experiment:
                "--output_tag", tag, "--rank", str(rank), "--world_size", "1" if benchmark else "2",
                "--seed", str(SEED), "--batch_size", "1" if benchmark else str(self.manifest["sample_batch_size"]),
                "--constraint_source", "strict_test"]
+        if self.sampling_revision:
+            cmd += ["--sampling_revision", self.sampling_revision]
         if benchmark:
             cmd += ["--max_samples", "1"]
         elif self.preflight:
@@ -230,7 +238,7 @@ class Experiment:
         self.phase = f"sample-{method}"
         disk_guard()
         self.status("running")
-        tag = f"{self.run_id}_{method}"
+        tag = self.output_tag(method)
         started = time.monotonic()
         with ExitStack() as stack:
             processes = []
@@ -263,10 +271,13 @@ class Experiment:
             raise RuntimeError("Merged result has a different checkpoint")
         if method == "native" and data["projection_calls"] != 0:
             raise RuntimeError("Native result used projection")
-        if method == "projection" and data["projection_calls"] <= 0:
+        if method == "projection" and data.get("eligible_projection_samples", 1) > 0 and data["projection_calls"] <= 0:
             raise RuntimeError("Projection result never executed projection")
         return path, dict(wall_seconds=time.monotonic()-started,
                           worker_seconds=data["elapsed_seconds"], projection_calls=data["projection_calls"],
+                          empty_count=len(data.get("empty_test_indices", [])),
+                          empty_rate=len(data.get("empty_test_indices", [])) / len(data["sequences"]),
+                          temporal_empty_count=len(data.get("temporal_empty_test_indices", [])),
                           samples=len(data["sequences"]))
 
     def benchmark(self, checkpoint):
@@ -274,7 +285,7 @@ class Experiment:
         disk_guard()
         self.status("running")
         started = time.monotonic()
-        self.run(self.sample_command("projection", checkpoint, f"{self.run_id}_benchmark", 0, benchmark=True),
+        self.run(self.sample_command("projection", checkpoint, self.output_tag("benchmark"), 0, benchmark=True),
                  "projection-benchmark", dict(os.environ, CUDA_VISIBLE_DEVICES="0"))
         atomic_json(self.directory / "benchmark.json", dict(samples=1,
                     elapsed_seconds=time.monotonic()-started, projection=PROJECTION,
@@ -285,15 +296,15 @@ class Experiment:
         disk_guard()
         self.status("running")
         from evaluation import run_Statistical
-        stats, skip, strict, coverage, unsat = run_Statistical(DATASET, f"{self.run_id}_{method}")
+        stats, skip, strict, coverage, unsat = run_Statistical(DATASET, self.output_tag(method))
         metrics = {str(k): float(v) for k, v in stats.items()}
         metrics.update(OVR_ref_skip=float(skip), OVR_ref_strict=float(strict),
                        coverage=float(coverage), Unsat_ref=float(unsat), **timing)
         if not all(math.isfinite(value) for value in metrics.values()):
             raise FloatingPointError("Non-finite evaluation metric; result is not accepted")
         run = wandb.init(project="Marionette", entity=self.entity,
-                         id=f"{self.run_id}-{method}", resume="allow", group=self.run_id,
-                         name=f"{self.run_id}-{method}", job_type="sampling-evaluation", mode="online",
+                         id=f"{self.result_id}-{method}", resume="allow", group=self.run_id,
+                         name=f"{self.result_id}-{method}", job_type="sampling-evaluation", mode="online",
                          dir=str(self.directory), save_code=False,
                          config={**self.manifest, "method": method,
                                  "checkpoint_sha256": sha256_file(self.directory / "final.ckpt")})

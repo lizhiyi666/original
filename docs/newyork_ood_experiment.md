@@ -55,6 +55,9 @@ precision, epochs or projection parameters are allowed on errors.
 
 ## Approved singleton fix while training is running
 
+This section describes the historical `sampling-singleton-fix` snapshot. The newer
+empty-trajectory revision uses the commands in the next section instead.
+
 `MixtureIntensity.sample` previously squeezed a one-sequence count tensor into a scalar.
 The fix keeps at least one dimension; non-scalar count values and shapes are unchanged.
 Do not replace files in the active training directory or rewrite its immutable manifest.
@@ -86,3 +89,43 @@ hash, the validation receipt, and the source experiment. Only the approved inten
 may differ; architecture, parameters, package versions, data and checkpoints must match.
 Sampling results and `status.json` are under the fixed snapshot, not the training directory.
 Use `--resume` explicitly to retry that continuation with matching inputs and code.
+
+## Empty trajectory / padded-constraint repair (`emptyfix-v1`)
+
+Use `/root/experiments/pcdg/sampling-emptyfix-v1`. Keep both older deployment directories,
+manifests and results unchanged. The 1000-epoch checkpoint is reused without training.
+
+- All-masked attention has zero weights and zero projected output, including the bias.
+  Normal/partially masked rows retain their previous attention results.
+- Mixed sampling batches retain their original shape and global-index seeds. All-empty
+  batches bypass the spatial decoder. Empty records keep the condition fields and indices;
+  they are not removed, resampled or filled with artificial events.
+- Projection excludes padded constraints and rows without generated category positions
+  from penalties, multiplier updates, KL contributions and convergence checks. The KL
+  denominator remains the original batch size. Inactive logits are unchanged.
+- PKLs record `empty_test_indices`, `temporal_empty_test_indices`, `empty_policy=keep`,
+  and the sampling revision. Strict violations count missing required categories as
+  unsatisfied; undefined skip metrics are never silently replaced with zero.
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python -B tools/validate_emptyfix.py \
+  --source-experiment /root/experiments/pcdg/original/experiment_runs/nyood1000s13539820261001
+
+python -u tools/continue_newyork_sampling.py --sampling-revision emptyfix-v1 \
+  --source-experiment /root/experiments/pcdg/original/experiment_runs/nyood1000s13539820261001 \
+  --validation-receipt validation/emptyfix-validation.json
+```
+
+The gate runs unit tests and replays global indices 64..127 at batch 64 with effective
+seed 135462, first natively and then at the unchanged full projection budget. Index 99
+must remain an empty record. Any error prevents full sampling.
+
+The controller separates checkpoint ID from result ID. New outputs use
+`<training-ID>_emptyfix-v1_native` and `<training-ID>_emptyfix-v1_projection`, and new W&B
+IDs are grouped under the original training run. It reruns BOTH methods under the same
+revision. Results, progress and comparison JSON are in the new deployment's
+`experiment_runs/<training-ID>_emptyfix-v1/`. All 2108 indices must be present.
+
+`sample.py --start_index N --max_samples M` is a diagnostic slice only: indices and seeds
+remain global. Formal sampling starts at zero and uses the full test set. Use `--resume`
+explicitly only for identical code, data, checkpoints and sampling settings.

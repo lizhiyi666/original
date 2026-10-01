@@ -75,15 +75,25 @@ class MultiHeadAttention(nn.Module):
 
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(self.d_k)
         
+        has_keys = None
         if mask is not None:
-            mask = mask.unsqueeze(1).unsqueeze(2)  # (batch_size, 1, 1, seq_len)
-            scores = scores.masked_fill(mask == 0, float('-inf'))
+            mask = mask.bool().unsqueeze(1).unsqueeze(2)
+            has_keys = mask.any(dim=-1, keepdim=True)
+            scores = scores.masked_fill(~mask, float('-inf'))
+            # Never evaluate softmax on an all-minus-infinity row.
+            scores = torch.where(has_keys, scores, torch.zeros_like(scores))
 
         attn = torch.softmax(scores, dim=-1)
+        if mask is not None:
+            attn = attn.masked_fill(~mask, 0.0)
         context = torch.matmul(attn, value)
         
         context = context.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
-        return self.out_linear(context)
+        output = self.out_linear(context)
+        if has_keys is not None:
+            # Suppress output projection bias as well for absent attention context.
+            output = torch.where(has_keys.reshape(batch_size, 1, 1), output, torch.zeros_like(output))
+        return output
 
 
 class EncoderLayer(nn.Module):

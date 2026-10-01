@@ -416,6 +416,8 @@ class DiffusionTransformer(nn.Module):
             log_model_pred = self.predict_start(log_x, cond_emb, t, batch)
         else:
             raise ValueError
+        if not torch.isfinite(log_model_pred).all():
+            raise FloatingPointError(f"Non-finite denoiser/posterior probabilities at diffusion step {int(t[0])}")
         return log_model_pred, log_x_recon
 
     '''@torch.no_grad()
@@ -504,13 +506,15 @@ class DiffusionTransformer(nn.Module):
                     print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
 
             if W_A is not None:
-                self.projection_call_count = getattr(self, "projection_call_count", 0) + 1
                 model_log_prob_after = self.constraint_projector.project_with_matrices(
                     model_log_prob,
                     W_A, W_B,
                     batch.category_mask,
                     constraint_mask=c_mask,
                 )
+                stats = getattr(self.constraint_projector, "last_projection_stats", {"optimizer_steps": 1})
+                if stats["optimizer_steps"] > 0:
+                    self.projection_call_count = getattr(self, "projection_call_count", 0) + 1
             else:
                 model_log_prob_after = model_log_prob
 

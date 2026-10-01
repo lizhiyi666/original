@@ -22,13 +22,17 @@ import torch
 import wandb
 
 PATCHED_FILE = "add_thin/distributions/intensities.py"
+EMPTYFIX_FILES = {PATCHED_FILE, "constraint_projection.py", "sample.py", "experiment_io.py",
+                  "merge_results.py", "discrete_diffusion/conditional_attention.py",
+                  "discrete_diffusion/diffusion_transformer.py", "tools/run_newyork_ood.py"}
 
 
-def verify_compatible_sources(training_hashes, sampling_hashes):
+def verify_compatible_sources(training_hashes, sampling_hashes, revision=None):
     changed = {name for name in training_hashes.keys() | sampling_hashes.keys()
                if training_hashes.get(name) != sampling_hashes.get(name)}
-    if changed != {PATCHED_FILE}:
-        raise RuntimeError(f"Expected only the approved singleton inference fix; changed={sorted(changed)}")
+    expected = EMPTYFIX_FILES if revision == "emptyfix-v1" else {PATCHED_FILE}
+    if changed != expected:
+        raise RuntimeError(f"Changes do not match the approved inference revision {revision}: {sorted(changed)}")
 
 
 class SamplingContinuation(Experiment):
@@ -97,7 +101,7 @@ class SamplingContinuation(Experiment):
             raise RuntimeError("Two visible GPUs required for full sampling")
         self.run([sys.executable, "-m", "pip", "check"], "continuation-pip-check")
         current_hashes = code_fingerprint()
-        verify_compatible_sources(source["code_sha256"], current_hashes)
+        verify_compatible_sources(source["code_sha256"], current_hashes, self.sampling_revision)
         for name, expected in source["code_sha256"].items():
             if sha256_file(self.source_root / name) != expected:
                 raise RuntimeError(f"Original source changed: {name}")
@@ -110,10 +114,19 @@ class SamplingContinuation(Experiment):
             raise RuntimeError("Python package versions changed")
         receipt_path = Path(self.args.validation_receipt).resolve()
         receipt = json.loads(receipt_path.read_text())
-        if (receipt.get("state") != "passed" or receipt.get("singleton_native_samples") != 1
-                or receipt.get("singleton_projection_calls", 0) <= 0
-                or receipt.get("source_manifest_sha256") != self.source_manifest_hash
-                or receipt.get("patched_file_sha256") != current_hashes[PATCHED_FILE]):
+        if self.sampling_revision == "emptyfix-v1":
+            if (receipt.get("state") != "passed" or receipt.get("sampling_revision") != "emptyfix-v1"
+                    or receipt.get("source_manifest_sha256") != self.source_manifest_hash
+                    or receipt.get("sampling_code_sha256") != current_hashes
+                    or receipt.get("regression_test_indices") != list(range(64, 128))
+                    or receipt.get("empty_index_99_preserved") is not True
+                    or receipt.get("projection_calls", 0) <= 0
+                    or receipt.get("projection") != source["projection"]):
+                raise RuntimeError("emptyfix-v1 has not passed its full-budget failing-batch regression")
+        elif (receipt.get("state") != "passed" or receipt.get("singleton_native_samples") != 1
+              or receipt.get("singleton_projection_calls", 0) <= 0
+              or receipt.get("source_manifest_sha256") != self.source_manifest_hash
+              or receipt.get("patched_file_sha256") != current_hashes[PATCHED_FILE]):
             raise RuntimeError("Singleton fix has not passed isolated validation")
         self.entity = wandb.Api(timeout=30).default_entity
         if self.entity != source["entity"]:
@@ -128,7 +141,9 @@ class SamplingContinuation(Experiment):
             source_manifest_sha256=self.source_manifest_hash,
             continuation_script_sha256=sha256_file(__file__),
             validation_receipt_sha256=sha256_file(receipt_path),
-            continuation_reason="User-approved singleton count-axis fix; training untouched")
+            continuation_reason="User-approved inference-only fix; training untouched")
+        if self.sampling_revision:
+            self.manifest.update(sampling_revision=self.sampling_revision, result_id=self.result_id, empty_policy="keep")
         path = self.directory / "manifest.json"
         if path.exists():
             if not self.args.resume or json.loads(path.read_text()) != self.manifest:
@@ -139,6 +154,10 @@ class SamplingContinuation(Experiment):
             atomic_json(path, self.manifest)
         # Check epoch, optimizer/scheduler state, dataset, seed, and batch size before sampling.
         self.checkpoint(require_complete=True)
+        if self.sampling_revision == "emptyfix-v1":
+            checkpoint, _ = self.checkpoint(require_complete=True)
+            if receipt.get("checkpoint_sha256") != sha256_file(checkpoint):
+                raise RuntimeError("Regression tested a different checkpoint")
         self.status("running", source_experiment=str(self.source_directory))
 
 
@@ -148,6 +167,7 @@ def main():
     parser.add_argument("--validation-receipt", required=True)
     parser.add_argument("--wait", action="store_true")
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--sampling-revision", choices=["emptyfix-v1"])
     args = parser.parse_args()
     os.chdir(ROOT)
     experiment = SamplingContinuation(args)
