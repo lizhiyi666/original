@@ -29,8 +29,8 @@ python tools/run_newyork_ood.py --run-id nyood-formal-UNIQUE --preflight-id nyoo
 
 Use a unique ID for each fresh experiment. Run the last command inside tmux. The runner checks
 the preflight's code/data/environment fingerprints, then trains and runs both sampling/evaluation
-stages automatically. The user-approved preflight uses 2 epochs, 50 batches per epoch at batch
-size 64 (100 training batches total), and 4 test conditions; its projection
+stages automatically. The user-approved preflight uses 20 epochs, 50 batches per epoch at batch
+size 64 (1000 training batches total), and 4 test conditions; its projection
 budget is only 2x2 iterations for functional testing. It is never reused for formal training.
 A separate full-budget one-sample benchmark runs after formal training, without changing settings.
 

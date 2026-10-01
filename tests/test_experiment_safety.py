@@ -16,8 +16,8 @@ class TrainingProfileTests(unittest.TestCase):
         from tools.run_newyork_ood import training_profile
         profile = training_profile(True)
         self.assertEqual(profile["train_batch_size"], 64)
-        self.assertEqual(profile["epochs"] * profile["limit_train_batches"], 100)
-        self.assertEqual(profile["expected_train_batches"], 100)
+        self.assertEqual(profile["epochs"] * profile["limit_train_batches"], 1000)
+        self.assertEqual(profile["expected_train_batches"], 1000)
 
     def test_formal_profile_unchanged(self):
         from tools.run_newyork_ood import training_profile

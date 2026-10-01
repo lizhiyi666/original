@@ -50,10 +50,10 @@ PROJECTION = dict(projection_last_k_steps=40, projection_frequency=4,
 
 def training_profile(preflight):
     # 3160 sequences / batch 64 => 50 batches per epoch (last batch is partial).
-    # User-approved warm-up: 2 full epochs, exactly 100 batches, always a new run.
-    return dict(epochs=2 if preflight else 1000, train_batch_size=64,
+    # User-approved warm-up: 20 full epochs, exactly 1000 batches, always a new run.
+    return dict(epochs=20 if preflight else 1000, train_batch_size=64,
                 limit_train_batches=50 if preflight else None,
-                expected_train_batches=100 if preflight else 50000)
+                expected_train_batches=1000 if preflight else 50000)
 
 
 def disk_guard():
