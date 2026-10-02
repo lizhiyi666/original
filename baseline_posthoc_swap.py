@@ -217,9 +217,7 @@ def fix_single_sequence(
     topo_order = topological_sort_stable(constrained_cats, relevant_constraints)
     
     if topo_order is None:
-        # 有环，回退到按最早出现位置排序
-        cat_min_pos = {c: min(cat_positions[c]) for c in constrained_cats}
-        topo_order = sorted(constrained_cats, key=lambda c: cat_min_pos[c])
+        raise ValueError('Cyclic post-hoc constraints; refusing to claim a repair')
     
     # Step 5: 收集所有受约束位置并重分配
     # 所有受约束 category 占据的位置，排序
@@ -239,9 +237,8 @@ def fix_single_sequence(
     new_seq = {}
     
     # 需要按位置重排的数组字段
-    array_fields = ['marks', 'checkins', 'arrival_times',
-                    'condition1', 'condition2', 'condition3',
-                    'condition4', 'condition5', 'condition6']
+    # Times and context belong to destination slots, not to the moved POI.
+    array_fields = ['marks', 'checkins']
     
     for key in array_fields:
         if key not in seq or seq[key] is None:
@@ -254,9 +251,7 @@ def fix_single_sequence(
         arr = np.array(val) if not is_np else val.copy()
         
         if len(arr) != L:
-            # 长度不匹配，不修改
-            new_seq[key] = val
-            continue
+            raise ValueError(f'Misaligned post-hoc field: {key}')
         
         # 执行交换
         new_arr = arr.copy()
@@ -468,7 +463,7 @@ def posthoc_swap_on_saved_file(
         test_seqs=test_seqs,
         poi_category=poi_category,
         category_mapping=category_mapping,
-        po_matrices=po_matrices,
+        po_matrices=None,
         verbose=True,
     )
     

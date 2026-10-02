@@ -529,11 +529,65 @@ class DiffusionTransformer(nn.Module):
 
         model_log_prob = model_log_prob_after
 
+        # ========== 新增: Baseline 3 - Energy-Based Guidance ==========
         if getattr(self, 'use_guidance_baseline', False) and po_constraints is not None:
-            if self.use_constraint_projection:
-                raise RuntimeError('Energy guidance must not run ALM projection')
-            model_log_prob = self.energy_guidance.apply(
-                model_log_prob, batch.category_mask, po_constraints, diffusion_index)
+            guidance_scale = getattr(self, 'guidance_scale', 10.0)
+            guidance_last_k = getattr(self, 'guidance_last_k_steps', 40)
+            guidance_freq = getattr(self, 'guidance_frequency', 4)
+
+            should_guide = False
+            if diffusion_index is not None:
+                should_guide = (
+                    (diffusion_index % guidance_freq == 0)
+                    and (diffusion_index < guidance_last_k)
+                )
+
+            if should_guide and hasattr(batch, 'category_mask') and batch.category_mask is not None:
+                # 1. 编译约束矩阵（如果 projection 阶段没编译的话）
+                if not should_apply_projection:
+                    # 重新编译（projection 没执行时 W_A/W_B 不存在）
+                    is_per_sample = (
+                        isinstance(po_constraints, list)
+                        and len(po_constraints) > 0
+                        and isinstance(po_constraints[0], list)
+                    )
+                    W_A, W_B, c_mask = None, None, None
+                    if is_per_sample:
+                        W_A, W_B, c_mask = self.constraint_projector.compile_batched_constraints(
+                            po_constraints, device=model_log_prob.device
+                        )
+                    else:
+                        W_A, W_B = self.constraint_projector._compile_constraints(
+                            po_constraints, device=model_log_prob.device
+                        )
+
+                if W_A is not None:
+                    # 2. 准备需要梯度的 logits
+                    logits = model_log_prob.detach().clone().requires_grad_(True)
+
+                    # 3. 计算约束违规度（能量函数）
+                    with torch.enable_grad():
+                        violation, _ = self.constraint_projector.compute_constraint_violation_optimized(
+                            logits, W_A, W_B, batch.category_mask,
+                            constraint_mask=c_mask, gumbel_noise=None
+                        )
+                        energy = violation.sum()
+
+                    # 4. 计算梯度
+                    grad = torch.autograd.grad(energy, logits)[0]
+
+                    # 5. 应用 Guidance: logits = logits - scale * grad
+                    model_log_prob = model_log_prob - guidance_scale * grad
+
+                    # 6. clamp 防止数值异常
+                    model_log_prob = model_log_prob.clamp(-70, 0)
+
+                    # debug 输出（只打印一次）
+                    if not getattr(self, '_guidance_printed', False):
+                        self._guidance_printed = True
+                        print(f"[Baseline3-Guidance] Applied at step {diffusion_index}, "
+                              f"energy={energy.item():.4f}, grad_norm={grad.norm().item():.4f}, "
+                              f"scale={guidance_scale}")
 
         # ========== 最终采样 ==========
         out = self.log_sample_categorical(model_log_prob)
@@ -636,10 +690,6 @@ class DiffusionTransformer(nn.Module):
             batch,
             content_token = None,
             **kwargs):
-        if kwargs.get('baseline_method') == 'cfg' and not getattr(self, 'cfg_trained', False):
-            raise RuntimeError('CFG requires a trained partial-order CFG checkpoint')
-        if kwargs.get('baseline_method') == 'energy_guidance' and not getattr(self, 'use_guidance_baseline', False):
-            raise RuntimeError('Energy guidance was requested but not configured')
         B, L = batch.batch_size, batch.content_len
 
         device = self.log_at.device
@@ -677,7 +727,7 @@ class DiffusionTransformer(nn.Module):
             po_constraints = parse_po_matrix_to_constraints(po_matrix.to(device))'''
         # [新增] 从 batch 中提取偏序约束（支持每条样本独立 po_matrix）
         po_constraints = None
-        if (self.use_constraint_projection or getattr(self, 'use_guidance_baseline', False)) and hasattr(batch, "po_matrix") and batch.po_matrix is not None:
+        if self.use_constraint_projection and hasattr(batch, "po_matrix") and batch.po_matrix is not None:
             pm = batch.po_matrix
             # debug：只打印一次
             if getattr(self, "debug_constraint_projection", False) and not getattr(self, "_debug_po_printed", False):
@@ -747,3 +797,4 @@ class DiffusionTransformer(nn.Module):
             tau=batch.tau,
             unpadded_length=batch.unpadded_length
         )
+

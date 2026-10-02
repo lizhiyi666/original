@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--run_id", type=str, default="marionette")
 parser.add_argument("--output_tag", default=None)
 parser.add_argument("--checkpoint", default=None)
+parser.add_argument("--cfg_checkpoint", default=None, help="Completed baseline-suite CFG spatial checkpoint")
 parser.add_argument("--seed", type=int, default=None)
 parser.add_argument("--batch_size", type=int, default=None)
 parser.add_argument("--max_samples", type=int, default=None)
@@ -63,6 +64,11 @@ args = None
 
 
 def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
+    if args.baseline is not None:
+        from tools.baseline_common import precision
+        precision()
+        if args.use_constraint_projection:
+            raise ValueError('Baseline methods cannot be combined with ALM projection')
     data_name, seed, run_path = get_run_data(RUN_ID, WANDB_DIR)
     if args.world_size < 1 or not 0 <= args.rank < args.world_size:
         raise ValueError("Invalid rank/world_size")
@@ -71,6 +77,11 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     if args.batch_size is not None and args.batch_size < 1:
         raise ValueError("batch_size must be positive")
     task, datamodule = get_task(run_path, data_root=PROJECT_ROOT, checkpoint=args.checkpoint)
+    if args.baseline == 'cfg':
+        if not args.cfg_checkpoint:
+            raise ValueError('--baseline cfg requires --cfg_checkpoint')
+        from tools.baseline_common import install_cfg
+        install_cfg(task, datamodule, run_path, args.cfg_checkpoint)
     if not 0 <= args.start_index < len(datamodule.test_data.sequences):
         raise ValueError("start_index must identify an existing test sequence")
     if args.batch_size is not None:
@@ -112,7 +123,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
     # ========== Baseline1: 强制关闭投影 ==========
     # 规则A：baseline=None 且未显式 --use_constraint_projection 时，视为 baseline1
-    if args.baseline is None and (not args.use_constraint_projection):
+    if args.baseline in (None, 'posthoc_swap') and (not args.use_constraint_projection):
         dd.use_constraint_projection = False
         dd.debug_constraint_projection = False
         dd.projection_last_k_steps = 0
@@ -192,53 +203,16 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
 
-        # ========== Baseline 3: Classifier-Based Guidance 设置 ==========
     if args.baseline == "energy_guidance":
-        from constraint_projection import ConstraintProjection
-
-        # 设置 guidance 标志和参数
-        dd.use_guidance_baseline = True
-        dd.guidance_scale = args.guidance_scale
-        dd.guidance_last_k_steps = args.guidance_last_k_steps
-        dd.guidance_frequency = args.guidance_frequency
-        dd.guidance_temperature = args.guidance_temperature  # [新增]
-        dd._guidance_printed = False
-
-        # 确保 po_constraints 能被解析出来
-        dd.use_constraint_projection = True
-        dd.projection_frequency = 999999
-        dd.projection_last_k_steps = 0
-        dd.debug_constraint_projection = False
-        dd._debug_projection_printed = True
-        dd._debug_viol_printed = True
-        dd._debug_po_printed = True
-
-        # 确保 constraint_projector 存在
-        if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
-            device = next(dd.parameters()).device
-            dd.constraint_projector = ConstraintProjection(
-                num_classes=dd.num_classes,
-                type_classes=dd.type_classes,
-                num_spectial=dd.num_spectial,
-                tau=0.0,
-                lambda_init=0.0,
-                mu_init=1.0,
-                mu_alpha=2.0,
-                mu_max=1000.0,
-                outer_iterations=50,
-                inner_iterations=50,
-                eta=1.0,
-                delta_tol=1e-6,
-                projection_existence_weight=args.projection_existence_weight,
-                use_gumbel_softmax=False,   # guidance 不用 Gumbel
-                gumbel_temperature=1.0,
-                device=str(device),
-            )
-        dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
-        print(f"[Baseline3] existence_weight {args.projection_existence_weight}")
-        print(f"[Baseline3] Classifier-Based Guidance enabled")
-        print(f"[Baseline3] scale={args.guidance_scale}, temp={args.guidance_temperature}, "
-              f"last_k={args.guidance_last_k_steps}, freq={args.guidance_frequency}")
+        if args.use_constraint_projection:
+            raise ValueError('Energy guidance and ALM are mutually exclusive')
+        from baseline_models import configure_energy
+        configure_energy(dd, args.guidance_temperature, args.guidance_scale,
+                         args.guidance_last_k_steps, args.guidance_frequency)
+    if args.baseline == "cfg":
+        if args.use_constraint_projection:
+            raise ValueError('CFG and ALM are mutually exclusive')
+        dd.cfg_scale = args.guidance_scale
 
     # ======================================================
     all_sequences = datamodule.test_data.sequences
@@ -334,7 +308,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             test_seqs=my_test_seqs,
             poi_category=poi_category,
             category_mapping=category_mapping,
-            po_matrices=po_matrices,
+            po_matrices=None,  # Always derive the same actual reference pairs as evaluation.
             verbose=True,
         )
         print(f"[Baseline2] Done. Summary: {swap_summary}")

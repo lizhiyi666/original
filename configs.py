@@ -60,7 +60,11 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     projection_existence_weight = getattr(config, 'projection_existence_weight', 5.0)
     cond_dropout_rate = getattr(config, 'cond_dropout_rate', 0.1)
 
-    discrete_diffusion =  DiffusionTransformer(
+    diffusion_class = DiffusionTransformer
+    if config.get('po_cfg_enabled', False):
+        from baseline_models import POCFGDiffusion
+        diffusion_class = POCFGDiffusion
+    discrete_diffusion = diffusion_class(
         diffusion_step=config.spatial_hidden_dims,
         alpha_init_type='alpha1',
         type_classes=datamodule.num_category,
