@@ -19,6 +19,7 @@ class ProjectionEquivalenceTests(unittest.TestCase):
         diagnosed=ConstraintProjection(**kwargs,collect_diagnostics=True)
         a,b,mask=ordinary.compile_batched_constraints([[([0],[1])],[]],'cpu')
         logits=torch.log_softmax(torch.randn(2,9,4),dim=1)
+        logits[0,4:6,:]=-20.0  # Guarantee an unmet constraint, independent of test order.
         positions=torch.ones(2,4)
         torch.manual_seed(12)
         expected=ordinary.project_with_matrices(logits,a,b,positions,mask)
