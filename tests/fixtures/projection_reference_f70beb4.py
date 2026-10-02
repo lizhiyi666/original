@@ -25,8 +25,6 @@ class ConstraintProjection:
         gumbel_temperature: float = 1.0,
         device: str = "cuda",
         projection_existence_weight: float = 0.02,
-        collect_diagnostics: bool = False,
-        verbose: bool = True,
     ):
         self.num_classes = int(num_classes)
         self.type_classes = int(type_classes)
@@ -50,8 +48,6 @@ class ConstraintProjection:
         self.use_gumbel_softmax = bool(use_gumbel_softmax)
         self.gumbel_temperature = float(gumbel_temperature)
         self.projection_existence_weight = float(projection_existence_weight)
-        self.collect_diagnostics = collect_diagnostics
-        self.verbose = verbose
 
     def effective_constraint_mask(self, log_probs, W_A, W_B, category_mask, constraint_mask=None):
         """Real constraints on rows with at least one generated category position."""
@@ -81,11 +77,9 @@ class ConstraintProjection:
         W_B: torch.Tensor,
         category_mask: torch.Tensor,
         constraint_mask: torch.Tensor = None,
-        *, _prepared_mask=None,
     ):
         B, V, L = log_probs.shape
-        constraint_mask = (self.effective_constraint_mask(log_probs, W_A, W_B, category_mask, constraint_mask)
-                           if _prepared_mask is None else _prepared_mask)
+        constraint_mask = self.effective_constraint_mask(log_probs, W_A, W_B, category_mask, constraint_mask)
 
         idx = log_probs.argmax(dim=1)  # [B, L]
         probs_hard = F.one_hot(idx, num_classes=self.num_classes).float()  # [B, L, V]
@@ -130,11 +124,9 @@ class ConstraintProjection:
         category_mask: torch.Tensor,
         constraint_mask: torch.Tensor = None,
         gumbel_noise=None,
-        *, _prepared_mask=None,
     ):
         B, V, L = log_probs.shape
-        constraint_mask = (self.effective_constraint_mask(log_probs, W_A, W_B, category_mask, constraint_mask)
-                           if _prepared_mask is None else _prepared_mask)
+        constraint_mask = self.effective_constraint_mask(log_probs, W_A, W_B, category_mask, constraint_mask)
 
         logits_lv = log_probs.transpose(1, 2)  # [B, L, V]
         T = float(self.gumbel_temperature)
@@ -201,15 +193,6 @@ class ConstraintProjection:
             return log_probs.detach()
         y_model = log_probs.transpose(1, 2).detach()  # [B, L, V]
         y = y_model.clone().detach().requires_grad_(True)
-        # Invariant only within this projection invocation, never across diffusion steps.
-        log_q = F.log_softmax(y_model, dim=-1)
-        active_view = active_rows[:, None, None]
-        has_inactive = bool((~constraint_mask).any())
-        probe_norms = probe_unmet = None
-        if self.collect_diagnostics:
-            initial_order, initial_exist = self.compute_hard_constraint_violation_optimized(
-                log_probs, W_A, W_B, category_mask, _prepared_mask=constraint_mask)
-            probe_unmet = (((initial_order > self.tau) | (initial_exist > self.tau)) & constraint_mask).any(1)
 
         optimizer = torch.optim.SGD([y], lr=self.eta)
         B = log_probs.shape[0]
@@ -229,8 +212,7 @@ class ConstraintProjection:
         mu_order *= constraint_mask
         mu_exist *= constraint_mask
 
-        if self.verbose:
-            print(f"\n[Projection Start] Batch: {B}, Constraints: {K}")
+        print(f"\n[Projection Start] Batch: {B}, Constraints: {K}")
 
         with torch.enable_grad():
             for outer_idx in range(self.outer_iterations):
@@ -243,13 +225,14 @@ class ConstraintProjection:
 
                     g_soft_order, g_soft_exist, gumbel_noise = self.compute_constraint_violation_optimized(
                         y.transpose(1, 2), W_A, W_B,
-                        category_mask, gumbel_noise=gumbel_noise, _prepared_mask=constraint_mask
+                        category_mask, constraint_mask, gumbel_noise=gumbel_noise
                     )
 
                     delta_soft_order = F.relu(g_soft_order - self.tau)
                     delta_soft_exist = F.relu(g_soft_exist - self.tau)
 
                     log_p = F.log_softmax(y, dim=-1)
+                    log_q = F.log_softmax(y_model, dim=-1)
                     kl_per_row = F.kl_div(log_p, log_q, reduction='none', log_target=True).sum(dim=(1, 2))
                     # Keep the original B denominator, not the active-row count.
                     kl_loss = (kl_per_row * active_rows).sum() / B
@@ -264,42 +247,31 @@ class ConstraintProjection:
                     loss = 1.0 * kl_loss + constraint_loss
                     if not torch.isfinite(loss):
                         raise FloatingPointError("Non-finite projection objective")
-                    if self.collect_diagnostics and probe_norms is None:
-                        # Probe only the constraint objective. At y == y_model, tiny
-                        # round-off in KL gradients must not masquerade as recovery.
-                        probe_gradient = torch.autograd.grad(constraint_loss, y, retain_graph=True)[0]
-                        probe_norms = probe_gradient.detach().flatten(1).norm(dim=1)
-                        del probe_gradient
                     loss.backward()
-                    if y.grad is None:
-                        raise FloatingPointError("Missing projection gradient")
-                    y.grad.mul_(active_view)
-                    # A non-finite element necessarily gives a non-finite global norm.
-                    # This retains the pre-update guard without a duplicate GPU scan/sync.
-                    try:
-                        torch.nn.utils.clip_grad_norm_([y], max_norm=10.0, error_if_nonfinite=True)
-                    except RuntimeError as exc:
-                        raise FloatingPointError("Non-finite projection gradient norm") from exc
+                    if y.grad is None or not torch.isfinite(y.grad).all():
+                        raise FloatingPointError("Non-finite projection gradient")
+                    y.grad.mul_(active_rows[:, None, None])
+                    torch.nn.utils.clip_grad_norm_([y], max_norm=10.0, error_if_nonfinite=True)
                     optimizer.step()
                     if not torch.isfinite(y).all():
                         raise FloatingPointError("Non-finite updated projection logits")
                     with torch.no_grad():
-                        y.copy_(torch.where(active_view, y, y_model))
+                        y.copy_(torch.where(active_rows[:, None, None], y, y_model))
                     self.last_projection_stats['optimizer_steps'] += 1
 
-                    last_kl_loss = kl_loss.detach()
-                    last_const_loss = constraint_loss.detach()
+                    last_kl_loss = float(kl_loss.item())
+                    last_const_loss = float(constraint_loss.item())
 
                 with torch.no_grad():
                     self.last_projection_stats['outer_iterations'] = outer_idx + 1
                     g_hard_order, g_hard_exist = self.compute_hard_constraint_violation_optimized(
-                        y.transpose(1, 2), W_A, W_B, category_mask, _prepared_mask=constraint_mask
+                        y.transpose(1, 2), W_A, W_B, category_mask, constraint_mask
                     )
 
                     delta_hard_order = F.relu(g_hard_order - self.tau)
                     delta_hard_exist = F.relu(g_hard_exist - self.tau)
 
-                    if self.verbose and (outer_idx == 0 or (outer_idx + 1) % 10 == 0 or outer_idx == self.outer_iterations - 1):
+                    if outer_idx == 0 or (outer_idx + 1) % 10 == 0 or outer_idx == self.outer_iterations - 1:
                         print(
                             f"  [Outer {outer_idx+1:02d}/{self.outer_iterations}] "
                             f"Loss (KL={last_kl_loss:.4f}, Const={last_const_loss:.4f}) | "
@@ -319,19 +291,15 @@ class ConstraintProjection:
                     mu_exist = torch.where(delta_hard_exist > self.delta_tol, mu_exist * self.mu_alpha, mu_exist)
                     mu_exist = torch.clamp(mu_exist, max=self.mu_max)
 
+                    if (~constraint_mask).any():
+                        self.last_projection_stats['inactive_multiplier_max'] = max(
+                            float(tensor[~constraint_mask].abs().max().item())
+                            for tensor in (lambda_order, lambda_exist, mu_order, mu_exist))
+
                     max_delta = torch.max(delta_hard_order.max(), delta_hard_exist.max())
                     if max_delta < self.delta_tol:
                         break
 
-        if has_inactive:
-            self.last_projection_stats['inactive_multiplier_max'] = max(
-                float(tensor[~constraint_mask].abs().max().item())
-                for tensor in (lambda_order, lambda_exist, mu_order, mu_exist))
-        if self.collect_diagnostics and probe_norms is not None:
-            values = probe_norms[probe_unmet].cpu().tolist()
-            self.last_projection_stats.update(
-                unmet_probe_count=len(values), zero_gradient_probe_count=sum(v == 0.0 for v in values),
-                gradient_norm_sum=sum(values), gradient_norm_max=max(values, default=0.0))
         return y.transpose(1, 2).detach()
 
     def compile_batched_constraints(self, po_constraints_list: list, device):
@@ -379,3 +347,4 @@ def parse_po_matrix_to_constraints(po_matrix: torch.Tensor, threshold: float = 0
             if i != j and po_matrix[i, j] > threshold:
                 constraints.append(([i], [j]))
     return constraints
+

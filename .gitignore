@@ -11,6 +11,7 @@ __pycache__/
 /data/
 /dataset/
 /experiment_runs/
+/calibration_runs/
 .env
 .env.*
 .netrc

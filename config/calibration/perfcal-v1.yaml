@@ -1,0 +1,30 @@
+revision: perfcal-v1
+dataset: NewYork_PO1_OOD
+seed: 135398
+reference_split: train
+pool_size: 512
+temperature_size: 128
+temperature_batch_size: 64
+temperatures: [0.1, 0.5, 1.0, 2.0, 3.0]
+batch_sizes: [64, 128, 256, 512]
+primary_gpu: 0
+verification_gpu: 1
+memory_fraction_limit: 0.8
+strict_ovr_tolerance: 0.01
+pair_coverage_tolerance: 0.01
+throughput_tie_fraction: 0.05
+projection_timing_repeats: 3
+projection:
+  projection_outer_iters: 10
+  projection_inner_iters: 50
+  projection_last_k_steps: 40
+  projection_frequency: 4
+  projection_tau: 0.0
+  projection_lambda: 1.0
+  projection_eta: 1.0
+  projection_mu: 1.0
+  projection_mu_max: 1000.0
+  projection_mu_alpha: 2.0
+  projection_delta_tol: 0.000001
+  projection_existence_weight: 5.0
+  use_gumbel_softmax: true
