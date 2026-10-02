@@ -18,7 +18,7 @@ import torch
 import wandb
 from omegaconf import OmegaConf
 
-REVISION = 'perfcal-v1-ood'
+REVISION = 'perfcal-v1-ood-r2'
 
 
 def selected_settings(calibration, results, receipt):
@@ -66,7 +66,8 @@ class CalibratedSampling(Experiment):
 
     def fingerprints(self):
         hashes = code_fingerprint()
-        for name in ('tools/run_calibrated_ood.py', 'tools/sample_perfcal.py', 'tools/perfcal_common.py'):
+        for name in ('tools/run_calibrated_ood.py', 'tools/sample_perfcal.py', 'tools/perfcal_common.py',
+                     'tools/validate_calibrated_empty.py'):
             hashes[name] = sha256_file(ROOT/name)
         return hashes
 
@@ -170,14 +171,30 @@ class CalibratedSampling(Experiment):
                      f'regression-{method}', dict(os.environ, CUDA_VISIBLE_DEVICES='0'))
             path = merge_parts(DATASET, self.run_id, 1, tag, expected_count=64)
             data = torch.load(path, map_location='cpu', weights_only=False)
-            if (data['test_indices'] != list(range(64,128)) or 99 not in data['temporal_empty_test_indices']
-                    or len(data['sequences'][35]['checkins']) != 0):
-                raise RuntimeError('Index-99 empty-trajectory regression failed')
+            if data['test_indices'] != list(range(64,128)) or len(data['sequences']) != 64:
+                raise RuntimeError('Calibrated end-to-end regression lost test indices')
+            for index in data['temporal_empty_test_indices']:
+                if len(data['sequences'][index-64]['checkins']) != 0:
+                    raise RuntimeError('Temporal empty record was filled')
             if (data['projection_calls'] > 0) != (method == 'projection'):
                 raise RuntimeError('Regression projection switch mismatch')
-            proofs[method] = dict(output_sha256=sha256_file(path), projection_calls=data['projection_calls'])
+            proofs[method] = dict(output_sha256=sha256_file(path), projection_calls=data['projection_calls'],
+                                 temporal_empty_test_indices=data['temporal_empty_test_indices'])
+        if proofs['native']['temporal_empty_test_indices'] != proofs['projection']['temporal_empty_test_indices']:
+            raise RuntimeError('Paired regression has different temporal-empty indices')
+        fixture_command=[sys.executable,'-u','-B','tools/validate_calibrated_empty.py',
+            '--source-experiment',str(self.source),'--calibration',str(self.calibration),
+            '--output-dir',str(self.directory/'frozen-empty-regression')]
+        if self.args.resume:
+            fixture_command+=['--resume']
+        self.run(fixture_command,'frozen-empty-regression',dict(os.environ,CUDA_VISIBLE_DEVICES='0'))
+        frozen=json.loads((self.directory/'frozen-empty-regression/receipt.json').read_text())
+        if frozen['state']!='passed' or not frozen['empty_index_99_preserved']:
+            raise RuntimeError('Frozen empty-input regression did not pass')
         atomic_json(self.directory/'regression.json', dict(state='passed', indices=list(range(64,128)),
-                    empty_index_99_preserved=True, projection=self.manifest['projection'], methods=proofs))
+                    empty_index_99_preserved_on_frozen_input=True, projection=self.manifest['projection'],
+                    methods=proofs,frozen_input_receipt_sha256=sha256_file(
+                        self.directory/'frozen-empty-regression/receipt.json')))
 
     def evaluate(self, method, generated_path, timing):
         raw = torch.load(ROOT/f'data/{DATASET}/{DATASET}_test.pkl', map_location='cpu', weights_only=False)

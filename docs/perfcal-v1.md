@@ -46,7 +46,7 @@ automatically started after selection.
 
 ## User-approved full OOD resampling
 
-After explicit approval, use a new deployment `/root/experiments/pcdg/sampling-perfcal-v1`.
+After explicit approval, use a new deployment `/root/experiments/pcdg/sampling-perfcal-v1-r2`.
 Keep the original training and calibration directories unchanged. Copy only the two input
 PKLs into the new data directory so new generated files cannot overwrite earlier outputs.
 
@@ -58,9 +58,20 @@ python -u -B tools/run_calibrated_ood.py \
 
 The runner verifies the completed calibration, code/data/checkpoint fingerprints and the
 lowest measured strict-OVR configuration. It cannot train. It replays global indices
-64..127 with the selected settings and requires empty index 99 to remain intact, then runs
+64..127 with the selected settings and checks all indices and empty records, then runs
 both native and projected sampling for all 2108 OOD conditions on two GPUs. It freezes
 temperature 3.0, batch 64 and projection 10x50 from the verified recommendation; no OOD
 hyperparameter search is performed. `tools/sample_perfcal.py` preserves the FP32/no-TF32
-policy. Outputs and W&B evaluation runs use the separate `perfcal-v1-ood` revision.
+policy. Outputs and W&B evaluation runs use the separate `perfcal-v1-ood-r2` revision.
 Existing manifests require identical inputs and an explicit `--resume`.
+
+The initial `sampling-perfcal-v1` attempt was stopped before full sampling because it
+incorrectly expected index 99 to remain temporally empty across precision policies.
+An isolated replay confirmed cuDNN TF32=true produces zero events there, whereas the
+calibration's cuDNN TF32=false produces six, with the same model and seed. The temporal
+model contains Conv1d layers. This is a numerical-policy difference, not a dropped record.
+The r2 gate additionally reconstructs and saves the historical temporal input (TF32 only
+for fixture creation), then decodes that fixed mixed batch natively and with projection
+under FP32. Index 99 must remain empty in both outputs. Production sampling always uses
+the calibration's no-TF32 policy. The first attempt's files and immutable manifest remain
+untouched; it produced no full OOD result or W&B evaluation run.
