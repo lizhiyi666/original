@@ -43,3 +43,24 @@ jobs/logs/results/generated outputs, recommendation.json and report.md. `--resum
 only recorded terminal candidates with identical manifests. W&B uses the distinct
 engineering-calibration job type and explicit in-sample labels. No full OOD sampling is
 automatically started after selection.
+
+## User-approved full OOD resampling
+
+After explicit approval, use a new deployment `/root/experiments/pcdg/sampling-perfcal-v1`.
+Keep the original training and calibration directories unchanged. Copy only the two input
+PKLs into the new data directory so new generated files cannot overwrite earlier outputs.
+
+```bash
+python -u -B tools/run_calibrated_ood.py \
+  --source-experiment /root/experiments/pcdg/original/experiment_runs/nyood1000s13539820261001 \
+  --calibration /root/experiments/pcdg/perfcal-v1/calibration_runs/perfcal-v1
+```
+
+The runner verifies the completed calibration, code/data/checkpoint fingerprints and the
+lowest measured strict-OVR configuration. It cannot train. It replays global indices
+64..127 with the selected settings and requires empty index 99 to remain intact, then runs
+both native and projected sampling for all 2108 OOD conditions on two GPUs. It freezes
+temperature 3.0, batch 64 and projection 10x50 from the verified recommendation; no OOD
+hyperparameter search is performed. `tools/sample_perfcal.py` preserves the FP32/no-TF32
+policy. Outputs and W&B evaluation runs use the separate `perfcal-v1-ood` revision.
+Existing manifests require identical inputs and an explicit `--resume`.
