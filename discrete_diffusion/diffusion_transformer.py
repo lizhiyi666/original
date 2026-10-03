@@ -540,7 +540,9 @@ class DiffusionTransformer(nn.Module):
         return out
 
     def log_sample_categorical(self, logits):           # use gumbel to sample onehot vector from log probability
-        uniform = torch.rand_like(logits)
+        generator = getattr(self, 'sampling_generator', None)
+        uniform = (torch.rand_like(logits) if generator is None else
+                   torch.rand(logits.shape, device=logits.device, dtype=logits.dtype, generator=generator))
         gumbel_noise = -torch.log(-torch.log(uniform + 1e-30) + 1e-30)
         sample = (gumbel_noise + logits).argmax(dim=1)
         log_sample = index_to_log_onehot(sample, self.num_classes)

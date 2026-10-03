@@ -2,7 +2,6 @@
 Constraint Discrete Diffusion - Projection Method Implementation
 """
 
-import math
 import torch
 import torch.nn.functional as F
 
@@ -28,11 +27,6 @@ class ConstraintProjection:
         projection_existence_weight: float = 0.02,
         collect_diagnostics: bool = False,
         verbose: bool = True,
-        projection_order_weight: float = 1.0,
-        projection_kl_weight: float = 1.0,
-        update_multipliers: bool = True,
-        early_stop: bool = True,
-        generator=None,
     ):
         self.num_classes = int(num_classes)
         self.type_classes = int(type_classes)
@@ -58,14 +52,6 @@ class ConstraintProjection:
         self.projection_existence_weight = float(projection_existence_weight)
         self.collect_diagnostics = collect_diagnostics
         self.verbose = verbose
-        self.projection_order_weight = float(projection_order_weight)
-        self.projection_kl_weight = float(projection_kl_weight)
-        if any(not math.isfinite(w) or w < 0 for w in
-               (self.projection_order_weight, self.projection_existence_weight, self.projection_kl_weight)):
-            raise ValueError('Projection weights must be finite and nonnegative')
-        self.update_multipliers = bool(update_multipliers)
-        self.early_stop = bool(early_stop)
-        self.generator = generator
 
     def effective_constraint_mask(self, log_probs, W_A, W_B, category_mask, constraint_mask=None):
         """Real constraints on rows with at least one generated category position."""
@@ -79,7 +65,7 @@ class ConstraintProjection:
         return structural & has_positions[:, None]
 
     def _sample_gumbel(self, shape, device, dtype):
-        U = torch.rand(shape, device=device, dtype=dtype, generator=self.generator)
+        U = torch.rand(shape, device=device, dtype=dtype)
         return -torch.log(-torch.log(U + 1e-20) + 1e-20)
 
     def _gumbel_softmax_relax(self, logits_lv, tau, gumbel_noise=None):
@@ -206,10 +192,6 @@ class ConstraintProjection:
         if not torch.isfinite(log_probs).all():
             raise FloatingPointError("Non-finite projection input before optimization")
         constraint_mask = self.effective_constraint_mask(log_probs, W_A, W_B, category_mask, constraint_mask)
-        order_enabled = self.projection_order_weight > 0
-        exist_enabled = self.projection_existence_weight > 0
-        if not (order_enabled or exist_enabled):
-            constraint_mask = torch.zeros_like(constraint_mask)
         active_rows = constraint_mask.any(dim=1)
         self.last_projection_stats = dict(active_constraints=int(constraint_mask.sum().item()),
                                           active_rows=int(active_rows.sum().item()),
@@ -227,8 +209,7 @@ class ConstraintProjection:
         if self.collect_diagnostics:
             initial_order, initial_exist = self.compute_hard_constraint_violation_optimized(
                 log_probs, W_A, W_B, category_mask, _prepared_mask=constraint_mask)
-            probe_unmet = ((((initial_order > self.tau) & order_enabled) |
-                            ((initial_exist > self.tau) & exist_enabled)) & constraint_mask).any(1)
+            probe_unmet = (((initial_order > self.tau) | (initial_exist > self.tau)) & constraint_mask).any(1)
 
         optimizer = torch.optim.SGD([y], lr=self.eta)
         B = log_probs.shape[0]
@@ -247,12 +228,6 @@ class ConstraintProjection:
         lambda_exist *= constraint_mask
         mu_order *= constraint_mask
         mu_exist *= constraint_mask
-        if not order_enabled:
-            lambda_order.zero_()
-            mu_order.zero_()
-        if not exist_enabled:
-            lambda_exist.zero_()
-            mu_exist.zero_()
 
         if self.verbose:
             print(f"\n[Projection Start] Batch: {B}, Constraints: {K}")
@@ -283,11 +258,10 @@ class ConstraintProjection:
                     penalty_exist = lambda_exist * delta_soft_exist + 0.5 * mu_exist * (delta_soft_exist ** 2)
 
                     constraint_loss = (
-                        self.projection_order_weight * penalty_order.sum(dim=1)
-                        + self.projection_existence_weight * penalty_exist.sum(dim=1)
+                        penalty_order.sum(dim=1) + self.projection_existence_weight * penalty_exist.sum(dim=1)
                     ).sum()
 
-                    loss = self.projection_kl_weight * kl_loss + constraint_loss
+                    loss = 1.0 * kl_loss + constraint_loss
                     if not torch.isfinite(loss):
                         raise FloatingPointError("Non-finite projection objective")
                     if self.collect_diagnostics and probe_norms is None:
@@ -336,18 +310,17 @@ class ConstraintProjection:
                         )
 
                     # 现在 lambda_* 一定是 float，不会再触发 Long cast 错误
-                    if self.update_multipliers and order_enabled:
-                        lambda_order += mu_order * delta_hard_order
-                        mu_order = torch.where(delta_hard_order > self.delta_tol, mu_order * self.mu_alpha, mu_order)
-                        mu_order = torch.clamp(mu_order, max=self.mu_max)
-                    if self.update_multipliers and exist_enabled:
-                        lambda_exist += mu_exist * delta_hard_exist
-                        mu_exist = torch.where(delta_hard_exist > self.delta_tol, mu_exist * self.mu_alpha, mu_exist)
-                        mu_exist = torch.clamp(mu_exist, max=self.mu_max)
+                    lambda_order += mu_order * delta_hard_order
+                    lambda_exist += mu_exist * delta_hard_exist
 
-                    max_delta = torch.max(delta_hard_order.max() * order_enabled,
-                                          delta_hard_exist.max() * exist_enabled)
-                    if self.early_stop and max_delta < self.delta_tol:
+                    mu_order = torch.where(delta_hard_order > self.delta_tol, mu_order * self.mu_alpha, mu_order)
+                    mu_order = torch.clamp(mu_order, max=self.mu_max)
+
+                    mu_exist = torch.where(delta_hard_exist > self.delta_tol, mu_exist * self.mu_alpha, mu_exist)
+                    mu_exist = torch.clamp(mu_exist, max=self.mu_max)
+
+                    max_delta = torch.max(delta_hard_order.max(), delta_hard_exist.max())
+                    if max_delta < self.delta_tol:
                         break
 
         if has_inactive:
@@ -359,16 +332,6 @@ class ConstraintProjection:
             self.last_projection_stats.update(
                 unmet_probe_count=len(values), zero_gradient_probe_count=sum(v == 0.0 for v in values),
                 gradient_norm_sum=sum(values), gradient_norm_max=max(values, default=0.0))
-        if self.collect_diagnostics:
-            with torch.no_grad():
-                final_log_p = F.log_softmax(y, dim=-1)
-                final_kl = F.kl_div(final_log_p, log_q, reduction='none', log_target=True).sum((1,2))
-                self.last_projection_stats.update(
-                    kl_model_to_projected_sum=float((final_kl * active_rows).sum()),
-                    logit_squared_change_sum=float((y-y_model).square().sum()),
-                    logit_element_count=y.numel(),
-                    lambda_order_max=float(lambda_order.max()), mu_order_max=float(mu_order.max()),
-                    lambda_exist_max=float(lambda_exist.max()), mu_exist_max=float(mu_exist.max()))
         return y.transpose(1, 2).detach()
 
     def compile_batched_constraints(self, po_constraints_list: list, device):
