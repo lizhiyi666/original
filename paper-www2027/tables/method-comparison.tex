@@ -1,0 +1,75 @@
+%% Method comparison tables.
+%% PROVISIONAL anchor = integrated-20261005 (evaluation v1, no distance-KL).
+%% Before submission: regenerate from the distance-v2 run under evaluation v2
+%% (Interval column becomes CategoryTransition; PCDG rows reflect the distance-KL term).
+% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Method comparison: distributional similarity (JSD $\downarrow$). \emph{Provisional eval-v1 anchor; final submission uses eval-v2 (CategoryTransition replaces Interval) on the distance-v2 run.}}
+\label{tab:method-jsd}
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{l}{\textbf{Istanbul}} \\
+\midrule
+Method & Distance $\downarrow$ & Radius $\downarrow$ & Interval $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
+\midrule
+JointGen & $0.1128\pm 0.0087$ & $0.0226\pm 0.0017$ & $\mathbf{0.0049\pm 0.0005}$ & $0.0414\pm 0.0009$ & $0.0325\pm 0.0005$ & $0.1922\pm 0.0022$ \\
+PostSwap & $0.0949\pm 0.0127$ & $0.0226\pm 0.0017$ & $\mathbf{0.0049\pm 0.0005}$ & $0.0414\pm 0.0009$ & $0.0325\pm 0.0005$ & $0.1922\pm 0.0022$ \\
+EnergyGuide & $0.1156\pm 0.0052$ & $\mathbf{0.0222\pm 0.0025}$ & $0.0049\pm 0.0004$ & $0.0392\pm 0.0020$ & $0.0342\pm 0.0004$ & $0.1921\pm 0.0004$ \\
+PO-CFG (s=1) & $\mathbf{0.0890\pm 0.0050}$ & $0.0263\pm 0.0020$ & $0.0049\pm 0.0005$ & $0.0444\pm 0.0022$ & $0.0256\pm 0.0003$ & $\mathbf{0.1794\pm 0.0026}$ \\
+PCDG & $0.1441\pm 0.0073$ & $0.0582\pm 0.0025$ & $0.0049\pm 0.0005$ & $\mathbf{0.0366\pm 0.0008}$ & $\mathbf{0.0083\pm 0.0002}$ & $0.1828\pm 0.0026$ \\
+\midrule
+\multicolumn{7}{l}{\textbf{New York}} \\
+\midrule
+Method & Distance $\downarrow$ & Radius $\downarrow$ & Interval $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
+\midrule
+JointGen & $0.2904\pm 0.0156$ & $0.1104\pm 0.0071$ & $0.0154\pm 0.0007$ & $0.0409\pm 0.0035$ & $0.0013\pm 0.0000$ & $0.1612\pm 0.0013$ \\
+PostSwap & $0.2276\pm 0.0448$ & $0.1104\pm 0.0071$ & $0.0154\pm 0.0007$ & $0.0409\pm 0.0035$ & $0.0013\pm 0.0000$ & $0.1612\pm 0.0013$ \\
+EnergyGuide & $0.2943\pm 0.0060$ & $0.1112\pm 0.0061$ & $0.0154\pm 0.0008$ & $0.0411\pm 0.0029$ & $0.0013\pm 0.0001$ & $0.1622\pm 0.0009$ \\
+PO-CFG (s=1) & $\mathbf{0.1228\pm 0.0160}$ & $\mathbf{0.0823\pm 0.0029}$ & $\mathbf{0.0153\pm 0.0006}$ & $0.0499\pm 0.0008$ & $\mathbf{0.0008\pm 0.0000}$ & $\mathbf{0.1525\pm 0.0025}$ \\
+PCDG & $0.2484\pm 0.0267$ & $0.1430\pm 0.0055$ & $0.0153\pm 0.0008$ & $\mathbf{0.0355\pm 0.0031}$ & $0.0047\pm 0.0008$ & $0.1937\pm 0.0082$ \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded mean within each city, not statistical significance.
+\end{minipage}
+\end{table*}
+
+% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Method comparison: constraint satisfaction (\%). \pcdg attains the best ordering/coverage on both cities, surpassing the \emph{retrained} PO-CFG, while being training-free. \emph{Provisional eval-v1 anchor; to be refreshed from distance-v2.}}
+\label{tab:method}
+\begin{tabular}{lrrrrr}
+\toprule
+\multicolumn{6}{l}{\textbf{Istanbul}} \\
+\midrule
+Method & OVR\_strict $\downarrow$ & OVR\_skip $\downarrow$ & Pair cov. $\uparrow$ & Category cov. $\uparrow$ & Unsat $\downarrow$ \\
+\midrule
+JointGen & $92.89\pm 0.08$ & $48.05\pm 0.74$ & $14.63\pm 0.19$ & $43.19\pm 0.20$ & $95.57\pm 0.15$ \\
+PostSwap & $86.10\pm 0.15$ & $\mathbf{0.00\pm 0.00}$ & $14.63\pm 0.19$ & $43.19\pm 0.20$ & $85.37\pm 0.19$ \\
+EnergyGuide & $90.66\pm 0.06$ & $44.76\pm 0.58$ & $19.17\pm 0.43$ & $47.06\pm 0.25$ & $92.89\pm 0.16$ \\
+PO-CFG (s=1) & $63.45\pm 0.23$ & $19.09\pm 0.54$ & $43.72\pm 0.35$ & $66.00\pm 0.23$ & $69.07\pm 0.45$ \\
+PCDG & $\mathbf{32.96\pm 0.46}$ & $9.10\pm 0.16$ & $\mathbf{70.92\pm 0.23}$ & $\mathbf{85.29\pm 0.14}$ & $\mathbf{36.83\pm 0.24}$ \\
+\midrule
+\multicolumn{6}{l}{\textbf{New York}} \\
+\midrule
+Method & OVR\_strict $\downarrow$ & OVR\_skip $\downarrow$ & Pair cov. $\uparrow$ & Category cov. $\uparrow$ & Unsat $\downarrow$ \\
+\midrule
+JointGen & $89.45\pm 0.20$ & $52.92\pm 0.86$ & $21.13\pm 0.15$ & $46.75\pm 0.12$ & $93.64\pm 0.26$ \\
+PostSwap & $78.22\pm 0.48$ & $\mathbf{0.00\pm 0.00}$ & $21.13\pm 0.15$ & $46.75\pm 0.12$ & $78.87\pm 0.15$ \\
+EnergyGuide & $89.17\pm 0.14$ & $51.59\pm 0.88$ & $21.17\pm 0.19$ & $47.14\pm 0.14$ & $93.20\pm 0.39$ \\
+PO-CFG (s=1) & $41.91\pm 1.37$ & $8.97\pm 0.88$ & $59.92\pm 1.58$ & $74.99\pm 1.08$ & $49.48\pm 1.20$ \\
+PCDG & $\mathbf{38.48\pm 1.04}$ & $13.76\pm 0.72$ & $\mathbf{67.33\pm 1.86}$ & $\mathbf{81.38\pm 0.81}$ & $\mathbf{42.77\pm 1.79}$ \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\begin{minipage}{\textwidth}\footnotesize
+Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded mean within each city. PostSwap drives OVR\_skip to $0$ by construction but cannot improve coverage.
+\end{minipage}
+\end{table*}

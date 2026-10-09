@@ -1,0 +1,72 @@
+\section{Limitations}
+\label{sec:limitations}
+Several limitations frame our claims honestly. (i) We evaluate two cities; the
+Istanbul base model was trained historically with a different batch size than New
+York and its full data provenance is not retroactively verifiable, so we do not
+claim identical cross-city training conditions. (ii) The reported error bars are
+sample standard deviations over three sampling seeds at a \emph{fixed} checkpoint;
+they reflect sampling stochasticity, not training variability. (iii) PO-CFG is
+evaluated at guidance scale $1$; we do not claim an extrapolation-tuned optimum.
+(iv) The distance-KL weight is fixed, not tuned per city, and is a batch-level
+distribution-matching regularizer rather than a per-sample spatial guarantee.
+(v) \pcdg reduces---but does not certify zero---constraint violations; it reweights
+the sampling distribution and performs no hard candidate filtering. (vi) We do not
+yet report a downstream-utility study (e.g., training a next-POI model on the
+synthetic data). Addressing complex partial-order DAGs (transitivity, conflict
+detection), adaptive constraint scheduling, a training-time partial-order
+objective, and downstream utility are natural directions for future work.
+
+\section{Conclusion}
+\label{sec:conclusion}
+We studied controllable synthetic generation of POI check-in sequences under
+sample-level activity-category precedence constraints---a web-native,
+privacy-relevant problem that single-step conditioning cannot address. We
+introduced \pcdg, a training-free, sampling-time projection that compiles a
+partial-order matrix into differentiable order and existence energies, projects
+the category-position logits of a frozen joint temporal\,+\,category\,+\,POI
+discrete-diffusion generator via a KL-preserving augmented Lagrangian, and
+preserves spatial fidelity through a distance-distribution regularizer on POI
+positions. Across two cities, \pcdg delivers the strongest constraint satisfaction
+among post-hoc, guidance, and even fully retrained conditional baselines, at a
+characterized and modest fidelity cost, without retraining the generator. We hope
+the training-free, sampling-time projection recipe proves useful for controllable
+generation of other structured web content.
+
+% ======================= Appendix =======================
+\appendix
+
+\section{Algorithm and Default Hyper-parameters}
+\label{app:algo}
+Algorithm~\ref{alg:pcdg} summarizes one projected reverse step. Defaults:
+$w_{\mathrm{ord}}{=}1$, $w_{\mathrm{ex}}{=}5$, $w_{\mathrm{kl}}{=}1$,
+$w_{\mathrm{dist}}{=}1$; Gumbel temperature $T{=}3$; outer iterations $10$, inner
+iterations $50$; SGD learning rate $\eta$, gradient clip $10$; multiplier growth
+$\alpha{=}2$, $\mu_{\max}{=}10^3$, tolerance $\tau_{\mathrm{tol}}{=}0.25$; distance
+routes $P{=}8$, candidates $\kappa{=}32$, bins $32$; applied over the last $40$
+reverse steps every $4$ steps. \todo{confirm $\eta$ and step schedule against the distance-v2 manifest before camera-ready.}
+
+\begin{algorithm}[t]
+\caption{\pcdg projected reverse step (one controlled step $s$)}
+\label{alg:pcdg}
+\begin{algorithmic}[1]
+\Require backbone logits $\mathbf{z}$; constraints $\{(a,b)\}$ with $\mathbf{W}_A,\mathbf{W}_B$; masks; distance reference $H_{\mathrm{train}}$
+\State $\mathbf{y}\gets \mathbf{z}$ (detached); initialize $\lambda,\mu$ for active rows
+\For{outer $=1$ to $T_{\mathrm{out}}$}
+  \For{inner $=1$ to $T_{\mathrm{in}}$}
+    \State relax $\mathbf{y}$ to $\boldsymbol\pi$; compute $g^{\mathrm{ord}},g^{\mathrm{ex}}$ on category positions \Comment{Eq.~\eqref{eq:order}--\eqref{eq:exist}}
+    \State $\mathcal{L}\gets w_{\mathrm{kl}}\dkl + \text{AL}(g^{\mathrm{ord}},g^{\mathrm{ex}};\lambda,\mu) + w_{\mathrm{dist}}\dkl(H_{\mathrm{train}}\|H_{\mathrm{proj}})$
+    \State SGD step on $\mathbf{y}$ (clip; restrict to active rows)
+  \EndFor
+  \State evaluate hard violations $\hat\delta$; update $\lambda,\mu$ \Comment{Eq.~\eqref{eq:dual}}; early stop if satisfied
+\EndFor
+\State \Return joint categorical sample from projected $\mathbf{y}$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Metric Definitions}
+\label{app:metrics}
+\todo{one-line formal definitions of OVR\_strict, OVR\_skip, Pair/Category coverage, Unsat, and the six eval-v2 JSD marginals; copy from the unified evaluation module.}
+
+\section{Cost}
+\label{app:cost}
+\todo{sampling wall-clock overhead vs.\ JointGen, and PO-CFG retraining cost (per-city GPU-hours), from distance-v2 diagnostics.}

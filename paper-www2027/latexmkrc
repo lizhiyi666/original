@@ -1,0 +1,13 @@
+# Robust latexmk config for building inside a non-ASCII (Chinese) path.
+# Problem: latexmk's default bibtex invocation passes the full absolute path,
+# and classic BibTeX 0.99 mishandles non-ASCII paths, so main.bbl is never made.
+# Fix: hand BibTeX only the basename (%B) and run it in the aux/working dir.
+
+$pdf_mode   = 1;                 # build with pdflatex
+$bibtex_use = 2;                 # always run bibtex; keep .bbl around
+$bibtex     = 'bibtex %O %B';    # %B = basename only -> avoids the Chinese path
+$pdflatex   = 'pdflatex -interaction=nonstopmode -file-line-error -synctex=1 %O %S';
+
+# Draft convenience: still produce the PDF even if a tool returns a nonzero code
+# (acmart review mode + harmless warnings can make pdflatex exit nonzero).
+$force_mode = 1;
