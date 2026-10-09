@@ -1,0 +1,437 @@
+{
+  "date": "2026-10-09",
+  "scope": "Authorized server switch; experiment continues, not a completion certificate",
+  "deployment_and_benchmarks": {
+    "deployment": {
+      "git_commit": "785f7c76f083cd72b81572b8471978f3fdfc2c19",
+      "archive_sha256": "5cbb34c6cb873971a8a43153035ec5bcb7281fa0126b0ea0b2a9e8d21ea94356",
+      "code_root": "/root/experiments/pcdg/two-city-distance-v2-batched-20261009",
+      "previous_deployment": "/root/experiments/pcdg/two-city-distance-v2-batched-20261009-deployment-crlf",
+      "all_113_files_equal_after_lf_normalization": true
+    },
+    "benchmarks": {
+      "legacy": {
+        "state": "complete",
+        "fixture": "synthetic-ragged-v1-not-production-replay",
+        "config": {
+          "device": "cuda",
+          "backend": "legacy",
+          "batch": 64,
+          "max_pois": 16,
+          "candidates": 64,
+          "seed": 135398,
+          "warmups": 2,
+          "repeats": 5,
+          "deterministic": false,
+          "profile": false,
+          "output": "validation/rtx3090-legacy.json"
+        },
+        "torch_version": "2.0.0+cu117",
+        "threads": 1,
+        "dtype": "float32",
+        "tf32": false,
+        "gpu": "NVIDIA GeForce RTX 3090",
+        "source_sha256": {
+          "distance_kl.py": "8f6c4f99b4c31c51097fdd26524bf98526b0f61383ac5fa31d52ecdcd1ae16e8",
+          "constraint_projection.py": "d16f2f08e2fa6735905eaf2b5fa603cdf2d125ec678d3dd450fc717c5a6c66cb",
+          "tools/benchmark_distance_kl.py": "65da11927450c2da37cc3892e18f30d6404f2297b39137367d24588ee803c683",
+          "tools/distance_benchmark_fixture.py": "2dc2dcd435a1259fc2c2302be6d65ddd4451ba4514e87b6a7167ada80f9beb0e"
+        },
+        "timings": {
+          "distance_forward_backward": {
+            "seconds": [
+              0.03947844775393605,
+              0.04087549541145563,
+              0.04080477822571993,
+              0.04009647201746702,
+              0.04038388095796108
+            ],
+            "median_seconds": 0.04038388095796108,
+            "peak_allocated_bytes": 72027136,
+            "peak_reserved_bytes": 73400320
+          },
+          "projection_prepared_geometry": {
+            "seconds": [
+              21.157917821314186,
+              21.24937426066026,
+              21.219933446031064,
+              21.13956290623173,
+              21.30772947706282
+            ],
+            "median_seconds": 21.219933446031064,
+            "peak_allocated_bytes": 76637696,
+            "peak_reserved_bytes": 98566144
+          },
+          "projection_including_geometry": {
+            "seconds": [
+              21.357581723947078,
+              21.20731777092442,
+              21.233027731999755,
+              21.24723289674148,
+              21.190344909671694
+            ],
+            "median_seconds": 21.233027731999755,
+            "peak_allocated_bytes": 76637696,
+            "peak_reserved_bytes": 98566144
+          }
+        },
+        "distance_backend": "legacy",
+        "distance_implementation_version": "distance-kl-legacy-v1",
+        "input_sha256": "32d767a69e44835a306587e396f664632e463f8a692c73a8787b644b4844c321",
+        "shape": [
+          64,
+          32,
+          72
+        ],
+        "eligible_distance_rows": 48,
+        "budget": {
+          "outer": 10,
+          "inner": 50,
+          "paths": 8,
+          "topk": 32,
+          "bins": 32
+        }
+      },
+      "batched": {
+        "state": "complete",
+        "fixture": "synthetic-ragged-v1-not-production-replay",
+        "config": {
+          "device": "cuda",
+          "backend": "batched",
+          "batch": 64,
+          "max_pois": 16,
+          "candidates": 64,
+          "seed": 135398,
+          "warmups": 2,
+          "repeats": 5,
+          "deterministic": false,
+          "profile": false,
+          "output": "validation/rtx3090-batched.json"
+        },
+        "torch_version": "2.0.0+cu117",
+        "threads": 1,
+        "dtype": "float32",
+        "tf32": false,
+        "gpu": "NVIDIA GeForce RTX 3090",
+        "source_sha256": {
+          "distance_kl.py": "8f6c4f99b4c31c51097fdd26524bf98526b0f61383ac5fa31d52ecdcd1ae16e8",
+          "constraint_projection.py": "d16f2f08e2fa6735905eaf2b5fa603cdf2d125ec678d3dd450fc717c5a6c66cb",
+          "tools/benchmark_distance_kl.py": "65da11927450c2da37cc3892e18f30d6404f2297b39137367d24588ee803c683",
+          "tools/distance_benchmark_fixture.py": "2dc2dcd435a1259fc2c2302be6d65ddd4451ba4514e87b6a7167ada80f9beb0e"
+        },
+        "timings": {
+          "distance_forward_backward": {
+            "seconds": [
+              0.0020097102969884872,
+              0.0024969070218503475,
+              0.0020306212827563286,
+              0.0020605050958693027,
+              0.0020306739024817944
+            ],
+            "median_seconds": 0.0020306739024817944,
+            "peak_allocated_bytes": 78104576,
+            "peak_reserved_bytes": 98566144
+          },
+          "projection_prepared_geometry": {
+            "seconds": [
+              1.79291579592973,
+              1.764114508870989,
+              1.7313532000407577,
+              1.794577042106539,
+              1.7346102660521865
+            ],
+            "median_seconds": 1.764114508870989,
+            "peak_allocated_bytes": 82696192,
+            "peak_reserved_bytes": 104857600
+          },
+          "projection_including_geometry": {
+            "seconds": [
+              1.7580418530851603,
+              1.777753478847444,
+              1.7560026641003788,
+              1.7606857968494296,
+              1.7749691922217607
+            ],
+            "median_seconds": 1.7606857968494296,
+            "peak_allocated_bytes": 82696192,
+            "peak_reserved_bytes": 104857600
+          }
+        },
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "input_sha256": "32d767a69e44835a306587e396f664632e463f8a692c73a8787b644b4844c321",
+        "shape": [
+          64,
+          32,
+          72
+        ],
+        "eligible_distance_rows": 48,
+        "budget": {
+          "outer": 10,
+          "inner": 50,
+          "paths": 8,
+          "topk": 32,
+          "bins": 32
+        }
+      }
+    },
+    "status": {
+      "state": "running",
+      "phase": "NewYork_PO1_OOD-batched-preflight-no_gumbel",
+      "pid": 8827,
+      "updated_at": 1791544598.1986067,
+      "completed_unique_results": 35,
+      "target_unique_results": 66,
+      "implementation_transition": "distance-batched-successor-v1",
+      "inherited_legacy_results": 35,
+      "new_batched_results": 0
+    },
+    "inheritance_audit": {
+      "state": "passed",
+      "inherited_results": 35,
+      "parent_snapshot_sha256": "eaec5455881f6b41e51e95ac165df29ad760ed9a3073737470246f6a0c864126",
+      "original_files_unchanged": true,
+      "whole_dataset_metrics_recomputed": true
+    },
+    "regression_logs": {
+      "unit-tests-1791544532879702118.log": "use_never_launches_worker (test_two_city.JobReuseTests) ... ok\ntest_best_uses_unrounded_mean_not_full_preference (test_two_city.TableTests) ... ok\ntest_incomplete_city_is_not_reported_as_final (test_two_city.TableTests) ... ok\ntest_method_and_ablation_headers_and_anchor_values_match (test_two_city.TableTests) ... ok\ntest_percent_precision_undefined_and_sample_sd (test_two_city.TableTests) ... ok\ntest_missing_constrained_row_rejected (test_two_city_recovery.RecoveryTests) ... ok\ntest_new_namespace_only_for_synthetic_jobs (test_two_city_recovery.RecoveryTests) ... ok\ntest_original_other_rows_constraints_and_context_unchanged (test_two_city_recovery.RecoveryTests) ... ok\ntest_preflight_resume_never_calls_newyork_generation (test_two_city_recovery.RecoveryTests) ... {\"recovery\": \"empty-fixture-v1\", \"verified_results\": 0, \"newyork_skipped\": true}\nok\ntest_reproduces_failure_and_corrected_fixture_validates (test_two_city_recovery.RecoveryTests) ... ok\ntest_ablation_switches_and_legacy_defaults (test_upgrade_integration.UpgradeIntegrationTests) ... ok\ntest_direct_baseline_ablation_and_cli_agree (test_upgrade_integration.UpgradeIntegrationTests) ... get Statistical Performance\nok\ntest_distance_poi_mask_reaches_projector (test_upgrade_integration.UpgradeIntegrationTests) ... ok\ntest_sampler_defaults_and_explicit_deterministic_flag (test_upgrade_integration.UpgradeIntegrationTests) ... ok\ntest_tables_reject_legacy_before_writing (test_upgrade_integration.UpgradeIntegrationTests) ... ok\n\n----------------------------------------------------------------------\nRan 137 tests in 9.275s\n\nOK\n"
+    },
+    "preflight_receipts": {}
+  },
+  "validation": {
+    "status": {
+      "state": "preflight-passed",
+      "phase": "ready-for-batched-continuation",
+      "pid": 8827,
+      "updated_at": 1791544911.1454089,
+      "completed_unique_results": 35,
+      "target_unique_results": 66,
+      "implementation_transition": "distance-batched-successor-v1",
+      "inherited_legacy_results": 35,
+      "new_batched_results": 0
+    },
+    "manifest_sha256": "9de7d944aa27529bf7695f9c589ef4ed898a2685cb8a437cfe40031cdfa70be8",
+    "launch": {
+      "pid": 9424,
+      "log": "/root/experiments/pcdg/two-city-distance-v2-batched-20261009-controller-01.log",
+      "mode": "formal-continuation",
+      "manifest_sha256": "9de7d944aa27529bf7695f9c589ef4ed898a2685cb8a437cfe40031cdfa70be8"
+    },
+    "inheritance_audit": {
+      "state": "passed",
+      "inherited_results": 35,
+      "parent_snapshot_sha256": "eaec5455881f6b41e51e95ac165df29ad760ed9a3073737470246f6a0c864126",
+      "original_files_unchanged": true,
+      "whole_dataset_metrics_recomputed": true
+    },
+    "snapshot_files": 867,
+    "preflight_receipts": {
+      "batched-preflight/Istanbul_PO1_OOD/receipt.json": {
+        "state": "passed",
+        "manifest_sha256": "9de7d944aa27529bf7695f9c589ef4ed898a2685cb8a437cfe40031cdfa70be8",
+        "batch_size": 64,
+        "normal_and_empty": true,
+        "deterministic_and_gumbel": true,
+        "full_two_gpu_equal": true,
+        "independent_rng_verified": true,
+        "artifacts": {
+          "batched-preflight/Istanbul_PO1_OOD/full/0/payload.pkl": "9ff5139621cc2bf39fb09fd2af527ff9832299e4f87dcff56c70b5e57512c19e",
+          "batched-preflight/Istanbul_PO1_OOD/full/1/payload.pkl": "70d826d6b343ce79a7c6e68ad03c72f087b67877c83db658743e0531ebea373d",
+          "batched-preflight/Istanbul_PO1_OOD/no_gumbel/0/payload.pkl": "fa8fbcbe6771f3c352c4e69eefcdaafa6fc132cded610ce14a02b3276a2c1c36",
+          "batched-preflight/Istanbul_PO1_OOD/no_gumbel/1/payload.pkl": "6fc71ac23eedc4ed88db3912cd2eab566ddaf90f5312390af70d01bc3bec4606",
+          "batched-preflight/Istanbul_PO1_OOD/full-gpu1/payload.pkl": "2bdf6604719b325a69f75f7eb03fa9089df8658fa762e23279fc52bfbbe67ebd"
+        }
+      },
+      "batched-preflight/NewYork_PO1_OOD/receipt.json": {
+        "state": "passed",
+        "manifest_sha256": "9de7d944aa27529bf7695f9c589ef4ed898a2685cb8a437cfe40031cdfa70be8",
+        "batch_size": 64,
+        "normal_and_empty": true,
+        "deterministic_and_gumbel": true,
+        "full_two_gpu_equal": true,
+        "independent_rng_verified": true,
+        "artifacts": {
+          "batched-preflight/NewYork_PO1_OOD/full/0/payload.pkl": "175416f7eac3b0e11d6124401f4e3c54ee65c40521c83bc523572e6c567e71a0",
+          "batched-preflight/NewYork_PO1_OOD/full/1/payload.pkl": "ebe562ac1a5d6bad2d5bcd3b45ea2c5ecc804fd138ab28e333c0eaffb6ca6d60",
+          "batched-preflight/NewYork_PO1_OOD/no_gumbel/0/payload.pkl": "eaafc87cf807c4523fb1fa30a3c67bcd2665cc82db9fd1587125691bce20e1b7",
+          "batched-preflight/NewYork_PO1_OOD/no_gumbel/1/payload.pkl": "0a93463406d5e95bbc31a117ae970a8711ef4431b89845ee28f8ae37c00c5a26",
+          "batched-preflight/NewYork_PO1_OOD/full-gpu1/payload.pkl": "9b744014a10d974b41d48ddc59139f102de377789fde83f9a5cefa922481d528"
+        }
+      }
+    },
+    "preflight_results": {
+      "batched-preflight/Istanbul_PO1_OOD/full-gpu1/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 25.266363255213946,
+        "peak_reserved_bytes": 459276288
+      },
+      "batched-preflight/Istanbul_PO1_OOD/full/1/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 25.588350581936538,
+        "peak_reserved_bytes": 459276288
+      },
+      "batched-preflight/Istanbul_PO1_OOD/full/0/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 25.471583197824657,
+        "peak_reserved_bytes": 459276288
+      },
+      "batched-preflight/Istanbul_PO1_OOD/no_gumbel/1/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 24.46818628674373,
+        "peak_reserved_bytes": 446693376
+      },
+      "batched-preflight/Istanbul_PO1_OOD/no_gumbel/0/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 24.823199490085244,
+        "peak_reserved_bytes": 446693376
+      },
+      "batched-preflight/NewYork_PO1_OOD/full-gpu1/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 27.86775151733309,
+        "peak_reserved_bytes": 599785472
+      },
+      "batched-preflight/NewYork_PO1_OOD/full/1/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 27.92696106992662,
+        "peak_reserved_bytes": 599785472
+      },
+      "batched-preflight/NewYork_PO1_OOD/full/0/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 27.863364649936557,
+        "peak_reserved_bytes": 599785472
+      },
+      "batched-preflight/NewYork_PO1_OOD/no_gumbel/1/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 26.869219546671957,
+        "peak_reserved_bytes": 656408576
+      },
+      "batched-preflight/NewYork_PO1_OOD/no_gumbel/0/result.json": {
+        "state": "complete",
+        "samples": 64,
+        "distance_backend": "batched",
+        "distance_implementation_version": "distance-kl-batched-v1",
+        "optimizer_steps": 5000,
+        "projection_calls": 10,
+        "spatial_seconds": 26.80684271361679,
+        "peak_reserved_bytes": 656408576
+      }
+    }
+  },
+  "runtime": {
+    "retirement": {
+      "state": "retired-after-successful-switch",
+      "old_processes": {
+        "917": {
+          "command": "/root/anaconda3/envs/pcdg-exp/bin/python -u -B tools/run_two_city_distance_v2.py --input-manifest /root/experiments/pcdg/two-city-v1/experiment_runs/two-city-v1/manifest.json --run-id two-city-distance-v2 --delivery-root D:/桌面/轨迹/轨迹/轨迹生成/实验/original/experiment_runs/two-city-distance-v2 ",
+          "state": "State:\tT (stopped)",
+          "start_ticks": "375888679"
+        },
+        "8334": {
+          "command": "/root/anaconda3/envs/pcdg-exp/bin/python -u -B tools/ablation_worker.py --job /root/experiments/pcdg/two-city-distance-v2/experiment_runs/two-city-distance-v2/Istanbul_PO1_OOD/seed-135398/full/rank-0/job.json ",
+          "state": "State:\tT (stopped)",
+          "start_ticks": "382258477"
+        },
+        "8335": {
+          "command": "/root/anaconda3/envs/pcdg-exp/bin/python -u -B tools/ablation_worker.py --job /root/experiments/pcdg/two-city-distance-v2/experiment_runs/two-city-distance-v2/Istanbul_PO1_OOD/seed-135398/full/rank-1/job.json ",
+          "state": "State:\tT (stopped)",
+          "start_ticks": "382258477"
+        }
+      },
+      "signal": "SIGKILL on verified stopped processes, preventing old failure handlers from modifying frozen artifacts",
+      "preserved_files": 867,
+      "original_and_snapshot_hashes_valid": true,
+      "original_manifest_sha256": "615dc569dd2d255c80ab80ff03b70337694392edc445a4809beb0af83a50294f",
+      "new_controller_pid": 9424
+    },
+    "status": {
+      "state": "running",
+      "phase": "Istanbul_PO1_OOD-135398-full",
+      "pid": 9424,
+      "updated_at": 1791545577.674426,
+      "completed_unique_results": 35,
+      "target_unique_results": 66,
+      "implementation_transition": "distance-batched-successor-v1",
+      "inherited_legacy_results": 35,
+      "new_batched_results": 0
+    },
+    "progress": {
+      "0": {
+        "completed_samples": 2048,
+        "total_samples": 2457,
+        "phase": "spatial",
+        "elapsed_seconds": 800.9364710832015
+      },
+      "1": {
+        "completed_samples": 2048,
+        "total_samples": 2457,
+        "phase": "spatial",
+        "elapsed_seconds": 809.8046941873617
+      }
+    }
+  },
+  "rtx_correctness": {
+    "tests": 10,
+    "passed": true,
+    "batch": 64,
+    "steps": 500,
+    "gumbel_max_abs_logits": 2.682209014892578e-7,
+    "deterministic_max_abs_logits": 0.0000040531158447265625,
+    "changed_argmax": 0,
+    "changed_sampled_tokens": 0
+  },
+  "regression": {
+    "local_passed": 136,
+    "local_skipped": 1,
+    "server_passed": 137
+  },
+  "notes": [
+    "Benchmark executed before LF repack; all 113 files verified equivalent after newline normalization.",
+    "Two unfinished legacy shards had no on-disk sampling checkpoint and were recomputed; 35 complete results and 8 completed time caches were retained.",
+    "Old stopped processes retired only after new workers demonstrated actual progress; 867 original and snapshot files reverified."
+  ]
+}

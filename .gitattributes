@@ -1,0 +1,2 @@
+# Linux launch scripts must also remain LF in Git archives made on Windows.
+*.sh text eol=lf

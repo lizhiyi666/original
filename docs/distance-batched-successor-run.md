@@ -55,3 +55,23 @@ bash tools/launch-distance-batched-successor.sh --resume
 接续交付包包含继承副本，因此不依赖旧实验达到 server-complete。原始 metadata 中的服务器路径不重写，审计通过 canonical mapping 指向经过 SHA-256 校验的副本。仅本地 `local-delivery-audit.json` 验证通过后，才能宣布完整任务完成。
 
 本文件是运行约定；实际部署哈希、PID、验证结果及启动状态由本次迁移完成后的执行记录补充。
+
+## 跨平台部署注意
+
+从 Windows 生成 Linux 代码包时使用 `git -c core.autocrlf=false archive`，并检查 `.sh` 不含 CR 字节。仓库 `.gitattributes` 另将 `*.sh` 固定为 LF。部署包只包含跟踪的源码、配置、脚本、测试和必要说明，不包含数据集、权重、outputs、依赖或密钥。
+
+本次第一份代码包受 `core.autocrlf=true` 影响，脚本在 Python 启动前报 `pipefail` 选项错误；失败代码目录已保留为 `two-city-distance-v2-batched-20261009-deployment-crlf`，失败日志 01/02 未删除。修复包与原包的 113 个文件在统一换行后逐字节一致，仅修复跨平台换行；原始实验代码和结果未修改。
+
+Linux 修复包 SHA-256：`5cbb34c6cb873971a8a43153035ec5bcb7281fa0126b0ea0b2a9e8d21ea94356`；部署代码提交：`785f7c76f083cd72b81572b8471978f3fdfc2c19`。真实模型预检日志为 `/root/experiments/pcdg/two-city-distance-v2-batched-20261009-preflight-03.log`。
+
+## 已验证的切换结果
+
+- 本机回归 136 项通过、1 项 Linux 专用测试跳过；服务器回归 137 项全部通过。RTX 3090 上 batch=64 的扩展正确性测试 10 项全部通过。
+- RTX 3090 合成基准（2 次预热、5 次测量、同卡同输入）完整投影含距离几何初始化：legacy 21.233 秒、batched 1.761 秒，耗时减少 91.7%。该数字不是完整真实模型采样加速倍数。
+- 两城市真实模型预检均通过：正常/空轨迹、确定性/Gumbel、相同 Full 输入跨 GPU 输出一致，均保持每批 64 条、5000 次优化更新。正常 Full 预检空间采样为 NewYork 约 27.86 秒/批、Istanbul 约 25.47 秒/批。
+- 867 个旧目录文件及其副本 SHA-256 已复核；继承结果 35 份，已完成时间缓存 8 份。旧 source/manifest/结果未改写。
+- 正式接续控制器 PID9424，初始 worker PID9509/9510；仅作本次启动证据，后续必须核验真实命令。日志：`/root/experiments/pcdg/two-city-distance-v2-batched-20261009-controller-01.log`。
+- 新 worker 已产生真实批次进度后，才结束旧的暂停进程 PID917/8334/8335，并再次验证全部旧文件与副本。结束时使用针对已核验停止进程的 SIGKILL，避免旧程序的退出/失败处理器回写封存文件；没有终止新 worker。
+- 接续 manifest SHA-256：`9de7d944aa27529bf7695f9c589ef4ed898a2685cb8a437cfe40031cdfa70be8`；原始 manifest SHA-256：`615dc569dd2d255c80ab80ff03b70337694392edc445a4809beb0af83a50294f`。
+
+完整计时样本、预检产物指纹、进程退出证据和一次正式进度快照见 [执行记录](benchmarks/distance-batched-successor-20261009.json)。这些是迁移成功的证据，**不是 66/66 已完成的证明**；实时状态以服务器新目录为准。
