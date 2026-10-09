@@ -1,0 +1,58 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Human mobility and POI modeling.}
+Classical studies established that human movement is highly regular yet only
+boundedly predictable~\cite{gonzalez2008mobility,song2010predictability}. A large
+body of work predicts the \emph{next} location from history using attentional,
+spatio-temporal, and graph-enhanced
+models~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, and diffusion models
+have recently been applied to next-POI and sequential
+recommendation~\cite{long2024cloudedge,wang2024dsdrec,chen2025sequentialdiffusion,qin2023diffpoi,wang2025gnprsid}.
+These methods target prediction or ranking of a single next step and do not emit a
+complete, constraint-satisfying sequence of time-stamped, categorized visits.
+
+\paragraph{Synthetic trajectory and mobility generation.}
+Data-driven generation spans GAN/Seq2Seq
+models~\cite{cao2021trajgen,jiang2023tstrajgen,xiong2024trajsgan,lin2023mbpgail},
+point-process and neural-ODE
+generators~\cite{yuan2022activity,long2023synthetic}, imitation- and
+privacy-oriented
+approaches~\cite{feng2020simulate,wang2023pategail,sun2023sprt,rao2023cats,hu2024retrasyn,netzler2024privacy},
+and, increasingly, diffusion
+models~\cite{zhu2023difftraj,yuan2023stdpp,gong2025stcdm,chen2024trajgdm,wei2024diffrntraj,rao2025seed,long2026population}
+and LLM-based
+generators~\cite{zhang2024mobglm,hsu2024trajgpt,li2025geollama,haydari2026mobilitygpt}.
+Closest to our backbone, Marionette performs fine-grained conditional generation
+of spatiotemporal trajectories with a diffusion point process and a
+category-to-POI cascade~\cite{deng2025marionette}, and related benchmarks study
+imitative generation quality~\cite{deng2025mirage}. These works pursue
+distributional realism or coarse conditioning; none enforces a \emph{sample-level
+partial order over activity categories} within the generated sequence.
+
+\paragraph{Discrete diffusion.}
+Discrete diffusion extends denoising diffusion~\cite{ho2020ddpm} to categorical
+data via structured transition matrices~\cite{austin2021d3pm}, concrete score
+matching~\cite{meng2022concrete}, score-entropy~\cite{lou2024sedd}, and masked
+formulations~\cite{sahoo2024mdlm}; guidance mechanisms steer discrete generation
+toward conditions~\cite{schiff2025guidance}. We adopt a discrete-diffusion
+backbone and intervene at sampling time rather than changing training.
+
+\paragraph{Controllable and constrained generation.}
+ControlTraj injects road-topology constraints into trajectory
+diffusion~\cite{zhu2024controltraj}; Geo-Llama conditions an LLM on mobility
+constraints~\cite{li2025geollama}. In NLP, structured decoding enforces grammars
+or DAG automata~\cite{geng2023grammar,chen2024controldag}, and precedence
+constraints are studied in temporal planning~\cite{hu2011precedence}. Most
+relevant methodologically, Constrained Discrete Diffusion (CDD) embeds
+differentiable constraint optimization into discrete-diffusion sampling via KL
+projection, Gumbel-softmax relaxation, and augmented Lagrangian
+updates~\cite{cardei2025cdd}. \pcdg \emph{specializes} this sampling-time
+projection paradigm to the previously unaddressed case of activity-category
+precedence in joint temporal\,+\,category\,+\,POI check-in generation: we
+contribute the order/existence energy formulation for sample-level partial orders,
+a category-position-restricted projection coupled with a spatial
+distance-distribution regularizer on POI positions, and---unlike prior controllable
+generators that retrain or post-process---a training-free controller that we show
+outperforms a \emph{fully retrained} partial-order conditional model on constraint
+satisfaction (\S\ref{sec:experiments}).

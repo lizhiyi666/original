@@ -1,0 +1,144 @@
+\section{Method}
+\label{sec:method}
+
+\pcdg is a \emph{training-free} control layer that is attached to a frozen,
+pre-trained conditional check-in generator and acts only during reverse-diffusion
+sampling. We first recall the backbone generator (\S\ref{sec:method:backbone}),
+then formalize the partial-order constraints as differentiable energies
+(\S\ref{sec:method:energy}), describe the KL-preserving augmented-Lagrangian
+projection (\S\ref{sec:method:project}) and the complementary distance
+regularizer (\S\ref{sec:method:distance}), and finally specify where the control
+is applied in the reverse process (\S\ref{sec:method:placement}).
+
+\subsection{Backbone: conditional joint discrete diffusion}
+\label{sec:method:backbone}
+We build on a conditional generator that models arrival times with a diffusion
+point process and the discrete content (categories and POIs) with a conditional
+discrete diffusion model, following the fine-grained trajectory generator of
+\citet{deng2025marionette}. The temporal branch samples event times; the discrete
+branch represents a sequence as a token string
+$\mathbf{x}=[\textsc{start},\,k_{1:n},\,\textsc{sep},\,l_{1:n},\,\textsc{end}]$,
+with a \emph{category mask} and a \emph{POI mask} identifying the two segments.
+Categories and POIs use separate absorbing-state transition
+matrices~\cite{austin2021d3pm}; a Transformer denoiser with an
+$\mathbf{x}_0$-parameterization predicts, at each reverse step, per-position
+logits $\mathbf{z}\in\mathbb{R}^{V\times L}$ over the joint vocabulary of size $V$
+across the $L$ positions, from which the posterior $p(\mathbf{x}_{s-1}\!\mid\!\mathbf{x}_s)$
+and the next discrete state are sampled. \textbf{The backbone is used as-is and is
+never retrained by \pcdg}; our contribution modifies only the per-step sampling
+distribution $\mathbf{z}$.
+
+\subsection{Partial-order constraints as differentiable energies}
+\label{sec:method:energy}
+Given the sample-level matrix $\Mmat$, we parse it into a set of pairwise
+constraints $\{(a,b): \Mmat[a,b]>\tfrac12\}$. To make a constraint differentiable
+in the logits, we relax the hard categorical choice at each position into a
+distribution. With temperature $T$ and (optionally) Gumbel noise $\mathbf{g}_l$,
+\begin{equation}
+  \boldsymbol{\pi}_l = \mathrm{softmax}\big((\mathbf{z}_l + \mathbf{g}_l)/T\big)\in\Delta^{V-1},
+  \qquad l=1,\dots,L .
+\end{equation}
+We restrict attention to category positions $\mathcal{P}_k$ (via the category
+mask) and to the category slice of the vocabulary, writing
+$\pi^{\mathrm{cat}}_l(a)$ for the relaxed probability that position
+$l\in\mathcal{P}_k$ takes category $a\in\mathcal{C}$. For a constraint $(a,b)$ let
+$P^A_l=\pi^{\mathrm{cat}}_l(a)$ and $P^B_l=\pi^{\mathrm{cat}}_l(b)$. We define two
+energies:
+\begin{align}
+  g^{\mathrm{ord}}_{(a,b)} &= \sum_{l\in\mathcal{P}_k}
+     \Big(\textstyle\sum_{l'<l} P^B_{l'}\Big)\, P^A_l,
+     \label{eq:order}\\[2pt]
+  g^{\mathrm{ex}}_{(a,b)}  &= \relu\!\Big(1-\textstyle\sum_{l} P^A_l\Big)
+                           + \relu\!\Big(1-\textstyle\sum_{l} P^B_l\Big).
+     \label{eq:exist}
+\end{align}
+The \emph{order energy}~\eqref{eq:order} is the expected number of inverted pairs,
+i.e.\ the probability mass of a $b$ appearing \emph{before} an $a$; it is zero iff
+no $b$ precedes any $a$. The \emph{existence energy}~\eqref{eq:exist} penalizes an
+expected count below one for either constrained category, which prevents the model
+from trivially satisfying ordering by \emph{omitting} $a$ or $b$. Both energies are
+computed only over category positions; POI logits do not enter
+Eqs.~\eqref{eq:order}--\eqref{eq:exist}.
+
+\subsection{KL-preserving augmented-Lagrangian projection}
+\label{sec:method:project}
+At a controlled reverse step, we project the backbone logits to reduce constraint
+violations while staying close to the model's own distribution. Let
+$\mathbf{y}^{(0)}=\mathbf{z}$ be the detached backbone logits and $\mathbf{y}$ a
+trainable copy. We solve, per sequence,
+\begin{equation}
+  \min_{\mathbf{y}}\; \dkl\!\big(\mathrm{softmax}(\mathbf{y})\,\big\|\,\mathrm{softmax}(\mathbf{y}^{(0)})\big)
+  \quad\text{s.t.}\quad g^{\mathrm{ord}}_{(a,b)}\le\tau,\; g^{\mathrm{ex}}_{(a,b)}\le\tau\;\;\forall(a,b),
+  \label{eq:constrained}
+\end{equation}
+where the KL term anchors the projected distribution to the base model so that
+fidelity is preserved away from the constrained categories. We optimize the
+augmented-Lagrangian relaxation of~\eqref{eq:constrained}: with
+$\delta^{\bullet}=\relu(g^{\bullet}-\tau)$,
+\begin{equation}
+\begin{aligned}
+  \mathcal{L}(\mathbf{y}) =\; & w_{\mathrm{kl}}\,\dkl
+   + \!\!\sum_{(a,b)}\! w_{\mathrm{ord}}\Big(\lambda^{\mathrm{ord}}\delta^{\mathrm{ord}}
+     + \tfrac{1}{2}\mu^{\mathrm{ord}}(\delta^{\mathrm{ord}})^2\Big)\\
+   & + \!\!\sum_{(a,b)}\! w_{\mathrm{ex}}\Big(\lambda^{\mathrm{ex}}\delta^{\mathrm{ex}}
+     + \tfrac{1}{2}\mu^{\mathrm{ex}}(\delta^{\mathrm{ex}})^2\Big).
+\end{aligned}
+\label{eq:auglag}
+\end{equation}
+An \emph{inner} loop takes projected-gradient steps on $\mathbf{y}$ (SGD with
+learning rate $\eta$, gradient-norm clipping, updates restricted to positions of
+constrained sequences). An \emph{outer} loop evaluates the \emph{hard} violations
+$\hat{\delta}$ (from the $\arg\max$ one-hot assignment, not the relaxation) and
+updates the dual variables,
+\begin{equation}
+  \lambda \leftarrow \lambda + \mu\,\hat{\delta},\qquad
+  \mu \leftarrow \min(\alpha\,\mu,\;\mu_{\max})\ \text{if}\ \hat{\delta}>\tau_{\mathrm{tol}},
+  \label{eq:dual}
+\end{equation}
+stopping early once $\max\hat{\delta}<\tau_{\mathrm{tol}}$. Evaluating the
+multiplier update on hard violations lets the penalty grow precisely for the
+sequences and constraints that remain unsatisfied, rather than applying a uniform
+fixed penalty. Crucially, the projection reweights the sampling distribution
+over category positions only; it performs \emph{no} POI candidate filtering and
+imposes \emph{no} hard category$\rightarrow$POI consistency mask.
+
+\subsection{Distance-distribution regularization}
+\label{sec:method:distance}
+Enforcing category order perturbs the category marginals and, indirectly, the
+induced spatial statistics. To preserve geographic realism we add an independent
+distance regularizer that matches the \emph{population} distribution of travel
+length. From the training split only, we compute the cumulative great-circle
+(Haversine) route length $d$ of every training sequence with at least two POIs and
+summarize it as a soft histogram $H_{\mathrm{train}}$ over $\log(1+d)$ with fixed
+Gaussian bins (the reference is content-hashed and cached, never stored in the
+model). During projection, for each POI position we fix the top-$\kappa$ candidate
+POIs under the backbone and draw $P$ routes with a straight-through
+Gumbel-softmax (exact distance on the forward pass, a bilinear surrogate on the
+backward pass), forming a differentiable route-length histogram
+$H_{\mathrm{proj}}(\mathbf{y})$. We add the term
+\begin{equation}
+  w_{\mathrm{dist}}\,\dkl\!\big(H_{\mathrm{train}}\,\|\,H_{\mathrm{proj}}(\mathbf{y})\big)
+  \label{eq:distance}
+\end{equation}
+to the objective~\eqref{eq:auglag}. Unlike the order/existence energies, this term
+acts on \emph{POI-position} logits, and it is a batch-level distribution-matching
+regularizer rather than a per-sample hard constraint; it is applied only to
+sequences with at least two POIs and uses an independent random stream. Its weight
+is not tuned per city and is not guaranteed to improve every fidelity metric; we
+quantify its effect via the \textsc{No Distance KL} ablation
+(\S\ref{sec:experiments}).
+
+\subsection{Placement in the reverse process and joint sampling}
+\label{sec:method:placement}
+The control is applied in the \emph{late} reverse-diffusion steps---where the
+predicted categories are informative enough for the energies to be
+meaningful---specifically during the last $K$ steps and every $f$ steps therein.
+At each such step, \pcdg replaces the backbone category-position logits with their
+projected values (and, when enabled, the distance-adjusted POI-position logits),
+and the next discrete state is obtained by the backbone's ordinary joint
+categorical sampling over the full token sequence. The temporal branch is
+unchanged. Because every operation reads and rewrites only the per-step sampling
+logits of a frozen model, \pcdg adds no trainable parameters and requires no
+retraining, and it reduces to the unconstrained backbone when the projection is
+disabled. Algorithm pseudocode and default hyper-parameters are given in
+Appendix~\ref{app:algo}. \todo{add Fig.~1 (framework) and Fig.~2 (one projected reverse step); export from figure\_build/}

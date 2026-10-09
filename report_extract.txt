@@ -1,0 +1,517 @@
+嗨！thesis
+
+
+
+
+                哈尔滨工业大学
+
+
+           硕士学位论文开题报告
+
+
+           题 目：在此填写论文题目
+
+
+
+
+      院         （系）    在此填写学院名称
+
+      学 科/专 业          在此填写学科/专业
+
+      导          师    在此填写导师姓名及职称
+
+      研     究    生      在此填写姓名
+
+      学          号      在此填写学号
+
+      开题报告日期            2026 年 8 月
+
+
+
+
+                 深圳校区教务部 制
+                                                哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+                                                                           目 录
+
+1 课题的来源及研究的目的和意义 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                                 1
+    1.1 课题来源 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       1
+    1.2 研究的目的和意义 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                         1
+         1.2.1 研究目的 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          1
+         1.2.2 理论意义 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          2
+         1.2.3 工程意义与应用价值 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                 2
+2 国内外研究现状及分析 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                               3
+    2.1 国内外研究现状 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                    3
+         2.1.1 人类移动规律与 POI 行为建模 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                                3
+         2.1.2 国内研究团队的 POI 与移动生成研究 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                                             3
+         2.1.3 活动轨迹与合成移动数据生成 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                                   4
+         2.1.4 扩散模型与离散扩散模型 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                         5
+         2.1.5 可控轨迹生成与序列级约束 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                              5
+         2.1.6 序列级结构与偏序约束. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                     5
+    2.2 国内外文献综述及简析 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                   6
+         2.2.1 已有研究成果 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                  6
+         2.2.2 现有研究不足 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                  6
+         2.2.3 本文研究定位 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                  7
+3 主要研究内容及研究方案 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                                    8
+    3.1 研究内容 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       8
+    3.2 研究方案 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       8
+4 预期目标 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   9
+    4.1 预期目标 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       9
+5 已完成的研究工作及进度安排 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+    5.1 已完成的研究工作 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+    5.2 进度安排 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+6 已具备的研究条件和所需条件及经费 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+    6.1 实验室条件和经费保障 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+    6.2 所需条件及经费 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+7 预计困难及解决方案 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+    7.1 预计困难与技术难点 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+    7.2 解决方案 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+参考文献 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+              哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+         1   课题的来源及研究的目的和意义
+
+1.1 课题来源
+   随着移动互联网、位置感知设备以及基于位置的社交网络快速发展，用户在
+兴趣点产生的签到数据为研究人类移动规律和时空活动模式提供了重要数据基础。
+既有研究表明，人类移动行为具有回访性和个体差异，同时具有有限而非完全确
+定的可预测性 [1,2] 。因此，POI 打卡数据应被视为具有时间顺序、空间转移和活动
+语义依赖的离散事件序列。
+   真实移动轨迹包含位置、活动时间和行为偏好等敏感信息，直接共享受到隐
+私保护和数据获取成本的限制；长尾行为和特定场景样本的稀缺性也限制了其在
+仿真与分析中的使用。生成具有统计真实性的合成移动数据，可以在降低直接共
+享风险的同时，为城市计算、移动行为仿真和下游任务提供数据补充。现有研究
+已经证明，数据驱动方法能够学习人类移动中的时空依赖，并兼顾数据保真度、隐
+私保护和任务效用 [3–6] 。
+   对于本文关注的 POI 打卡序列，核心问题不仅是生成符合真实分布的访问事
+件，还包括根据应用场景指定的活动类别先后关系生成完整序列。例如，系统可
+能要求休闲活动先于餐饮活动，或景点访问先于购物活动。这类要求作用于多个
+序列位置之间的全局语义关系，不能仅通过调整单个 POI 的生成概率实现。现有
+可控轨迹生成和离散序列约束研究为采样期控制提供了技术启发 [7,8] ，但面向 POI
+活动类别偏序的联合生成问题仍有待研究。
+   基于上述背景，本课题拟研究扩散模型驱动的离散 POI 序列生成方法，并在
+逆扩散采样过程中引入活动类别偏序约束，使生成序列在保持统计真实性、时空
+合理性和多样性的同时满足指定的类别顺序关系。
+
+1.2 研究的目的和意义
+1.2.1 研究目的
+   本课题拟构建一种面向 POI 打卡序列的约束生成方法，以扩散模型为基本生
+成框架，学习真实用户访问序列中的时间、空间、活动类别和 POI 依赖关系，并
+根据给定的类别偏序条件生成完整的 POI 打卡序列。具体目标包括：其一，研究
+适用于离散 POI 打卡序列的扩散生成方法，学习 POI 访问分布、序列转移关系及
+活动类别关联规律；其二，将“活动类别 A 先于活动类别 B”形式化为可计算的
+序列约束，并研究其与离散逆扩散采样过程的结合方式；其三，在约束满足率、生
+成真实性、多样性以及空间和时序合理性之间进行权衡，通过与无约束生成模型
+                       -1-
+               哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+及其他可控轨迹生成方法比较，验证所提出方法的有效性。
+
+1.2.2 理论意义
+     首先，本文将离散扩散模型引入 POI 打卡序列生成任务。POI 和活动类别均
+属于离散变量，D3PM 为离散状态空间中的去噪生成提供了转移矩阵和训练目标，
+Concrete Score Matching 则为离散变量的可微优化提供了理论工具 [9,10] 。在此基础
+上开展 POI 序列生成研究，有助于拓展离散扩散模型在人类移动行为建模中的应
+用。
+   其次，本文关注活动类别之间的序列级语义约束。与单个位置、时间窗或道路
+拓扑约束相比，类别偏序关系需要跨越多个序列位置协调生成结果。将偏序约束
+与类别/POI 联合逆扩散过程结合，可以为离散序列生成中的结构化语义控制提供
+一种研究路径。
+   再次，本文将生成质量和约束满足统一纳入生成过程。CDD 的采样期投影思
+想表明，可以在不重新训练生成模型的情况下，将可微约束优化嵌入离散扩散采
+样，从而减少生成后过滤或重排导致的分布偏移 [8] 。本文将在 POI 移动行为场景
+中考察这一思想的适用性。
+
+1.2.3 工程意义与应用价值
+     在移动行为仿真、城市计算、位置推荐和智慧交通等领域，高质量且可控的
+合成移动数据具有应用价值。首先，基于真实用户数据训练生成模型并输出具有
+统计真实性的合成 POI 序列，可以降低直接共享真实轨迹带来的隐私风险，并为
+受数据获取限制的研究提供补充数据。其次，可依据预设活动类别顺序生成特定
+场景下的用户移动序列，用于分析不同活动组合下的时空分布和行为模式。再次，
+具有明确类别顺序的 POI 序列能够表达用户潜在的出行意图，为场景化 POI 组合
+生成和个性化服务提供数据基础。最后，可控移动行为生成还可支持特定活动模
+式下的人群流动模拟，为城市活动分析和智能交通研究提供辅助。
+
+
+
+
+                          -2-
+                    哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+                2    国内外研究现状及分析
+
+2.1 国内外研究现状
+2.1.1 人类移动规律与 POI 行为建模
+   人类移动规律研究为 POI 序列建模提供了行为基础。González 等基于大规模
+移动通信数据分析了个体移动距离、访问地点和回访行为，指出人类移动具有显
+著的个体规律性和可重复性 [1] 。Song 等进一步利用熵和信息理论估计人类移动的
+理论可预测性上限，表明移动行为具有可预测结构，但仍受到个体随机性和活动选
+择不确定性的限制 [2] 。上述结论说明，POI 序列生成既需要学习重复性和周期性，
+也需要保留行为多样性，不能将用户行为简化为确定性规则。
+   在预测模型方面，DeepMove 使用带注意力机制的循环网络联合建模历史轨
+迹、周期性移动模式和时间上下文，用于下一位置预测 [11] 。STAN 从时间间隔、空
+间距离和历史访问序列中提取时空信息，构建下一位置推荐模型 [12] 。GETNext 进
+一步构建轨迹流图并利用 Transformer 建模 POI 转移和长程序列依赖 [13] 。这些研究
+揭示了时间、空间、历史访问和轨迹转移对 POI 选择的重要作用，但其主要任务
+是预测或排序下一位置，尚不能直接生成带时间戳、活动类别和 POI 的完整序列，
+也没有显式表达多个活动类别之间的全局偏序关系。
+
+2.1.2 国内研究团队的 POI 与移动生成研究
+   国内研究团队近年来在 POI 推荐、活动轨迹生成和时空扩散建模方面形成了
+连续研究方向。Feng 等提出 DeepMove，利用注意力循环网络建模历史移动、周
+期性模式和时间上下文 [11] ；其后，Feng 等进一步提出 Learning to Simulate Human
+Mobility，将自注意力序列生成器、城市结构先验以及空间连续性和时间周期性预
+训练结合，用于合成移动数据 [3] 。Yuan 等围绕活动轨迹生成、不规则时空动态和时
+空扩散点过程开展研究，分别从神经微分方程和扩散点过程角度刻画活动事件的
+时间–空间联合分布 [5,14] 。Long 等将变分点过程用于合成人类轨迹生成，并进一步
+将扩散模型引入云边端协同的下一 POI 推荐 [6,15] 。Wang 等提出 DSDRec，将深层
+语义提取与扩散模型结合用于下一 POI 推荐 [16] 。这些工作均由中国研究团队完成
+并发表于国际会议或期刊，表明国内研究已从 POI 预测逐步拓展到轨迹生成、隐
+私保护和扩散式推荐；但其主要目标仍是下一 POI 推荐或无偏序约束的轨迹生成，
+尚未解决活动类别偏序约束下的完整 POI 序列生成问题。
+   近期研究开始将扩散模型用于 POI 推荐。Diffusion-Based Cloud-Edge-Device
+Collaborative Learning for Next POI Recommendations 将扩散模型用于云边端协同的
+
+                              -3-
+                  哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+下一 POI 推荐，并将协同学习与数据隐私场景结合 [15] 。DSDRec 通过深层语义提
+取和扩散模型增强下一 POI 推荐中的语义与时空信息 [16] ；Unlocking the Power of
+Diffusion Models in Sequential Recommendation 则考察扩散模型在序列推荐中的建
+模能力 [17] 。这些工作补充了扩散模型在 POI/序列推荐中的应用证据，但其任务目
+标仍是下一位置预测、候选排序或推荐序列建模，不能等同于生成带时间戳、活
+动类别和 POI 的完整移动序列，也未直接处理序列级类别偏序约束。
+   从近期发展看，国内外研究正在由无条件模仿生成转向条件化、可操控和协
+同式生成：Marionette 将全局/局部上下文、时间点过程和离散扩散结合，用于细粒
+度人类轨迹生成 [18] ；云边端协同扩散推荐将生成模型与隐私保护场景结合 [15] ；离
+散扩散 guidance 研究则尝试通过分类器引导或无分类器引导改善离散序列的可控
+生成 [19] 。这些新兴范式提高了条件控制、隐私保护和生成质量，但尚未解决 POI
+活动类别偏序关系在完整序列生成过程中的显式满足问题。
+
+2.1.3 活动轨迹与合成移动数据生成
+   随着隐私保护和数据效用需求增加，研究者开始从机制模型和预测模型转向
+数据驱动的轨迹生成。Learning to Simulate Human Mobility 通过自注意力序列生成
+网络刻画复杂时间转移，并将人类移动规律和城市结构先验引入生成对抗框架，通
+过空间连续性和时间周期性预训练提高合成移动数据质量 [3] 。TrajGen 采用生成对
+抗网络和 Seq2Seq 模型生成与原始数据解耦的移动轨迹，并以统计特征保持、道
+路地图更新和 OD 需求估计评价合成数据效用 [4] 。
+   Activity Trajectory Generation 针对活动数据的稀疏性和不规则采样，利用神经
+                  并通过生成对抗模仿学习生成具有保真
+微分方程建模连续流动与活动点瞬时更新，
+度和数据效用的人工活动轨迹 [5] 。Practical Synthetic Human Trajectories Generation
+Based on Variational Point Processes 则从变分点过程角度处理不规则时间、空间移
+动和个体差异，为合成人类轨迹提供了概率生成方法 [6] 。这些工作表明，完整轨迹
+生成需要同时考虑时空依赖、个体差异、统计保真和下游任务效用，但尚未针对
+活动类别之间的偏序约束设计采样机制。
+   Marionette 进一步面向细粒度条件下的人类轨迹生成，联合利用全局和局部移
+动上下文，提取序列级与事件级条件，并分别采用扩散式时间点过程和类别到 POI
+的级联离散扩散建模时间、空间动态 [18] 。其时间、活动类别和 POI 的事件表示与
+本文研究对象具有直接对应关系，可作为本文联合生成框架的主要参考；但该方
+法并未针对活动类别之间的样本级偏序关系设计约束投影。
+
+
+
+                                -4-
+               哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+2.1.4 扩散模型与离散扩散模型
+  DDPM 通过前向加噪和反向去噪学习复杂数据分布，为扩散生成模型奠定了
+基本框架 [20] 。针对离散变量，D3PM 将扩散模型推广到离散状态空间，通过可设
+计的离散状态转移矩阵和去噪目标实现离散序列生成 [9] 。Concrete Score Matching
+进一步利用 Concrete 分布对离散变量进行连续松弛，构造适用于离散数据的 score
+matching 目标，为离散概率分布的梯度优化提供了方法基础 [10] 。
+  在时空轨迹场景中，Spatio-temporal Diffusion Point Processes 使用扩散模型学习
+事件时间和空间位置的联合分布，并通过时空协同注意力捕捉二者的耦合关系 [14] 。
+DiffTraj 则提出时空扩散概率模型和 Traj-UNet，从噪声中逐步重建 GPS 轨迹，在
+地理分布保真度和下游轨迹分析方面取得较好结果 [21] 。这些研究说明扩散模型已
+经能够处理时空事件、连续轨迹以及离散类别/位置序列，但现有工作对跨多个位
+置的活动类别偏序约束仍缺乏系统讨论。
+
+2.1.5 可控轨迹生成与序列级约束
+  可控轨迹生成研究主要围绕道路拓扑、空间范围和时间条件展开。ControlTraj
+将道路网络拓扑约束引入扩散轨迹生成过程，以提高生成轨迹的道路连通性和结
+构可行性 [7] 。该研究表明，约束可以在采样期介入生成过程，而不必在生成完成后
+进行过滤或交换；但道路拓扑属于连续空间或网络结构约束，与 POI 活动类别之
+间的语义偏序关系存在差异。
+  在离散序列生成方面，Constrained Discrete Diffusion 将可微约束优化直接嵌入
+离散扩散采样，结合 KL 投影、Gumbel-Softmax 和增广拉格朗日机制满足序列级
+逻辑、属性和安全约束 [8] 。该方法为本文提供了采样期约束的直接技术启发。本文
+拟将其通用离散约束思想具体化为 POI 活动类别的偏序约束，并结合时间、类别
+和 POI 的联合生成过程进行研究。
+
+2.1.6 序列级结构与偏序约束
+  在结构化序列约束研究中，先序约束用于描述事件或活动之间必须满足的先
+后关系，并可被发现和用于时序规划 [22] 。语法约束解码通过在生成过程中引入形
+式语法，使结构化文本满足预定义的合法性条件 [23] ；Control-DAG 则利用有向无环
+结构和加权有限状态自动机，对非自回归生成施加结构化约束 [24] 。这些研究分别
+从规划约束、形式语法和图结构解码角度说明了维持序列合法性的可行路径，但
+其实现通常依赖规划搜索、自动机或自回归/非自回归解码状态，尚未直接嵌入类
+别与 POI 联合离散扩散过程。
+  对于离散扩散自身，掩码扩散语言模型和 SEDD 分别从掩码去噪、离散 score
+
+                            -5-
+                哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+entropy 等角度改进离散序列建模 [25,26] 。离散扩散 guidance 进一步推导了 classifier-
+free 和 classifier-based guidance，使离散生成能够在条件引导下进行控制 [19] 。与通
+过 guidance 调整条件生成方向不同，本文拟采用显式偏序能量、KL 投影和增广拉
+格朗日优化，直接降低类别偏序违反程度，并将投影范围限定在类别 logits 上，以
+减少对 POI 联合分布的非必要扰动。
+    因此，本文将“活动类别 𝐴 先于活动类别 𝐵”表示为样本级偏序关系，并在
+逆扩散采样过程中将其转化为可微约束能量。该处理连接了先序约束的语义表达
+与离散扩散的概率采样过程，为 POI 序列中的全局类别顺序控制提供研究基础。
+
+2.2 国内外文献综述及简析
+2.2.1 已有研究成果
+    综上，现有研究已经形成三方面基础能力。第一，人类移动规律和 POI 预测
+研究揭示了回访性、周期性、个体差异以及时间、空间和历史访问上下文对行为
+选择的影响 [1,2,11–13] 。第二，活动轨迹生成、点过程生成和扩散轨迹生成研究已经
+能够从真实数据中学习复杂的时间、空间和事件分布，并兼顾统计保真、隐私保
+护和下游任务效用 [3–6,14,21] 。第三，ControlTraj 和 CDD 证明了显式约束可以在扩散
+采样过程中发挥作用，为生成道路拓扑可行轨迹或满足离散序列规则提供了方法
+基础 [7,8] 。
+
+2.2.2 现有研究不足
+    第一，现有轨迹扩散方法主要处理 GPS 坐标、道路拓扑或连续时空轨迹，而
+本文研究对象是由活动类别和 POI 构成的离散语义序列，二者在状态空间和约束
+表达上存在差异。第二，面向 POI 的预测与推荐研究，包括 next-POI 推荐和扩散
+式推荐，通常优化下一位置预测、候选排序或推荐序列建模，不能保证完整序列的
+全局类别结构。第三，以 ControlTraj 为代表的可控轨迹生成研究主要处理道路拓
+扑等几何或时空约束，对“活动类别 A 必须先于活动类别 B”这类跨位置的语义
+偏序约束关注不足。第四，先序约束、语法约束和 DAG 解码虽然能够维持结构合
+法性，但尚未与类别/POI 联合离散扩散中的样本级偏序能量形成直接结合。第五，
+若在生成完成后进行过滤、交换或重新排序，可能破坏时间、类别、POI 和空间的
+联合分布；因此，约束应尽可能在逆扩散分布形成过程中介入。第六，CDD 虽然
+提供了通用的离散序列约束框架，但尚未针对 POI 类别与 POI 的级联依赖、时间
+点过程以及样本级偏序矩阵进行专门设计。
+
+
+
+
+                             -6-
+              哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+2.2.3 本文研究定位
+  本文拟在 Marionette 的条件时间建模和类别/POI 级联离散生成骨架上，引入
+样本级活动类别偏序矩阵。给定上下文条件 𝐶、时间序列 𝑡 1:𝑛 、活动类别 𝑘 1:𝑛 、POI
+𝑙1:𝑛 以及偏序矩阵 𝑀，目标是学习联合分布
+
+                   𝑝(𝑡 1:𝑛 , 𝑘 1:𝑛 , 𝑙 1:𝑛 | 𝐶, 𝑀)
+
+其中，𝑡1:𝑛 、𝑘 1:𝑛 和 𝑙 1:𝑛 分别表示时间、活动类别和 POI 序列。在每个离散逆扩散步
+骤中，模型首先预测类别和 POI 的 logits，再仅对类别位置计算偏序违反能量，并
+通过 KL 保真和增广拉格朗日投影修正类别分布，随后联合采样类别和 POI。由此，
+本文将连续时间、离散类别/POI 和语义偏序约束纳入统一生成框架，研究生成真
+实性、样本多样性、时空合理性与约束满足率之间的关系。
+
+
+
+
+                               -7-
+               哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+           3   主要研究内容及研究方案
+
+3.1 研究内容
+  请使用将来时态说明拟开展的研究内容，不要只罗列论文目录。需要时可增
+加三级小节。
+
+3.2 研究方案
+  请填写技术路线、研究方法、实验方案和可行性分析。
+
+
+
+
+                        -8-
+           哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+               4   预期目标
+
+4.1 预期目标
+  请填写理论、方法、系统或实验方面的预期目标和成果形式。
+
+
+
+
+                    -9-
+           哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+       5   已完成的研究工作及进度安排
+
+5.1 已完成的研究工作
+  请填写已经完成的理论分析、实验、仿真、调研或文献阅读工作。
+
+5.2 进度安排
+  请填写起止时间、阶段任务和阶段成果。
+
+
+
+
+                    - 10 -
+          哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+    6   已具备的研究条件和所需条件及经费
+
+6.1 实验室条件和经费保障
+  请填写已有实验室、设备、数据、软件和经费保障情况。
+
+6.2 所需条件及经费
+  请填写后续研究所需的条件、外协安排及经费需求。
+
+
+
+
+                   - 11 -
+           哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+           7   预计困难及解决方案
+
+7.1 预计困难与技术难点
+  请填写潜在困难、技术难点和项目风险。
+
+7.2 解决方案
+  请逐项填写对应的解决思路、备选方案和验证方法。
+
+
+
+
+                    - 12 -
+                        哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+
+                                    参考文献
+
+ [1] González M C, Hidalgo C A, Barabási A-L. Understanding Individual Human Mo-
+     bility Patterns[J/OL]. Nature, 2008. http://dx.doi.org/10.1038/nature07850.
+ [2] Song C, Qu Z, Blumm N, et al. Limits of Predictability in Human Mobility[J/OL].
+     Science, 2010. http://dx.doi.org/10.1126/science.1177170.
+ [3] Feng J, Yang Z, Xu F, et al. Learning to Simulate Human Mobility[C/OL]
+     // Proceedings of the 26th ACM SIGKDD International Conference on Knowledge
+     Discovery and Data Mining. 2020. http://dx.doi.org/10.1145/3394486.3412862.
+ [4] Cao C, Li M. Generating Mobility Trajectories with Retained Data Utility[C/OL]
+     // Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery and
+     Data Mining. 2021. http://dx.doi.org/10.1145/3447548.3467158.
+ [5] Yuan Y, Ding J, Wang H, et al. Activity Trajectory Generation via Modeling Spa-
+     tiotemporal Dynamics[C/OL] // Proceedings of the 28th ACM SIGKDD Confer-
+     ence on Knowledge Discovery and Data Mining. 2022. http://dx.doi.org/10.1145/
+     3534678.3542671.
+ [6] Long Q, Wang H, Li T, et al. Practical Synthetic Human Trajectories Genera-
+     tion Based on Variational Point Processes[C/OL] // Proceedings of the 29th ACM
+     SIGKDD Conference on Knowledge Discovery and Data Mining. 2023. http://dx.
+     doi.org/10.1145/3580305.3599888.
+ [7] Zhu Y, Yu J J, Zhao X, et al. ControlTraj: Controllable Trajectory Generation
+     with Topology-Constrained Diffusion Model[C/OL] // Proceedings of the 30th ACM
+     SIGKDD Conference on Knowledge Discovery and Data Mining. 2024. http://dx.
+     doi.org/10.1145/3637528.3671866.
+ [8] Cardei M, Christopher J K, Hartvigsen T, et al. Constrained Discrete Diffu-
+     sion[C/OL] // Advances in Neural Information Processing Systems: Vol 38. 2025.
+     http://dx.doi.org/10.52202/085713-0415.
+ [9] Austin J, Johnson D, Ho J, et al. Structured Denoising Diffusion Models in Discrete
+     State-Spaces[C] // Advances in Neural Information Processing Systems. 2021.
+[10] Meng C, Choi K, Song J, et al. Concrete Score Matching: Generalized Score Match-
+     ing for Discrete Data[C/OL] // Advances in Neural Information Processing Systems:
+     Vol 35. 2022. http://dx.doi.org/10.52202/068431-2502.
+                                         - 13 -
+                        哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+[11] Feng J, Li Y, Zhang C, et al. DeepMove: Predicting Human Mobility with Atten-
+     tional Recurrent Networks[C/OL] // Proceedings of the 2018 World Wide Web Con-
+     ference. 2018. http://dx.doi.org/10.1145/3178876.3186058.
+[12] Luo Y, Liu Q, Liu Z. STAN: Spatio-Temporal Attention Network for Next Location
+     Recommendation[C/OL] // Proceedings of the Web Conference 2021. 2021. http:
+     //dx.doi.org/10.1145/3442381.3449998.
+[13] Yang S, Liu J, Zhao K. GETNext: Trajectory Flow Map Enhanced Transformer for
+     Next POI Recommendation[C/OL] // Proceedings of the 45th International ACM
+     SIGIR Conference on Research and Development in Information Retrieval. 2022.
+     http://dx.doi.org/10.1145/3477495.3531983.
+[14] Yuan Y, Ding J, Shao C, et al. Spatio-temporal Diffusion Point Processes[C/OL]
+     // Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and
+     Data Mining. 2023. http://dx.doi.org/10.1145/3580305.3599511.
+[15] Long J, Ye G, Chen T, et al. Diffusion-Based Cloud-Edge-Device Collaborative
+     Learning for Next POI Recommendations[C/OL] // Proceedings of the 30th ACM
+     SIGKDD Conference on Knowledge Discovery and Data Mining. 2024. http://dx.
+     doi.org/10.1145/3637528.3671743.
+[16] Wang Z, Zeng J, Zhong L, et al. DSDRec: Next POI Recommendation Using Deep
+     Semantic Extraction and Diffusion Model[J/OL]. Information Sciences, 2024. http:
+     //dx.doi.org/10.1016/j.ins.2024.121004.
+[17] Chen J, Xu Y, Jiang Y. Unlocking the Power of Diffusion Models in Sequential
+     Recommendation: A Simple and Effective Approach[C/OL] // Proceedings of the
+     31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining. 2025.
+     http://dx.doi.org/10.1145/3711896.3737172.
+[18] Deng B, Ding L, Ji L, et al. Marionette: Fine-Grained Conditional Generative
+     Modeling of Spatiotemporal Human Trajectory Data Beyond Imitation[C/OL]
+     // Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and
+     Data Mining. 2025. http://dx.doi.org/10.1145/3711896.3737039.
+[19] Schiff Y, Sahoo S S, Phung H, et al. Simple Guidance Mechanisms for Discrete
+     Diffusion Models[C] // International Conference on Learning Representations. 2025.
+[20] Ho J, Jain A, Abbeel P. Denoising Diffusion Probabilistic Models[C] // Advances in
+     Neural Information Processing Systems. 2020.
+[21] Zhu Y, Ye Y, Zhang S, et al. DiffTraj: Generating GPS Trajectory with Diffusion
+                                        - 14 -
+                        哈尔滨工业大学（深圳）硕士学位论文开题报告
+
+
+
+     Probabilistic Model[C/OL] // Advances in Neural Information Processing Systems:
+     Vol 36. 2023. http://dx.doi.org/10.52202/075280-2843.
+[22] Hu Y, Yin M, Cai D. On the Discovery and Utility of Precedence Constraints in
+     Temporal Planning[C/OL] // Proceedings of the AAAI Conference on Artificial In-
+     telligence: Vol 25. 2011. http://dx.doi.org/10.1609/aaai.v25i1.8052.
+[23] Geng S, Josifoski M, Peyrard M, et al. Grammar-Constrained Decoding for Struc-
+     tured NLP Tasks without Finetuning[C/OL] // Proceedings of the 2023 Conference
+     on Empirical Methods in Natural Language Processing. 2023. http://dx.doi.org/10.
+     18653/v1/2023.emnlp-main.674.
+[24] Chen J, Lin W, Mei J, et al. Control-DAG: Constrained Decoding for Non-
+     Autoregressive Directed Acyclic T5 using Weighted Finite State Automata[C/OL]
+     // Proceedings of the 2024 Conference of the North American Chapter of the As-
+     sociation for Computational Linguistics: Human Language Technologies. 2024.
+     http://dx.doi.org/10.18653/v1/2024.naacl-short.42.
+[25] Sahoo S, Arriola M, Schiff Y, et al. Simple and Effective Masked Diffusion Language
+     Models[C/OL] // Advances in Neural Information Processing Systems: Vol 37. 2024.
+     http://dx.doi.org/10.52202/079017-4135.
+[26] Lou A, Meng C, Ermon S. Discrete Diffusion Modeling by Estimating the Ratios
+     of the Data Distribution[C] // Proceedings of the 41st International Conference on
+     Machine Learning. 2024.
+
+
+
+
+                                         - 15 -
+

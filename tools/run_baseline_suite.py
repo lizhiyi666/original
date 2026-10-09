@@ -165,7 +165,8 @@ class Suite:
         if generated['indices']!=list(range(2108)):
             raise RuntimeError('Full OOD indices are incomplete')
         validate_alignment(generated['sequences'],raw['sequences'],raw['poi_category'])
-        metrics=full_metrics(raw['sequences'],generated['sequences'],raw['poi_category'])
+        metric_diagnostics = {}
+        metrics=full_metrics(raw['sequences'],generated['sequences'],raw['poi_category'],diagnostics=metric_diagnostics)
         run=wandb.init(project='Marionette',entity=self.entity,id=f'{self.id}-{method}-ood',
             name=f'{self.id}-{method}-ood',group=self.original['run_id'],job_type='baseline-ood-evaluation',
             mode='online',resume='allow',dir=str(self.out),save_code=False,
@@ -175,7 +176,7 @@ class Suite:
         run.finish()
         if wandb.Api(timeout=30).run(f'{self.entity}/Marionette/{run.id}').summary.get('complete') is not True:
             raise RuntimeError('W&B evaluation readback failed')
-        result=dict(metrics=metrics,timing=timing,output=str(path),output_sha256=sha256_file(path),wandb_url=run.url)
+        result=dict(metrics=metrics,metric_diagnostics=metric_diagnostics,timing=timing,output=str(path),output_sha256=sha256_file(path),wandb_url=run.url)
         atomic_json(self.out/f'metrics-{method}.json',result)
         self.metrics[method]=result
         return result
@@ -361,12 +362,14 @@ class Suite:
             coverage=m.get('category_coverage',m.get('coverage'))
             lines.append(f"| {method} | {strict:.2%} | {m['pair_coverage']:.2%} | {coverage:.2%} | {m['empty_count']} |")
         lines+=['','## 统计指标','',
-                '| 方法 | Distance | Radius | DailyLoc | Interval | Category | G-RANK | totalJSD |',
+                '| 方法 | Distance | Radius | CategoryTransition | DailyLoc | Category | G-RANK | totalJSD |',
                 '|---|---:|---:|---:|---:|---:|---:|---:|']
         for method,record in self.metrics.items():
             m=record['metrics']
-            lines.append('| '+method+' | '+' | '.join(f'{m[k]:.6f}' for k in
-                ('Distance','Radius','DailyLoc','Interval','Category','G-RANK','totalJSD'))+' |')
+            from evaluations.statistical_metrics import require_evaluation_version
+            require_evaluation_version(m)
+            lines.append('| '+method+' | '+' | '.join('—' if m[k] is None else f'{m[k]:.6f}' for k in
+                ('Distance','Radius','CategoryTransition','DailyLoc','Category','G-RANK','totalJSD'))+' |')
         lines+=['','## 设置和时间','']
         for method in self.args.methods:
             lines.append(f"- {method}: {json.dumps(self.metrics[method]['timing'],ensure_ascii=False)}")

@@ -1,4 +1,61 @@
 import numpy as np
+from collections import Counter, defaultdict
+
+# Numeric revision keeps metric payloads compatible with scalar JSON/CSV consumers.
+EVALUATION_VERSION = 2
+STATISTICAL_NAMES = ('Distance', 'Radius', 'CategoryTransition', 'DailyLoc', 'Category', 'G-RANK')
+
+
+def require_evaluation_version(metrics):
+    if metrics.get('evaluation_version') != EVALUATION_VERSION or 'Interval' in metrics:
+        raise ValueError('Evaluation version mismatch: recompute legacy metrics into a new v2 output directory')
+
+
+def counter_jsd(left, right, both_empty=float('nan')):
+    if not left and not right:
+        return both_empty
+    if not left or not right:
+        return float(np.log(2))
+    keys = sorted(set(left) | set(right))
+    return float(JSD(np.array([left[k] for k in keys]), np.array([right[k] for k in keys])))
+
+
+def _category_events(seqs):
+    hourly = [Counter() for _ in range(24)]
+    transitions = defaultdict(Counter)
+    for seq in seqs:
+        marks = seq['marks']
+        times = np.asarray(seq['arrival_times'], dtype=float)
+        if len(times) != len(marks) or times.ndim != 1 or not np.isfinite(times).all():
+            raise ValueError('Category events require aligned finite arrival times and marks')
+        if np.any(times < 0) or np.any(times >= 24) or np.any(np.diff(times) < 0):
+            raise ValueError('Category event times must be ordered and in [0,24)')
+        if any(c is None or not np.isfinite(c) or int(c) != c for c in marks):
+            raise ValueError('Category events contain invalid category tokens')
+        marks = [int(c) for c in marks]
+        for h, c in zip(times.astype(int), marks):
+            hourly[h][c] += 1
+        for left, right in zip(marks[:-1], marks[1:]):
+            transitions[left][right] += 1
+    return hourly, transitions
+
+
+def temporal_category_metrics(real_data, generated_data, diagnostics=None):
+    real_hours, real_edges = _category_events(real_data)
+    gen_hours, gen_edges = _category_events(generated_data)
+    hourly = [counter_jsd(r, g, both_empty=0.0) for r, g in zip(real_hours, gen_hours)]
+    has_events = any(real_hours) or any(gen_hours)
+    sources = sorted(set(real_edges) | set(gen_edges))
+    rows = {str(c): counter_jsd(real_edges[c], gen_edges[c]) for c in sources}
+    if diagnostics is not None:
+        diagnostics.update(evaluation_version=EVALUATION_VERSION,
+            category_hourly=[dict(hour=h, jsd=hourly[h], real_count=sum(real_hours[h].values()),
+                                 generated_count=sum(gen_hours[h].values())) for h in range(24)],
+            category_transition_rows=rows,
+            category_transition_counts={str(c): dict(real=sum(real_edges[c].values()),
+                                                    generated=sum(gen_edges[c].values())) for c in sources})
+    return dict(Category=float(np.mean(hourly)) if has_events else float('nan'),
+                CategoryTransition=float(np.mean(list(rows.values()))) if rows else float('nan'))
 
 def distance(lat1, lon1, lat2, lon2):
     lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
@@ -20,6 +77,8 @@ def radius(geo):
 
 def JSD(P_A, P_B):
     epsilon = 1e-14
+    if P_A.sum() == 0 or P_B.sum() == 0:
+        return float('nan')
     P_A = (P_A / P_A.sum() + epsilon)
     P_B = (P_B / P_B.sum() + epsilon)
     P_merged = 0.5 * (P_A + P_B)
@@ -105,6 +164,8 @@ def evaluation(generated, original):
     assert len(generated) > 0
     assert len(original) > 0
     max = np.max(generated) if np.max(generated) > np.max(original) else np.max(original)
+    if max == 0:
+        return 0.0
     p_gen = arr_to_distribution(generated, 0, max, 100)
     p_real = arr_to_distribution(original, 0, max, 100)
     jsd = JSD(p_gen, p_real)
@@ -124,52 +185,28 @@ def get_topk_visits(visits, K):
     topk_probs = [locs_visits[i][1] for i in range(K)]
     return np.array(topk_probs), topk_locs
 
-def Get_Statistical_Metrics(real_data, generated_data, min_seq_len=1,top=1000):
-    Real_Statistics = {'Distance': [], 'Radius': [], 'DailyLoc': [], 'Interval': [], 'Category':[], 'G-RANK':[]}
-    Generated_Statistics = {'Distance': [], 'Radius': [], 'DailyLoc': [], 'Interval': [], 'Category':[], 'G-RANK':[]}
-    JSD = {'Distance': 1.0, 'Radius': 1.0, 'DailyLoc': 1.0, 'Interval': 1.0, 'Category':1.0, 'G-RANK':1.0, 'totalJSD': 6.0}
-
-    data = [generated_data,real_data]
-    if len(generated_data)==0 and len(real_data) == 0:
-        return JSD
-    assert len(generated_data) > 0
-    assert len(real_data) > 0
-
-    metrics_dicts = [Generated_Statistics,Real_Statistics]
-    for idx,seqs in enumerate(data):
+def Get_Statistical_Metrics(real_data, generated_data, min_seq_len=1, top=1000, *, diagnostics=None):
+    if len(real_data) != len(generated_data):
+        raise ValueError('Statistical evaluation requires aligned real/generated sequences')
+    result = {name: float('nan') for name in STATISTICAL_NAMES}
+    result.update(temporal_category_metrics(real_data, generated_data, diagnostics))
+    statistics = [{k: [] for k in ('Distance', 'Radius', 'DailyLoc', 'G-RANK')} for _ in range(2)]
+    # Preserve historical filtering of the other four metrics, including Distance's endpoints.
+    for index, seqs in enumerate((generated_data, real_data)):
         for i, seq in enumerate(seqs):
-            if len(seq['gps'])>min_seq_len:
-                gps = np.array(seq['gps'])
-                
-                # 获取对应的 test 和 gen 序列用于起止点判断
-                gen_seq = generated_data[i]
-                real_seq = real_data[i]
-                
-                # 只在 起止点类别一致 时计算 Distance
-                if len(gen_seq.get('marks', [])) > 0 and len(real_seq.get('marks', [])) > 0:
-                    if gen_seq['marks'][0] == real_seq['marks'][0] and gen_seq['marks'][-1] == real_seq['marks'][-1]:
-                        metrics_dicts[idx]['Distance'].append(travel_distance(gps))
-                        
-                metrics_dicts[idx]['Radius'].append(radius(gps))
-                metrics_dicts[idx]['DailyLoc'].append(len(set(seq['checkins'])))
-                metrics_dicts[idx]['Interval'].extend(np.ediff1d(np.concatenate([[0],seq["arrival_times"]])).tolist())
-                metrics_dicts[idx]['Category'].extend(seq['marks'])
-                metrics_dicts[idx]['G-RANK'].extend(seq['checkins'])
-
-    for metric in JSD.keys():
-        if metric == 'Category':
-            JSD[metric] = category_jsd(Generated_Statistics[metric],Real_Statistics[metric])
-        elif metric == 'G-RANK':
-            JSD[metric] = grank_jsd(Generated_Statistics[metric],Real_Statistics[metric],top)
-        elif metric != 'totalJSD':
-            if len(Generated_Statistics[metric]) > 0 and len(Real_Statistics[metric]) > 0:
-                JSD[metric] = evaluation(Generated_Statistics[metric],Real_Statistics[metric])
-            else:
-                JSD[metric] = float('nan') # 如果过滤后无满足条件的数据，记为 nan
-        else:
-            break
-        
-        valid_jsds = [JSD[m] for m in JSD.keys() if m != 'totalJSD' and not np.isnan(JSD[m])]
-        JSD['totalJSD'] = sum(valid_jsds) if len(valid_jsds) > 0 else float('nan')
-        
-    return JSD
+            if len(seq.get('gps', [])) > min_seq_len:
+                gps = np.asarray(seq['gps'])
+                gen, real = generated_data[i], real_data[i]
+                if len(gen['marks']) and len(real['marks']) and gen['marks'][0] == real['marks'][0] and gen['marks'][-1] == real['marks'][-1]:
+                    statistics[index]['Distance'].append(travel_distance(gps))
+                statistics[index]['Radius'].append(radius(gps))
+                statistics[index]['DailyLoc'].append(len(set(seq['checkins'])))
+                statistics[index]['G-RANK'].extend(seq['checkins'])
+    for name in statistics[0]:
+        gen, real = statistics[0][name], statistics[1][name]
+        if gen and real:
+            result[name] = grank_jsd(gen, real, top) if name == 'G-RANK' else evaluation(gen, real)
+    valid = [result[name] for name in STATISTICAL_NAMES if np.isfinite(result[name])]
+    result['totalJSD'] = sum(valid) if valid else float('nan')
+    result['evaluation_version'] = EVALUATION_VERSION
+    return result

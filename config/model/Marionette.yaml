@@ -28,3 +28,8 @@ use_gumbel_softmax: true
 gumbel_temperature: 3
 projection_last_k_steps: 300
 projection_existence_weight: 5
+projection_distance_kl_weight: 1.0  # New sampling; old configs without this field stay disabled.
+distance_paths: 8
+distance_topk: 32
+distance_bins: 32
+distance_temperature: 1.0

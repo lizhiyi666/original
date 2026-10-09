@@ -1,0 +1,58 @@
+\section{Problem Formulation}
+\label{sec:problem}
+
+\paragraph{POI check-in sequences.}
+We model a user's daily behavior on an LBSN as a variable-length sequence of
+check-in events. A sequence of length $n$ consists of arrival times
+$t_{1:n}$ (continuous, strictly increasing), activity categories
+$k_{1:n}$ with $k_i \in \mathcal{C} = \{1,\dots,C\}$, and points of interest
+$l_{1:n}$ with $l_i \in \mathcal{L}$. Each POI $l$ carries fixed geographic
+coordinates $\mathrm{gps}(l)$, and each training POI is associated with a
+category. A per-sequence context $\mathbf{c}$ encodes coarse temporal and
+behavioral conditions (e.g., time-of-day occupancy indicators). The empirical
+distribution over such sequences is highly structured: it reflects the
+regularity and bounded predictability of human mobility~\cite{gonzalez2008mobility,song2010predictability}
+while retaining substantial individual variability.
+
+\paragraph{Category partial-order constraints.}
+Many web applications do not merely require a statistically realistic sequence;
+they require that the \emph{activity semantics} follow an application-specified
+order---for instance, that leisure precedes dining, or that sightseeing precedes
+shopping. We formalize such requirements as a sample-level \emph{partial order}
+over categories. Given a reference or user-specified ordering, we encode it as a
+binary matrix $\Mmat \in \{0,1\}^{C\times C}$, where $\Mmat[a,b]=1$ denotes the
+strict precedence constraint ``category $a$ precedes category $b$'': in a
+satisfying sequence, \emph{every} occurrence of category $a$ must appear before
+\emph{every} occurrence of category $b$. When $\Mmat$ is derived from a reference
+sequence, we set $\Mmat[a,b]=1$ iff the last position of $a$ precedes the first
+position of $b$. A constraint $(a,b)$ is \emph{violated} either by an inversion
+(some $b$ before some $a$) or, degenerately, by dropping $a$ or $b$ entirely so
+that the ordering is vacuously ``satisfied.'' A faithful method must avoid both.
+
+\paragraph{Task.}
+Given a frozen conditional generator of complete check-in sequences and a
+sample-level partial-order matrix $\Mmat$, we seek to sample
+\begin{equation}
+  (t_{1:n},\, k_{1:n},\, l_{1:n}) \sim p\big(t_{1:n}, k_{1:n}, l_{1:n} \mid \mathbf{c}, \Mmat\big),
+  \label{eq:task}
+\end{equation}
+such that (i) the generated sequences remain close to the real data distribution
+in time, space, and activity semantics; and (ii) the category subsequence
+satisfies the precedence constraints encoded by $\Mmat$. Unlike next-location
+prediction~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, the task outputs a
+\emph{complete} time-stamped, categorized, geolocated sequence; unlike single-step
+conditioning, the constraint couples \emph{multiple, non-adjacent} positions and
+therefore cannot be enforced by reweighting any single token independently.
+
+\paragraph{Evaluation axes.}
+We evaluate along two axes that are in tension. \emph{Distributional fidelity} is
+measured by the Jensen--Shannon divergence (JSD) between generated and reference
+marginals of travel distance, radius of gyration, category-transition structure,
+daily location count, hourly category usage, and a global ranking statistic
+(G-RANK). \emph{Constraint satisfaction} is measured by ordering-violation rates
+(OVR), pairwise and category coverage of the required relations, and an overall
+unsatisfied-sequence rate (Unsat); full definitions are given in
+Section~\ref{sec:experiments}. A trivial reordering can satisfy the constraint
+while destroying fidelity, and an unconstrained generator maximizes fidelity while
+ignoring the constraint; the goal is to improve constraint satisfaction with
+minimal fidelity cost.

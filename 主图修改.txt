@@ -1,0 +1,1057 @@
+你现在需要对我当前论文方法框架图的 PowerPoint 源文件进行“基于现有 PPT 的精修和重构”，而不是重新从零绘制。
+
+========================
+一、任务目标
+========================
+
+当前图是一个已经在 PowerPoint 中绘制完成的论文方法架构图。
+请基于以下三个来源，对现有 PPT 第二页图进行修改：
+
+1. 我的硕士学位论文开题报告
+2. Marionette 方法主图
+3. 当前项目已有实现代码
+
+最终目标：
+
+将当前方法图从现在的：
+
+“Marionette + CDD：细粒度条件偏序生成”
+
+修改为真正表达我自己的：
+
+“PCDG: Partial-order Constrained Diffusion Generation”
+
+中文可写：
+
+“偏序约束扩散生成（PCDG）方法框架”
+
+注意：
+
+我的方法不是简单的“Marionette + CDD”。
+
+正确的论文定位是：
+
+以细粒度条件时空联合生成作为生成基础，
+在类别/POI联合离散扩散的逆向采样过程中，
+针对活动类别之间的样本级偏序关系，
+设计可微偏序约束能量与采样期约束投影机制。
+
+因此，图中必须突出“Partial-order Constraint Projection”是本文核心创新，
+而不是突出 Marionette 或 CDD。
+
+========================
+二、必须读取的文件
+========================
+
+请先自动搜索当前项目目录，找到：
+
+A. 开题报告：
+report.pdf。
+
+B. Marionette 主图：
+Marionette.png。
+
+C. 当前方法架构图的 PowerPoint 源文件：
+优先搜索：
+marionette_cdd_figures_editable.pptx
+
+D. 当前已有算法代码：
+读取当前项目相关代码。
+
+重要：
+
+如果找到了 PPTX：
+必须直接编辑 PPTX 中现有的图形对象。
+不要用 PNG 替换整个图。
+不要把现有 PPT 页面截图后重新插入 PPT。
+不要把整张图做成一个不可编辑的图片。
+
+最终必须保持：
+文本框、矩形、箭头、虚线、公式、token、模块等都尽可能保持 PowerPoint 可编辑。
+
+========================
+三、执行顺序
+========================
+
+必须严格按以下顺序执行：
+
+Step 1：分析开题报告
+
+Step 2：分析实际代码
+
+Step 3：分析 Marionette 图的视觉布局
+
+Step 4：分析当前 PPT 架构图
+
+Step 5：建立“代码—论文—PPT”三方映射
+
+Step 6：修改现有 PPT
+
+Step 7：导出预览图
+
+Step 8：做最终一致性检查
+
+不要跳过 Step 1~5。
+
+========================
+四、第一阶段：分析开题报告
+========================
+
+重点读取：
+
+第 2.1.2
+第 2.1.3
+第 2.1.4
+第 2.1.5
+第 2.2.1
+第 2.2.2
+第 2.2.3
+第 3.1.1
+第 3.1.2
+第 3.2.1
+第 3.2.2
+第 3.2.3
+第 3.2.4
+
+重点确认论文中已经明确的方法结构：
+
+1. POI check-in sequence
+2. 时间 t
+3. 活动类别 k
+4. POI l
+5. Context representation C
+6. Partial-order matrix M
+7. Constraint pair S={(A_k,B_k)}
+8. Conditional Temporal Point Process
+9. Joint Discrete Diffusion
+10. Category token
+11. POI token
+12. Category logits
+13. POI logits
+14. Partial-order violation energy g_order
+15. Existence penalty g_exist
+16. Constraint energy
+17. KL fidelity term
+18. Augmented Lagrangian
+19. Gumbel-Softmax
+20. Differentiable constraint projection
+21. Projected category logits
+22. Joint category + POI sampling
+23. x_t -> x_{t-1} -> ... -> x_0
+
+必须区分：
+
+[Implemented]
+[Partially Implemented]
+[Planned]
+
+尤其注意：
+
+训练期偏序辅助损失是“拟研究并实现”的内容，
+不能把它画成当前已经稳定实现的主流程。
+
+研究问题二“复杂偏序约束下的自适应生成”目前主要是问题定义与初步方案，
+不能将其画成已经完成的完整算法。
+
+========================
+五、第二阶段：分析代码
+========================
+
+请实际阅读代码，而不是根据论文猜测。
+
+找到：
+
+1. 数据加载
+2. 数据预处理
+3. check-in sequence representation
+4. context encoder
+5. temporal point process
+6. diffusion model
+7. category / POI tokenization
+8. x_t representation
+9. reverse diffusion
+10. model logits
+11. partial-order matrix construction
+12. constraint pair extraction
+13. g_order
+14. g_exist
+15. KL fidelity
+16. augmented Lagrangian
+17. Gumbel-Softmax
+18. projection
+19. joint sampling
+20. timestep loop
+
+对于每个模块输出：
+
+- 文件
+- 类
+- 函数
+- 输入
+- 输出
+- 张量形状（如果代码中能够确认）
+- 是否已实际调用
+- 是否应该画入主架构图
+
+建立：
+
+figure/code_mapping.md
+
+格式：
+
+Module
+→ File
+→ Class/Function
+→ Input
+→ Output
+→ Status
+→ Figure Representation
+
+========================
+六、第三阶段：分析 Marionette 主图
+========================
+
+Marionette 只作为“视觉参考”，不能作为算法定义来源。
+
+分析：
+
+1. 页面结构
+2. 分区方式
+3. 标题
+4. 模块颜色
+5. 虚线框
+6. 实线箭头
+7. 条件信息的表达
+8. temporal modeling 的表现形式
+9. spatial/discrete modeling 的表现形式
+10. token 表示
+11. diffusion timestep 的表达
+12. legend
+13. 数学公式排版
+
+然后建立：
+
+figure/marionette_visual_reference.md
+
+明确列出：
+
+“哪些视觉元素可以借鉴”
+
+以及：
+
+“哪些结构不能直接复制”。
+
+========================
+七、第四阶段：分析当前 PPT
+========================
+
+不要立即修改。
+
+首先读取 PPT 中所有对象：
+
+- slide
+- group
+- shape
+- text box
+- arrow
+- line
+- connector
+- rectangle
+- dashed box
+- equation
+- legend
+- icon
+- token block
+
+确定当前图的对象结构。
+
+尤其检查目前已有的：
+
+① 细粒度条件对齐
+② 条件时间生成
+③ 类别 / POI 联合离散扩散
+④ CDD Projection + ALM
+⑤ 偏序矩阵
+⑥ 联合采样
+⑦ x_t / x_{t-1}
+⑧ legend
+
+建立：
+
+figure/current_ppt_structure.md
+
+========================
+八、第五阶段：建立最终架构
+========================
+
+不要从零设计完全不同的布局。
+
+以当前 PPT 第二版布局为基础进行修改。
+
+目标结构：
+
+┌──────────────────────────────────────────────┐
+│ ① Conditional Context Encoding               │
+│                                              │
+│ Context                                       │
+│ (Time / User / Spatial / Historical)         │
+│                 ↓                            │
+│           Context Encoder                    │
+│                 ↓                            │
+│      Condition Representation C              │
+└──────────────────────────────────────────────┘
+
+
+同时建立偏序约束输入支路：
+
+Partial-order Matrix M
+          ↓
+Constraint Pair Extraction
+          ↓
+{(A_k, B_k)}
+          ↓
+Partial-order Energy
+
+
+然后进入：
+
+┌──────────────────────────────────────────────┐
+│ ② Conditional Temporal Modeling              │
+│                                              │
+│ Condition C                                   │
+│      ↓                                       │
+│ Conditional Temporal Point Process           │
+│      ↓                                       │
+│ Event Times                                  │
+└──────────────────────────────────────────────┘
+
+
+然后：
+
+┌──────────────────────────────────────────────┐
+│ ③ Joint Discrete Diffusion                  │
+│                                              │
+│ x_t = [Category | POI]                      │
+│                ↓                             │
+│ Joint Diffusion Transformer                  │
+│                ↓                             │
+│       ┌────────┴────────┐                    │
+│       ↓                 ↓                    │
+│ Category logits      POI logits              │
+│       ↓                 │                    │
+│ Partial-order          │                    │
+│ Constraint Energy      │                    │
+│       ↓                 │                    │
+│ Gumbel-Softmax          │                    │
+│       ↓                 │                    │
+│ KL Fidelity             │                    │
+│ + Augmented Lagrangian  │                    │
+│       ↓                 │                    │
+│ Differentiable          │                    │
+│ Constraint Projection   │                    │
+│       ↓                 │                    │
+│ Projected Category      │                    │
+│ logits                  │                    │
+│       └────────┬────────┘                    │
+│                ↓                             │
+│          Joint Sampling                     │
+│                ↓                             │
+│              x_{t-1}                         │
+└──────────────────────────────────────────────┘
+
+
+然后：
+
+x_t → x_{t-1} → ... → x_0
+
+表示逆扩散迭代。
+
+最终：
+
+x_0
+↓
+Constrained POI Check-in Sequence
+
+========================
+九、必须修改的具体内容
+========================
+
+【修改 1：标题】
+
+当前：
+
+Marionette + CDD：细粒度条件偏序生成
+
+修改为：
+
+PCDG: Partial-order Constrained Diffusion Generation
+
+中文副标题：
+
+偏序约束扩散生成方法框架
+
+不要再在主标题中出现：
+
+Marionette + CDD
+
+Marionette 和 CDD 可以在图注或论文正文中说明来源。
+
+--------------------------------
+
+【修改 2：顶部条件模块】
+
+当前：
+
+细粒度条件对齐
+
+修改为：
+
+① Conditional Context Encoding
+
+保留已有 Context Alignment 的视觉风格，
+但不要让它占据整张图的主要视觉中心。
+
+内部建议：
+
+Context
+Time / User / Spatial / Historical
+↓
+Context Encoder
+↓
+Condition Representation C
+
+如果代码中真实实现了 Marionette 的：
+24-hour alignment
+Cseq + εi
+
+可以保留这些细节。
+
+如果代码中没有实际对应实现：
+删除这些内容，不允许凭论文猜测添加。
+
+--------------------------------
+
+【修改 3：增加明确的 Partial-order Matrix 模块】
+
+新增一个独立模块：
+
+Partial-order Matrix M
+
+下面：
+
+Constraint Pair Extraction
+
+再下面：
+
+S = {(A_k, B_k)}
+
+其中：
+
+A_k ≺ B_k
+
+这个模块应该与 Context Encoding 并列，而不是藏在底部。
+
+视觉上使用：
+虚线框 + 橙色强调。
+
+--------------------------------
+
+【修改 4：修改“CDD Projection + ALM”】
+
+当前：
+
+CDD Projection + ALM
+
+必须删除。
+
+改为：
+
+Partial-order Constraint Projection
+
+内部：
+
+Partial-order Energy
+g_order + w · g_exist
+
+↓
+
+Gumbel-Softmax Relaxation
+
+↓
+
+KL Fidelity
++
+Augmented Lagrangian
+
+↓
+
+Differentiable Projection
+
+如果空间允许，可进一步写：
+
+min_Y D_KL(Y || Y_model)
++ λΔg
++ μ/2 Δg²
+
+但如果公式导致拥挤，只保留文字：
+
+KL Fidelity + Augmented Lagrangian
+
+--------------------------------
+
+【修改 5：必须显示 g_order / g_exist】
+
+当前图中只有：
+
+KL 保真 + 偏序惩罚
+
+过于模糊。
+
+必须明确写：
+
+Partial-order Energy
+
+g_order + w · g_exist
+
+其中：
+
+g_order
+表示 partial-order violation energy
+
+g_exist
+表示 existence penalty
+
+不需要在主图中把完整求和公式展开。
+
+--------------------------------
+
+【修改 6：加入 Gumbel-Softmax】
+
+当前图中缺少：
+
+Gumbel-Softmax
+
+必须加入：
+
+Gumbel-Softmax Relaxation
+
+并把它放在 constraint optimization / projection 流程内部。
+
+--------------------------------
+
+【修改 7：明确 Category logits 和 POI logits】
+
+保留目前的分支：
+
+Joint Discrete Diffusion
+↓
+Category logits
+POI logits
+
+但改成：
+
+Category logits Y^cat
+
+POI logits Y^poi
+
+然后：
+
+Y^cat → Partial-order Constraint Projection
+
+Y^poi ───────────────────→ Joint Sampling
+
+必须明确表示：
+
+Only category logits are projected.
+
+不要让 POI logits 进入 constraint optimization。
+
+--------------------------------
+
+【修改 8：增加“Projected Category logits”】
+
+在 Projection 后面增加：
+
+Projected Category logits
+
+即：
+
+Category logits
+↓
+Constraint Projection
+↓
+Projected Category logits
+
+这个模块必须存在。
+
+--------------------------------
+
+【修改 9：明确联合采样】
+
+从：
+
+Projected Category logits
++
+POI logits
+
+共同进入：
+
+Joint Sampling
+
+然后：
+
+x_{t-1}
+
+不要画成：
+
+Category → sample
+POI → sample
+
+两个独立模型。
+
+必须体现：
+
+Category + POI → Joint Sampling
+
+--------------------------------
+
+【修改 10：增加 diffusion sampling loop】
+
+不要只写：
+
+重复 t = T … 0
+
+建议使用环形箭头表示：
+
+x_t
+↓
+Joint Diffusion
+↓
+Category / POI logits
+↓
+Constraint Projection
+↓
+Joint Sampling
+↓
+x_{t-1}
+↺
+
+然后标注：
+
+Iterate t = T, ..., 1
+
+最终：
+
+x_0
+
+这样才能直观体现 constraint 是 sampling-time intervention，
+而不是 post-hoc filtering。
+
+--------------------------------
+
+【修改 11：强化“sampling-time constraint”】
+
+在偏序约束模块标题下增加：
+
+Sampling-time Constraint
+
+或者：
+
+Sampling-time Partial-order Control
+
+这是本文与普通“生成后重新排序”方法最重要的视觉区别之一。
+
+--------------------------------
+
+【修改 12：不要画 PostSwap】
+
+PostSwap 只属于实验 baseline。
+
+不要画进主方法架构图。
+
+--------------------------------
+
+【修改 13：不要把研究问题二画成已实现主流程】
+
+研究问题二：
+
+Adaptive Constraint Scheduling
+Complex Partial-order Constraints
+
+目前是 planned / future work。
+
+如果需要在当前图体现研究问题二，只能在右下角增加一个浅灰虚线框：
+
+Future Extension:
+Adaptive Constraint Scheduling
+
+并明确使用：
+Future / Planned
+
+不要把它接入当前主流程。
+
+--------------------------------
+
+【修改 14：颜色重新定义】
+
+保持当前 PPT 的整体学术风格，但重新建立颜色语义：
+
+蓝色：
+Base Generation Backbone
+
+包括：
+Context Encoder
+Conditional TPP
+Joint Discrete Diffusion
+
+橙色：
+Proposed Constraint Mechanism
+
+包括：
+Partial-order Matrix
+Constraint Pair Extraction
+Partial-order Energy
+Gumbel-Softmax
+KL Fidelity
+Augmented Lagrangian
+Differentiable Projection
+Projected Category logits
+
+绿色：
+Sequence / Sampling State
+
+包括：
+x_t
+x_{t-1}
+x_0
+Output Sequence
+
+不要使用过多颜色。
+
+--------------------------------
+
+【修改 15：线条语义】
+
+普通主数据流：
+
+黑色/深蓝色实线箭头
+
+条件信息：
+
+蓝色虚线
+
+偏序约束：
+
+橙色虚线
+
+sampling loop：
+
+深色环形箭头
+
+Projection 后的 category logits：
+
+橙色或强调色
+
+--------------------------------
+
+【修改 16：图例】
+
+保留目前 token legend 的思路。
+
+建议：
+
+Category token
+POI token
+Masked category
+Masked POI
+Special token
+
+新增：
+
+Base generation flow
+Constraint flow
+Sampling iteration
+
+图例不要过大。
+
+========================
+十、PPT编辑原则
+========================
+
+这是 PowerPoint 图，不是程序流程图。
+
+所有修改必须尽可能直接操作原 PPT 对象。
+
+必须做到：
+
+1. 保持原 PPT 页面尺寸。
+2. 保持原字体体系。
+3. 保持原圆角、边框、阴影风格。
+4. 不随意改变整个页面配色。
+5. 不把整张图转换成图片。
+6. 不使用截图替换。
+7. 尽量保持已有箭头对象。
+8. 对已有模块优先移动/改名，而不是删除后重建。
+9. 只有新增模块才创建新 shape。
+10. 所有文本框必须可编辑。
+11. 数学公式尽量保留为可编辑文本或 PowerPoint equation。
+12. 对齐、等间距、group 关系保持统一。
+
+========================
+十一、版式要求
+========================
+
+整张图建议保持横向布局。
+
+不要让内容全部垂直堆成长条。
+
+推荐：
+
+左：
+Context / Constraint
+
+中：
+Temporal + Joint Diffusion
+
+右：
+Projection + Joint Sampling
+
+中心视觉重点：
+
+Category logits
+↓
+Partial-order Constraint Projection
+↓
+Projected Category logits
+↓
+Joint Sampling
+
+这是本文最重要的数据流。
+
+========================
+十二、字体要求
+========================
+
+沿用当前 PPT 的字体体系。
+
+标题：
+加粗，明显大于普通模块标题。
+
+模块标题：
+Bold
+
+正文：
+Regular
+
+数学公式：
+Math / Cambria Math 或当前 PPT 已有数学字体。
+
+不要引入新的字体。
+
+避免过小字号。
+
+正文标签尽量 ≥ 12 pt。
+
+模块标题尽量 ≥ 16 pt。
+
+主标题根据页面尺寸调整。
+
+========================
+十三、最终必须生成的文件
+========================
+
+不要覆盖原始文件。
+
+创建新文件：
+
+<original_name>_PCDG_v2.pptx
+
+同时创建：
+
+<original_name>_PCDG_v2.pdf
+<original_name>_PCDG_v2.png
+
+以及：
+
+figure/code_mapping.md
+figure/current_ppt_structure.md
+figure/marionette_visual_reference.md
+figure/pcdg_figure_audit.md
+
+========================
+十四、最终一致性检查
+========================
+
+修改完成后，必须做以下检查：
+
+A. 与论文一致性
+
+[ ] POI check-in sequence
+[ ] context C
+[ ] temporal point process
+[ ] joint discrete diffusion
+[ ] category token
+[ ] POI token
+[ ] partial-order matrix M
+[ ] constraint pair S
+[ ] g_order
+[ ] g_exist
+[ ] KL fidelity
+[ ] augmented Lagrangian
+[ ] Gumbel-Softmax
+[ ] differentiable projection
+[ ] projected category logits
+[ ] joint sampling
+[ ] x_t → x_{t-1}
+
+B. 与代码一致性
+
+[ ] 每个主模块都能在代码找到
+[ ] 没有把 planned 模块伪装成 implemented
+[ ] 没有加入代码不存在的模块
+[ ] constraint projection 的实际位置正确
+[ ] 只修改 category logits
+[ ] POI logits 没有被错误投影
+[ ] joint sampling 顺序正确
+[ ] diffusion loop 正确
+
+C. 创新点表达
+
+只看图，不看正文，应该能在 10 秒内看出：
+
+本文不是单纯做轨迹生成。
+
+本文不是单纯复现 Marionette。
+
+本文不是直接使用 CDD。
+
+本文的核心是：
+
+Partial-order Matrix
+→ Partial-order Energy
+→ Sampling-time Constraint Projection
+→ Projected Category logits
+→ Joint Sampling
+
+D. 视觉一致性
+
+[ ] 没有明显拥挤
+[ ] 没有交叉箭头
+[ ] 没有文字压线
+[ ] 模块对齐
+[ ] 箭头方向清晰
+[ ] 蓝色代表 generation
+[ ] 橙色代表 proposed constraint
+[ ] token legend 清楚
+[ ] diffusion loop 清楚
+[ ] 主创新模块视觉突出
+
+========================
+十五、特别重要的限制
+========================
+
+不要：
+
+1. 把图标题写成“Marionette + CDD”
+2. 把 CDD Projection 当成本文方法名称
+3. 把 Marionette 画成本文方法主体
+4. 把 Category 和 POI 画成两个完全独立模型
+5. 把 constraint 画成生成结束之后的 post-processing
+6. 把 POI logits 送入 partial-order projection
+7. 把研究问题二画成已经完成的算法
+8. 把训练期偏序辅助损失画成已经实现的主流程
+9. 删除现有 PPT 后整个页面重新绘制
+10. 用一张 PNG 替换所有 PPT shape
+
+========================
+十六、最终视觉目标
+========================
+
+最终图应该让读者形成如下认知：
+
+真实 POI Check-in Sequence
+        ↓
+Context Encoding
+        ↓
+Condition C
+        ↓
+Conditional Temporal Modeling
+        +
+Joint Discrete Diffusion
+        ↓
+Category / POI logits
+        ↓
+             ┌──────────────────────────┐
+             │ Partial-order Constraint │
+M ─────────→ │                          │
+             │ g_order + g_exist        │
+             │ Gumbel-Softmax           │
+             │ KL + Augmented Lagrangian│
+             │ Differentiable Projection│
+             └────────────┬─────────────┘
+                          ↓
+                Projected Category logits
+                          +
+                     POI logits
+                          ↓
+                    Joint Sampling
+                          ↓
+                        x_{t-1}
+                          ↺
+                 t = T,...,1
+                          ↓
+                         x_0
+                          ↓
+              Constrained POI Sequence
+
+视觉上要让：
+
+“Partial-order Constraint Projection”
+
+成为整张图最突出的模块。
+
+========================
+十七、执行方式
+========================
+
+先不要修改 PPT。
+
+第一轮只完成：
+
+1. 找到 PPTX
+2. 找到报告
+3. 找到 Marionette
+4. 找到代码
+5. 完成代码—论文—PPT 三方分析
+6. 生成 figure/code_mapping.md
+7. 生成 figure/current_ppt_structure.md
+8. 生成 figure/marionette_visual_reference.md
+9. 输出拟修改的 PPT 对象列表
+
+等结构分析完成后，再修改 PPT。
+
+修改完成后导出 PNG/PDF，
+检查最终页面，
+如果出现：
+- 箭头交叉
+- 文字重叠
+- 字体过小
+- 约束主线不突出
+- Category / POI 数据流不清楚
+- sampling loop 不明显
+
+继续自动迭代，直到达到论文架构图质量。
+
+不要只告诉我“已经修改完成”。
+最后输出：
+
+1. 原 PPT 文件路径
+2. 新 PPT 文件路径
+3. PDF 路径
+4. PNG 路径
+5. 修改了哪些模块
+6. 哪些模块来自现有 PPT
+7. 哪些模块是新增
+8. 哪些模块根据代码确认
+9. 哪些部分属于论文中的 planned/future work
+10. 最终一致性检查结果

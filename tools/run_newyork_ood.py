@@ -214,9 +214,11 @@ class Experiment:
         cmd = [sys.executable, "sample.py", "--run_id", self.run_id, "--checkpoint", str(checkpoint),
                "--output_tag", tag, "--rank", str(rank), "--world_size", "1" if benchmark else "2",
                "--seed", str(SEED), "--batch_size", "1" if benchmark else str(self.manifest["sample_batch_size"]),
-               "--constraint_source", "strict_test"]
+               "--constraint_source", "strict_test", "--projection_distance_kl_weight", "0"]
         if self.sampling_revision:
             cmd += ["--sampling_revision", self.sampling_revision]
+        else:
+            cmd += ["--sampling_revision", "emptyfix-v1"]
         if benchmark:
             cmd += ["--max_samples", "1"]
         elif self.preflight:

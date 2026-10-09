@@ -33,6 +33,13 @@ class ConstraintProjection:
         update_multipliers: bool = True,
         early_stop: bool = True,
         generator=None,
+        projection_distance_kl_weight: float = 0.0,
+        distance_reference=None,
+        distance_generator=None,
+        distance_paths: int = 8,
+        distance_topk: int = 32,
+        distance_bins: int = 32,
+        distance_temperature: float = 1.0,
     ):
         self.num_classes = int(num_classes)
         self.type_classes = int(type_classes)
@@ -66,6 +73,19 @@ class ConstraintProjection:
         self.update_multipliers = bool(update_multipliers)
         self.early_stop = bool(early_stop)
         self.generator = generator
+        self.projection_distance_kl_weight = float(projection_distance_kl_weight)
+        self.distance_reference = distance_reference
+        self.distance_generator = distance_generator
+        self.distance_paths = int(distance_paths)
+        self.distance_topk = int(distance_topk)
+        self.distance_bins = int(distance_bins)
+        self.distance_temperature = float(distance_temperature)
+        if (not math.isfinite(self.projection_distance_kl_weight) or self.projection_distance_kl_weight < 0
+                or self.distance_paths < 1 or self.distance_topk < 1 or self.distance_bins < 2
+                or not math.isfinite(self.distance_temperature) or self.distance_temperature <= 0):
+            raise ValueError('Invalid distance KL configuration')
+        if self.projection_distance_kl_weight > 0 and (self.outer_iterations < 1 or self.inner_iterations < 1):
+            raise ValueError('Distance KL requires positive projection iteration counts')
 
     def effective_constraint_mask(self, log_probs, W_A, W_B, category_mask, constraint_mask=None):
         """Real constraints on rows with at least one generated category position."""
@@ -202,7 +222,13 @@ class ConstraintProjection:
         W_B: torch.Tensor,
         category_mask: torch.Tensor,
         constraint_mask=None,
+        *, poi_mask=None,
     ) -> torch.Tensor:
+        distance_enabled = self.projection_distance_kl_weight > 0
+        if distance_enabled and self.distance_reference is None:
+            raise ValueError('Enabled distance KL requires a training distance reference')
+        if distance_enabled and (poi_mask is None or tuple(poi_mask.shape) != (log_probs.shape[0], log_probs.shape[2])):
+            raise ValueError('Enabled distance KL requires an aligned poi_mask')
         if not torch.isfinite(log_probs).all():
             raise FloatingPointError("Non-finite projection input before optimization")
         constraint_mask = self.effective_constraint_mask(log_probs, W_A, W_B, category_mask, constraint_mask)
@@ -222,6 +248,22 @@ class ConstraintProjection:
         # Invariant only within this projection invocation, never across diffusion steps.
         log_q = F.log_softmax(y_model, dim=-1)
         active_view = active_rows[:, None, None]
+        distance_objective = None
+        if distance_enabled:
+            from distance_kl import DistanceObjective, distance_generator
+            distance_objective = DistanceObjective(self.distance_reference, y_model, poi_mask, active_rows,
+                paths=self.distance_paths, topk=self.distance_topk, temperature=self.distance_temperature)
+            if self.distance_generator is None:
+                seed = getattr(self, 'distance_seed', self.generator.initial_seed() if self.generator is not None else torch.initial_seed())
+                self.distance_generator = distance_generator(seed, y_model.device)
+            coverage = distance_objective.coverage
+            self.last_projection_stats.update(distance_active_rows=len(distance_objective.rows),
+                distance_candidate_mass_mean=float(coverage.mean()) if coverage.numel() else None,
+                distance_candidate_mass_min=float(coverage.min()) if coverage.numel() else None,
+                distance_kl=0.0, distance_poi_gradient_norm=0.0,
+                distance_paths=self.distance_paths if self.use_gumbel_softmax else 1,
+                distance_estimator='straight-through-mc' if self.use_gumbel_softmax else 'expected-route',
+                distance_reference_sha256=self.distance_reference.fingerprint)
         has_inactive = bool((~constraint_mask).any())
         probe_norms = probe_unmet = None
         if self.collect_diagnostics:
@@ -260,6 +302,8 @@ class ConstraintProjection:
         with torch.enable_grad():
             for outer_idx in range(self.outer_iterations):
                 gumbel_noise = None
+                distance_noise = (distance_objective.noise(self.distance_generator, self.use_gumbel_softmax)
+                                  if distance_objective is not None else None)
                 last_kl_loss = 0.0
                 last_const_loss = 0.0
 
@@ -288,6 +332,15 @@ class ConstraintProjection:
                     ).sum()
 
                     loss = self.projection_kl_weight * kl_loss + constraint_loss
+                    if distance_objective is not None and distance_objective.rows:
+                        distance_loss = distance_objective.loss(y, distance_noise)
+                        loss = loss + self.projection_distance_kl_weight * distance_loss
+                        if self.last_projection_stats['optimizer_steps'] == 0:
+                            distance_gradient = torch.autograd.grad(distance_loss, y, retain_graph=True)[0]
+                            self.last_projection_stats['distance_poi_gradient_norm'] = float(
+                                distance_gradient[poi_mask.bool()].norm().detach())
+                            del distance_gradient
+                        self.last_projection_stats['distance_kl'] = float(distance_loss.detach())
                     if not torch.isfinite(loss):
                         raise FloatingPointError("Non-finite projection objective")
                     if self.collect_diagnostics and probe_norms is None:
@@ -347,7 +400,7 @@ class ConstraintProjection:
 
                     max_delta = torch.max(delta_hard_order.max() * order_enabled,
                                           delta_hard_exist.max() * exist_enabled)
-                    if self.early_stop and max_delta < self.delta_tol:
+                    if self.early_stop and not (distance_objective is not None and distance_objective.rows) and max_delta < self.delta_tol:
                         break
 
         if has_inactive:
@@ -369,6 +422,9 @@ class ConstraintProjection:
                     logit_element_count=y.numel(),
                     lambda_order_max=float(lambda_order.max()), mu_order_max=float(mu_order.max()),
                     lambda_exist_max=float(lambda_exist.max()), mu_exist_max=float(mu_exist.max()))
+        if distance_objective is not None and distance_objective.rows:
+            with torch.no_grad():
+                self.last_projection_stats['distance_kl'] = float(distance_objective.loss(y, distance_noise))
         return y.transpose(1, 2).detach()
 
     def compile_batched_constraints(self, po_constraints_list: list, device):

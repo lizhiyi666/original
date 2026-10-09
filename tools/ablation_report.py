@@ -5,16 +5,20 @@ from pathlib import Path
 
 from experiment_io import atomic_json
 from tools.ablation_common import mean_sd
+from evaluations.statistical_metrics import require_evaluation_version
 
 LABELS={'full':'Full','no_projection':'No Projection','no_existence':'No Existence',
-        'no_order':'No Order','no_kl':'No KL','fixed_multipliers':'Fixed Multipliers','no_gumbel':'No Gumbel Noise'}
+        'no_order':'No Order','no_kl':'No KL','no_distance_kl':'No Distance KL','fixed_multipliers':'Fixed Multipliers','no_gumbel':'No Gumbel Noise'}
 
 
 def make_report(directory,seeds,variants):
     directory=Path(directory)
     runs={v:{s:json.loads((directory/f'seed-{s}'/v/'metrics.json').read_text()) for s in seeds} for v in variants}
+    for by_seed in runs.values():
+        for record in by_seed.values():
+            require_evaluation_version(record['metrics'])
     summary={}
-    keys=list(runs[variants[0]][seeds[0]]['metrics'])
+    keys=[key for key in runs[variants[0]][seeds[0]]['metrics'] if key != 'evaluation_version']
     for variant in variants:
         summary[variant]={key:mean_sd([runs[variant][s]['metrics'][key] for s in seeds]) for key in keys}
         summary[variant]['spatial_wall_seconds']=mean_sd([runs[variant][s]['timing']['spatial_wall_seconds'] for s in seeds])

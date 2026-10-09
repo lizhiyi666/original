@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import json
+from pathlib import Path
+from evaluations.statistical_metrics import EVALUATION_VERSION
 from evaluations.preprocessing import preprocessing_data
 from evaluations import Get_Statistical_Metrics, run_SemLoc_task, run_EpiSim_task
 # use the per-test-sequence OVR implementation
@@ -104,7 +107,7 @@ def run_EpiSim(task, dataset, experiment_comments, init_exposed_num, exp_num, ma
     return EpiSim_MAPE, EpiSim_MSPE
 
 
-def run_Statistical(dataset, experiment_comments):
+def run_Statistical(dataset, experiment_comments, *, diagnostics=None):
     """
     Compute statistical metrics and the reference-based OVR (OVR_ref) for generated vs test.
     Returns:
@@ -133,7 +136,7 @@ def run_Statistical(dataset, experiment_comments):
         seq['marks'] = marks_revised
 
     # existing statistical metrics
-    JSD_Values = Get_Statistical_Metrics(test_seqs, generated_seqs)
+    JSD_Values = Get_Statistical_Metrics(test_seqs, generated_seqs, diagnostics=diagnostics)
     unsat_ratio = dataset_unsat_ratio_by_test_pairs(test_seqs, generated_seqs, poi_category, skip_nan=True)
     # compute per-test-sequence reference-based OVR: for each test sequence, extract its reference pairs
     # and compute average violation rate in the corresponding generated sequence.
@@ -167,9 +170,15 @@ def evaluation(task, dataset, cuda, results_log, experiment_comments, generated_
             f.writelines(f"{dataset} {task} MAPE : {MAPE}, MSPE : {MSPE} \n")
     else:
         # Statistical metrics + OVR_ref
-        JSD_Values, OVR_ref_skip,OVR_ref_strict,coverage,unsat_ratio = run_Statistical(dataset, experiment_comments)
-        with open(results_log, "a+") as f:
-            f.writelines(f"Distance: {JSD_Values['Distance']}, Radius: {JSD_Values['Radius']}, Interval: {JSD_Values['Interval']}, DailyLoc: {JSD_Values['DailyLoc']}, Category: {JSD_Values['Category']}, 'G-RANK': {JSD_Values['G-RANK']}, OVR_ref_skip: {OVR_ref_skip}, OVR_ref_strict: {OVR_ref_strict}, coverage: {coverage}, Unsat_ref: {unsat_ratio}\n")
+        diagnostics = {}
+        if Path(results_log).exists() or Path(results_log + '.json').exists():
+            raise FileExistsError('Use a new v2 results path; historical evaluations are not overwritten or appended')
+        JSD_Values, OVR_ref_skip,OVR_ref_strict,coverage,unsat_ratio = run_Statistical(dataset, experiment_comments, diagnostics=diagnostics)
+        with open(results_log, "x", encoding='utf-8') as f:
+            f.writelines(f"evaluation_version: {EVALUATION_VERSION}, Distance: {JSD_Values['Distance']}, Radius: {JSD_Values['Radius']}, CategoryTransition: {JSD_Values['CategoryTransition']}, DailyLoc: {JSD_Values['DailyLoc']}, Category: {JSD_Values['Category']}, 'G-RANK': {JSD_Values['G-RANK']}, OVR_ref_skip: {OVR_ref_skip}, OVR_ref_strict: {OVR_ref_strict}, coverage: {coverage}, Unsat_ref: {unsat_ratio}\n")
+        with open(results_log + '.json', 'x', encoding='utf-8') as f:
+            json.dump(dict(metrics={k: v if np.isfinite(v) else None for k,v in JSD_Values.items()},
+                           diagnostics=diagnostics), f, ensure_ascii=False, indent=2, allow_nan=False)
 
 
 if __name__ == "__main__":
@@ -185,5 +194,5 @@ if __name__ == "__main__":
     parser.add_argument("--generated_only", default=False, action='store_true')
     args = parser.parse_args()
     if len(args.results) == 0:
-        args.results = args.datasets + "_" + args.experiment_comments + "_Evaluation_results.txt" if args.experiment_comments != '' else args.datasets + "_Evaluation_results.txt"
+        args.results = args.datasets + "_" + args.experiment_comments + "_Evaluation_v2_results.txt" if args.experiment_comments != '' else args.datasets + "_Evaluation_v2_results.txt"
     evaluation(args.task, args.datasets, args.cuda, args.results, args.experiment_comments, args.generated_only, args.init_exposed_num, args.exp_num, args.max_weeks)

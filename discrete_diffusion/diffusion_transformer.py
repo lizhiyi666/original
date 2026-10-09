@@ -170,6 +170,11 @@ class DiffusionTransformer(nn.Module):
         projection_delta_tol: float = 0.25,     # δ 容忍
         projection_existence_weight: float = 0.02,
         cond_dropout_rate: float = 0.0,
+        projection_distance_kl_weight: float = 0.0,
+        distance_paths: int = 8,
+        distance_topk: int = 32,
+        distance_bins: int = 32,
+        distance_temperature: float = 1.0,
     ):
         super().__init__()  
 
@@ -212,6 +217,9 @@ class DiffusionTransformer(nn.Module):
                 use_gumbel_softmax=self.use_gumbel_softmax,
                 gumbel_temperature=self.gumbel_temperature,
                 projection_existence_weight=projection_existence_weight, 
+                projection_distance_kl_weight=projection_distance_kl_weight,
+                distance_paths=distance_paths, distance_topk=distance_topk,
+                distance_bins=distance_bins, distance_temperature=distance_temperature,
             )
 
         at,at1, bt,bt1, ct,ct1, att,att1, btt1,btt2, ctt,ctt1 = alpha_schedule(self.num_timesteps, type_classes=self.type_classes, poi_classes = self.poi_classes)
@@ -506,11 +514,14 @@ class DiffusionTransformer(nn.Module):
                     print(f"[DEBUG][projection] viol_before[0]={viol_before[0].item():.6f}, mean={viol_before.mean().item():.6f}")
 
             if W_A is not None:
+                distance_options = ({'poi_mask': batch.poi_mask}
+                    if getattr(self.constraint_projector, 'projection_distance_kl_weight', 0) > 0 else {})
                 model_log_prob_after = self.constraint_projector.project_with_matrices(
                     model_log_prob,
                     W_A, W_B,
                     batch.category_mask,
                     constraint_mask=c_mask,
+                    **distance_options,
                 )
                 stats = getattr(self.constraint_projector, "last_projection_stats", {"optimizer_steps": 1})
                 if stats["optimizer_steps"] > 0:

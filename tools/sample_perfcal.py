@@ -7,6 +7,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import torch
 
 if __name__ == '__main__':
+    if '--sampling_revision' not in sys.argv:
+        sys.argv += ['--sampling_revision', 'perfcal-v1']
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     torch.set_num_threads(4)

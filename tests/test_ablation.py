@@ -152,7 +152,9 @@ class MetricTests(unittest.TestCase):
         m,_=evaluate([self.record([10,20])],[self.record([])],{10:4,20:5},[0])
         self.assertEqual(m['strict_ovr'],1)
         self.assertIsNone(m['ovr_skip'])
-        self.assertIsNone(m['totalJSD'])
+        self.assertGreater(m['Category'], 0)
+        self.assertGreater(m['CategoryTransition'], 0)
+        self.assertIsNone(m['Distance'])
         self.assertEqual(m['empty_rate'],1)
 
     def test_sample_standard_deviation(self):

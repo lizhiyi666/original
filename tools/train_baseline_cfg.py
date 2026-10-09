@@ -24,12 +24,23 @@ def main():
     job=json.loads(Path(args.job).read_text())
     folder=Path(job['output_dir'])
     precision()
-    task,dm,run_path=load_task(job['source'])
+    city=job.get('city')
+    if city:
+        from tools.city_common import load_city,fresh_city_cfg,references as city_references,verify_tracking
+        task,dm=load_city(city)
+        run_path=None
+    else:
+        task,dm,run_path=load_task(job['source'])
     temporal_hash=state_hash(task.tpp_model)
-    dd=fresh_cfg(task,dm,run_path)
-    _,_,_=references(dm,'train',list(range(len(dm.train_data.sequences))))
-    if len(dm.train_data.sequences)!=3160 or dm.batch_size!=64:
-        raise RuntimeError('CFG budget requires 3160 training sequences at batch 64')
+    dd=fresh_city_cfg(task,dm,city) if city else fresh_cfg(task,dm,run_path)
+    if city:
+        city_references(dm,city,'train',list(range(len(dm.train_data.sequences))))
+    else:
+        references(dm,'train',list(range(len(dm.train_data.sequences))))
+    expected_count=city['train_count'] if city else 3160
+    batches_per_epoch=(expected_count+63)//64
+    if len(dm.train_data.sequences)!=expected_count or dm.batch_size!=64:
+        raise RuntimeError('CFG dataset/batch budget mismatch')
     dd.train()
     optimizer=torch.optim.AdamW(dd.parameters(),lr=.001,weight_decay=0)
     scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,factor=.95,patience=1000)
@@ -77,7 +88,7 @@ def main():
                 scheduler.step(loss.detach())
                 losses.append(float(loss.detach()))
                 global_step+=1
-            if len(losses)!=50 or any(p.grad is not None for p in task.tpp_model.parameters()):
+            if len(losses)!=batches_per_epoch or any(p.grad is not None for p in task.tpp_model.parameters()):
                 raise RuntimeError('CFG training budget/frozen temporal invariant failed')
             if min(dd.cfg_stats['conditional_rows'],dd.cfg_stats['null_rows'])<=0:
                 raise RuntimeError('Both CFG training branches must receive samples')
@@ -94,22 +105,33 @@ def main():
             run.log(progress)
             if epoch<2 or (epoch+1)%25==0:
                 print(json.dumps(progress),flush=True)
-        if state_hash(task.tpp_model)!=temporal_hash or global_step!=job['epochs']*50:
+        if state_hash(task.tpp_model)!=temporal_hash or global_step!=job['epochs']*batches_per_epoch:
             raise RuntimeError('Final CFG frozen weights/update count mismatch')
         result=dict(state='complete',epochs=job['epochs'],global_step=global_step,
             checkpoint_sha256=sha256_file(checkpoint_path),temporal_sha256=temporal_hash,
             branch_counts=dict(dd.cfg_stats),training_seconds=prior_seconds+time.perf_counter()-started)
         run.summary.update(result)
         run.summary['complete']=True
+        if city:
+            # Numeric completion is durable before the independent tracking receipt.
+            result['wandb_url']=run.url
+            atomic_json(folder/'result.json',result)
         run.finish(exit_code=0)
-        remote=wandb.Api(timeout=30).run(f"{job['entity']}/Marionette/{job['wandb_id']}")
-        if remote.summary.get('complete') is not True:
-            raise RuntimeError('CFG training W&B readback failed')
+        if city:
+            verify_tracking(job['entity'],job['wandb_id'],
+                dict(complete=True,checkpoint_sha256=result['checkpoint_sha256'],global_step=global_step),
+                folder/'wandb-sync.json',run.url)
+        else:
+            remote=wandb.Api(timeout=30).run(f"{job['entity']}/Marionette/{job['wandb_id']}")
+            if remote.summary.get('complete') is not True:
+                raise RuntimeError('CFG training W&B readback failed')
         result['wandb_url']=run.url
         atomic_json(folder/'result.json',result)
     except BaseException as exc:
-        run.finish(exit_code=1)
-        atomic_json(folder/'result.json',dict(state='failed',error_type=type(exc).__name__,error=str(exc)))
+        if not city or not (folder/'result.json').exists() or json.loads((folder/'result.json').read_text()).get('state')!='complete':
+            run.finish(exit_code=1)
+            atomic_json(folder/'result.json',dict(state='failed',error_type=type(exc).__name__,error=str(exc)))
+        atomic_json(folder/'failure.json',dict(error_type=type(exc).__name__,error=str(exc)))
         raise
 
 

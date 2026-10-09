@@ -44,6 +44,9 @@ def merge_parts(data_name, run_id, world_size=4, output_tag=None, data_dir="data
                   projection_calls=sum(p.get("projection_calls", 0) for p in parts),
                   elapsed_seconds=max(p.get("elapsed_seconds", 0) for p in parts),
                   shard_sha256=[sha256_file(path) for path in paths])
+    if any('distance_projection_diagnostics' in part for part in parts):
+        merged['distance_projection_diagnostics'] = [dict(entry, rank=rank)
+            for rank, part in enumerate(parts) for entry in part.get('distance_projection_diagnostics', [])]
     if destination.exists():
         previous = torch.load(destination, map_location="cpu", weights_only=False)
         if any(previous.get(k) != merged[k] for k in ("metadata", "test_indices", "shard_sha256")):

@@ -1,4 +1,4 @@
 root: data/
 batch_size: 64
-name: NewYork_PO1_OOD
+name: NewYork_PO1
 

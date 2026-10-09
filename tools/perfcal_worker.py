@@ -61,6 +61,11 @@ def main():
         dd.projection_call_count = 0
         kwargs = projector_kwargs(dd, profile, job.get('temperature', 0.1))
         p = ConstraintProjection(**kwargs, device=str(task.device), collect_diagnostics=True, verbose=False)
+        if p.projection_distance_kl_weight > 0:
+            if job['kind'] == 'regression':
+                raise ValueError('Frozen v1 equivalence checks require distance KL to be disabled')
+            from distance_kl import attach_distance_reference
+            attach_distance_reference(p, dm, profile['seed'])
         dd.constraint_projector = p
         result['load_seconds'] = time.perf_counter() - load_started
         result['checkpoint_sha256'] = sha256_file(job['checkpoint'])
@@ -112,6 +117,10 @@ def main():
 
             def trial(cls, temperature=None):
                 options = dict(kwargs)
+                if cls is not ConstraintProjection:
+                    for key in ('projection_distance_kl_weight', 'distance_paths', 'distance_topk',
+                                'distance_bins', 'distance_temperature'):
+                        options.pop(key, None)
                 if temperature is not None:
                     options['gumbel_temperature'] = temperature
                 instance = cls(**options, device=str(task.device))

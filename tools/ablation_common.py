@@ -9,7 +9,7 @@ import torch
 from constraint_projection import ConstraintProjection
 from evaluations.ovr import (_seq_cats_order, _extract_reference_pairs_for_sequence,
                              _violation_rate_for_pair_in_generated)
-from evaluations.statistical_metrics import Get_Statistical_Metrics
+from evaluations.statistical_metrics import Get_Statistical_Metrics, EVALUATION_VERSION
 from tools.baseline_common import validate_alignment
 
 VERSION='pcdg-ablation-v1'
@@ -23,6 +23,10 @@ VARIANTS={
     'fixed_multipliers': dict(order=1,existence=5,kl=1,update=False,gumbel=True),
     'no_gumbel': dict(order=1,existence=5,kl=1,update=True,gumbel=False),
 }
+DISTANCE_VERSION = 'pcdg-distance-v2'
+DISTANCE_VARIANTS = {name: (None if value is None else dict(value, distance=0 if name == 'no_kl' else 1))
+                     for name, value in VARIANTS.items()}
+DISTANCE_VARIANTS['no_distance_kl'] = dict(DISTANCE_VARIANTS['full'], distance=0)
 STEPS=list(range(36,-1,-4))
 
 
@@ -42,17 +46,26 @@ def rng_digest(value):
     return hashlib.sha256(state.cpu().numpy().tobytes()).hexdigest()
 
 
-def projector(dd,variant,rng=None):
-    p=VARIANTS[variant]
+def projector(dd,variant,rng=None,*,revision=VERSION,datamodule=None):
+    if revision not in (VERSION, DISTANCE_VERSION):
+        raise ValueError('Unknown projection revision')
+    p=(DISTANCE_VARIANTS if revision == DISTANCE_VERSION else VARIANTS)[variant]
     if p is None:
         return None
-    return ConstraintProjection(dd.num_classes,dd.type_classes,dd.num_spectial,
+    instance = ConstraintProjection(dd.num_classes,dd.type_classes,dd.num_spectial,
         tau=0,lambda_init=1,mu_init=1,mu_alpha=2,mu_max=1000,
         outer_iterations=10,inner_iterations=50,eta=1,delta_tol=1e-6,
         use_gumbel_softmax=p['gumbel'],gumbel_temperature=3,
         projection_order_weight=p['order'],projection_existence_weight=p['existence'],
         projection_kl_weight=p['kl'],update_multipliers=p['update'],early_stop=False,
-        generator=rng,collect_diagnostics=True,verbose=False)
+        generator=rng,collect_diagnostics=True,verbose=False,
+        projection_distance_kl_weight=p.get('distance', 0))
+    if instance.projection_distance_kl_weight:
+        if datamodule is None:
+            raise ValueError('Distance ablations require the training datamodule')
+        from distance_kl import attach_distance_reference
+        attach_distance_reference(instance, datamodule)
+    return instance
 
 
 def _rates(pairs,cats):
@@ -76,7 +89,7 @@ def _rates(pairs,cats):
                 ovr_skip=float(np.mean(skip)) if skip else None)
 
 
-def evaluate(refs,generated,poi_category,indices):
+def evaluate(refs,generated,poi_category,indices,*,diagnostics=None):
     validate_alignment(generated,refs,poi_category)
     if len(indices)!=len(generated) or len(set(indices))!=len(indices):
         raise ValueError('Invalid evaluation indices')
@@ -110,13 +123,10 @@ def evaluate(refs,generated,poi_category,indices):
     if metrics['strict_ovr'] is not None and abs(metrics['strict_ovr']-
             metrics['missing_contribution']-metrics['order_contribution'])>1e-12:
         raise RuntimeError('Strict OVR decomposition mismatch')
-    names=('Distance','Radius','DailyLoc','Interval','Category','G-RANK','totalJSD')
-    if events:
-        revised=[dict(s,marks=[poi_category[int(p)] for p in s['checkins']]) for s in generated]
-        stats=Get_Statistical_Metrics(refs,revised)
-        metrics.update({str(k):float(v) if math.isfinite(float(v)) else None for k,v in stats.items()})
-    else:
-        metrics.update({k:None for k in names})
+    revised=[dict(s,marks=[poi_category[int(p)] for p in s['checkins']]) for s in generated]
+    stats=Get_Statistical_Metrics(refs,revised,diagnostics=diagnostics)
+    metrics.update({str(k):float(v) if math.isfinite(float(v)) else None for k,v in stats.items()})
+    metrics['evaluation_version'] = EVALUATION_VERSION
     return metrics,rows
 
 

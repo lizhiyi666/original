@@ -1,0 +1,105 @@
+\section{Experiments}
+\label{sec:experiments}
+
+We evaluate whether \pcdg enforces category precedence while preserving fidelity,
+how it compares to retraining- and post-processing-based alternatives, and how
+each component contributes.
+
+\subsection{Setup}
+\label{sec:exp:setup}
+\paragraph{Datasets.}
+We use check-in data from two cities, \textbf{New York} and \textbf{Istanbul},
+under an out-of-distribution (OOD) split that holds out partial-order
+configurations unseen during training ($2{,}108$ and $4{,}914$ held-out reference
+sequences, respectively). For each reference we derive a sample-level
+partial-order matrix $\Mmat$ from the category first/last positions
+(\S\ref{sec:problem}). The base generators are trained once per city and
+\textbf{kept frozen} for all methods; \pcdg and all sampling-time baselines reuse
+the identical frozen weights. \todo{confirm final train/test counts and OOD definition from distance-v2 manifest}
+
+\paragraph{Protocol.}
+Unless noted, the constraint projection uses order weight $w_{\mathrm{ord}}{=}1$,
+existence weight $w_{\mathrm{ex}}{=}5$, token-KL weight $w_{\mathrm{kl}}{=}1$, and
+distance-KL weight $w_{\mathrm{dist}}{=}1$ ($8$ routes, top-$32$ candidates,
+$32$ bins), with Gumbel temperature $3$, applied over the last $40$ reverse steps
+every $4$ steps without early stopping. No per-city hyper-parameter search is
+performed. We report the mean $\pm$ sample standard deviation over \textbf{three
+sampling seeds} at a fixed checkpoint; the reported variability reflects sampling
+stochasticity, not training variability.
+
+\paragraph{Baselines.} We compare five methods on the same frozen backbone unless
+stated: \textbf{JointGen} (unconstrained backbone); \textbf{PostSwap} (generate,
+then stably reorder categories to satisfy $\Mmat$); \textbf{EnergyGuide}
+(gradient guidance by the constraint-violation energy during
+sampling~\cite{schiff2025guidance}); \textbf{PO-CFG} (a \emph{retrained}
+classifier-free-guidance model conditioned on the partial order, trained for
+$1000$ epochs; guidance scale $1$); and \textbf{\pcdg} (ours). PO-CFG is the only
+method that requires retraining.
+
+\paragraph{Metrics.}
+\emph{Fidelity} uses the Jensen--Shannon divergence (JSD, lower is better) of six
+marginals (evaluation protocol v2): travel \emph{Distance}, \emph{Radius} of
+gyration, \emph{CategoryTransition} (adjacent directed category pairs),
+\emph{DailyLoc} (daily location count), hourly \emph{Category} usage, and a global
+rank statistic \emph{G-RANK}. \emph{Constraint satisfaction} (percentages) uses
+\emph{OVR\textsubscript{strict}} and \emph{OVR\textsubscript{skip}} (ordering-%
+violation rates), \emph{Pair coverage} and \emph{Category coverage} (fraction of
+required relations/categories realized, higher is better), and \emph{Unsat}
+(fraction of sequences violating any constraint, lower is better). \todo{add one-line formal definitions in Appendix~\ref{app:metrics}}
+
+\subsection{Main results}
+\label{sec:exp:main}
+Table~\ref{tab:method} reports the method comparison on both cities.
+\input{tables/method-comparison}
+
+\noindent\textbf{Findings.} \todo{fill from distance-v2 final tables}
+Qualitatively, we expect to report: (i) \pcdg attains the strongest
+\emph{constraint satisfaction} on both cities---more than halving \emph{Unsat}
+relative to the unconstrained JointGen and roughly tripling \emph{Pair
+coverage}---and surpasses PostSwap, EnergyGuide, and the \emph{retrained} PO-CFG
+on the ordering and coverage metrics, despite being training-free; (ii) PostSwap
+trivially drives OVR\textsubscript{skip} to $0$ by construction but cannot improve
+coverage and distorts \emph{Distance}; (iii) PO-CFG achieves the best raw
+\emph{fidelity} on several JSD metrics, exposing a genuine fidelity--constraint
+trade-off that we analyze in \S\ref{sec:exp:tradeoff}. \emph{All numeric claims in
+this subsection are to be finalized from the distance-v2 evaluation.}
+
+% --- PROVISIONAL reference numbers (integrated-20261005, eval-v1, no distance-KL) ---
+% Istanbul Unsat: JointGen 95.57 -> PCDG 36.83 ; PO-CFG 69.07
+% NewYork  Unsat: JointGen 93.64 -> PCDG 42.77 ; PO-CFG 49.48
+% Istanbul Pair coverage: 14.63 -> 70.92 ; NewYork 21.13 -> 67.33
+% These will be replaced by eval-v2 distance-v2 numbers before submission.
+
+\subsection{Ablation study}
+\label{sec:exp:ablation}
+Table~\ref{tab:ablation} isolates each component by disabling it from the full
+model: \textsc{No Projection} (the backbone), \textsc{No Existence},
+\textsc{No Order}, \textsc{No KL} (both KL terms off), \textsc{No Distance KL}
+(only the distance term off), \textsc{Fixed Multipliers} (no dual update,
+Eq.~\eqref{eq:dual}), \textsc{No Gumbel} (deterministic relaxation), and
+\textsc{Full} ($=\pcdg$).
+\input{tables/ablation}
+
+\noindent\textbf{Findings.} \todo{fill from distance-v2 final tables}
+We expect the ablation to show that the \emph{existence} energy is responsible for
+coverage (removing it collapses pair/category coverage), the \emph{order} energy
+is responsible for strict ordering (removing it inflates
+OVR\textsubscript{strict}), and the \emph{adaptive multipliers} materially improve
+constraint satisfaction over fixed penalties. The \emph{token-KL} and
+\emph{Gumbel} terms have smaller marginal effects at this projection budget, which
+we report honestly; the \emph{distance-KL} term is evaluated specifically for its
+effect on spatial-fidelity metrics (Radius, Distance).
+
+\subsection{Fidelity--constraint trade-off}
+\label{sec:exp:tradeoff}
+\todo{Fig.~3: scatter of Unsat (x) vs.\ Distance/Radius JSD (y), one point per method per city, showing \pcdg on the favorable frontier and PO-CFG trading constraint satisfaction for raw fidelity.}
+We position each method in the Unsat--fidelity plane and discuss where \pcdg sits
+relative to the retraining-based PO-CFG and the post-hoc PostSwap.
+
+\subsection{Cost and reproducibility}
+\label{sec:exp:cost}
+\pcdg adds only sampling-time projection iterations to a frozen generator and
+trains nothing, whereas PO-CFG requires a full retraining per city. We report
+wall-clock sampling overhead and the number of projection updates in
+Appendix~\ref{app:cost}, and we release code, constraint matrices, and evaluation
+scripts to reproduce every table. \todo{insert sampling-time overhead numbers from distance-v2 diagnostics}

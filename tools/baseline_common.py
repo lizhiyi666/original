@@ -112,16 +112,17 @@ def validate_alignment(generated,refs,poi_category):
                 raise ValueError(f'Condition/index mismatch: {key}')
 
 
-def full_metrics(refs,generated,poi_category):
+def full_metrics(refs,generated,poi_category,*,diagnostics=None):
     metrics=calibration_metrics(refs,generated,poi_category)
     revised=[]
     for sample in generated:
         copy=dict(sample)
         copy['marks']=[poi_category[int(p)] for p in sample['checkins']]
         revised.append(copy)
-    metrics.update({str(k):float(v) for k,v in Get_Statistical_Metrics(refs,revised).items()})
+    metrics.update({str(k):float(v) if math.isfinite(float(v)) else None
+                    for k,v in Get_Statistical_Metrics(refs,revised,diagnostics=diagnostics).items()})
     metrics['Unsat_ref']=float(dataset_unsat_ratio_by_test_pairs(refs,generated,poi_category,skip_nan=True))
-    if not all(math.isfinite(v) for v in metrics.values()):
+    if not all(v is None or math.isfinite(v) for v in metrics.values()):
         raise FloatingPointError('Non-finite baseline evaluation')
     return metrics
 

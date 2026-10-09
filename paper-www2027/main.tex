@@ -1,0 +1,93 @@
+%% PCDG — WWW 2027 submission (Research Track)
+%% Double-blind, review mode. Compile with:  latexmk -pdf main.tex
+\documentclass[sigconf,anonymous,review]{acmart}
+
+% ---- review / draft conveniences (remove `review` and set copyright for camera-ready) ----
+\settopmatter{printacmref=false}          % suppress ACM reference block during review
+\setcopyright{none}                        % anonymous review; set properly for camera-ready
+\acmConference[WWW '27]{Proceedings of the ACM Web Conference 2027}{May 10--14, 2027}{Dublin, Ireland}
+\acmDOI{}
+\acmISBN{}
+\renewcommand{\footnotetextcopyrightpermission}[1]{}
+
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% draft-only helper; make it a no-op before submission
+\newcommand{\todo}[1]{\textcolor{red}{\small[TODO: #1]}}
+% shared macros
+\newcommand{\pcdg}{\textsc{PCDG}\xspace}
+\usepackage{xspace}
+\newcommand{\Mmat}{\mathbf{M}}
+\newcommand{\dkl}{D_{\mathrm{KL}}}
+\newcommand{\relu}{\mathrm{ReLU}}
+
+\begin{document}
+
+\title{Training-Free Partial-Order and Distance-Constrained Discrete Diffusion for Controllable POI Check-in Generation}
+
+\author{Anonymous Author(s)}
+\affiliation{%
+  \institution{Submission \#XXXX under double-blind review}
+  \country{}
+}
+
+\begin{abstract}
+Location-based social networks (LBSNs) are a core source of web-scale human-mobility
+data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic
+synthetic generation. Beyond statistical realism, many downstream web applications need
+control over the \emph{semantic order} of activities---e.g., leisure before dining---a
+sample-level, cross-position requirement that single-step conditioning cannot express.
+We present \pcdg, a \emph{training-free}, sampling-time projection layer for conditional
+joint temporal\,+\,category/POI discrete-diffusion generators. From a sample-level
+category partial-order matrix, \pcdg compiles differentiable order-violation and
+existence energies and, in the late reverse-diffusion steps, projects \emph{only the
+category-position logits} through a KL-preserving augmented-Lagrangian optimization; a
+complementary distance-distribution KL term regularizes spatial travel length to preserve
+geographic fidelity. The projected category logits are then jointly sampled with the
+unaltered POI distribution. Across two cities under an out-of-distribution split and three
+sampling seeds, \pcdg more than halves the constraint-violation rate and nearly triples
+pairwise ordering coverage over the unconstrained base generator, surpassing energy
+guidance, post-hoc reordering, and even a \emph{fully retrained} partial-order conditional
+model---without any retraining of the base generator. Ablations isolate the role of each
+energy term, the adaptive multipliers, and the distance regularizer, and we characterize
+the resulting fidelity--constraint trade-off.
+\end{abstract}
+
+% ---- CCS (minimal; refine with the ACM CCS tool before camera-ready) ----
+\begin{CCSXML}
+<ccs2012>
+   <concept>
+       <concept_id>10010147.10010257.10010258.10010259</concept_id>
+       <concept_desc>Computing methodologies~Machine learning</concept_desc>
+       <concept_significance>500</concept_significance>
+   </concept>
+   <concept>
+       <concept_id>10002951.10003227</concept_id>
+       <concept_desc>Information systems~Information systems applications</concept_desc>
+       <concept_significance>300</concept_significance>
+   </concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Computing methodologies~Machine learning}
+\ccsdesc[300]{Information systems~Information systems applications}
+
+\keywords{synthetic human mobility, controllable generation, discrete diffusion,
+constrained sampling, POI check-in sequences, partial-order constraints, LBSN}
+
+\maketitle
+
+\input{sections/intro}
+\input{sections/related}
+\input{sections/problem}
+\input{sections/method}
+\input{sections/experiments}
+\input{sections/conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

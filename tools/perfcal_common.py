@@ -22,13 +22,15 @@ def reference_projector_class(root):
 
 def projector_kwargs(dd, profile, temperature):
     p = profile['projection']
+    distance = ({key: p[key] for key in ('projection_distance_kl_weight', 'distance_paths', 'distance_topk',
+                                        'distance_bins', 'distance_temperature') if key in p})
     return dict(num_classes=dd.num_classes, type_classes=dd.type_classes, num_spectial=dd.num_spectial,
                 tau=p['projection_tau'], lambda_init=p['projection_lambda'], mu_init=p['projection_mu'],
                 mu_alpha=p['projection_mu_alpha'], mu_max=p['projection_mu_max'],
                 outer_iterations=p['projection_outer_iters'], inner_iterations=p['projection_inner_iters'],
                 eta=p['projection_eta'], delta_tol=p['projection_delta_tol'],
                 projection_existence_weight=p['projection_existence_weight'],
-                use_gumbel_softmax=p['use_gumbel_softmax'], gumbel_temperature=temperature)
+                use_gumbel_softmax=p['use_gumbel_softmax'], gumbel_temperature=temperature, **distance)
 
 
 def calibration_metrics(reference, generated, poi_category):

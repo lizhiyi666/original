@@ -14,10 +14,26 @@ from datamodule import Batch
 from evaluate_utils import get_task,get_run_data
 from experiment_io import atomic_json,publish_torch,sha256_file,seed_sampling,decode_preserving_empty
 from tools.baseline_common import precision,references,validate_alignment
-from tools.ablation_common import VERSION,VARIANTS,STEPS,generator,rng_digest,projector,evaluate
+from tools.ablation_common import VERSION,VARIANTS,DISTANCE_VERSION,DISTANCE_VARIANTS,STEPS,generator,rng_digest,projector,evaluate
+
+
+def memory_guard(job):
+    """An explicit safety ceiling; never silently reduce batch size or precision."""
+    limit = job.get('max_gpu_memory_fraction')
+    if limit is not None:
+        total = torch.cuda.get_device_properties(torch.cuda.current_device()).total_memory
+        used = torch.cuda.max_memory_reserved()
+        if used > total * limit:
+            raise RuntimeError(f'GPU reserved-memory safety ceiling exceeded: {used}/{total} > {limit}')
 
 
 def original_task(job):
+    if job.get('city'):
+        from tools.city_common import load_city
+        task,dm=load_city(job['city'],job.get('cfg_checkpoint'))
+        if task.device.type!='cuda':
+            raise RuntimeError('CUDA required for the declared experiment')
+        return task,dm
     source=Path(job['source'])
     manifest=json.loads((source/'manifest.json').read_text())
     _,_,run_path=get_run_data(manifest['run_id'],ROOT/'wandb')
@@ -29,10 +45,23 @@ def original_task(job):
     return task,dm
 
 
+def job_references(job,dm):
+    if job.get('city'):
+        from tools.city_common import references as city_references
+        return city_references(dm,job['city'],job['split'],job['indices'])
+    return references(dm,job['split'],job['indices'])
+
+
 def check_cache(cache,job):
     expected=job['indices']
-    if cache['indices']!=expected or cache['manifest_sha256']!=job['manifest_sha256']:
+    origin=job.get('cache_manifest_sha256',job['manifest_sha256'])
+    if cache['indices']!=expected or cache['manifest_sha256']!=origin:
         raise RuntimeError('Time cache indices/protocol mismatch')
+    if job.get('city'):
+        source_job=cache['job']
+        if (source_job['checkpoint_sha256']!=job['checkpoint_sha256'] or
+                source_job['seed']!=job['seed'] or source_job['split']!=job['split']):
+            raise RuntimeError('Foreign cache has a different checkpoint/seed/split')
     indices=[]
     for item in cache['batches']:
         batch=item['batch']
@@ -41,6 +70,12 @@ def check_cache(cache,job):
             raise RuntimeError('Cache batch shape/device mismatch')
         if not torch.isfinite(batch.time).all() or not torch.equal(batch.mask.sum(1),batch.unpadded_length):
             raise RuntimeError('Invalid cached time/mask')
+        if job.get('city'):
+            p=job['city']; semantic=p['semantic_classes']; slots=p['model_category_slots']
+            if batch.po_matrix.shape!=(batch.batch_size,slots,slots):
+                raise RuntimeError('Cached constraint matrix has wrong model-slot dimensions')
+            if batch.po_matrix[:,semantic:,:].any() or batch.po_matrix[:,:,semantic:].any():
+                raise RuntimeError('Unused legacy slots must never receive constraint edges')
         for i in range(batch.batch_size):
             t=batch.time[i][batch.mask[i]]
             if ((t<0)|(t>=24)).any() or (t.diff()<=0).any():
@@ -62,7 +97,7 @@ def create_cache(job):
         adaptation=[]
     else:
         task,dm=original_task(job)
-        raw,selected,_=references(dm,job['split'],job['indices'])
+        raw,selected,_=job_references(job,dm)
         items=[]
         adaptation=[]
         generation_started=time.perf_counter()
@@ -74,6 +109,7 @@ def create_cache(job):
             batch=Batch.from_sequence_list(selected[offset:offset+64]).to(task.device)
             with torch.no_grad():
                 temporal=task.tpp_model.sample(batch.batch_size,x_n=batch,tmax=batch.tmax)
+            memory_guard(job)
             maximum=min(task.discrete_diffusion.condition_encoder.max_position_embeddings,
                         (task.discrete_diffusion.transformer.positional_encoding.num_embeddings-3)//2)
             if int(temporal.unpadded_length.max())>maximum:
@@ -104,18 +140,32 @@ def sample(job):
     cache=torch.load(cache_path,map_location='cpu',weights_only=False)
     check_cache(cache,job)
     task,dm=original_task(job)
-    raw,_,refs=references(dm,job['split'],job['indices'])
+    raw,_,refs=job_references(job,dm)
     def forbidden(*args,**kwargs):
         raise RuntimeError('Temporal resampling is forbidden in spatial ablations')
     task.tpp_model.sample=forbidden
     dd=task.discrete_diffusion
+    revision = job.get('projection_revision', VERSION)
+    variants = DISTANCE_VARIANTS if revision == DISTANCE_VERSION else VARIANTS
     dd.use_guidance_baseline=False
-    dd.use_constraint_projection=job['variant']!='no_projection'
+    dd.use_constraint_projection=job['variant'] in variants and job['variant']!='no_projection'
     dd.projection_frequency=4
     dd.projection_last_k_steps=40
     dd.projection_call_count=0
-    p=projector(dd,job['variant'])
+    p=projector(dd,job['variant'],revision=revision,datamodule=dm) if job['variant'] in variants else None
     dd.constraint_projector=p
+    if job.get('distance_reference_sha256') and p is not None and p.projection_distance_kl_weight:
+        if p.distance_reference.fingerprint != job['distance_reference_sha256']:
+            raise RuntimeError('Distance training reference changed')
+    if job['variant']=='energy':
+        from baseline_models import configure_energy
+        configure_energy(dd,temperature=3,scale=100,last_k=40,frequency=4)
+    elif job['variant']=='cfg':
+        if not getattr(dd,'cfg_trained',False):
+            raise RuntimeError('PO-CFG requires a validated trained checkpoint')
+        dd.cfg_scale=1.0; dd.reset_cfg_stats()
+    elif job['variant'] not in variants:
+        raise ValueError('Unknown sampling variant')
     calls=[]
     current={}
     old_sample=dd.p_sample
@@ -128,6 +178,7 @@ def sample(job):
         def traced(*args,**kwargs):
             t=time.perf_counter()
             output=old_project(*args,**kwargs)
+            memory_guard(job)
             calls.append(dict(p.last_projection_stats,diffusion_step=current['step'],
                               projection_wall_seconds=time.perf_counter()-t))
             return output
@@ -145,10 +196,17 @@ def sample(job):
         dd.sampling_generator=spatial
         if p is not None:
             p.generator=projection
+            if p.projection_distance_kl_weight > 0:
+                from distance_kl import distance_generator
+                p.distance_generator = distance_generator(job['seed'] + item['global_start'], task.device)
+        distance_rng_before = rng_digest(p.distance_generator) if p is not None and p.distance_generator is not None else None
         before_spatial=rng_digest(spatial)
         before_global=(rng_digest(torch.get_rng_state()),rng_digest(torch.cuda.get_rng_state()))
         begin=len(calls)
+        energy_before=dd.energy_guidance.stats['calls'] if job['variant']=='energy' else 0
+        cfg_before=dd.cfg_stats['calls'] if job['variant']=='cfg' else 0
         output=decode_preserving_empty(task,batch,raw['poi_gps'])
+        memory_guard(job)
         after_global=(rng_digest(torch.get_rng_state()),rng_digest(torch.cuda.get_rng_state()))
         if before_global!=after_global:
             raise RuntimeError('Spatial/projection sampling leaked into global RNG')
@@ -158,19 +216,28 @@ def sample(job):
         expected=STEPS if effective and p is not None else []
         if [c['diffusion_step'] for c in active]!=expected or any(c['optimizer_steps']!=500 for c in active):
             raise RuntimeError('Ablation did not execute the fixed 10 x 500 budget')
+        if job['variant']=='energy' and dd.energy_guidance.stats['calls']-energy_before!=(10 if effective else 0):
+            raise RuntimeError('Energy guidance did not execute its fixed schedule')
+        if job['variant']=='cfg' and dd.cfg_stats['calls']-cfg_before!=(dd.num_timesteps if bool((batch.unpadded_length>0).any()) else 0):
+            raise RuntimeError('PO-CFG did not execute both prediction branches')
         temporal_empty.extend(index for index,n in zip(item['indices'],batch.unpadded_length.tolist()) if n==0)
         generated.extend(output)
         batch_traces.append(dict(global_start=item['global_start'],indices=item['indices'],
             spatial_rng_before=before_spatial,spatial_rng_after=rng_digest(spatial),
+            distance_rng_before=distance_rng_before,
+            distance_rng_after=rng_digest(p.distance_generator) if distance_rng_before else None,
             projection_rng_after=rng_digest(projection),effective_constraints=effective,
             projection_stats=trace,global_rng_unchanged=True))
         atomic_json(Path(job['output_dir'])/'progress.json',dict(completed_samples=len(generated),
             total_samples=len(job['indices']),phase='spatial',elapsed_seconds=time.perf_counter()-started))
     torch.cuda.synchronize()
     spatial_seconds=time.perf_counter()-started
-    metrics,rows=evaluate(refs,generated,raw['poi_category'],job['indices'])
+    metric_diagnostics = {}
+    metrics,rows=evaluate(refs,generated,raw['poi_category'],job['indices'],diagnostics=metric_diagnostics)
     if job.get('historical_empty') and len(generated[35]['checkins'])!=0:
         raise RuntimeError('Historical empty index 99 was filled')
+    if job.get('test_empty_row') is not None and len(generated[job['test_empty_row']]['checkins'])!=0:
+        raise RuntimeError('Test-only fixed empty row was filled')
     if sha256_file(cache_path)!=job['cache_sha256']:
         raise RuntimeError('Spatial worker modified the sealed time cache')
     active=[c for c in calls if c['optimizer_steps']>0]
@@ -178,6 +245,7 @@ def sample(job):
     active_rows=sum(c.get('active_rows',0) for c in active)
     elements=sum(c.get('logit_element_count',0) for c in calls)
     result=dict(state='complete',kind='sample',samples=len(generated),metrics=metrics,
+        metric_diagnostics=metric_diagnostics, projection_revision=revision,
         spatial_seconds=spatial_seconds,samples_per_second=len(generated)/spatial_seconds,
         projection_calls=len(active),projection_invocations=len(calls),
         optimizer_steps=sum(c['optimizer_steps'] for c in calls),
@@ -187,6 +255,19 @@ def sample(job):
         kl_model_to_projected_per_active_row=sum(c.get('kl_model_to_projected_sum',0) for c in calls)/active_rows if active_rows else 0.0,
         logit_rms_change=(sum(c.get('logit_squared_change_sum',0) for c in calls)/elements)**.5 if elements else 0.0,
         peak_allocated_bytes=torch.cuda.max_memory_allocated(),peak_reserved_bytes=torch.cuda.max_memory_reserved())
+    result['projection_settings'] = None if p is None else dict(
+        token_kl_weight=p.projection_kl_weight, distance_kl_weight=p.projection_distance_kl_weight,
+        order_weight=p.projection_order_weight, existence_weight=p.projection_existence_weight,
+        gumbel=p.use_gumbel_softmax, update_multipliers=p.update_multipliers,
+        distance_paths=p.distance_paths, distance_topk=p.distance_topk,
+        distance_bins=p.distance_bins, distance_temperature=p.distance_temperature,
+        outer=p.outer_iterations, inner=p.inner_iterations, early_stop=p.early_stop)
+    if job['variant']=='energy':
+        result['energy_stats']=dict(dd.energy_guidance.stats)
+    if job['variant']=='cfg':
+        result['cfg_stats']=dict(dd.cfg_stats)
+    if job['variant'] in ('energy','cfg') and dd.projection_call_count!=0:
+        raise RuntimeError('Baseline unexpectedly used ALM')
     payload=dict(format=VERSION,job=job,manifest_sha256=job['manifest_sha256'],indices=job['indices'],
                  test_indices=job['indices'] if job['split']=='test' else None,t_max=24.0,
                  sequences=generated,per_condition=rows,batch_traces=batch_traces,
@@ -204,6 +285,8 @@ def main():
     precision()
     if sha256_file(job['checkpoint'])!=job['checkpoint_sha256']:
         raise RuntimeError('Checkpoint changed')
+    if job.get('cfg_checkpoint') and sha256_file(job['cfg_checkpoint'])!=job['cfg_checkpoint_sha256']:
+        raise RuntimeError('CFG checkpoint changed')
     atomic_json(folder/'status.json',dict(state='running',pid=os.getpid()))
     try:
         path=folder/'payload.pkl'

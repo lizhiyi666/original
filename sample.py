@@ -16,7 +16,7 @@ parser.add_argument("--seed", type=int, default=None)
 parser.add_argument("--batch_size", type=int, default=None)
 parser.add_argument("--max_samples", type=int, default=None)
 parser.add_argument("--start_index", type=int, default=0, help="Diagnostic slice; retains global test indices/seeds")
-parser.add_argument("--sampling_revision", default="emptyfix-v1")
+parser.add_argument("--sampling_revision", default="distance-kl-v2")
 parser.add_argument("--constraint_source", choices=["stored", "strict_test"], default="stored")
 parser.add_argument("--resume", action="store_true")
 
@@ -34,7 +34,15 @@ parser.add_argument("--projection_inner_iters", type=int, default=10)
 parser.add_argument("--projection_mu_alpha", type=float, default=2.0)
 parser.add_argument("--projection_delta_tol", type=float, default=1e-6)
 parser.add_argument("--projection_existence_weight", type=float, default=0.02)
-parser.add_argument("--use_gumbel_softmax", action="store_true", help="Enable Gumbel-Softmax for gradient estimation")
+parser.add_argument("--projection_distance_kl_weight", type=float, default=None,
+                    help="Defaults to 1 for distance-kl-v2, 0 for explicitly historical sampling revisions")
+parser.add_argument("--distance_paths", type=int, default=8)
+parser.add_argument("--distance_topk", type=int, default=32)
+parser.add_argument("--distance_bins", type=int, default=32)
+parser.add_argument("--distance_temperature", type=float, default=1.0)
+parser.add_argument("--use_gumbel_softmax", action="store_true", default=None, help="Enable Gumbel-Softmax for gradient estimation")
+parser.add_argument("--no_gumbel_softmax", action="store_false", dest="use_gumbel_softmax",
+                    help="Deterministic relaxation, including expected-route distance KL")
 parser.add_argument("--gumbel_temperature", type=float, default=1.0)
 parser.add_argument("--projection_last_k_steps", type=int, default=60)
 parser.add_argument("--cond_dropout_rate", type=float, default=0.1, help="CFG dropout rate")
@@ -64,6 +72,12 @@ args = None
 
 
 def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
+    if args.use_gumbel_softmax is None:
+        args.use_gumbel_softmax = args.sampling_revision == 'distance-kl-v2'
+    if args.projection_distance_kl_weight is None:
+        args.projection_distance_kl_weight = 1.0 if args.sampling_revision == 'distance-kl-v2' else 0.0
+    if not math.isfinite(args.projection_distance_kl_weight) or args.projection_distance_kl_weight < 0:
+        raise ValueError('Distance KL weight must be finite and nonnegative')
     if args.baseline is not None:
         from tools.baseline_common import precision
         precision()
@@ -91,6 +105,11 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     test_data = torch.load(test_path, map_location="cpu", weights_only=False)
     output_tag = safe_tag(args.output_tag or RUN_ID)
     seed_base = int(seed if args.seed is None else args.seed)
+    distance_reference = None
+    if args.use_constraint_projection and args.projection_distance_kl_weight > 0:
+        from distance_kl import load_distance_reference
+        distance_reference = load_distance_reference(
+            Path(datamodule.root) / datamodule.name / f'{datamodule.name}_train.pkl', args.distance_bins)
     remaining = len(datamodule.test_data.sequences) - args.start_index
     total_len = min(remaining, args.max_samples or remaining)
     chunk_size = int(math.ceil(total_len / args.world_size))
@@ -105,6 +124,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     start_index=args.start_index, empty_policy="keep", sampling_revision=args.sampling_revision,
                     checkpoint_sha256=sha256_file(checkpoint),
                     dataset_sha256=sha256_file(test_path), sampling_config=sampling_config)
+    if distance_reference is not None:
+        metadata['distance_reference_sha256'] = distance_reference.fingerprint
     save_name = test_path.parent / f"{data_name}_{output_tag}_generated_part{args.rank}.pkl"
     if save_name.exists():
         if not args.resume:
@@ -156,7 +177,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd.projection_delta_tol = args.projection_delta_tol
         dd.projection_existence_weight = args.projection_existence_weight
 
-        if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None:
+        if not hasattr(dd, "constraint_projector") or dd.constraint_projector is None or args.projection_distance_kl_weight > 0:
             device = next(dd.parameters()).device
             dd.constraint_projector = ConstraintProjection(
                 num_classes=dd.num_classes,
@@ -175,9 +196,15 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 use_gumbel_softmax=args.use_gumbel_softmax,
                 gumbel_temperature=args.gumbel_temperature,
                 device=str(device),
+                projection_distance_kl_weight=args.projection_distance_kl_weight,
+                distance_reference=distance_reference,
+                distance_paths=args.distance_paths, distance_topk=args.distance_topk,
+                distance_bins=args.distance_bins, distance_temperature=args.distance_temperature,
             )
+            dd.constraint_projector.distance_seed = seed_base + args.rank
 
         if hasattr(dd, "constraint_projector") and dd.constraint_projector is not None:
+            dd.constraint_projector.projection_distance_kl_weight = args.projection_distance_kl_weight
             dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
             dd.constraint_projector.lambda_init = args.projection_lambda
             dd.constraint_projector.eta = args.projection_eta
@@ -214,6 +241,15 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             raise ValueError('CFG and ALM are mutually exclusive')
         dd.cfg_scale = args.guidance_scale
 
+    distance_projection_stats = []
+    if args.use_constraint_projection and args.projection_distance_kl_weight > 0:
+        project_distance = dd.constraint_projector.project_with_matrices
+        def trace_distance(*values, **options):
+            output = project_distance(*values, **options)
+            distance_projection_stats.append(dict(dd.constraint_projector.last_projection_stats))
+            return output
+        dd.constraint_projector.project_with_matrices = trace_distance
+
     # ======================================================
     all_sequences = datamodule.test_data.sequences
     my_sequences = all_sequences[start_idx:end_idx]
@@ -239,6 +275,10 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     for batch in datamodule.test_dataloader():
         # Paired methods start each global batch from the same RNG state.
         seed_sampling(seed_base + start_idx + len(generated_seqs))
+        if args.use_constraint_projection and args.projection_distance_kl_weight > 0:
+            from distance_kl import distance_generator
+            dd.constraint_projector.distance_generator = distance_generator(
+                seed_base + start_idx + len(generated_seqs), task.device)
         with torch.no_grad():
             time_samples = task.tpp_model.sample(
                 batch.batch_size,
@@ -328,6 +368,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     temporal_empty_test_indices=temporal_empty_indices,
                     eligible_projection_samples=eligible_projection_samples,
                     elapsed_seconds=time.monotonic() - started)
+    if args.use_constraint_projection and args.projection_distance_kl_weight > 0:
+        data_new['distance_projection_diagnostics'] = distance_projection_stats
     publish_torch(save_name, data_new)
     print(f"[GPU {args.rank}] Saved part file to {save_name}")
 

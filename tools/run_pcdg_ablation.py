@@ -16,7 +16,8 @@ import wandb
 from omegaconf import OmegaConf
 from experiment_io import atomic_json,publish_torch,sha256_file,safe_tag
 from evaluate_utils import get_run_data
-from tools.ablation_common import VERSION,VARIANTS,SEEDS,STEPS,evaluate,same_records
+from tools.ablation_common import VERSION,VARIANTS,DISTANCE_VERSION,DISTANCE_VARIANTS,SEEDS,STEPS,evaluate,same_records
+from evaluations.statistical_metrics import EVALUATION_VERSION
 from tools.ablation_report import make_report
 from tools.run_newyork_ood import code_fingerprint,DATA_HASHES
 
@@ -24,6 +25,8 @@ from tools.run_newyork_ood import code_fingerprint,DATA_HASHES
 class Ablation:
     def __init__(self,args):
         self.args=args
+        self.projection_revision = getattr(args, 'projection_revision', VERSION)
+        self.variant_settings = DISTANCE_VARIANTS if self.projection_revision == DISTANCE_VERSION else VARIANTS
         self.out=ROOT/'experiment_runs'/safe_tag(args.run_id)
         self.out.mkdir(parents=True,exist_ok=True)
         self.cache=Path(args.cache_dir).resolve() if args.cache_dir else self.out/'time-cache'
@@ -81,12 +84,12 @@ class Ablation:
         self.entity=wandb.Api(timeout=30).default_entity
         if self.entity!=source['entity']:
             raise RuntimeError('W&B account changed')
-        self.manifest=dict(version=VERSION,run_id=self.args.run_id,source=str(self.source),
+        self.manifest=dict(version=self.projection_revision,evaluation_version=EVALUATION_VERSION,run_id=self.args.run_id,source=str(self.source),
             source_run_id=source['run_id'],checkpoint=str(self.checkpoint),checkpoint_sha256=sha256_file(self.checkpoint),
             source_manifest_sha256=sha256_file(self.source/'manifest.json'),
             source_config_sha256=sha256_file(self.source/'config_hydra.yaml'),data_sha256=DATA_HASHES,
             code_sha256=self.fingerprints(),packages=versions,seeds=self.args.seeds,variants=self.args.variants,
-            variant_settings=VARIANTS,cache_dir=str(self.cache),batch_size=64,world_size=2,sample_count=2108,
+            variant_settings=self.variant_settings,cache_dir=str(self.cache),batch_size=64,world_size=2,sample_count=2108,
             projection_steps=STEPS,outer=10,inner=50,early_stop=False,temperature=3,learning_rate=1,
             lambda_init=1,mu_init=1,mu_max=1000,mu_alpha=2,gradient_clip=10,
             precision='model FP32; legacy softmax normalization retained; no autocast or TF32',
@@ -111,6 +114,7 @@ class Ablation:
     def job(self,folder,kind,split,indices,seed,gpu,global_start=0,variant=None,cache=None,fixture=None,historical_empty=False):
         folder.mkdir(parents=True,exist_ok=True)
         return dict(kind=kind,split=split,indices=indices,seed=seed,gpu=gpu,global_start=global_start,
+            projection_revision=getattr(self, 'projection_revision', VERSION),
             variant=variant,cache=str(cache) if cache else None,cache_sha256=sha256_file(cache) if cache else None,
             fixture=str(fixture) if fixture else None,fixture_sha256=sha256_file(fixture) if fixture else None,
             historical_empty=bool(fixture) if kind=='cache' else historical_empty,
@@ -213,11 +217,12 @@ class Ablation:
         if indices!=list(range(2108)) or len(generated)!=2108:
             raise RuntimeError('Full OOD count/index mismatch')
         raw=torch.load(ROOT/'data/NewYork_PO1_OOD/NewYork_PO1_OOD_test.pkl',map_location='cpu',weights_only=False)
-        metrics,rows=evaluate(raw['sequences'],generated,raw['poi_category'],indices)
+        metric_diagnostics = {}
+        metrics,rows=evaluate(raw['sequences'],generated,raw['poi_category'],indices,diagnostics=metric_diagnostics)
         if rows!=condition_rows:
             raise RuntimeError('Merged per-condition diagnostics differ from shard diagnostics')
         path=folder/'generated.pkl'
-        artifact=dict(format=VERSION,seed=seed,variant=variant,manifest_sha256=self.manifest_sha,
+        artifact=dict(format=self.projection_revision,seed=seed,variant=variant,manifest_sha256=self.manifest_sha,
             test_indices=indices,t_max=24.0,sequences=generated,
             source_shards=[dict(path=str(Path(j['output_dir'])/'payload.pkl'),sha256=r['output_sha256'])
                            for j,r in zip(jobs,results)])
@@ -233,7 +238,7 @@ class Ablation:
             actual_optimizer_steps=sum(r['optimizer_steps'] for r in results),
             actual_projection_calls=sum(r['projection_calls'] for r in results),
             peak_reserved_bytes=max(r['peak_reserved_bytes'] for r in results))
-        value=dict(seed=seed,variant=variant,metrics=metrics,timing=timing,output_sha256=sha256_file(path),
+        value=dict(seed=seed,variant=variant,metrics=metrics,metric_diagnostics=metric_diagnostics,timing=timing,output_sha256=sha256_file(path),
                    worker_diagnostics=results)
         existing=folder/'metrics.json'
         if existing.exists() and json.loads(existing.read_text())!=value:
@@ -336,11 +341,17 @@ def main():
     parser.add_argument('--preflight-indices',required=True)
     parser.add_argument('--historical-fixture',required=True)
     parser.add_argument('--cache-dir')
-    parser.add_argument('--run-id',default=VERSION)
+    parser.add_argument('--projection-revision',choices=[VERSION,DISTANCE_VERSION],default=VERSION)
+    parser.add_argument('--run-id')
     parser.add_argument('--seeds',type=int,nargs='+',choices=SEEDS,default=list(SEEDS))
-    parser.add_argument('--variants',nargs='+',choices=list(VARIANTS),default=list(VARIANTS))
+    parser.add_argument('--variants',nargs='+',choices=list(DISTANCE_VARIANTS))
     parser.add_argument('--resume',action='store_true')
     args=parser.parse_args()
+    variants = DISTANCE_VARIANTS if args.projection_revision == DISTANCE_VERSION else VARIANTS
+    args.variants = args.variants or list(variants)
+    if any(v not in variants for v in args.variants):
+        parser.error('no_distance_kl requires --projection-revision pcdg-distance-v2')
+    args.run_id = args.run_id or args.projection_revision
     os.chdir(ROOT)
     experiment=Ablation(args)
     import fcntl
