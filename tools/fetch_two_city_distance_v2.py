@@ -11,6 +11,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.integrate_experiment_results import digest, copy_no_overwrite
+from experiment_io import safe_tag
 
 OUT = ROOT / 'experiment_runs' / 'two-city-distance-v2'
 SSH = ['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', '-o', 'StrictHostKeyChecking=yes', 'pcdg']
@@ -34,7 +35,7 @@ def check_completion(status, audit, registry):
 REMOTE_BUILD = r'''
 import hashlib, json, os, tarfile, tempfile
 from pathlib import Path, PurePosixPath
-root = Path('/root/experiments/pcdg/two-city-distance-v2/experiment_runs/two-city-distance-v2')
+root = Path(__REMOTE_RUN_ROOT__)
 def read(name): return json.loads((root / name).read_text())
 def sha(path):
     h = hashlib.sha256()
@@ -123,16 +124,21 @@ def extract_verified(archive, stage):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--verify-only', action='store_true')
+    parser.add_argument('--run-id', default='two-city-distance-v2')
     args = parser.parse_args()
+    run_id = safe_tag(args.run_id)
+    output = ROOT / 'experiment_runs' / run_id
+    server_code = '/root/experiments/pcdg/' + run_id
+    remote_code = REMOTE_BUILD.replace('__REMOTE_RUN_ROOT__', repr(server_code + '/experiment_runs/' + run_id))
     if args.verify_only:
-        print(json.dumps(verify(OUT)))
+        print(json.dumps(verify(output)))
         return
     proc = subprocess.run(SSH + ['/root/anaconda3/envs/pcdg-exp/bin/python', '-B', '-'],
-                          input=REMOTE_BUILD, text=True, encoding='utf-8', capture_output=True, timeout=1800)
+                          input=remote_code, text=True, encoding='utf-8', capture_output=True, timeout=1800)
     if proc.returncode:
         raise RuntimeError(proc.stderr)
     remote = json.loads(proc.stdout)
-    if not remote['archive'].startswith('/root/experiments/pcdg/two-city-distance-v2/delivery-'):
+    if not remote['archive'].startswith(server_code + '/delivery-'):
         raise RuntimeError('Unexpected archive location')
     temporary_root = ROOT / 'tmp'
     temporary_root.mkdir(exist_ok=True)
@@ -148,19 +154,19 @@ def main():
     files = dict(seal['files'], **{'delivery-files.json': digest(contents / 'delivery-files.json')})
     # Detect all collisions before publishing any result into the final directory.
     for name, expected in files.items():
-        target = OUT / str(safe_relative(name))
-        if not target.resolve().is_relative_to(OUT.resolve()) or target.is_symlink():
+        target = output / str(safe_relative(name))
+        if not target.resolve().is_relative_to(output.resolve()) or target.is_symlink():
             raise RuntimeError(f'Unsafe existing destination: {target}')
         if target.exists() and digest(target) != expected:
             raise RuntimeError(f'Conflicting local file preserved: {target}')
     for name, expected in files.items():
-        copy_no_overwrite(contents / name, OUT / name, expected)
-    if verify(OUT) != receipt:
+        copy_no_overwrite(contents / name, output / name, expected)
+    if verify(output) != receipt:
         raise RuntimeError('Final delivery differs from verified staging')
     proof = stage / 'local-delivery-audit.json'
     proof.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
-    copy_no_overwrite(proof, OUT / proof.name, digest(proof))
-    print(json.dumps(dict(receipt, destination=str(OUT)), ensure_ascii=False))
+    copy_no_overwrite(proof, output / proof.name, digest(proof))
+    print(json.dumps(dict(receipt, destination=str(output)), ensure_ascii=False))
 
 
 if __name__ == '__main__':

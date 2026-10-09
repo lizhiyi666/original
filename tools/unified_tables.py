@@ -117,6 +117,13 @@ def render(out,records,manifest,complete=False):
         f'评估版本：{EVALUATION_VERSION}；Category 为逐小时均值，CategoryTransition 为条件转移 JSD。',
         '方法对比和消融使用同一评估实现与指标列。约束指标为百分比，JSD为原量纲；均值 ± 样本标准差来自三个采样种子。',
         '按未舍入均值逐城市、逐列标最优，不预设PCDG/Full获胜；未定义值为“—”，不填零。','']
+    transition = manifest.get('implementation_transition')
+    if transition:
+        inherited = sum(r.get('origin') == 'inherited-legacy' for r in records.values())
+        lines += ['## 实现切换与结果来源','',
+            f'接续版本：{transition}。已保留旧实现结果 {inherited} 份，新实现结果 {len(records)-inherited} 份。',
+            '这是明确记录实现切换的接续实验，不是全程单一后端实验；浮点误差可能改变最终离散输出。',
+            '不能将跨版本的效率差异解释为仅由方法或消融造成。逐结果后端、版本、原始 manifest 和 SHA-256 见 registry.json。','']
     all_summaries={}
     preview_tables=[]
     for name,rows,metrics,percent,title in plans:
@@ -128,12 +135,19 @@ def render(out,records,manifest,complete=False):
         (out/f'{name}.tex').write_text(latex,encoding='utf-8')
         lines+=['## '+title,'',markdown]
         all_summaries[name]=summary
+        if transition:
+            path = out / f'{name}.md'
+            path.write_text('> Mixed implementation successor: legacy results retained; unfinished results use batched distance KL. See report.md and registry.json.\n\n' + path.read_text(encoding='utf-8'), encoding='utf-8')
+            path = out / f'{name}.tex'
+            path.write_text('% Mixed implementation successor; consult per-result backend provenance.\n' + path.read_text(encoding='utf-8'), encoding='utf-8')
     atomic_json(out/'table-values.json',all_summaries)
     preview=[r'\documentclass[10pt]{article}',r'\usepackage[a4paper,margin=1.6cm]{geometry}',
              r'\usepackage{booktabs,amsmath}',r'\begin{document}',
              r'\section*{'+('Final two-city results' if complete else 'Partial results -- not the final two-city comparison')+'}',
              'Only panels with all three sampling seeds are shown. Error bars in cells are sample standard deviations.',
              *[t+r'\clearpage' for t in preview_tables],r'\end{document}']
+    if transition:
+        preview.insert(5, 'Mixed implementation successor: legacy outputs are retained; unfinished outputs use the batched distance backend. This is not a homogeneous-backend experiment.')
     (out/'table-preview.tex').write_text('\n'.join(preview)+'\n',encoding='utf-8')
     rows=[]
     for dataset in DATASETS:
