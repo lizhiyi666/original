@@ -1,5 +1,4 @@
 """Run on CPU by default; DISTANCE_TEST_DEVICE=cuda explicitly exercises CUDA."""
-import copy
 import inspect
 import os
 from pathlib import Path
@@ -11,7 +10,8 @@ from unittest.mock import patch
 import torch
 
 from distance_kl import (BatchedDistanceObjective, DistanceObjective, distance_generator,
-    distance_metadata, distance_objective_class, distance_output_directory, validate_distance_metadata)
+    distance_metadata, distance_objective_class, distance_output_directory, haversine,
+    soft_histogram, validate_distance_metadata)
 from tools.ablation_common import generator
 from tools.distance_benchmark_fixture import fixture, make_projector
 
@@ -76,8 +76,25 @@ class BatchedDistanceTests(unittest.TestCase):
         tree = ast.parse(textwrap.dedent(inspect.getsource(BatchedDistanceObjective.loss)))
         self.assertFalse(any(isinstance(n, (ast.For, ast.ListComp, ast.GeneratorExp)) for n in ast.walk(tree)))
 
+    def test_hard_paths_use_exact_geometry_including_repeated_pois(self):
+        d = fixture(self.device, batch=8, max_pois=6, candidates=5)
+        obj = BatchedDistanceObjective(d['reference'], d['y'], d['poi'], d['active'])
+        noise = torch.full((len(obj.rows), obj.paths, *obj.padded_ids.shape[1:]), -10000., device=self.device)
+        exact_lengths = []
+        for i, (_, positions, ids, _) in enumerate(obj.rows):
+            selected = [6] * (len(positions) - 1) + [7]
+            for j, token in enumerate(selected):
+                noise[i, :, j, torch.where(ids[j] == token)[0]] = 10000.
+            coords = d['reference'].coordinates[[token-6 for token in selected]].to(d['y'])
+            exact_lengths.append(haversine(coords[:-1], coords[1:]).sum().repeat(8))
+        hist = soft_histogram(torch.stack(exact_lengths), obj.centers, obj.bandwidth)
+        expected = (obj.target * (obj.target.log() - hist.log())).sum()
+        torch.testing.assert_close(obj.loss(d['y'], noise), expected, rtol=1e-5, atol=1e-6)
+
     def test_full_projection_budget_diagnostics_random_streams_and_disabled(self):
-        d = fixture(self.device, batch=8, max_pois=4, candidates=5)
+        d = fixture(self.device, batch=int(os.environ.get('DISTANCE_TEST_BATCH', 8)),
+                    max_pois=int(os.environ.get('DISTANCE_TEST_MAX_POIS', 4)),
+                    candidates=int(os.environ.get('DISTANCE_TEST_CANDIDATES', 5)))
         for stochastic, weight in ((True, 1.), (False, 1.), (True, 0.)):
             outputs, states, stats = [], [], []
             global_cpu = torch.get_rng_state()
@@ -113,7 +130,7 @@ class BatchedDistanceTests(unittest.TestCase):
             if weight == 0:
                 self.assertTrue(torch.equal(outputs[0][0], outputs[1][0]))
                 self.assertEqual(stats[0], stats[1])
-            print('FULL_PROJECTION_COMPARISON', dict(device=self.device, stochastic=stochastic,
+            print('FULL_PROJECTION_COMPARISON', dict(device=self.device, shape=list(d['y'].shape), stochastic=stochastic,
                 distance_weight=weight, max_abs_logits=float((outputs[0][0]-outputs[1][0]).abs().max()),
                 changed_argmax=int((outputs[0][0].argmax(1) != outputs[1][0].argmax(1)).sum()),
                 changed_sampled_tokens=int((outputs[0][1] != outputs[1][1]).sum())), flush=True)
@@ -135,6 +152,32 @@ class BatchedDistanceTests(unittest.TestCase):
                 context = patch.object(torch.optim.SGD, 'step', bad_step)
             with context, self.assertRaises(FloatingPointError):
                 p.project_with_matrices(*args, poi_mask=d['poi'])
+
+    def test_final_diagnostic_noise_refresh_and_first_gradient_probe(self):
+        d = fixture(self.device, batch=4, max_pois=3, candidates=5)
+        p, args = make_projector(d, 'batched', outer=2, inner=3)
+        losses, noise_calls = [], []
+        original_loss, original_noise = BatchedDistanceObjective.loss, BatchedDistanceObjective.noise
+        def observed_loss(obj, y, noise):
+            value = original_loss(obj, y, noise)
+            losses.append(value.detach())
+            return value
+        def observed_noise(obj, rng, stochastic=True):
+            noise_calls.append(rng.get_state())
+            return original_noise(obj, rng, stochastic)
+        with patch.object(BatchedDistanceObjective, 'loss', observed_loss), \
+             patch.object(BatchedDistanceObjective, 'noise', observed_noise), \
+             patch('torch.autograd.grad', wraps=torch.autograd.grad) as grad:
+            output = p.project_with_matrices(*args, poi_mask=d['poi'])
+        self.assertEqual(len(losses), 7)  # Six updates and exactly one final loss.
+        self.assertEqual(len(noise_calls), 2)  # Once per outer loop, not inner loop.
+        self.assertEqual(grad.call_count, 2)  # One distance and one constraint probe.
+        self.assertEqual(p.last_projection_stats['distance_kl'], float(losses[-1]))
+        obj = BatchedDistanceObjective(d['reference'], d['y'], d['poi'], d['active'])
+        rng = distance_generator(d['seed'], self.device)
+        obj.noise(rng)
+        expected = obj.loss(output.transpose(1, 2), obj.noise(rng))
+        self.assertEqual(float(expected), p.last_projection_stats['distance_kl'])
 
 
 class BackendIdentityTests(unittest.TestCase):

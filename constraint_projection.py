@@ -347,7 +347,8 @@ class ConstraintProjection:
                             self.last_projection_stats['distance_poi_gradient_norm'] = float(
                                 distance_gradient[poi_mask.bool()].norm().detach())
                             del distance_gradient
-                        self.last_projection_stats['distance_kl'] = float(distance_loss.detach())
+                        # The final diagnostic below evaluates the updated logits.
+                        # Do not synchronize the GPU merely to log every inner step.
                     if not torch.isfinite(loss):
                         raise FloatingPointError("Non-finite projection objective")
                     if self.collect_diagnostics and probe_norms is None:

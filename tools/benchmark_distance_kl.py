@@ -6,6 +6,7 @@ Two warmups and five synchronized measurements by default; no profiler in timed 
 import argparse
 from contextlib import nullcontext
 import gc
+import hashlib
 import json
 from pathlib import Path
 import statistics
@@ -67,6 +68,7 @@ def main():
     parser.add_argument('--warmups', type=int, default=2)
     parser.add_argument('--repeats', type=int, default=5)
     parser.add_argument('--deterministic', action='store_true')
+    parser.add_argument('--profile', action='store_true', help='Separate profiler run; no formal timings')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     if args.output.exists():
@@ -89,8 +91,15 @@ def main():
         source_sha256={p: sha256_file(ROOT / p) for p in
             ('distance_kl.py', 'constraint_projection.py', 'tools/benchmark_distance_kl.py',
              'tools/distance_benchmark_fixture.py')}, timings={})
+    if hasattr(distance_kl, 'distance_metadata'):
+        report.update(distance_kl.distance_metadata(args.backend))
     try:
         d = fixture(device, args.batch, args.max_pois, args.candidates, args.seed)
+        report['input_sha256'] = hashlib.sha256(b''.join(
+            d[name].cpu().contiguous().numpy().tobytes() for name in ('y', 'cat', 'poi', 'active'))).hexdigest()
+        report['shape'] = list(d['y'].shape)
+        report['eligible_distance_rows'] = int((d['active'] & (d['poi'].sum(1) >= 2)).sum())
+        report['budget'] = dict(outer=10, inner=50, paths=8, topk=32, bins=32)
         stochastic = not args.deterministic
         def objective():
             return cls(d['reference'], d['y'], d['poi'], d['active'])
@@ -114,6 +123,25 @@ def main():
                     raise RuntimeError('Incomplete/nonfinite full projection')
                 return result
             return run
+        if args.profile:
+            # Profiling is intentionally a separate execution mode: no speedup
+            # claims can be derived from these instrumented durations.
+            for _ in range(args.warmups):
+                projection_setup(True)()
+            sync(device)
+            activities = [torch.profiler.ProfilerActivity.CPU]
+            if device.type == 'cuda':
+                activities.append(torch.profiler.ProfilerActivity.CUDA)
+            with torch.profiler.profile(activities=activities, record_shapes=True) as profile:
+                projection_setup(True)()
+                sync(device)
+            trace_path = args.output.with_suffix('.trace.json')
+            if trace_path.exists():
+                raise FileExistsError('Refusing to overwrite profiler trace')
+            trace_path.parent.mkdir(parents=True, exist_ok=True)
+            profile.export_chrome_trace(str(trace_path))
+            report.update(state='profile-complete', profile_trace=str(trace_path), formal_timing=False)
+            return
         for label, setup in (
                 ('distance_forward_backward', loss_setup),
                 ('projection_prepared_geometry', lambda: projection_setup(False)),

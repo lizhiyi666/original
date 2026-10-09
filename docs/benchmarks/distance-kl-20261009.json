@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "report_date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "default_backend": "legacy",
+  "scope": "synthetic inputs only; not production trajectory sampling or RTX 3090 validation",
+  "hardware": {
+    "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+    "gpu": "NVIDIA GeForce GTX 1650",
+    "gpu_total_mib": 4096
+  },
+  "correctness": {
+    "regression": {
+      "tests": 129,
+      "passed": 128,
+      "skipped": 1,
+      "skip_reason": "Linux flock test on Windows"
+    },
+    "cpu": {
+      "test_shape": [
+        8,
+        8,
+        13
+      ],
+      "full_budget_steps": 500,
+      "gumbel_max_abs_logits": 0.0000010728836059570312,
+      "deterministic_max_abs_logits": 0.0000019073486328125
+    },
+    "cuda": {
+      "tests": 10,
+      "full_budget_shape": [
+        64,
+        32,
+        72
+      ],
+      "full_budget_steps": 500,
+      "gumbel_max_abs_logits": 2.682209014892578e-7,
+      "deterministic_max_abs_logits": 0.000001430511474609375,
+      "changed_argmax": 0,
+      "changed_sampled_tokens": 0
+    },
+    "single_loss_gradient_tolerance": {
+      "rtol": 0.00001,
+      "atol": 0.000001
+    },
+    "spatial_projection_distance_rng_states_match": true,
+    "inactive_rows_bitwise_unchanged": true,
+    "disabled_distance_bitwise_identical": true,
+    "batched_same_device_repeat_bitwise": true,
+    "warning": "No assertion of identical final trajectories on arbitrary production inputs."
+  },
+  "timing_notes": [
+    "GPU legacy snapshot predates all optimization. CPU legacy uses the new shared projector with logging-only synchronization removed.",
+    "Two warmups, five measurements, medians; GPU synchronized before/after each measurement. No profiler in timing runs.",
+    "Prepared projection excludes distance candidate/geometry construction. Including-geometry includes it; both exclude fixture/reference/model construction.",
+    "Input shape [64,32,72], 64 mapped POIs, top-32, 8 paths, 32 bins, 48 eligible rows; not the full real model vocabulary.",
+    "The pre-optimization script predates input_sha256 logging; its fixture source SHA256 and seed/dimensions match the later runs.",
+    "Shared Windows desktop timings vary; retain all measurements including outliers. No concurrent GPU benchmark jobs."
+  ],
+  "server": {
+    "validation": "pending: original experiment still running",
+    "completed_unique_results_at_check": 29,
+    "target_unique_results": 66,
+    "remote_files_unchanged_at_check": {
+      "distance_kl.py": "bccff6bf22c3cbbe62ed8c47ead26cec6611ee5cce66ec835e441892a37281ab",
+      "constraint_projection.py": "7f8893176056c45e15a59a17d8ab98546874f3fe92c90b511e231dcf840f5ac9"
+    }
+  },
+  "runs": {
+    "distance-legacy-before-20261009": {
+      "state": "complete",
+      "fixture": "synthetic-ragged-v1-not-production-replay",
+      "config": {
+        "device": "cuda",
+        "backend": "legacy",
+        "batch": 64,
+        "max_pois": 16,
+        "candidates": 64,
+        "seed": 135398,
+        "warmups": 2,
+        "repeats": 5,
+        "deterministic": false,
+        "output": "tmp\\distance-legacy-before-20261009.json"
+      },
+      "torch_version": "2.0.0",
+      "threads": 1,
+      "dtype": "float32",
+      "tf32": false,
+      "gpu": "NVIDIA GeForce GTX 1650",
+      "source_sha256": {
+        "distance_kl.py": "bccff6bf22c3cbbe62ed8c47ead26cec6611ee5cce66ec835e441892a37281ab",
+        "constraint_projection.py": "7f8893176056c45e15a59a17d8ab98546874f3fe92c90b511e231dcf840f5ac9",
+        "tools/benchmark_distance_kl.py": "0fe1c8e31d40cebfdd05be31a63e0b1181ecd1f2ba2a4a6a8e39842a3d78f23c",
+        "tools/distance_benchmark_fixture.py": "a24e7aeb45539bd2a37358f28561d3e450ebc40381a85f90dc19b54185709c35"
+      },
+      "timings": {
+        "distance_forward_backward": {
+          "seconds": [
+            0.11354609999398235,
+            0.08938320000015665,
+            0.132876399991801,
+            0.11044940000283532,
+            0.1113681999995606
+          ],
+          "median_seconds": 0.1113681999995606,
+          "peak_allocated_bytes": 21957632,
+          "peak_reserved_bytes": 27262976
+        },
+        "projection_prepared_geometry": {
+          "seconds": [
+            45.43684680000297,
+            46.780547000002116,
+            51.84926380000252,
+            48.29369979999319,
+            76.98843279998982
+          ],
+          "median_seconds": 48.29369979999319,
+          "peak_allocated_bytes": 26568192,
+          "peak_reserved_bytes": 31457280
+        },
+        "projection_including_geometry": {
+          "seconds": [
+            57.213544899990666,
+            47.937955400004284,
+            49.704538999998476,
+            51.93754810000246,
+            50.44285330000275
+          ],
+          "median_seconds": 50.44285330000275,
+          "peak_allocated_bytes": 26568192,
+          "peak_reserved_bytes": 31457280
+        }
+      }
+    },
+    "distance-batched-cuda-20261009": {
+      "state": "complete",
+      "fixture": "synthetic-ragged-v1-not-production-replay",
+      "config": {
+        "device": "cuda",
+        "backend": "batched",
+        "batch": 64,
+        "max_pois": 16,
+        "candidates": 64,
+        "seed": 135398,
+        "warmups": 2,
+        "repeats": 5,
+        "deterministic": false,
+        "profile": false,
+        "output": "tmp\\distance-batched-cuda-20261009.json"
+      },
+      "torch_version": "2.0.0",
+      "threads": 1,
+      "dtype": "float32",
+      "tf32": false,
+      "gpu": "NVIDIA GeForce GTX 1650",
+      "source_sha256": {
+        "distance_kl.py": "fb3659c36c71c51573b9e884c8109fbde621e3e5cdd68260dae07c18c0cada4d",
+        "constraint_projection.py": "dcd025c0f8ab263dfc2699718e08e0cff25ad9d5d14193c529d71c2d11bb899c",
+        "tools/benchmark_distance_kl.py": "59b7a3346733e1c30294511d66e537577d4539b8daef475475aa28f3fec925ca",
+        "tools/distance_benchmark_fixture.py": "a24e7aeb45539bd2a37358f28561d3e450ebc40381a85f90dc19b54185709c35"
+      },
+      "timings": {
+        "distance_forward_backward": {
+          "seconds": [
+            0.009838500001933426,
+            0.008266300006653182,
+            0.007233399999677204,
+            0.007635900008608587,
+            0.007150399993406609
+          ],
+          "median_seconds": 0.007635900008608587,
+          "peak_allocated_bytes": 29018112,
+          "peak_reserved_bytes": 52428800
+        },
+        "projection_prepared_geometry": {
+          "seconds": [
+            6.781364100010251,
+            6.744420099988929,
+            7.57821769999282,
+            7.7737306999915745,
+            6.958901899997727
+          ],
+          "median_seconds": 6.958901899997727,
+          "peak_allocated_bytes": 33609728,
+          "peak_reserved_bytes": 58720256
+        },
+        "projection_including_geometry": {
+          "seconds": [
+            8.086966599992593,
+            7.015133099994273,
+            6.909489099998609,
+            7.758168600004865,
+            7.909582199994475
+          ],
+          "median_seconds": 7.758168600004865,
+          "peak_allocated_bytes": 33609728,
+          "peak_reserved_bytes": 58720256
+        }
+      },
+      "distance_backend": "batched",
+      "distance_implementation_version": "distance-kl-batched-v1",
+      "input_sha256": "68ae2e69bddf87064dd6b764fb4e50283fd79dce9ab9ecd09f92b8f9fd5ebb9b",
+      "shape": [
+        64,
+        32,
+        72
+      ],
+      "eligible_distance_rows": 48,
+      "budget": {
+        "outer": 10,
+        "inner": 50,
+        "paths": 8,
+        "topk": 32,
+        "bins": 32
+      }
+    },
+    "distance-legacy-cpu-20261009": {
+      "state": "complete",
+      "fixture": "synthetic-ragged-v1-not-production-replay",
+      "config": {
+        "device": "cpu",
+        "backend": "legacy",
+        "batch": 64,
+        "max_pois": 16,
+        "candidates": 64,
+        "seed": 135398,
+        "warmups": 2,
+        "repeats": 5,
+        "deterministic": false,
+        "profile": false,
+        "output": "tmp\\distance-legacy-cpu-20261009.json"
+      },
+      "torch_version": "2.0.0",
+      "threads": 1,
+      "dtype": "float32",
+      "tf32": false,
+      "gpu": null,
+      "source_sha256": {
+        "distance_kl.py": "fb3659c36c71c51573b9e884c8109fbde621e3e5cdd68260dae07c18c0cada4d",
+        "constraint_projection.py": "dcd025c0f8ab263dfc2699718e08e0cff25ad9d5d14193c529d71c2d11bb899c",
+        "tools/benchmark_distance_kl.py": "59b7a3346733e1c30294511d66e537577d4539b8daef475475aa28f3fec925ca",
+        "tools/distance_benchmark_fixture.py": "a24e7aeb45539bd2a37358f28561d3e450ebc40381a85f90dc19b54185709c35"
+      },
+      "timings": {
+        "distance_forward_backward": {
+          "seconds": [
+            0.030954199988627806,
+            0.029968500006361865,
+            0.03116119999322109,
+            0.029511300002923235,
+            0.037587400001939386
+          ],
+          "median_seconds": 0.030954199988627806,
+          "peak_allocated_bytes": null,
+          "peak_reserved_bytes": null
+        },
+        "projection_prepared_geometry": {
+          "seconds": [
+            27.085493999999017,
+            30.14419479999924,
+            26.244642699995893,
+            32.61608399999386,
+            26.93457589999889
+          ],
+          "median_seconds": 27.085493999999017,
+          "peak_allocated_bytes": null,
+          "peak_reserved_bytes": null
+        },
+        "projection_including_geometry": {
+          "seconds": [
+            33.33813139999984,
+            34.643633200001204,
+            26.5443465999997,
+            22.701431999987108,
+            23.31447990000015
+          ],
+          "median_seconds": 26.5443465999997,
+          "peak_allocated_bytes": null,
+          "peak_reserved_bytes": null
+        }
+      },
+      "distance_backend": "legacy",
+      "distance_implementation_version": "distance-kl-legacy-v1",
+      "input_sha256": "68ae2e69bddf87064dd6b764fb4e50283fd79dce9ab9ecd09f92b8f9fd5ebb9b",
+      "shape": [
+        64,
+        32,
+        72
+      ],
+      "eligible_distance_rows": 48,
+      "budget": {
+        "outer": 10,
+        "inner": 50,
+        "paths": 8,
+        "topk": 32,
+        "bins": 32
+      }
+    },
+    "distance-batched-cpu-20261009": {
+      "state": "complete",
+      "fixture": "synthetic-ragged-v1-not-production-replay",
+      "config": {
+        "device": "cpu",
+        "backend": "batched",
+        "batch": 64,
+        "max_pois": 16,
+        "candidates": 64,
+        "seed": 135398,
+        "warmups": 2,
+        "repeats": 5,
+        "deterministic": false,
+        "profile": false,
+        "output": "tmp\\distance-batched-cpu-20261009.json"
+      },
+      "torch_version": "2.0.0",
+      "threads": 1,
+      "dtype": "float32",
+      "tf32": false,
+      "gpu": null,
+      "source_sha256": {
+        "distance_kl.py": "fb3659c36c71c51573b9e884c8109fbde621e3e5cdd68260dae07c18c0cada4d",
+        "constraint_projection.py": "dcd025c0f8ab263dfc2699718e08e0cff25ad9d5d14193c529d71c2d11bb899c",
+        "tools/benchmark_distance_kl.py": "59b7a3346733e1c30294511d66e537577d4539b8daef475475aa28f3fec925ca",
+        "tools/distance_benchmark_fixture.py": "a24e7aeb45539bd2a37358f28561d3e450ebc40381a85f90dc19b54185709c35"
+      },
+      "timings": {
+        "distance_forward_backward": {
+          "seconds": [
+            0.013266500012832694,
+            0.02085349999833852,
+            0.018893699991167523,
+            0.01615009999659378,
+            0.0116522000025725
+          ],
+          "median_seconds": 0.01615009999659378,
+          "peak_allocated_bytes": null,
+          "peak_reserved_bytes": null
+        },
+        "projection_prepared_geometry": {
+          "seconds": [
+            11.895686699994258,
+            12.36772330000531,
+            11.540001000001212,
+            11.448291199994856,
+            11.399446800001897
+          ],
+          "median_seconds": 11.540001000001212,
+          "peak_allocated_bytes": null,
+          "peak_reserved_bytes": null
+        },
+        "projection_including_geometry": {
+          "seconds": [
+            12.234033999993699,
+            11.688284799995017,
+            11.937961899995571,
+            11.428392600006191,
+            11.961093000005349
+          ],
+          "median_seconds": 11.937961899995571,
+          "peak_allocated_bytes": null,
+          "peak_reserved_bytes": null
+        }
+      },
+      "distance_backend": "batched",
+      "distance_implementation_version": "distance-kl-batched-v1",
+      "input_sha256": "68ae2e69bddf87064dd6b764fb4e50283fd79dce9ab9ecd09f92b8f9fd5ebb9b",
+      "shape": [
+        64,
+        32,
+        72
+      ],
+      "eligible_distance_rows": 48,
+      "budget": {
+        "outer": 10,
+        "inner": 50,
+        "paths": 8,
+        "topk": 32,
+        "bins": 32
+      }
+    }
+  }
+}
