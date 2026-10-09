@@ -15,3 +15,21 @@ __pycache__/
 .env
 .env.*
 .netrc
+
+# Local dependencies, transfer staging, and editor backups
+node_modules/
+/tmp/
+*.bkp
+*.bkp.
+/report_extract_tmp.txt
+
+# Manuscript build intermediates; keep sources and the deliverable PDF
+/paper-www2027/*.aux
+/paper-www2027/*.bbl
+/paper-www2027/*.blg
+/paper-www2027/*.fdb_latexmk
+/paper-www2027/*.fls
+/paper-www2027/*.log
+/paper-www2027/*.out
+/paper-www2027/*.synctex.gz
+/paper-www2027/page-*.png
