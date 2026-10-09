@@ -13,7 +13,43 @@ import torch
 import torch.nn.functional as F
 
 DISTANCE_REVISION = 'distance-kl-v2'
+DISTANCE_IMPLEMENTATIONS = {'legacy': 'distance-kl-legacy-v1', 'batched': 'distance-kl-batched-v1'}
 EPS = 1e-8
+
+
+def distance_metadata(backend='legacy'):
+    if backend not in DISTANCE_IMPLEMENTATIONS:
+        raise ValueError(f'Unknown distance backend: {backend}')
+    return dict(distance_backend=backend, distance_implementation_version=DISTANCE_IMPLEMENTATIONS[backend])
+
+
+def validate_distance_metadata(record, *, expected=None, allow_historical=False):
+    """Historical unlabelled traces may be audited, but not silently resumed."""
+    actual = distance_metadata(record.get('distance_backend', 'legacy'))
+    version = record.get('distance_implementation_version')
+    if version is None and allow_historical and 'distance_backend' not in record:
+        version = DISTANCE_IMPLEMENTATIONS['legacy']
+    if version != actual['distance_implementation_version']:
+        raise RuntimeError('Distance implementation version mismatch or missing version')
+    if expected is not None and actual != expected:
+        raise RuntimeError('Distance backend/implementation mismatch')
+    return actual
+
+
+def distance_objective_class(backend='legacy'):
+    distance_metadata(backend)  # Fail closed on misspelled/unsupported backends.
+    return DistanceObjective if backend == 'legacy' else BatchedDistanceObjective
+
+
+def distance_output_directory(data_directory, backend='legacy', output_tag=None):
+    implementation = distance_metadata(backend)
+    root = Path(data_directory)
+    if backend == 'legacy':
+        return root
+    if not output_tag:
+        raise ValueError('Batched distance sampling requires an explicit independent output_tag')
+    from experiment_io import safe_tag
+    return root / 'distance-backends' / implementation['distance_implementation_version'] / safe_tag(output_tag)
 
 
 def haversine(left, right):
@@ -167,4 +203,71 @@ class DistanceObjective:
             route = torch.einsum('mli,lij,mlj->m', weights[:, :-1], edges, weights[:, 1:])
             lengths.append(route)
         histogram = soft_histogram(torch.stack(lengths), self.centers, self.bandwidth)
+        return (self.target * (self.target.log() - histogram.log())).sum()
+
+
+class BatchedDistanceObjective(DistanceObjective):
+    """Same finite-candidate objective; padded rows and edges, no inner row loop.
+
+    Candidate selection/geometry and row-wise random draws deliberately reuse the
+    reference implementation. Only deterministic tensor algebra is batched.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.rows:
+            return
+        count = len(self.rows)
+        length = max(len(row[1]) for row in self.rows)
+        topk = self.rows[0][2].shape[-1]
+        ids = self.rows[0][2]
+        self.padded_batch = ids.new_zeros((count, 1, 1))
+        self.padded_positions = ids.new_zeros((count, length, 1))
+        self.padded_ids = ids.new_zeros((count, length, topk))
+        self.valid_positions = torch.zeros((count, length), device=ids.device, dtype=torch.bool)
+        self.valid_edges = torch.zeros((count, length - 1), device=ids.device, dtype=torch.bool)
+        self.padded_edges = self.centers.new_zeros((count, length - 1, topk, topk))
+        for i, (b, positions, candidates, edges) in enumerate(self.rows):
+            n = len(positions)
+            self.padded_batch[i] = b
+            self.padded_positions[i, :n, 0] = positions
+            self.padded_ids[i, :n] = candidates
+            self.valid_positions[i, :n] = True
+            self.valid_edges[i, :n-1] = True
+            self.padded_edges[i, :n-1] = edges
+
+    def noise(self, generator, stochastic=True):
+        # Do NOT replace these draws by a single padded torch.rand: CUDA consumes
+        # a different random stream for different launch shapes/call counts.
+        ragged = super().noise(generator, stochastic)
+        if not self.rows or not stochastic:
+            return None
+        count, length, topk = self.padded_ids.shape
+        result = self.centers.new_zeros((count, self.paths, length, topk))
+        for i, noise in enumerate(ragged):
+            result[i, :, :noise.shape[1]] = noise
+        return result
+
+    def loss(self, y, noise):
+        if not self.rows:
+            return y.sum() * 0
+        logits = y[self.padded_batch, self.padded_positions, self.padded_ids]
+        if noise is None:
+            weights = logits.softmax(-1).unsqueeze(1)
+        else:
+            expected = (len(self.rows), self.paths, *self.padded_ids.shape[1:])
+            if tuple(noise.shape) != expected:
+                raise ValueError('Distance noise must cover every eligible row')
+            soft = ((logits.unsqueeze(1) + noise) / self.temperature).softmax(-1)
+            hard = F.one_hot(soft.argmax(-1), soft.shape[-1]).to(soft.dtype)
+            weights = hard - soft.detach() + soft
+        weights = weights * self.valid_positions[:, None, :, None]
+        # [row, edge, path, candidate] @ [row, edge, candidate, candidate].
+        # Exact candidate-to-candidate distances, never mean-coordinate geometry.
+        by_position = weights.transpose(1, 2)
+        weighted_edges = torch.matmul(by_position[:, :-1], self.padded_edges)
+        lengths = ((weighted_edges * by_position[:, 1:]).sum(-1)
+                   * self.valid_edges[:, :, None]).sum(1)
+        # There are no padded trajectories here: every eligible row gets exactly
+        # the same number of paths and the same histogram weight as the reference.
+        histogram = soft_histogram(lengths, self.centers, self.bandwidth)
         return (self.target * (self.target.log() - histogram.log())).sum()

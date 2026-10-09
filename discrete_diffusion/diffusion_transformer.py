@@ -175,6 +175,7 @@ class DiffusionTransformer(nn.Module):
         distance_topk: int = 32,
         distance_bins: int = 32,
         distance_temperature: float = 1.0,
+        distance_backend: str = 'legacy',
     ):
         super().__init__()  
 
@@ -220,6 +221,7 @@ class DiffusionTransformer(nn.Module):
                 projection_distance_kl_weight=projection_distance_kl_weight,
                 distance_paths=distance_paths, distance_topk=distance_topk,
                 distance_bins=distance_bins, distance_temperature=distance_temperature,
+                distance_backend=distance_backend,
             )
 
         at,at1, bt,bt1, ct,ct1, att,att1, btt1,btt2, ctt,ctt1 = alpha_schedule(self.num_timesteps, type_classes=self.type_classes, poi_classes = self.poi_classes)

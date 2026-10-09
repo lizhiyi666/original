@@ -40,6 +40,7 @@ parser.add_argument("--distance_paths", type=int, default=8)
 parser.add_argument("--distance_topk", type=int, default=32)
 parser.add_argument("--distance_bins", type=int, default=32)
 parser.add_argument("--distance_temperature", type=float, default=1.0)
+parser.add_argument("--distance_backend", choices=['legacy', 'batched'], default='legacy')
 parser.add_argument("--use_gumbel_softmax", action="store_true", default=None, help="Enable Gumbel-Softmax for gradient estimation")
 parser.add_argument("--no_gumbel_softmax", action="store_false", dest="use_gumbel_softmax",
                     help="Deterministic relaxation, including expected-route distance KL")
@@ -72,6 +73,10 @@ args = None
 
 
 def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
+    from distance_kl import distance_metadata, distance_output_directory
+    implementation = distance_metadata(args.distance_backend)
+    if args.distance_backend == 'batched' and not args.output_tag:
+        raise ValueError('Batched distance sampling requires an explicit independent --output_tag')
     if args.use_gumbel_softmax is None:
         args.use_gumbel_softmax = args.sampling_revision == 'distance-kl-v2'
     if args.projection_distance_kl_weight is None:
@@ -83,6 +88,9 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         precision()
         if args.use_constraint_projection:
             raise ValueError('Baseline methods cannot be combined with ALM projection')
+    if args.use_constraint_projection and args.projection_distance_kl_weight > 0:
+        from tools.baseline_common import precision
+        precision()
     data_name, seed, run_path = get_run_data(RUN_ID, WANDB_DIR)
     if args.world_size < 1 or not 0 <= args.rank < args.world_size:
         raise ValueError("Invalid rank/world_size")
@@ -123,10 +131,11 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     output_tag=output_tag, total_samples=total_len, world_size=args.world_size,
                     start_index=args.start_index, empty_policy="keep", sampling_revision=args.sampling_revision,
                     checkpoint_sha256=sha256_file(checkpoint),
-                    dataset_sha256=sha256_file(test_path), sampling_config=sampling_config)
+                    dataset_sha256=sha256_file(test_path), sampling_config=sampling_config, **implementation)
     if distance_reference is not None:
         metadata['distance_reference_sha256'] = distance_reference.fingerprint
-    save_name = test_path.parent / f"{data_name}_{output_tag}_generated_part{args.rank}.pkl"
+    output_dir = distance_output_directory(test_path.parent, args.distance_backend, args.output_tag)
+    save_name = output_dir / f"{data_name}_{output_tag}_generated_part{args.rank}.pkl"
     if save_name.exists():
         if not args.resume:
             raise FileExistsError(f"Refusing to overwrite {save_name}")
@@ -200,10 +209,13 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 distance_reference=distance_reference,
                 distance_paths=args.distance_paths, distance_topk=args.distance_topk,
                 distance_bins=args.distance_bins, distance_temperature=args.distance_temperature,
+                distance_backend=args.distance_backend,
             )
             dd.constraint_projector.distance_seed = seed_base + args.rank
 
         if hasattr(dd, "constraint_projector") and dd.constraint_projector is not None:
+            dd.constraint_projector.distance_backend = args.distance_backend
+            dd.constraint_projector.distance_implementation_version = implementation['distance_implementation_version']
             dd.constraint_projector.projection_distance_kl_weight = args.projection_distance_kl_weight
             dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
             dd.constraint_projector.lambda_init = args.projection_lambda

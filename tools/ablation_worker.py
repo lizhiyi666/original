@@ -15,6 +15,7 @@ from evaluate_utils import get_task,get_run_data
 from experiment_io import atomic_json,publish_torch,sha256_file,seed_sampling,decode_preserving_empty
 from tools.baseline_common import precision,references,validate_alignment
 from tools.ablation_common import VERSION,VARIANTS,DISTANCE_VERSION,DISTANCE_VARIANTS,STEPS,generator,rng_digest,projector,evaluate
+from distance_kl import validate_distance_metadata
 
 
 def memory_guard(job):
@@ -152,7 +153,9 @@ def sample(job):
     dd.projection_frequency=4
     dd.projection_last_k_steps=40
     dd.projection_call_count=0
-    p=projector(dd,job['variant'],revision=revision,datamodule=dm) if job['variant'] in variants else None
+    implementation = validate_distance_metadata(job, allow_historical=True)
+    p=projector(dd,job['variant'],revision=revision,datamodule=dm,
+                distance_backend=implementation['distance_backend']) if job['variant'] in variants else None
     dd.constraint_projector=p
     if job.get('distance_reference_sha256') and p is not None and p.projection_distance_kl_weight:
         if p.distance_reference.fingerprint != job['distance_reference_sha256']:
@@ -245,7 +248,7 @@ def sample(job):
     active_rows=sum(c.get('active_rows',0) for c in active)
     elements=sum(c.get('logit_element_count',0) for c in calls)
     result=dict(state='complete',kind='sample',samples=len(generated),metrics=metrics,
-        metric_diagnostics=metric_diagnostics, projection_revision=revision,
+        metric_diagnostics=metric_diagnostics, projection_revision=revision, **implementation,
         spatial_seconds=spatial_seconds,samples_per_second=len(generated)/spatial_seconds,
         projection_calls=len(active),projection_invocations=len(calls),
         optimizer_steps=sum(c['optimizer_steps'] for c in calls),
@@ -281,6 +284,7 @@ def main():
     args=parser.parse_args()
     os.chdir(ROOT)
     job=json.loads(Path(args.job).read_text())
+    implementation = validate_distance_metadata(job, allow_historical=True)
     folder=Path(job['output_dir'])
     precision()
     if sha256_file(job['checkpoint'])!=job['checkpoint_sha256']:
@@ -295,6 +299,8 @@ def main():
             if payload['job']!=job:
                 raise RuntimeError('Published artifact belongs to another job')
             result=payload['result']
+            if job['kind'] != 'cache':
+                validate_distance_metadata(result, expected=implementation)
             if result['state']!='complete' or payload['indices']!=job['indices']:
                 raise RuntimeError('Published artifact is not a complete matching job')
             if job['kind']=='cache':

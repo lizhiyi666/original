@@ -46,7 +46,7 @@ def rng_digest(value):
     return hashlib.sha256(state.cpu().numpy().tobytes()).hexdigest()
 
 
-def projector(dd,variant,rng=None,*,revision=VERSION,datamodule=None):
+def projector(dd,variant,rng=None,*,revision=VERSION,datamodule=None,distance_backend='legacy'):
     if revision not in (VERSION, DISTANCE_VERSION):
         raise ValueError('Unknown projection revision')
     p=(DISTANCE_VARIANTS if revision == DISTANCE_VERSION else VARIANTS)[variant]
@@ -59,7 +59,7 @@ def projector(dd,variant,rng=None,*,revision=VERSION,datamodule=None):
         projection_order_weight=p['order'],projection_existence_weight=p['existence'],
         projection_kl_weight=p['kl'],update_multipliers=p['update'],early_stop=False,
         generator=rng,collect_diagnostics=True,verbose=False,
-        projection_distance_kl_weight=p.get('distance', 0))
+        projection_distance_kl_weight=p.get('distance', 0), distance_backend=distance_backend)
     if instance.projection_distance_kl_weight:
         if datamodule is None:
             raise ValueError('Distance ablations require the training datamodule')

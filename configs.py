@@ -89,6 +89,7 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
         projection_distance_kl_weight=config.get('projection_distance_kl_weight', 0.0),
         distance_paths=config.get('distance_paths', 8), distance_topk=config.get('distance_topk', 32),
         distance_bins=config.get('distance_bins', 32), distance_temperature=config.get('distance_temperature', 1.0),
+        distance_backend=config.get('distance_backend', 'legacy'),
     )
     if use_constraint_projection:
         from distance_kl import attach_distance_reference

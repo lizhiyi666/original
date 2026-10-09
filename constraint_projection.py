@@ -40,6 +40,7 @@ class ConstraintProjection:
         distance_topk: int = 32,
         distance_bins: int = 32,
         distance_temperature: float = 1.0,
+        distance_backend: str = 'legacy',
     ):
         self.num_classes = int(num_classes)
         self.type_classes = int(type_classes)
@@ -80,6 +81,9 @@ class ConstraintProjection:
         self.distance_topk = int(distance_topk)
         self.distance_bins = int(distance_bins)
         self.distance_temperature = float(distance_temperature)
+        from distance_kl import distance_metadata
+        self.distance_backend = distance_backend
+        self.distance_implementation_version = distance_metadata(distance_backend)['distance_implementation_version']
         if (not math.isfinite(self.projection_distance_kl_weight) or self.projection_distance_kl_weight < 0
                 or self.distance_paths < 1 or self.distance_topk < 1 or self.distance_bins < 2
                 or not math.isfinite(self.distance_temperature) or self.distance_temperature <= 0):
@@ -241,6 +245,9 @@ class ConstraintProjection:
                                           active_rows=int(active_rows.sum().item()),
                                           optimizer_steps=0, outer_iterations=0,
                                           inactive_multiplier_max=0.0)
+        if distance_enabled:
+            from distance_kl import distance_metadata
+            self.last_projection_stats.update(distance_metadata(self.distance_backend))
         if not active_rows.any():
             return log_probs.detach()
         y_model = log_probs.transpose(1, 2).detach()  # [B, L, V]
@@ -250,8 +257,8 @@ class ConstraintProjection:
         active_view = active_rows[:, None, None]
         distance_objective = None
         if distance_enabled:
-            from distance_kl import DistanceObjective, distance_generator
-            distance_objective = DistanceObjective(self.distance_reference, y_model, poi_mask, active_rows,
+            from distance_kl import distance_objective_class, distance_generator
+            distance_objective = distance_objective_class(self.distance_backend)(self.distance_reference, y_model, poi_mask, active_rows,
                 paths=self.distance_paths, topk=self.distance_topk, temperature=self.distance_temperature)
             if self.distance_generator is None:
                 seed = getattr(self, 'distance_seed', self.generator.initial_seed() if self.generator is not None else torch.initial_seed())

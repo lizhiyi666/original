@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 import torch
 import wandb
 from experiment_io import atomic_json, publish_torch, sha256_file, safe_tag
-from distance_kl import load_distance_reference
+from distance_kl import load_distance_reference, distance_metadata, validate_distance_metadata
 from evaluations.statistical_metrics import EVALUATION_VERSION
 from tools.ablation_common import DISTANCE_VERSION, DISTANCE_VARIANTS, VERSION, SEEDS, STEPS, evaluate, same_records
 from tools.baseline_common import precision
@@ -38,6 +38,9 @@ def expected_keys():
 def validate_trace(payload, reference_sha):
     """Audit the actual worker trace, including disabled objectives and independent RNG."""
     job, result = payload['job'], payload['result']
+    implementation = validate_distance_metadata(job, allow_historical=True)
+    historical = 'distance_backend' not in job and 'distance_implementation_version' not in job
+    validate_distance_metadata(result, expected=implementation, allow_historical=historical)
     if job['projection_revision'] != DISTANCE_VERSION or result['projection_revision'] != DISTANCE_VERSION:
         raise RuntimeError('Wrong projection revision')
     variant = job['variant']
@@ -66,6 +69,7 @@ def validate_trace(payload, reference_sha):
             raise RuntimeError('Distance random stream enabled for wrong variant')
         for call in calls:
             if enabled:
+                validate_distance_metadata(call, expected=implementation, allow_historical=historical)
                 if call.get('distance_reference_sha256') != reference_sha:
                     raise RuntimeError('Distance reference fingerprint mismatch')
                 estimator = 'straight-through-mc' if setting['gumbel'] else 'expected-route'
@@ -87,7 +91,13 @@ def validate_trace(payload, reference_sha):
 class DistanceStudy(Study):
     def __init__(self, args):
         self.args = args
+        self.distance_implementation = distance_metadata(getattr(args, 'distance_backend', 'legacy'))
+        if self.distance_implementation['distance_backend'] == 'batched' and args.run_id == REVISION:
+            raise ValueError('Batched backend requires a new independent --run-id')
         self.out = ROOT / 'experiment_runs' / safe_tag(args.run_id)
+        manifest_path = self.out / 'manifest.json'
+        if manifest_path.exists():
+            validate_distance_metadata(json.loads(manifest_path.read_text()), expected=self.distance_implementation)
         self.out.mkdir(parents=True, exist_ok=True)
         self.phase, self.registry, self.cfg_cost = 'precheck', {}, {}
         self.delivery = args.delivery_root.rstrip('/').replace('\\', '/')
@@ -131,6 +141,7 @@ class DistanceStudy(Study):
         if packages != source_training['packages']:
             raise RuntimeError('Frozen experiment package versions changed')
         self.manifest = dict(version=REVISION, projection_revision=DISTANCE_VERSION,
+            **self.distance_implementation,
             evaluation_version=EVALUATION_VERSION, run_id=self.args.run_id, profiles=self.profiles,
             input_manifest=str(source_path), input_manifest_sha256=sha256_file(source_path),
             cfg_checkpoints={d: dict(path=str(p), sha256=sha256_file(p)) for d, p in self.cfg.items()},
@@ -187,6 +198,7 @@ class DistanceStudy(Study):
     def city_job(self, dataset, *args, **kwargs):
         job = super().city_job(dataset, *args, **kwargs)
         job.update(projection_revision=DISTANCE_VERSION, max_gpu_memory_fraction=.8,
+                   **self.distance_implementation,
                    distance_reference_sha256=self.references[dataset].fingerprint)
         return job
 
@@ -418,6 +430,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input-manifest', default='/root/experiments/pcdg/two-city-v1/experiment_runs/two-city-v1/manifest.json')
     parser.add_argument('--run-id', default=REVISION)
+    parser.add_argument('--distance-backend', choices=('legacy', 'batched'), default='legacy')
     parser.add_argument('--delivery-root', required=True)
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--sync-only', action='store_true')
