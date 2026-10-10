@@ -104,7 +104,7 @@ git status --short --branch
 git fetch origin
 git rev-parse HEAD
 git rev-parse origin/codex/pcdg-geo-tol10
-& 'D:/Anaconda/envs/Marionette/python.exe' -B tools/fetch_two_city_distance_v2.py --verify-only
+& 'D:/Anaconda/envs/Marionette/python.exe' -B tools/fetch_two_city_distance_v2.py --run-id two-city-distance-v2-batched-20261009 --verify-only
 & 'D:/Anaconda/envs/Marionette/python.exe' -B tools/fetch_geometry_study.py --run-id pcdg-geo-v1-tol10-20261010 --verify-only
 ~~~
 
