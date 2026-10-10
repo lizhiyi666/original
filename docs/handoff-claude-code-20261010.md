@@ -1,9 +1,9 @@
 # Claude Code 交接文档：PCDG 两城市轨迹实验
 
-更新日期：2026-10-10（Asia/Shanghai）  
-仓库：D:/桌面/轨迹/轨迹/轨迹生成/实验/original  
-当前分支：codex/pcdg-geo-tol10  
-当前提交：b607a69d1754df3cfb0c639585b8b7d6bc335722  
+更新日期：2026-10-10（Asia/Shanghai）
+仓库：D:/桌面/轨迹/轨迹/轨迹生成/实验/original
+当前分支：codex/pcdg-geo-tol10
+当前提交：b607a69d1754df3cfb0c639585b8b7d6bc335722
 远程：origin/codex/pcdg-geo-tol10，当前已与本地同步。
 
 ## 可以直接交给 Claude Code 的开场指令
