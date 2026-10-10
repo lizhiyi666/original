@@ -16,6 +16,18 @@ def metric():
 
 
 class GeometryStudyTests(unittest.TestCase):
+    def test_worker_resume_requires_geometry_version_configuration_and_reference(self):
+        from tools.ablation_worker import validate_geometry_result
+        config=GeometryConfig('same_category_v1',geometry_steps=100)
+        job=dict(geometry_config=asdict(config),geometry_reference_sha256='train-only')
+        result=dict(config.metadata(),geometry_reference_sha256='train-only')
+        validate_geometry_result(job,result)
+        for mutation in ({'geometry_implementation_version':'old'}, {'geometry_steps':50},
+                         {'geometry_reference_sha256':'test'}, {'geometry_refinement':'off'}):
+            with self.assertRaises(RuntimeError):validate_geometry_result(job,dict(result,**mutation))
+        with self.assertRaises(RuntimeError):validate_geometry_result({},result)
+        validate_geometry_result({}, {})
+
     def test_split_is_reproducible_disjoint_and_leaves_reference(self):
         for count in (3160,7035):
             split=split_indices(count)

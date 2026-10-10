@@ -18,6 +18,21 @@ from tools.ablation_common import VERSION,VARIANTS,DISTANCE_VERSION,DISTANCE_VAR
 from distance_kl import validate_distance_metadata
 
 
+def validate_geometry_result(job, result):
+    configuration = job.get('geometry_config', {})
+    if configuration.get('geometry_refinement', 'off') == 'off':
+        if result.get('geometry_refinement', 'off') != 'off':
+            raise RuntimeError('Geometry result cannot be resumed as an unrefined job')
+        return
+    from geometry_projection import GeometryConfig
+    expected = GeometryConfig(**configuration).metadata()
+    if any(result.get(k) != v for k, v in expected.items()):
+        raise RuntimeError('Geometry result implementation/configuration changed')
+    reference = job.get('geometry_reference_sha256')
+    if not reference or result.get('geometry_reference_sha256') != reference:
+        raise RuntimeError('Geometry result reference changed')
+
+
 def memory_guard(job):
     """An explicit safety ceiling; never silently reduce batch size or precision."""
     limit = job.get('max_gpu_memory_fraction')
@@ -318,6 +333,7 @@ def main():
             result=payload['result']
             if job['kind'] != 'cache':
                 validate_distance_metadata(result, expected=implementation)
+                validate_geometry_result(job, result)
             if result['state']!='complete' or payload['indices']!=job['indices']:
                 raise RuntimeError('Published artifact is not a complete matching job')
             if job['kind']=='cache':
