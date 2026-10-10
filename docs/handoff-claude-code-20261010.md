@@ -3,7 +3,7 @@
 更新日期：2026-10-10（Asia/Shanghai）
 仓库：D:/桌面/轨迹/轨迹/轨迹生成/实验/original
 当前分支：codex/pcdg-geo-tol10
-当前提交：b607a69d1754df3cfb0c639585b8b7d6bc335722
+交接前基线提交：eab0b8e615d1f64febe8630e202b1fa407cfe493
 远程：origin/codex/pcdg-geo-tol10，当前已与本地同步。
 
 ## 可以直接交给 Claude Code 的开场指令
@@ -25,7 +25,7 @@
 | NewYork OOD 基础训练与历史采样 | 已完成，结果封存 | 仅作固定 checkpoint 对照；不要重训 |
 | pcdg-ablation-v1 | 已完成 | 历史 PCDG 消融结果保留 |
 | two-city-v1 | 旧目录有过运行记录 | 不要操作；它不是当前 successor |
-| two-city-distance-v2-batched-20261009 | 66/66，服务器审计通过，本地交付审计通过 | 先执行 --verify-only，再用于论文汇总 |
+| two-city-distance-v2-batched-20261009 | 66/66、服务器审计通过；历史本地交付凭证通过，但当前 verify-only 因 report.md 哈希不一致失败 | 先保留现场并核对报告差异，不能直接宣称当前本地交付通过 |
 | pcdg-geo-v1-20261010 | stopped at quality gate | 原 5% 协议未通过，全部文件保留 |
 | pcdg-geo-v1-tol10-20261010 | complete，18/18，本地交付审计通过 | 10% 是探索性修订，不是 5% 协议成功 |
 | ny-category-sampled-v2-20261010 | failed（原长度配对审计失败） | 必须保留 failed；不可重采样或改状态 |
@@ -59,7 +59,7 @@
 
 - successor 使用独立目录和新 manifest；明确记录实现切换：35 份 inherited legacy results + 31 份 new batched results。
 - 服务器审计确认：66/66、231726 条轨迹、12 个时间缓存、输入和旧父目录未变、paired spatial RNG、distance switches、全数据集指标重算、全部哈希有效。
-- 本地目录 experiment_runs/two-city-distance-v2-batched-20261009/ 已下载，local-delivery-audit.json 为 passed，verified_files=1453。
+- 本地目录 experiment_runs/two-city-distance-v2-batched-20261009/ 已下载；随目录保存的历史 local-delivery-audit.json 为 passed、verified_files=1453，但当前只读复核发现 report.md 不再匹配 delivery-files.json：期望 SHA-256 为 599894b6c2c7ac1687802270c2cc38eeb97817411f6450adffa9f74212de9f7e，当前为 980716f82826a50704de9f903ba82b7d3980d99fd4f99f127437331b2b91607e。不要覆盖报告或重新下载，先核对这是交付后报告更新还是其他来源变更。
 - 报告明确说明混合实现版本，不能把跨后端效率差异解释成纯方法/消融差异。均值和标准差是三个固定采样 seed 的均值与样本标准差，不是多次训练的不确定性。
 
 ### 2026-10-10：几何精修与类别一致解码
@@ -77,7 +77,7 @@
 
 ### 两城市 distance-v2 successor
 
-- 结果文件：experiment_runs/two-city-distance-v2-batched-20261009/report.md、registry.json、audit.json、local-delivery-audit.json。
+- 结果文件：experiment_runs/two-city-distance-v2-batched-20261009/report.md、registry.json、audit.json、local-delivery-audit.json；其中 report.md 当前存在封存哈希偏差，未重新封存前不能作为“当前逐文件验证通过”的本地交付。
 - Istanbul 的 PCDG-Geo/Full 分布指标明显改善 Distance/Radius；NewYork 也改善 Distance/Radius，但 G-RANK 仍差，类别-POI mismatch 仍是瓶颈。
 - 报告中的 PCDG-Geo 是几何精修后的 Full；纯 PCDG 与 Full 的命名在方法表和消融表中有明确限制。消融 Full 使用 PCDG-Geo，而其他消融行未加几何精修，因此 Distance/Radius/DailyLoc/G-RANK 的差异不能纯归因于某一个偏序组件。
 - 必须披露：Istanbul 历史基础训练 batch=512，NewYork=64；Istanbul 历史训练数据没有完整可回溯指纹；CFG scale=1；标准差只反映固定 checkpoint 的 sampling variation。
@@ -108,7 +108,7 @@ git rev-parse origin/codex/pcdg-geo-tol10
 & 'D:/Anaconda/envs/Marionette/python.exe' -B tools/fetch_geometry_study.py --run-id pcdg-geo-v1-tol10-20261010 --verify-only
 ~~~
 
-若 two-city-distance-v2-batched-20261009/status.json 仍显示 server-complete-awaiting-local-verification，以 --verify-only 的结果为准，但不要手改 status；需要修改状态时应使用仓库已有交付工具或另开审计提交。
+当前 two-city-distance-v2-batched-20261009/status.json 为 server-complete-awaiting-local-verification。以 --verify-only 的结果为准：当前预期会因 report.md 哈希偏差失败。不要手改 status、不要覆盖 report.md、不要删除历史 local-delivery-audit.json；先检查 report.md 的来源和差异，再决定是否用受保护的重新交付流程生成新的本地凭证。
 
 ### 2. 执行独立类别缓存审计
 
