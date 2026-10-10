@@ -64,18 +64,25 @@ def subset_inputs(cache, shard, indices):
     return derived,records,traces
 
 
-def compare_pair(before,after,old_traces,new_traces):
-    if len(before)!=128 or len(after)!=128 or len(old_traces)!=2 or len(new_traces)!=2:
-        raise RuntimeError('Expected exactly two paired batches / 128 records')
-    for a,b in zip(before,after):
-        if a.keys()!=b.keys() or len(a['checkins'])!=len(b['checkins']):
-            raise RuntimeError('Generated length or record fields changed')
-        if any(not np.array_equal(a[k],b[k]) for k in a if k not in ('marks','checkins','gps')):
-            raise RuntimeError('Time, condition or empty-record metadata changed')
-    for a,b in zip(old_traces,new_traces):
-        for key in ('indices','global_start','spatial_rng_before','spatial_rng_after',
-                    'projection_rng_after','distance_rng_before','distance_rng_after'):
-            if a.get(key)!=b.get(key):raise RuntimeError('Paired trace mismatch: '+key)
+def compare_pair(items, before, after, old_traces, new_traces, mapping, gps):
+    """Pair On against Off on the shared-time-cache basis, not post-export length.
+
+    Off (the sealed original) is an ordered subset of the cached POI slots because
+    the shared exporter silently drops slots whose token is not a catalog POI.
+    Category-consistent decoding resolves every cached slot to a legal POI, so On
+    may legitimately retain events Off dropped. Validate alignment against the time
+    cache (On covers every cached slot; Off is an ordered subset with matching
+    time/conditions) instead of requiring identical lengths. The global exporter is
+    left unchanged, so no other experiment or sealed result is affected.
+    """
+    n = sum(len(item['indices']) for item in items)
+    if not (len(before) == len(after) == n and len(items) == len(old_traces) == len(new_traces)):
+        raise RuntimeError('Paired batches/records do not align with the time cache')
+    # Lazy import avoids a module-load cycle (category_cache_audit imports this module).
+    from tools.category_cache_audit import audit_alignment, audit_traces
+    alignment, matched = audit_alignment(items, before, after, mapping, gps)
+    audit_traces(items, old_traces, new_traces)
+    return alignment, matched
 
 
 def distribution_counts(refs,records,mapping):
@@ -188,10 +195,13 @@ def execute(args,out):
         if any(state_hash(task)!=before for task,before in models):raise RuntimeError('Model tensor state changed')
         publish_torch(path,payload)
         atomic_json(path.parent/'receipt.json',dict(manifest_sha256=manifest_sha,sha256=sha256_file(path)))
-    compare_pair(off_records,payload['sequences'],off_traces,payload['batch_traces'])
+    alignment, matched = compare_pair(derived['batches'], off_records, payload['sequences'],
+                                      off_traces, payload['batch_traces'], mapping, raw['poi_gps'])
     if result['projection_settings']!=manifest['projection_settings']:raise RuntimeError('Projection budget/settings changed')
     if result['metrics']['category_poi_mismatch_rate']!=0:raise RuntimeError('Actual category mismatch remains')
-    comparison=dict(off=off_metrics,on=result['metrics'],seed=SEED,samples=128,
+    matched_metrics,_=evaluate(refs,matched,mapping,indices)
+    comparison=dict(off=off_metrics,on=result['metrics'],on_matched_events=matched_metrics,seed=SEED,samples=128,
+        alignment=alignment,
         off_diagnostics=distribution_counts(refs,off_records,mapping),
         on_diagnostics=distribution_counts(refs,payload['sequences'],mapping),
         on_spatial_seconds=result['spatial_seconds'],off_spatial_seconds=None,
@@ -200,7 +210,11 @@ def execute(args,out):
     atomic_json(out/'comparison.json',comparison)
     lines=['# NewYork category-consistent decoding: 128-row diagnostic','',manifest['interpretation'],'',
         'Off: original sealed Full subset. On: sampled-category-poi-v2. Same time inputs/seed/legacy backend; no Geo refinement.',
-        'Category/POI consistency is checked against the actual generated category tokens, not the logit argmax.','',
+        'Category/POI consistency is checked against the actual generated category tokens, not the logit argmax.',
+        f'Paired on the shared time cache: On covers every cached POI slot; Off is an ordered subset. '
+        f'On resolved {alignment["restored_events"]} slot(s) across {len(alignment["restored_rows"])} row(s) that the '
+        f'shared exporter dropped from Off as non-catalog tokens. See on_matched_events in comparison.json for the '
+        f'length-matched metric comparison. The global exporter is unchanged.','',
         '| Metric (raw units) | Off | On |','|---|---:|---:|']
     for key in ('category_poi_mismatch_rate','token_strict_ovr','strict_ovr','pair_coverage','category_coverage',
                 'Distance','Radius','DailyLoc','G-RANK','empty_rate'):
