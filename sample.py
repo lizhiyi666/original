@@ -61,7 +61,7 @@ parser.add_argument("--world_size", type=int, default=1, help="总进程数 (GPU
 
 # debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
-parser.add_argument("--category_consistent_decoding", action="store_true",
+parser.add_argument("--category_consistent_decoding", "--category-consistent-decoding", action="store_true",
     help="方案A：解码时将每个 POI 位置的 logits 掩码到与对齐类别一致的 POI 子集（默认关闭）")
 
 # ========== Baseline 选择 ==========
@@ -139,6 +139,9 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     sampling_config = {key: value for key, value in vars(args).items()
                        if key not in {"rank", "resume", "checkpoint", "output_tag", "run_id"}}
     sampling_config.update(batch_size=datamodule.batch_size, seed=seed_base)
+    if args.category_consistent_decoding:
+        from discrete_diffusion.diffusion_transformer import CATEGORY_DECODING_VERSION
+        sampling_config['category_consistent_decoding_version'] = CATEGORY_DECODING_VERSION
     metadata = dict(schema_version=1, data_name=data_name, run_id=RUN_ID,
                     output_tag=output_tag, total_samples=total_len, world_size=args.world_size,
                     start_index=args.start_index, empty_policy="keep", sampling_revision=args.sampling_revision,

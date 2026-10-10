@@ -18,6 +18,17 @@ from tools.ablation_common import VERSION,VARIANTS,DISTANCE_VERSION,DISTANCE_VAR
 from distance_kl import validate_distance_metadata
 
 
+def validate_category_decoding_result(job, result):
+    from discrete_diffusion.diffusion_transformer import CATEGORY_DECODING_VERSION
+    if job.get('category_consistent_decoding'):
+        if (job.get('category_consistent_decoding_version', CATEGORY_DECODING_VERSION) != CATEGORY_DECODING_VERSION
+                or result.get('category_consistent_decoding_version') != CATEGORY_DECODING_VERSION
+                or result.get('category_consistent_decoding') is not True):
+            raise RuntimeError('Category decoding version changed; do not reuse argmax-based results')
+    elif result.get('category_consistent_decoding') or result.get('category_consistent_decoding_version'):
+        raise RuntimeError('Cannot resume category-decoded output as the default-off method')
+
+
 def validate_geometry_result(job, result):
     configuration = job.get('geometry_config', {})
     if configuration.get('geometry_refinement', 'off') == 'off':
@@ -185,6 +196,9 @@ def sample(job):
     # 作业的字节级可复现（payload['job'] 比较不受影响）。不消耗随机数、不改变
     # 投影调用计数，故与配对 RNG 与固定预算校验兼容。
     if job.get('category_consistent_decoding'):
+        from discrete_diffusion.diffusion_transformer import CATEGORY_DECODING_VERSION
+        if job.get('category_consistent_decoding_version', CATEGORY_DECODING_VERSION) != CATEGORY_DECODING_VERSION:
+            raise RuntimeError('Unsupported category decoding implementation')
         dd.enable_category_consistent_decoding(raw['poi_category'], enabled=True)
     else:
         dd.category_consistent_decoding = False
@@ -304,6 +318,8 @@ def sample(job):
     if geometry_on:
         result.update(dd.geometry_config.metadata(), geometry_reference_sha256=dd.geometry_reference.fingerprint,
                       geometry_optimizer_steps=sum((b.get('geometry_projection_stats') or {}).get('optimizer_steps',0) for b in batch_traces))
+    if job.get('category_consistent_decoding'):
+        result.update(category_consistent_decoding=True, category_consistent_decoding_version=CATEGORY_DECODING_VERSION)
     if job['variant']=='energy':
         result['energy_stats']=dict(dd.energy_guidance.stats)
     if job['variant']=='cfg':
@@ -341,6 +357,7 @@ def main():
             if job['kind'] != 'cache':
                 validate_distance_metadata(result, expected=implementation)
                 validate_geometry_result(job, result)
+                validate_category_decoding_result(job, result)
             if result['state']!='complete' or payload['indices']!=job['indices']:
                 raise RuntimeError('Published artifact is not a complete matching job')
             if job['kind']=='cache':

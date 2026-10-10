@@ -4,9 +4,9 @@
 ([start, cat_1..cat_L, sep, poi_1..poi_L, end]) 和合成 logits，验证：
 
 1. enable_category_consistent_decoding 正确构造 class->category 查表；
-2. 开启后，每个 POI 位置仅保留与对齐类别一致的 POI 类，其余 POI 类被置 -70；
-3. 类别位置、特殊符与非 POI 类不受影响；
-4. 目标类别无可用 POI 时跳过该位置（不产生整列 -70 的空分布）；
+2. 开启后，每个 POI 位置仅保留与实际采样类别一致的 POI 类；
+3. 类别位置和非 POI 位置不受影响，最终 POI 位置不能采到非 POI 类；
+4. 中间步骤目标类别无可用 POI 时跳过，最终步骤明确失败；
 5. 关闭时输出与输入逐元素一致（保持既有默认行为）；
 6. 掩码后按 gumbel 采样，生成 POI 与其对齐类别的不一致率为 0。
 """
@@ -25,9 +25,15 @@ from discrete_diffusion.diffusion_transformer import (
 def _dummy(num_classes):
     d = types.SimpleNamespace()
     d.num_classes = num_classes
+    d.num_spectial = 4
+    d.type_classes = 3
     d.category_consistent_decoding = False
     d.poi_class_to_category = None
     d.sampling_generator = None
+    d._apply_category_consistent_poi_mask = types.MethodType(DiffusionTransformer._apply_category_consistent_poi_mask, d)
+    d.log_sample_categorical = types.MethodType(DiffusionTransformer.log_sample_categorical, d)
+    d.projection_last_k_steps = 40
+    d.use_constraint_projection = False
     return d
 
 
@@ -78,9 +84,10 @@ class TestCategoryConsistentDecoding(unittest.TestCase):
         # L=2，类别计划 [4,5]；POI 位置故意偏好错类别 POI(9->cat5, 10->cat6)
         logits, cl = self._logits_one_seq(2, cat_tokens=[4, 5], poi_pref=[9, 10])
         batch = _batch([2], cl)
-        out = DiffusionTransformer._apply_category_consistent_poi_mask(self.dummy, logits.clone(), batch)
+        out = DiffusionTransformer._apply_category_consistent_poi_mask(
+            self.dummy, logits.clone(), batch, logits.argmax(1), final_step=True)
 
-        NEG = -70.0
+        NEG = float('-inf')
         # POI 位置0 (绝对 pos=4) 目标类别=4 -> 仅 7,8 允许
         p0 = 4
         self.assertGreater(out[0, 7, p0].item(), NEG + 1)
@@ -95,9 +102,9 @@ class TestCategoryConsistentDecoding(unittest.TestCase):
         # 类别位置与特殊符不受影响
         for cat_pos in [1, 2]:
             self.assertTrue(torch.equal(out[0, :, cat_pos], logits[0, :, cat_pos]))
-        # 非 POI 类在 POI 位置也不被改动
+        # 最终 POI 位置必须排除所有非 POI 类。
         for non_poi in [0, 1, 2, 3, 4, 5, 6, 11, 12]:
-            self.assertAlmostEqual(out[0, non_poi, p0].item(), logits[0, non_poi, p0].item(), places=5)
+            self.assertTrue(torch.isneginf(out[0, non_poi, p0]))
 
     def test_skip_when_no_poi_for_intended_category(self):
         # 查表中去掉类别6的 POI(10)，令 token 10 变为非 POI
@@ -105,11 +112,11 @@ class TestCategoryConsistentDecoding(unittest.TestCase):
         # 类别计划 [6,4]：pos0 目标类别6无可用 POI -> 跳过；pos1 目标类别4 -> 仅7,8
         logits, cl = self._logits_one_seq(2, cat_tokens=[6, 4], poi_pref=[7, 9])
         batch = _batch([2], cl)
-        out = DiffusionTransformer._apply_category_consistent_poi_mask(self.dummy, logits.clone(), batch)
+        out = DiffusionTransformer._apply_category_consistent_poi_mask(self.dummy, logits.clone(), batch, logits.argmax(1))
         p0 = 4  # 目标类别6无 POI -> 整列保持不变
         self.assertTrue(torch.equal(out[0, :, p0], logits[0, :, p0]))
         p1 = 5  # 目标类别4 -> 9 被屏蔽
-        self.assertAlmostEqual(out[0, 9, p1].item(), -70.0, places=5)
+        self.assertTrue(torch.isneginf(out[0, 9, p1]))
         self.assertGreater(out[0, 7, p1].item(), -69.0)
 
     def test_disabled_is_noop(self):
@@ -140,8 +147,7 @@ class TestCategoryConsistentDecoding(unittest.TestCase):
                 logits[i, wrong[k], L + 2 + k] = -0.5   # 错类别偏好更高
                 logits[i, right[k], L + 2 + k] = -1.5   # 同类别候选次之
         batch = _batch(lengths, content_len)
-        masked = DiffusionTransformer._apply_category_consistent_poi_mask(self.dummy, logits.clone(), batch)
-        sample = DiffusionTransformer.log_sample_categorical(self.dummy, masked)
+        sample = DiffusionTransformer.log_sample_categorical(self.dummy, logits, batch=batch, final_step=True)
         tokens = log_onehot_to_index(sample)  # (B, content_len)
 
         mismatches = 0
@@ -153,7 +159,7 @@ class TestCategoryConsistentDecoding(unittest.TestCase):
                 poi_token = int(tokens[i, L + 2 + k])
                 total += 1
                 self.assertGreaterEqual(int(table[poi_token]), 0, f"non-POI sampled at i={i},k={k}: {poi_token}")
-                if int(table[poi_token]) != cats[k]:
+                if int(table[poi_token]) != int(tokens[i, 1 + k]):
                     mismatches += 1
         self.assertEqual(total, 5)
         self.assertEqual(mismatches, 0)

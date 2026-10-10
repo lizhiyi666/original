@@ -12,6 +12,7 @@ from einops import rearrange
 from constraint_projection import ConstraintProjection, parse_po_matrix_to_constraints
 
 eps = 1e-8
+CATEGORY_DECODING_VERSION = 'sampled-category-poi-v2'
 
 
 
@@ -444,60 +445,74 @@ class DiffusionTransformer(nn.Module):
         table = torch.full((self.num_classes,), -1, dtype=torch.long)
         for poi_token, category_token in poi_category.items():
             pt = int(poi_token)
-            if 0 <= pt < self.num_classes:
-                table[pt] = int(category_token)
+            ct = int(category_token)
+            first_poi = self.num_spectial + self.type_classes
+            if not (first_poi <= pt < self.num_classes - 2
+                    and self.num_spectial <= ct < first_poi):
+                raise ValueError('POI/category token outside the model vocabulary')
+            table[pt] = ct
+        if enabled and not bool((table >= 0).any()):
+            raise ValueError('Category-consistent decoding requires a nonempty POI map')
         self.poi_class_to_category = table
         self.category_consistent_decoding = bool(enabled)
         return self
 
-    def _apply_category_consistent_poi_mask(self, model_log_prob, batch):
-        """把每个 POI 位置的 logits 掩码到“与对齐类别位置的预测类别一致”的 POI 子集。
+    def _apply_category_consistent_poi_mask(self, model_log_prob, batch,
+                                           sampled_tokens=None, *, final_step=False):
+        """Condition POI support on categories ACTUALLY drawn with shared noise.
 
-        - 对齐关系：content 布局为 [start, cat_1..cat_L, sep, poi_1..poi_L, end]，
-          故 POI 绝对位置 p 对齐到类别绝对位置 p-(L+1)，L=unpadded_length。
-        - 目标类别取该类别位置上 model_log_prob 的 argmax（已含投影/引导的影响）。
-        - 若某位置目标类别在词表中没有任何 POI（计数为 0），则跳过该位置不掩码，
-          避免把整列置 -70 造成空分布。类别位置与特殊符不受影响。
+        Unresolved category tokens are left alone at intermediate diffusion
+        steps. The POI mask token remains available until the final step. At
+        final decoding every occupied POI slot must have a supported category;
+        failure is explicit rather than a silent inconsistent fallback.
         """
         if not getattr(self, 'category_consistent_decoding', False):
             return model_log_prob
         table = getattr(self, 'poi_class_to_category', None)
         if table is None:
-            return model_log_prob
+            raise RuntimeError('Enabled category decoding has no POI mapping')
         if not (hasattr(batch, 'poi_mask') and hasattr(batch, 'category_mask')
                 and batch.poi_mask is not None and batch.category_mask is not None):
-            return model_log_prob
+            raise ValueError('Category decoding requires aligned category/POI masks')
 
-        B, C, L = model_log_prob.shape
+        B, C, T = model_log_prob.shape
         device = model_log_prob.device
         table = table.to(device)
-        is_poi = (table >= 0)                                   # (C,)
-        poi_mask = batch.poi_mask.bool()                        # (B,L)
-        cat_mask = batch.category_mask.bool()                   # (B,L)
-
-        pred_tokens = model_log_prob.argmax(dim=1)              # (B,L) 当前每位置预测 token
-        offset = (batch.unpadded_length.long() + 1).view(B, 1)  # L+1
-        pos = torch.arange(L, device=device).view(1, L).expand(B, L)
-        src = pos - offset                                      # 对齐的类别位置索引
+        if sampled_tokens is None or tuple(sampled_tokens.shape) != (B, T):
+            raise ValueError('Actual sampled category tokens are required; argmax is not a substitute')
+        if tuple(table.shape) != (C,) or tuple(batch.poi_mask.shape) != (B,T) or tuple(batch.category_mask.shape) != (B,T):
+            raise ValueError('Category decoding shape mismatch')
+        if not torch.isfinite(model_log_prob).all():
+            raise FloatingPointError('Non-finite category decoding input')
+        is_poi = table >= 0
+        poi_mask = batch.poi_mask.to(device).bool()
+        cat_mask = batch.category_mask.to(device).bool()
+        lengths = batch.unpadded_length.to(device=device, dtype=torch.long)
+        if tuple(lengths.shape) != (B,) or bool((lengths < 0).any()):
+            raise ValueError('Invalid trajectory lengths')
+        offset = (lengths + 1).view(B, 1)
+        pos = torch.arange(T, device=device).view(1, T).expand(B, T)
+        src = pos - offset
         src_valid = src >= 0
         src_clamped = src.clamp(min=0)
-        intended_cat = torch.gather(pred_tokens, 1, src_clamped)        # (B,L)
+        intended_cat = torch.gather(sampled_tokens, 1, src_clamped)
         cat_at_src = torch.gather(cat_mask.long(), 1, src_clamped).bool()
-        apply_pos = poi_mask & src_valid & cat_at_src                   # (B,L) 需约束的 POI 位置
-
+        apply_pos = poi_mask & src_valid & cat_at_src
+        if bool((poi_mask & ~apply_pos).any()):
+            raise ValueError('POI positions do not align with category positions')
         c2cat_e = table.view(1, C, 1)
         is_poi_e = is_poi.view(1, C, 1)
-        intended_e = intended_cat.view(B, 1, L)
-        match = (c2cat_e == intended_e)                                 # (B,C,L)
-        allowed = (~is_poi_e) | match                                   # 非 POI 类恒允许；POI 类需同类别
-
-        poi_allowed_count = (is_poi_e & match).sum(dim=1)               # (B,L) 目标类别可用 POI 数
-        effective = apply_pos & (poi_allowed_count > 0)                 # 跳过无可用 POI 的位置
-        eff = effective.view(B, 1, L)
-        keep = allowed | (~eff)                                         # 非约束位置保持原样
-        # 仅把被屏蔽的 POI 类置 -70，其余保持原值（真实 log-prob 已 <=0）
-        return torch.where(keep, model_log_prob,
-                           torch.full_like(model_log_prob, -70.0))
+        match = is_poi_e & (c2cat_e == intended_cat.view(B, 1, T))
+        supported = match.any(dim=1)
+        if final_step and bool((apply_pos & ~supported).any()):
+            invalid = intended_cat[apply_pos & ~supported].unique().tolist()
+            raise RuntimeError(f'Final sampled category has no legal POI: {invalid}')
+        effective = apply_pos & supported
+        allowed = match.clone()
+        if not final_step:
+            allowed[:, C-1, :] = True  # Retain the diffusion POI-mask state only.
+        keep = allowed | ~effective[:, None, :]
+        return model_log_prob.masked_fill(~keep, float('-inf'))
 
     '''@torch.no_grad()
     def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None, diffusion_index=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
@@ -617,19 +632,26 @@ class DiffusionTransformer(nn.Module):
             model_log_prob = self.energy_guidance.apply(
                 model_log_prob, batch.category_mask, po_constraints, diffusion_index)
 
-        # ========== 方案A：类别一致的 POI 解码（默认关闭） ==========
-        model_log_prob = self._apply_category_consistent_poi_mask(model_log_prob, batch)
-
-        # ========== 最终采样 ==========
-        out = self.log_sample_categorical(model_log_prob)
+        # Default-off calls the exact historical sampler with its old signature.
+        if getattr(self, 'category_consistent_decoding', False):
+            final_step = diffusion_index == 0 if diffusion_index is not None else (
+                t is not None and bool((t == 0).all()))
+            out = self.log_sample_categorical(model_log_prob, batch=batch, final_step=final_step)
+        else:
+            out = self.log_sample_categorical(model_log_prob)
         return out
 
-    def log_sample_categorical(self, logits):           # use gumbel to sample onehot vector from log probability
+    def log_sample_categorical(self, logits, *, batch=None, final_step=False):
         generator = getattr(self, 'sampling_generator', None)
         uniform = (torch.rand_like(logits) if generator is None else
                    torch.rand(logits.shape, device=logits.device, dtype=logits.dtype, generator=generator))
         gumbel_noise = -torch.log(-torch.log(uniform + 1e-30) + 1e-30)
         sample = (gumbel_noise + logits).argmax(dim=1)
+        if batch is not None and getattr(self, 'category_consistent_decoding', False):
+            masked = self._apply_category_consistent_poi_mask(logits, batch, sample, final_step=final_step)
+            # Reuse the SAME draw: category samples stay fixed, RNG consumption
+            # matches the original path, and POIs condition on actual categories.
+            sample = (gumbel_noise + masked).argmax(dim=1)
         log_sample = index_to_log_onehot(sample, self.num_classes)
         return log_sample
 
