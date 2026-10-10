@@ -70,6 +70,16 @@ def verify(root):
         if not path.resolve().is_relative_to(root.resolve()) or path.is_symlink() or digest(path)!=expected:
             raise RuntimeError('Delivered file hash/path mismatch: '+name)
     if digest(root/'manifest.json')!=seal['manifest_sha256']:raise RuntimeError('Manifest hash mismatch')
+    manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+    if 'inheritance' in manifest:
+        from tools.geometry_inheritance import verify_snapshot
+        inherited=manifest['inheritance']
+        snapshot=root/str(safe_relative(inherited['snapshot']))
+        if digest(snapshot/'delivery-inventory.json')!=inherited['source_inventory_sha256']:
+            raise RuntimeError('Inherited inventory differs from manifest')
+        if digest(snapshot/'manifest.json')!=inherited['source_manifest_sha256']:
+            raise RuntimeError('Inherited source manifest differs')
+        verify_snapshot(snapshot)
     status=json.loads((root/'status.json').read_text(encoding='utf-8'))
     if status['state']!=seal['terminal_state']:raise RuntimeError('Terminal state mismatch')
     count=0

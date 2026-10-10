@@ -32,7 +32,8 @@ from tools.baseline_common import precision, state_hash
 from tools.city_common import load_city, references as city_references
 from tools.geometry_study_common import (CITIES, REVISION, SEEDS, SPEED_CEILING, STEP_CHOICES,
     check_invariant_metrics, choose_steps, configurations, config_label, content_hash,
-    geometric_diagnostics, metric_means, quality_failures, rank_candidates, split_indices, target_metrics)
+    geometric_diagnostics, metric_means, quality_failures, rank_candidates, split_indices, target_metrics,
+    validate_other_jsd_tolerance)
 
 
 def read(path):
@@ -53,6 +54,9 @@ class GeometryStudy:
         self.cold_reference_seconds = {}
         self.cold_model_records = []
         self.device = torch.device(args.device)
+        self.other_jsd_relative_tolerance = validate_other_jsd_tolerance(
+            getattr(args, 'other_jsd_relative_tolerance', .05))
+        self.inherited = None
 
     def status(self, state='running', **fields):
         value = dict(state=state, phase=self.phase, pid=os.getpid(), updated_at=time.time(), **fields)
@@ -107,8 +111,16 @@ class GeometryStudy:
             geometry_probe=dict(radius_weight=1.,prior_weight=.01),
             calibration='train-side engineering calibration; base model saw training records',
             test_policy='One frozen-configuration test evaluation; no test-driven search',
-            constraints_tolerance=.01,other_jsd_relative_tolerance=.05,
+            constraints_tolerance=.01,other_jsd_relative_tolerance=self.other_jsd_relative_tolerance,
             planned_new_formal_results=18,no_training=True,precision='FP32; TF32 disabled',memory_limit=.8)
+        if getattr(self.args, 'inherit_geometry_run', None):
+            from tools.geometry_inheritance import InheritedGeometry, POLICY
+            self.inherited = InheritedGeometry(self.args.inherit_geometry_run,
+                                               self.args.inherit_geometry_inventory, ROOT)
+            manifest['inheritance'] = self.inherited.descriptor(manifest)
+            manifest['selection_revision'] = POLICY
+            manifest['policy_disclosure'] = ('Tolerance changed from 5% to 10% after observing training-side '
+                'confirmation. Exploratory protocol amendment, not retrospective success under the original rule.')
         path=self.out/'manifest.json'
         if path.exists():
             if not self.args.resume or read(path)!=manifest:raise RuntimeError('Resume requires identical manifest/code and --resume')
@@ -118,6 +130,8 @@ class GeometryStudy:
             if any(p.name!='pipeline.lock' for p in self.out.iterdir()):raise RuntimeError('Output directory is not empty')
             atomic_json(path,manifest)
         self.manifest=manifest;self.manifest_sha=sha256_file(path)
+        if self.inherited is not None:
+            self.inherited.materialize(self.out)
         atomic_json(self.out/'cold-start.json',dict(reference_seconds=self.cold_reference_seconds,model_loads=[]))
         self.status()
 
@@ -126,13 +140,18 @@ class GeometryStudy:
             path=self.parent/name
             if not path.resolve().is_relative_to(self.parent) or path.is_symlink() or sha256_file(path)!=digest:
                 raise RuntimeError(f'Sealed parent artifact changed: {name}')
+        if getattr(self, 'inherited', None) is not None:
+            self.inherited.verify_preserved()
 
     def identity(self, **fields):
         return dict(study_manifest_sha256=self.manifest_sha,**fields)
 
     def load_payload(self,path,identity):
         path=Path(path)
-        if not path.exists():return None
+        if not path.exists():
+            if getattr(self, 'inherited', None) is not None:
+                return self.inherited.load_reusable(path.relative_to(self.out).as_posix(), identity)
+            return None
         receipt=path.with_suffix('.receipt.json')
         if not receipt.exists() or read(receipt)!=dict(identity=identity,sha256=sha256_file(path)):
             raise RuntimeError(f'Payload/receipt identity mismatch; retain artifact for inspection: {path}')
@@ -221,6 +240,8 @@ class GeometryStudy:
         return records,stats
 
     def prepare_pool(self,city,pool,seed):
+        if getattr(self, 'inherited', None) is not None:
+            return self.read_pool(city,pool,seed)
         indices=self.splits[city][pool]
         task,dm=self.load_model(city,force=True)
         raw,selected,_=city_references(dm,self.profiles[city],'train',indices)
@@ -269,7 +290,10 @@ class GeometryStudy:
             packet=self.load_payload(path,identity)
             if packet is None:raise RuntimeError('Missing completed base cache')
             packets.append(packet)
-        return packets,read(path.parent/'baseline-metrics.json')
+        baseline_path=path.parent/'baseline-metrics.json'
+        if getattr(self, 'inherited', None) is not None:
+            baseline_path=self.inherited.file(baseline_path.relative_to(self.out).as_posix())
+        return packets,read(baseline_path)
 
     def speed_cases(self,city):
         packets,_=self.read_pool(city,'screen',SEEDS[0])
@@ -352,7 +376,43 @@ class GeometryStudy:
                'See performance-qualification.json, speed/, screening.json and confirmation.json when present.']
         path=self.out/'performance-qualification.json'
         if path.exists():lines+=['','## Complete spatial-sampling timing',json.dumps(read(path),indent=2)]
+        lines += self.policy_report_lines()
+        for phase in ('screening','confirmation'):
+            path=self.out/(phase+'.json')
+            if path.exists():
+                lines += ['', '## '+phase+' (training-side only)',
+                          '```json',json.dumps(read(path).get('quality_comparison',{}),indent=2),'```']
         (self.out/'report.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+
+    def policy_report_lines(self):
+        tolerance=getattr(self,'other_jsd_relative_tolerance',.05)
+        lines=['','## Selection policy',
+               f'DailyLoc/G-RANK relative tolerance: {tolerance:.0%}. Category invariants and 10% speed ceiling unchanged.']
+        if getattr(self,'inherited',None) is not None:
+            lines += [self.manifest['policy_disclosure'],
+                      'Original 5% stopped run is preserved; all inherited payloads retain their original identities.',
+                      'Original screening is reranked; only its new top three enter confirmation. No fourth-place fallback.']
+        return lines
+
+    def selection_record(self,results,baselines,confirmation=False):
+        tolerance=self.other_jsd_relative_tolerance
+        comparison={}
+        for label,candidate in results.items():
+            comparison[label]={}
+            for city,rows in candidate['cities'].items():
+                values=[r['metrics'] for r in rows];means=metric_means(values)
+                full=metric_means(baselines[city]['full'])
+                sd={k:statistics.stdev(v[k] for v in values) if len(values)>1 and
+                    all(v[k] is not None for v in values) else None for k in means}
+                comparison[label][city]=dict(mean=means,sample_sd=sd,full_mean=full,
+                    failures_at_5_percent=quality_failures(means,full,confirmation),
+                    failures_at_selected_tolerance=quality_failures(means,full,confirmation,
+                        other_jsd_relative_tolerance=tolerance))
+        return dict(results=results,baselines=baselines,other_jsd_relative_tolerance=tolerance,
+                    ranking=rank_candidates(results,baselines,confirmation=confirmation,
+                        other_jsd_relative_tolerance=tolerance),
+                    ranking_at_5_percent=rank_candidates(results,baselines,confirmation=confirmation),
+                    quality_comparison=comparison)
 
     def refine_pool(self,city,pool,seed,config):
         label=config_label(config)
@@ -391,8 +451,9 @@ class GeometryStudy:
             for config in configs:
                 self.phase=f'screen-{city}-{config_label(config)}';self.status()
                 results[config_label(config)]['cities'][city]=[self.refine_pool(city,'screen',SEEDS[0],config)]
-        ranked=rank_candidates(results,baselines)
-        atomic_json(self.out/'screening.json',dict(results=results,baselines=baselines,ranking=ranked))
+        screening=self.selection_record(results,baselines)
+        ranked=screening['ranking']
+        atomic_json(self.out/'screening.json',screening)
         finalists=ranked[:3]
         if not finalists:return None,'no-screening-candidate'
         confirmed={r['label']:dict(config=r['config'],cities={}) for r in finalists}
@@ -406,15 +467,17 @@ class GeometryStudy:
                     config=GeometryConfig(**r['config'])
                     self.phase=f'confirm-{city}-{seed}-{r["label"]}';self.status()
                     confirmed[r['label']]['cities'].setdefault(city,[]).append(self.refine_pool(city,'confirm',seed,config))
-        ranking=rank_candidates(confirmed,confirm_base,confirmation=True)
-        atomic_json(self.out/'confirmation.json',dict(results=confirmed,baselines=confirm_base,ranking=ranking))
+        confirmation=self.selection_record(confirmed,confirm_base,confirmation=True)
+        ranking=confirmation['ranking']
+        atomic_json(self.out/'confirmation.json',confirmation)
         for r in ranking:
             config=GeometryConfig(**r['config'])
             passed,speed=self.speed_gate(config,round_name='confirm-'+r['label'])
             if passed is not None:
                 recommendation=dict(state='selected',config=asdict(config),configuration_sha256=content_hash(asdict(config)),
                     study_manifest_sha256=self.manifest_sha,screening_sha256=sha256_file(self.out/'screening.json'),
-                    confirmation_sha256=sha256_file(self.out/'confirmation.json'),speed=speed)
+                    confirmation_sha256=sha256_file(self.out/'confirmation.json'),speed=speed,
+                    other_jsd_relative_tolerance=self.other_jsd_relative_tolerance)
                 atomic_json(self.out/'recommendation.json',recommendation)
                 return config,None
         return None,'no-confirmed-quality-and-speed-candidate'
@@ -500,9 +563,12 @@ class GeometryStudy:
                     for k in means}
                 rows.append(dict(city=city,variant=variant,mean=means,sample_sd=sd))
                 if variant=='full':
-                    failures=quality_failures(means,original_full,True)
+                    failures=quality_failures(means,original_full,True,
+                        other_jsd_relative_tolerance=self.other_jsd_relative_tolerance)
                     targets=target_metrics(city,original_full,joint)
                     acceptance[city]=dict(quality_failures=failures,targets=targets,
+                        failures_at_5_percent=quality_failures(means,original_full,True),
+                        other_jsd_relative_tolerance=self.other_jsd_relative_tolerance,
                         geometry_goals_pass=all(means[k] is not None and means[k]<=v for k,v in targets.items()))
         atomic_json(self.out/'results-summary.json',dict(rows=rows,acceptance=acceptance))
         lines=['# PCDG-Geo final results','',
@@ -518,16 +584,23 @@ class GeometryStudy:
             'Speed: see speed/ and recommendation.json. All costs are complete spatial sampling on the same GPU/input; temporal generation, loading and network excluded.',
             'Offline refinement costs in registry.json are NOT complete online sampling costs. Historical legacy/batched Full provenance is retained.',
             'All frozen category/time/order/length/condition fields and endpoint-selection masks were checked. Geometry goals are not guaranteed.']
+        lines+=self.policy_report_lines()
         (self.out/'report.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
         return acceptance
 
     def execute(self):
         self.precheck()
         for city in CITIES:self.prepare_pool(city,'screen',SEEDS[0])
-        steps,speed=self.speed_gate()
+        inherited=getattr(self,'inherited',None)
+        if inherited is None:
+            steps,speed=self.speed_gate()
+        else:
+            original_performance=read(inherited.file('performance-qualification.json'))
+            steps,speed=original_performance['selected_steps'],original_performance['speed']
         atomic_json(self.out/'performance-qualification.json',dict(selected_steps=steps,speed=speed,
-                    ceiling=SPEED_CEILING,study_manifest_sha256=self.manifest_sha))
-        self.profile_tail(steps or 50)
+                    ceiling=SPEED_CEILING,study_manifest_sha256=self.manifest_sha,
+                    inherited_from=self.manifest['inheritance'] if inherited is not None else None))
+        if inherited is None:self.profile_tail(steps or 50)
         if steps is None:
             self.finish_model();self.verify_parent();self.phase='stopped-at-speed-gate'
             self.stop_report('50 steps exceed the 10% complete spatial-sampling overhead ceiling. Quality search and formal refinement were not started.')
@@ -557,7 +630,15 @@ def main():
     parser.add_argument('--stage',choices=('speed','all'),default='all')
     parser.add_argument('--device',default='cuda:0')
     parser.add_argument('--resume',action='store_true')
+    parser.add_argument('--other-jsd-relative-tolerance',type=validate_other_jsd_tolerance,default=.05)
+    parser.add_argument('--inherit-geometry-run',help='Read-only stopped geometry-v1 run to inherit')
+    parser.add_argument('--inherit-geometry-inventory',help='Verified delivery-inventory.json for the inherited run')
     args=parser.parse_args()
+    if bool(args.inherit_geometry_run) != bool(args.inherit_geometry_inventory):
+        parser.error('Inheritance requires both --inherit-geometry-run and --inherit-geometry-inventory')
+    if args.inherit_geometry_run and (args.other_jsd_relative_tolerance != .10 or
+            Path(args.inherit_geometry_run).resolve().parent.parent == ROOT.resolve()):
+        parser.error('10-percent inheritance requires a separate deployment, never the old source directory')
     os.chdir(ROOT)
     study=GeometryStudy(args)
     import fcntl

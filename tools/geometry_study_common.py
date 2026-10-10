@@ -57,16 +57,25 @@ def check_invariant_metrics(actual, original):
             raise RuntimeError(f'Category-preserving refinement changed invariant metric: {metric}')
 
 
-def quality_failures(actual, full, require_geometry_nonworse=False):
+def validate_other_jsd_tolerance(value):
+    value = float(value)
+    if not math.isfinite(value) or not 0 <= value <= 1:
+        raise ValueError('Other JSD relative tolerance must be finite and between 0 and 1')
+    return value
+
+
+def quality_failures(actual, full, require_geometry_nonworse=False, *, other_jsd_relative_tolerance=.05):
+    tolerance = validate_other_jsd_tolerance(other_jsd_relative_tolerance)
     required = ('strict_ovr', 'pair_coverage', 'category_coverage', 'DailyLoc', 'G-RANK', 'Distance', 'Radius')
-    if any(actual.get(k) is None or full.get(k) is None or not math.isfinite(actual[k]) for k in required):
+    if any(actual.get(k) is None or full.get(k) is None or not math.isfinite(actual[k])
+           or not math.isfinite(full[k]) for k in required):
         return ['undefined-metric']
     failures = []
     if actual['strict_ovr'] > full['strict_ovr'] + .01 + 1e-12: failures.append('strict-ovr')
     for k in ('pair_coverage', 'category_coverage'):
         if actual[k] < full[k] - .01 - 1e-12: failures.append(k)
     for k in ('DailyLoc', 'G-RANK'):
-        if actual[k] > full[k] * 1.05 + 1e-12: failures.append(k)
+        if actual[k] > full[k] * (1 + tolerance) + 1e-12: failures.append(k)
     if require_geometry_nonworse:
         for k in ('Distance', 'Radius'):
             if actual[k] > full[k] + 1e-12: failures.append(k)
@@ -78,8 +87,9 @@ def target_metrics(city, full, jointgen):
             'Radius': jointgen['Radius']}
 
 
-def rank_candidates(results, baselines, *, confirmation=False):
+def rank_candidates(results, baselines, *, confirmation=False, other_jsd_relative_tolerance=.05):
     """Each city value is a seed-list; tie-break by objective, cost, then coefficients."""
+    validate_other_jsd_tolerance(other_jsd_relative_tolerance)
     ranked = []
     for label, candidate in results.items():
         ratios, failed, cost = [], [], 0.
@@ -90,9 +100,11 @@ def rank_candidates(results, baselines, *, confirmation=False):
             actual = metric_means([r['metrics'] for r in rows])
             full = metric_means(baselines[city]['full'])
             joint = metric_means(baselines[city]['no_projection'])
-            failed.extend(f'{city}:{f}' for f in quality_failures(actual, full, confirmation))
+            failed.extend(f'{city}:{f}' for f in quality_failures(actual, full, confirmation,
+                other_jsd_relative_tolerance=other_jsd_relative_tolerance))
             for metric, target in target_metrics(city, full, joint).items():
-                if actual.get(metric) is None or target is None:
+                if (actual.get(metric) is None or target is None
+                        or not math.isfinite(actual[metric]) or not math.isfinite(target)):
                     failed.append(f'{city}:{metric}:undefined')
                 else:
                     ratios.append(actual[metric] / max(target, 1e-12))
