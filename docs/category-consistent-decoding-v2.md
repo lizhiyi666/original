@@ -26,3 +26,12 @@
 输出 `off.pkl`、`on/payload.pkl`、`comparison.json`、`audit.json`、`report.md`；检查实际类别一致性、时间/长度/条件不变、原随机流状态一致、模型状态哈希不变，以及原输入/封存文件未变。Distance可能因端点类别变动而改变入选集合，因此同时报告两侧有效数量和未筛选Distance。关闭组仅复用，未重新测量精确配对端到端时间，不虚构加速比。
 
 下载后可用 `python -B tools/run_category_decoding_check.py --verify-only <下载目录>` 做只读逐文件校验。非有限值、无合法最终POI、指纹/配对不符或OOM均保留现场并停止，不自动重启、缩小batch或改参。
+
+终态下载使用 `python -B tools/fetch_category_decoding_check.py`，随后同命令加 `--verify-only` 复核。只有控制器退出、源代码/输入哈希一致、传输实际退出、逐文件校验与 `local-delivery-audit.json` 通过才报告本地交付。下载工具拒绝覆盖冲突文件，并把归档及服务器审计哈希与本地记录绑定。
+
+## 部署记录（2026-10-10）
+
+- 修复提交：`9169bae6a63c5a8b362c2851b8162b8915dd46e0`；实验代码冻结于 `13ccf2c33154c2aa926a6e915aa652c3b1464dbb`。Git HTTPS不可用期间通过GitHub Git Data API逐对象校验后快进同步，远程提交与本地哈希完全一致，未强推或改写历史。
+- 部署包 SHA-256：`b0982c10613d234dc9fe846dc87a36860f2e74e5f582539f4a1142cbe089a764`，上传前后相同；服务器198项完整回归、10项CUDA联合采样回归全部通过。
+- 新目录 `/root/experiments/pcdg/ny-category-sampled-v2-20261010`，初始PID16179；日志 `/root/experiments/pcdg/ny-category-sampled-v2-20261010-controller-01.log`。PID仅作启动记录，操作前须核验实际命令。
+- 下载工具与后续文档提交不部署到运行中的实验目录；最终运行状态以 `status.json`、`audit.json` 与本地交付校验为准。
