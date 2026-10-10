@@ -69,9 +69,18 @@ def decode_preserving_empty(task, time_samples, gps_dict, **sample_kwargs):
     empty = time_samples.unpadded_length == 0
     if bool(empty.all()):
         return [empty_generated_record(time_samples, i) for i in range(time_samples.batch_size)]
-    samples = task.discrete_diffusion.sample_fast(time_samples.to(task.device), **sample_kwargs).to_seq_list(gps_dict)
+    dd = task.discrete_diffusion
+    geometry = getattr(dd, 'geometry_config', None)
+    geometry_enabled = getattr(geometry, 'geometry_refinement', 'off') == 'same_category_v1'
+    before = getattr(dd, 'projection_call_count', 0) if geometry_enabled else 0
+    samples = dd.sample_fast(time_samples.to(task.device), **sample_kwargs).to_seq_list(gps_dict)
     for index in torch.where(empty)[0].tolist():
         samples[index] = empty_generated_record(time_samples, index)
+    if geometry_enabled:
+        from geometry_projection import refine_records
+        samples, dd.last_geometry_stats = refine_records(samples, dd, dd.geometry_reference, geometry,
+            seed=dd.geometry_seed, global_start=dd.geometry_global_start,
+            projection_executed=dd.projection_call_count > before)
     return samples
 
 

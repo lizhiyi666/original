@@ -1,6 +1,7 @@
 import torch
 import argparse
 import math
+import json
 import time
 from pathlib import Path
 from evaluate_utils import get_task, get_run_data
@@ -41,6 +42,12 @@ parser.add_argument("--distance_topk", type=int, default=32)
 parser.add_argument("--distance_bins", type=int, default=32)
 parser.add_argument("--distance_temperature", type=float, default=1.0)
 parser.add_argument("--distance_backend", choices=['legacy', 'batched'], default='legacy')
+parser.add_argument('--geometry_refinement', choices=['off', 'same_category_v1'], default='off')
+parser.add_argument('--geometry_steps', type=int, choices=[50,100,200], default=50)
+parser.add_argument('--geometry_distance_weight', type=float, default=1.)
+parser.add_argument('--geometry_radius_weight', type=float, default=1.)
+parser.add_argument('--geometry_prior_weight', type=float, default=.01)
+parser.add_argument('--geometry_fit_indices', help='JSON list of train-only prior indices, excluding calibration pools')
 parser.add_argument("--use_gumbel_softmax", action="store_true", default=None, help="Enable Gumbel-Softmax for gradient estimation")
 parser.add_argument("--no_gumbel_softmax", action="store_false", dest="use_gumbel_softmax",
                     help="Deterministic relaxation, including expected-route distance KL")
@@ -75,6 +82,9 @@ args = None
 def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     from distance_kl import distance_metadata, distance_output_directory
     implementation = distance_metadata(args.distance_backend)
+    geometry_on = args.geometry_refinement != 'off'
+    if geometry_on and (not args.output_tag or not args.use_constraint_projection or not args.geometry_fit_indices):
+        raise ValueError('Geometry requires PCDG, an independent output tag and training reference indices')
     if args.distance_backend == 'batched' and not args.output_tag:
         raise ValueError('Batched distance sampling requires an explicit independent --output_tag')
     if args.use_gumbel_softmax is None:
@@ -134,7 +144,20 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     dataset_sha256=sha256_file(test_path), sampling_config=sampling_config, **implementation)
     if distance_reference is not None:
         metadata['distance_reference_sha256'] = distance_reference.fingerprint
+    if not geometry_on:
+        sampling_config_keys = [k for k in sampling_config if k.startswith('geometry_')]
+        for k in sampling_config_keys:
+            sampling_config.pop(k)
     output_dir = distance_output_directory(test_path.parent, args.distance_backend, args.output_tag)
+    geometry_config = geometry_reference = None
+    if geometry_on:
+        from geometry_projection import GeometryConfig, load_geometry_reference, geometry_output_directory
+        geometry_config = GeometryConfig(**{k:getattr(args,k) for k in GeometryConfig.__dataclass_fields__ if hasattr(args,k)})
+        fit_indices = json.loads(Path(args.geometry_fit_indices).read_text(encoding='utf-8'))
+        geometry_reference = load_geometry_reference(Path(datamodule.root)/datamodule.name/f'{datamodule.name}_train.pkl', fit_indices)
+        metadata.update(geometry_config.metadata(), geometry_reference_sha256=geometry_reference.fingerprint,
+                        geometry_fit_indices_sha256=sha256_file(args.geometry_fit_indices))
+        output_dir = geometry_output_directory(test_path.parent, args.geometry_refinement, args.output_tag)
     save_name = output_dir / f"{data_name}_{output_tag}_generated_part{args.rank}.pkl"
     if save_name.exists():
         if not args.resume:
@@ -150,6 +173,9 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
     dd = task.discrete_diffusion
     dd.projection_call_count = 0
+    dd.geometry_config = geometry_config
+    dd.geometry_reference = geometry_reference
+    geometry_diagnostics = []
 
     # ========== Baseline1: 强制关闭投影 ==========
     # 规则A：baseline=None 且未显式 --use_constraint_projection 时，视为 baseline1
@@ -324,12 +350,17 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
 
         assert len(time_samples) == batch.batch_size, "not enough samples"
 
+        dd.geometry_seed = seed_base
+        dd.geometry_global_start = batch_global_start
+        dd.last_geometry_stats = None
         samples = decode_preserving_empty(
             task, time_samples, gps_dict,
             baseline_method=args.baseline,      # [新增]
             guidance_scale=args.guidance_scale  # [新增]
         )
         assert len(samples) == batch.batch_size, "not enough samples"
+        if geometry_on:
+            geometry_diagnostics.append(dict(global_start=batch_global_start, diagnostics=dd.last_geometry_stats))
         generated_seqs += samples
 
     # ========== Baseline 2: Post-hoc Swap ==========
@@ -382,6 +413,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     elapsed_seconds=time.monotonic() - started)
     if args.use_constraint_projection and args.projection_distance_kl_weight > 0:
         data_new['distance_projection_diagnostics'] = distance_projection_stats
+    if geometry_on:
+        data_new['geometry_projection_diagnostics'] = geometry_diagnostics
     publish_torch(save_name, data_new)
     print(f"[GPU {args.rank}] Saved part file to {save_name}")
 

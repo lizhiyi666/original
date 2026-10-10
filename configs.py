@@ -94,6 +94,16 @@ def instantiate_model(config: DictConfig, datamodule) -> AddThin:
     if use_constraint_projection:
         from distance_kl import attach_distance_reference
         attach_distance_reference(discrete_diffusion.constraint_projector, datamodule)
+    if config.get('geometry_refinement', 'off') != 'off':
+        from geometry_projection import GeometryConfig, load_geometry_reference
+        if not use_constraint_projection or config.get('geometry_fit_indices') is None:
+            raise ValueError('Geometry requires PCDG and explicit train-only reference indices')
+        discrete_diffusion.geometry_config = GeometryConfig(**{
+            k: config[k] for k in GeometryConfig.__dataclass_fields__ if k in config})
+        discrete_diffusion.geometry_reference = load_geometry_reference(
+            Path(datamodule.root)/datamodule.name/f'{datamodule.name}_train.pkl', config['geometry_fit_indices'])
+        discrete_diffusion.geometry_seed = 0
+        discrete_diffusion.geometry_global_start = 0
     return tpp_model, discrete_diffusion
 
 

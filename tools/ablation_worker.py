@@ -157,6 +157,15 @@ def sample(job):
     p=projector(dd,job['variant'],revision=revision,datamodule=dm,
                 distance_backend=implementation['distance_backend']) if job['variant'] in variants else None
     dd.constraint_projector=p
+    geometry_on = job.get('geometry_config', {}).get('geometry_refinement', 'off') != 'off'
+    if geometry_on:
+        from geometry_projection import GeometryConfig, load_geometry_reference
+        dd.geometry_config = GeometryConfig(**job['geometry_config'])
+        dd.geometry_reference = load_geometry_reference(Path(dm.root)/dm.name/f'{dm.name}_train.pkl', job['geometry_fit_indices'])
+        if dd.geometry_reference.fingerprint != job['geometry_reference_sha256'] or p is None:
+            raise RuntimeError('Geometry reference/projection configuration mismatch')
+    else:
+        dd.geometry_config = None
     if job.get('distance_reference_sha256') and p is not None and p.projection_distance_kl_weight:
         if p.distance_reference.fingerprint != job['distance_reference_sha256']:
             raise RuntimeError('Distance training reference changed')
@@ -206,6 +215,9 @@ def sample(job):
         before_spatial=rng_digest(spatial)
         before_global=(rng_digest(torch.get_rng_state()),rng_digest(torch.cuda.get_rng_state()))
         begin=len(calls)
+        dd.geometry_seed=job['seed']
+        dd.geometry_global_start=item['global_start']
+        dd.last_geometry_stats=None
         energy_before=dd.energy_guidance.stats['calls'] if job['variant']=='energy' else 0
         cfg_before=dd.cfg_stats['calls'] if job['variant']=='cfg' else 0
         output=decode_preserving_empty(task,batch,raw['poi_gps'])
@@ -231,6 +243,8 @@ def sample(job):
             distance_rng_after=rng_digest(p.distance_generator) if distance_rng_before else None,
             projection_rng_after=rng_digest(projection),effective_constraints=effective,
             projection_stats=trace,global_rng_unchanged=True))
+        if geometry_on:
+            batch_traces[-1]['geometry_projection_stats'] = dd.last_geometry_stats
         atomic_json(Path(job['output_dir'])/'progress.json',dict(completed_samples=len(generated),
             total_samples=len(job['indices']),phase='spatial',elapsed_seconds=time.perf_counter()-started))
     torch.cuda.synchronize()
@@ -265,6 +279,9 @@ def sample(job):
         distance_paths=p.distance_paths, distance_topk=p.distance_topk,
         distance_bins=p.distance_bins, distance_temperature=p.distance_temperature,
         outer=p.outer_iterations, inner=p.inner_iterations, early_stop=p.early_stop)
+    if geometry_on:
+        result.update(dd.geometry_config.metadata(), geometry_reference_sha256=dd.geometry_reference.fingerprint,
+                      geometry_optimizer_steps=sum((b.get('geometry_projection_stats') or {}).get('optimizer_steps',0) for b in batch_traces))
     if job['variant']=='energy':
         result['energy_stats']=dict(dd.energy_guidance.stats)
     if job['variant']=='cfg':

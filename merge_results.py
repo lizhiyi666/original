@@ -7,13 +7,16 @@ from experiment_io import publish_torch, safe_tag, sha256_file, validate_part
 
 
 def merge_parts(data_name, run_id, world_size=4, output_tag=None, data_dir="data", expected_count=None,
-                distance_backend='legacy'):
+                distance_backend='legacy', geometry_refinement='off'):
     if world_size < 1:
         raise ValueError("world_size must be positive")
     tag = safe_tag(output_tag or run_id)
     base = Path(data_dir) / safe_tag(data_name)
     from distance_kl import distance_metadata, distance_output_directory, validate_distance_metadata
     output_dir = distance_output_directory(base, distance_backend, output_tag)
+    if geometry_refinement != 'off':
+        from geometry_projection import geometry_output_directory
+        output_dir = geometry_output_directory(base, geometry_refinement, output_tag)
     paths = [output_dir / f"{data_name}_{tag}_generated_part{rank}.pkl" for rank in range(world_size)]
     missing = [str(path) for path in paths if not path.is_file()]
     if missing:
@@ -23,6 +26,12 @@ def merge_parts(data_name, run_id, world_size=4, output_tag=None, data_dir="data
     if not metadata:
         raise ValueError("Legacy shards lack validation metadata; regenerate with the current sampler")
     validate_distance_metadata(metadata, expected=distance_metadata(distance_backend), allow_historical=True)
+    if metadata.get('geometry_refinement', 'off') != geometry_refinement:
+        raise ValueError('Geometry backend differs from the requested merge')
+    if geometry_refinement != 'off':
+        from geometry_projection import VERSION
+        if metadata.get('geometry_implementation_version') != VERSION:
+            raise ValueError('Geometry implementation version differs')
     total = metadata["total_samples"]
     if expected_count is not None and total != expected_count:
         raise ValueError("Unexpected total sample count")
@@ -51,6 +60,9 @@ def merge_parts(data_name, run_id, world_size=4, output_tag=None, data_dir="data
     if any('distance_projection_diagnostics' in part for part in parts):
         merged['distance_projection_diagnostics'] = [dict(entry, rank=rank)
             for rank, part in enumerate(parts) for entry in part.get('distance_projection_diagnostics', [])]
+    if any('geometry_projection_diagnostics' in part for part in parts):
+        merged['geometry_projection_diagnostics'] = [dict(entry, rank=rank)
+            for rank, part in enumerate(parts) for entry in part.get('geometry_projection_diagnostics', [])]
     if destination.exists():
         previous = torch.load(destination, map_location="cpu", weights_only=False)
         if any(previous.get(k) != merged[k] for k in ("metadata", "test_indices", "shard_sha256")):
@@ -71,6 +83,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_tag")
     parser.add_argument("--expected_count", type=int)
     parser.add_argument("--distance_backend", choices=('legacy', 'batched'), default='legacy')
+    parser.add_argument('--geometry_refinement', choices=('off','same_category_v1'), default='off')
     args = parser.parse_args()
     merge_parts(args.data_name, args.run_id, args.world_size, args.output_tag, expected_count=args.expected_count,
-                distance_backend=args.distance_backend)
+                distance_backend=args.distance_backend, geometry_refinement=args.geometry_refinement)
