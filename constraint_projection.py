@@ -30,6 +30,8 @@ class ConstraintProjection:
         verbose: bool = True,
         projection_order_weight: float = 1.0,
         projection_kl_weight: float = 1.0,
+        existence_adaptive: bool = False,
+        existence_violation_gate: float = 0.0,
         update_multipliers: bool = True,
         early_stop: bool = True,
         generator=None,
@@ -68,6 +70,11 @@ class ConstraintProjection:
         self.verbose = verbose
         self.projection_order_weight = float(projection_order_weight)
         self.projection_kl_weight = float(projection_kl_weight)
+        # 自适应存在性：仅对初始硬存在性违反超过阈值(tau+gate)的约束施加存在性惩罚，
+        # 其余约束的存在性乘子被清零，避免为补齐"轻微缺失"类别而插入 POI 破坏频次分布。
+        # 默认关闭，关闭时行为与原实现逐位一致。
+        self.existence_adaptive = bool(existence_adaptive)
+        self.existence_violation_gate = float(existence_violation_gate)
         if any(not math.isfinite(w) or w < 0 for w in
                (self.projection_order_weight, self.projection_existence_weight, self.projection_kl_weight)):
             raise ValueError('Projection weights must be finite and nonnegative')
@@ -302,6 +309,17 @@ class ConstraintProjection:
         if not exist_enabled:
             lambda_exist.zero_()
             mu_exist.zero_()
+        # 自适应存在性门控（默认关闭）：清零低违反约束的存在性乘子，使其惩罚与
+        # 乘子更新全程保持为零（penalty 与 λ += μ·δ 均含该乘子）。
+        if self.existence_adaptive and exist_enabled:
+            with torch.no_grad():
+                _, initial_exist = self.compute_hard_constraint_violation_optimized(
+                    log_probs, W_A, W_B, category_mask, _prepared_mask=constraint_mask)
+                exist_gate = ((initial_exist > self.tau + self.existence_violation_gate)
+                              & constraint_mask).to(lambda_exist.dtype)
+            lambda_exist = lambda_exist * exist_gate
+            mu_exist = mu_exist * exist_gate
+            self.last_projection_stats['existence_gated_constraints'] = int(exist_gate.sum().item())
 
         if self.verbose:
             print(f"\n[Projection Start] Batch: {B}, Constraints: {K}")

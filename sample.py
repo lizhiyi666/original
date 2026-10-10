@@ -35,6 +35,10 @@ parser.add_argument("--projection_inner_iters", type=int, default=10)
 parser.add_argument("--projection_mu_alpha", type=float, default=2.0)
 parser.add_argument("--projection_delta_tol", type=float, default=1e-6)
 parser.add_argument("--projection_existence_weight", type=float, default=0.02)
+parser.add_argument("--existence_adaptive", action="store_true",
+                    help="自适应存在性：仅对初始硬违反>tau+gate的约束施加存在性惩罚（默认关闭）")
+parser.add_argument("--existence_violation_gate", type=float, default=0.0,
+                    help="自适应存在性的违反阈值增量，仅在 --existence_adaptive 下生效")
 parser.add_argument("--projection_distance_kl_weight", type=float, default=None,
                     help="Defaults to 1 for distance-kl-v2, 0 for explicitly historical sampling revisions")
 parser.add_argument("--distance_paths", type=int, default=8)
@@ -233,6 +237,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                 eta=args.projection_eta,
                 delta_tol=args.projection_delta_tol,
                 projection_existence_weight=args.projection_existence_weight,
+                existence_adaptive=args.existence_adaptive,
+                existence_violation_gate=args.existence_violation_gate,
                 use_gumbel_softmax=args.use_gumbel_softmax,
                 gumbel_temperature=args.gumbel_temperature,
                 device=str(device),
@@ -249,6 +255,8 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             dd.constraint_projector.distance_implementation_version = implementation['distance_implementation_version']
             dd.constraint_projector.projection_distance_kl_weight = args.projection_distance_kl_weight
             dd.constraint_projector.projection_existence_weight = args.projection_existence_weight
+            dd.constraint_projector.existence_adaptive = args.existence_adaptive
+            dd.constraint_projector.existence_violation_gate = args.existence_violation_gate
             dd.constraint_projector.lambda_init = args.projection_lambda
             dd.constraint_projector.eta = args.projection_eta
             dd.constraint_projector.inner_iterations = args.projection_inner_iters
