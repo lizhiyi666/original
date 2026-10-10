@@ -50,3 +50,14 @@ Remove-Item Env:GEOMETRY_TEST_DEVICE
 普通采样可用 `sample.py --geometry_refinement same_category_v1 --geometry_fit_indices <训练参考索引JSON> --geometry_steps <已合格步数> --geometry_radius_weight <已选值> --geometry_prior_weight <已选值>`，同时显式启用PCDG并提供新的output_tag。配置构造器支持相同字段。此入口不替代两城市的性能资格验证。合并需指定相同 `--geometry_refinement`，新目录与旧distance-v2隔离。
 
 FP32、TF32关闭、名义batch64、原10×50投影预算和80%显存上限始终不变；非有限值、OOM或指纹错误会失败，不自动改参或覆盖旧产物。
+
+## 完成或门槛停止后的本地交付
+
+确认控制器已退出，且状态为 `complete` 或明确的门槛 `stopped` 后执行：
+
+```powershell
+& 'D:/Anaconda/envs/Marionette/python.exe' -B tools/fetch_geometry_study.py --run-id pcdg-geo-v1-20261010
+& 'D:/Anaconda/envs/Marionette/python.exe' -B tools/fetch_geometry_study.py --run-id pcdg-geo-v1-20261010 --verify-only
+```
+
+交付工具在独立归档中生成清单，不向服务器实验目录添加文件。逐文件哈希通过后才生成本地 `local-delivery-audit.json`；门槛停止不被报告成18份正式结果完成。Distance-only/Radius-only仅移除末端对应惩罚，基础Full始终保持原样。
