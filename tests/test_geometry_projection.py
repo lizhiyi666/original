@@ -51,6 +51,35 @@ class GeometryTests(unittest.TestCase):
             (length + spread).backward()
             self.assertTrue(torch.isfinite(offset.grad).all())
 
+    def test_radius_gradient_matches_finite_differences_off_singularities(self):
+        points=torch.tensor([[.001,.002],[.004,.007],[.009,.003]],dtype=torch.float64,requires_grad=True)
+        mask=torch.ones(3,dtype=torch.bool)
+        self.assertTrue(torch.autograd.gradcheck(lambda x:legacy_radius(x,mask,torch.tensor(.6,dtype=torch.float64)),
+                                               (points,),eps=1e-7,atol=1e-5,rtol=1e-4))
+
+    def test_decoder_hook_requires_an_actual_projection_call(self):
+        from experiment_io import decode_preserving_empty
+        from types import SimpleNamespace
+        raw,records,reference,logits=fixture(8)
+        batch=SimpleNamespace(unpadded_length=torch.tensor([2]),to=lambda device:batch)
+        one=[records[2]]
+        dd=SimpleNamespace(geometry_config=GeometryConfig('same_category_v1'),geometry_reference=reference,
+                           geometry_seed=3,geometry_global_start=0,projection_call_count=0)
+        def sample(*args,**kwargs):
+            return SimpleNamespace(to_seq_list=lambda gps:one)
+        dd.sample_fast=sample
+        task=SimpleNamespace(discrete_diffusion=dd,device='cpu')
+        with patch('geometry_projection.refine_records',return_value=(one,{})) as refine:
+            decode_preserving_empty(task,batch,raw['poi_gps'])
+            self.assertFalse(refine.call_args.kwargs['projection_executed'])
+        def projected(*args,**kwargs):
+            dd.projection_call_count+=1
+            return sample()
+        dd.sample_fast=projected
+        with patch('geometry_projection.refine_records',return_value=(one,{})) as refine:
+            decode_preserving_empty(task,batch,raw['poi_gps'])
+            self.assertTrue(refine.call_args.kwargs['projection_executed'])
+
     def test_candidates_have_original_and_same_actual_category(self):
         _, records, ref, logits = fixture(80)
         logits.zero_()  # Stable tie policy should be POI-id order.

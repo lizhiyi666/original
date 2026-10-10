@@ -318,7 +318,7 @@ def assert_invariants(before, after, reference):
 
 
 def refine_records(records, model, reference, config=GeometryConfig(), *, seed=0, global_start=0,
-                   projection_executed=True, scored_logits=None):
+                   projection_executed=True, scored_logits=None, profile=False):
     started = time.perf_counter()
     stats = dict(config.metadata(), optimizer_steps=0, replaced_pois=0)
     if config.geometry_refinement == 'off' or not projection_executed or not records:
@@ -329,11 +329,23 @@ def refine_records(records, model, reference, config=GeometryConfig(), *, seed=0
                   for p in r['checkins']) for r in records)
     if not movable:
         return records, dict(stats, skipped=True)
+    profile_device = scored_logits.device if scored_logits is not None else next(model.parameters()).device
+    stage_timings = {}
+    if profile and profile_device.type == 'cuda':
+        torch.cuda.synchronize(profile_device)
+    stage_started = time.perf_counter()
+    def mark_stage(name):
+        nonlocal stage_started
+        if profile:
+            if profile_device.type == 'cuda':torch.cuda.synchronize(profile_device)
+            now=time.perf_counter();stage_timings[name]=now-stage_started;stage_started=now
     logits = untruncated_scores(model, records) if scored_logits is None else scored_logits.detach()
+    mark_stage('model_scoring')
     objective = GeometryObjective(reference, records, logits)
     rng = geometry_generator(seed, global_start, logits.device)
     parameters = objective.log_q.clone().requires_grad_()
     optimizer = torch.optim.Adam([parameters], lr=config.geometry_learning_rate)
+    mark_stage('candidate_and_geometry_construction')
     with torch.enable_grad():
         for step in range(config.geometry_steps):
             if step % config.geometry_noise_interval == 0:
@@ -352,9 +364,11 @@ def refine_records(records, model, reference, config=GeometryConfig(), *, seed=0
             optimizer.step()
             if not torch.isfinite(parameters).all():
                 raise FloatingPointError('Non-finite geometry logits')
+    mark_stage('optimization')
     with torch.no_grad():
         chosen, diagnostics = objective.select(parameters, noise, config)
     chosen = chosen.cpu()
+    mark_stage('discrete_selection_and_transfer')
     result = copy.deepcopy(records)
     replaced = 0
     for row, index in enumerate(objective.rows):
@@ -364,7 +378,9 @@ def refine_records(records, model, reference, config=GeometryConfig(), *, seed=0
         result[index]['checkins'] = tokens.astype(np.asarray(records[index]['checkins']).dtype, copy=False)
         result[index]['gps'] = reference.coordinates[ids].tolist()
     assert_invariants(records, result, reference)
+    mark_stage('export_and_invariants')
     stats.update(diagnostics, optimizer_steps=config.geometry_steps, replaced_pois=replaced,
                  geometry_reference_sha256=reference.fingerprint, elapsed_seconds=time.perf_counter()-started,
                  eligible_rows=len(objective.rows), candidate_count=int(objective.valid.sum()))
+    if profile:stats.update(stage_seconds=stage_timings,timing_kind='separate synchronized profile, not formal benchmark')
     return result, stats
