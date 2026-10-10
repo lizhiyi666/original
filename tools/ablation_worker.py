@@ -181,6 +181,13 @@ def sample(job):
             raise RuntimeError('Geometry reference/projection configuration mismatch')
     else:
         dd.geometry_config = None
+    # 方案A：类别一致的 POI 解码。仅当 job 显式带该键时启用；缺省关闭以保持既有
+    # 作业的字节级可复现（payload['job'] 比较不受影响）。不消耗随机数、不改变
+    # 投影调用计数，故与配对 RNG 与固定预算校验兼容。
+    if job.get('category_consistent_decoding'):
+        dd.enable_category_consistent_decoding(raw['poi_category'], enabled=True)
+    else:
+        dd.category_consistent_decoding = False
     if job.get('distance_reference_sha256') and p is not None and p.projection_distance_kl_weight:
         if p.distance_reference.fingerprint != job['distance_reference_sha256']:
             raise RuntimeError('Distance training reference changed')

@@ -61,6 +61,8 @@ parser.add_argument("--world_size", type=int, default=1, help="总进程数 (GPU
 
 # debug 开关
 parser.add_argument("--debug_constraint_projection", action="store_true")
+parser.add_argument("--category_consistent_decoding", action="store_true",
+    help="方案A：解码时将每个 POI 位置的 logits 掩码到与对齐类别一致的 POI 子集（默认关闭）")
 
 # ========== Baseline 选择 ==========
 parser.add_argument("--baseline", type=str, default=None,
@@ -287,6 +289,13 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
             distance_projection_stats.append(dict(dd.constraint_projector.last_projection_stats))
             return output
         dd.constraint_projector.project_with_matrices = trace_distance
+
+    # ========== 方案A：类别一致的 POI 解码（默认关闭） ==========
+    if args.category_consistent_decoding:
+        dd.enable_category_consistent_decoding(test_data['poi_category'], enabled=True)
+        print("[DEBUG] category-consistent POI decoding enabled")
+    else:
+        dd.category_consistent_decoding = False
 
     # ======================================================
     all_sequences = datamodule.test_data.sequences
