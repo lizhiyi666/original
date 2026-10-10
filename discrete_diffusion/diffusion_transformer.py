@@ -196,6 +196,10 @@ class DiffusionTransformer(nn.Module):
         self.projection_last_k_steps = projection_last_k_steps
         self.projection_existence_weight=projection_existence_weight
         self.cond_dropout_rate=cond_dropout_rate
+
+        # 方案A：类别一致的 POI 解码（默认关闭，不改变既有实验行为）
+        self.category_consistent_decoding = False
+        self.poi_class_to_category = None
         
         # [新增] 约束投影模块
         self.use_constraint_projection = use_constraint_projection
@@ -430,6 +434,71 @@ class DiffusionTransformer(nn.Module):
             raise FloatingPointError(f"Non-finite denoiser/posterior probabilities at diffusion step {int(t[0])}")
         return log_model_pred, log_x_recon
 
+    def enable_category_consistent_decoding(self, poi_category, enabled: bool = True):
+        """方案A：开启“类别一致的 POI 解码”。
+
+        构造 class->category 查表：POI 类别 token 映射到其所属类别 token，其余类
+        （特殊符、类别 token、mask）置为 -1。默认关闭，开启后仅影响采样解码，不改
+        变训练与既有默认行为。
+        """
+        table = torch.full((self.num_classes,), -1, dtype=torch.long)
+        for poi_token, category_token in poi_category.items():
+            pt = int(poi_token)
+            if 0 <= pt < self.num_classes:
+                table[pt] = int(category_token)
+        self.poi_class_to_category = table
+        self.category_consistent_decoding = bool(enabled)
+        return self
+
+    def _apply_category_consistent_poi_mask(self, model_log_prob, batch):
+        """把每个 POI 位置的 logits 掩码到“与对齐类别位置的预测类别一致”的 POI 子集。
+
+        - 对齐关系：content 布局为 [start, cat_1..cat_L, sep, poi_1..poi_L, end]，
+          故 POI 绝对位置 p 对齐到类别绝对位置 p-(L+1)，L=unpadded_length。
+        - 目标类别取该类别位置上 model_log_prob 的 argmax（已含投影/引导的影响）。
+        - 若某位置目标类别在词表中没有任何 POI（计数为 0），则跳过该位置不掩码，
+          避免把整列置 -70 造成空分布。类别位置与特殊符不受影响。
+        """
+        if not getattr(self, 'category_consistent_decoding', False):
+            return model_log_prob
+        table = getattr(self, 'poi_class_to_category', None)
+        if table is None:
+            return model_log_prob
+        if not (hasattr(batch, 'poi_mask') and hasattr(batch, 'category_mask')
+                and batch.poi_mask is not None and batch.category_mask is not None):
+            return model_log_prob
+
+        B, C, L = model_log_prob.shape
+        device = model_log_prob.device
+        table = table.to(device)
+        is_poi = (table >= 0)                                   # (C,)
+        poi_mask = batch.poi_mask.bool()                        # (B,L)
+        cat_mask = batch.category_mask.bool()                   # (B,L)
+
+        pred_tokens = model_log_prob.argmax(dim=1)              # (B,L) 当前每位置预测 token
+        offset = (batch.unpadded_length.long() + 1).view(B, 1)  # L+1
+        pos = torch.arange(L, device=device).view(1, L).expand(B, L)
+        src = pos - offset                                      # 对齐的类别位置索引
+        src_valid = src >= 0
+        src_clamped = src.clamp(min=0)
+        intended_cat = torch.gather(pred_tokens, 1, src_clamped)        # (B,L)
+        cat_at_src = torch.gather(cat_mask.long(), 1, src_clamped).bool()
+        apply_pos = poi_mask & src_valid & cat_at_src                   # (B,L) 需约束的 POI 位置
+
+        c2cat_e = table.view(1, C, 1)
+        is_poi_e = is_poi.view(1, C, 1)
+        intended_e = intended_cat.view(B, 1, L)
+        match = (c2cat_e == intended_e)                                 # (B,C,L)
+        allowed = (~is_poi_e) | match                                   # 非 POI 类恒允许；POI 类需同类别
+
+        poi_allowed_count = (is_poi_e & match).sum(dim=1)               # (B,L) 目标类别可用 POI 数
+        effective = apply_pos & (poi_allowed_count > 0)                 # 跳过无可用 POI 的位置
+        eff = effective.view(B, 1, L)
+        keep = allowed | (~eff)                                         # 非约束位置保持原样
+        # 仅把被屏蔽的 POI 类置 -70，其余保持原值（真实 log-prob 已 <=0）
+        return torch.where(keep, model_log_prob,
+                           torch.full_like(model_log_prob, -70.0))
+
     '''@torch.no_grad()
     def p_sample(self, log_x, cond_emb,  t, batch, po_constraints=None, diffusion_index=None):               # sample q(xt-1) for next step from  xt, actually is p(xt-1|xt)
         model_log_prob, log_x_recon = self.p_pred(log_x, cond_emb, t, batch)
@@ -547,6 +616,9 @@ class DiffusionTransformer(nn.Module):
                 raise RuntimeError('Energy guidance must not run ALM projection')
             model_log_prob = self.energy_guidance.apply(
                 model_log_prob, batch.category_mask, po_constraints, diffusion_index)
+
+        # ========== 方案A：类别一致的 POI 解码（默认关闭） ==========
+        model_log_prob = self._apply_category_consistent_poi_mask(model_log_prob, batch)
 
         # ========== 最终采样 ==========
         out = self.log_sample_categorical(model_log_prob)
