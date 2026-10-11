@@ -443,13 +443,23 @@ class DiffusionTransformer(nn.Module):
         变训练与既有默认行为。
         """
         table = torch.full((self.num_classes,), -1, dtype=torch.long)
+        category_end = self.num_spectial + self.type_classes  # exclusive category-token bound
+        used_categories = {int(c) for c in poi_category.values()}
         for poi_token, category_token in poi_category.items():
             pt = int(poi_token)
             ct = int(category_token)
-            first_poi = self.num_spectial + self.type_classes
-            if not (first_poi <= pt < self.num_classes - 2
-                    and self.num_spectial <= ct < first_poi):
-                raise ValueError('POI/category token outside the model vocabulary')
+            # Validate against the data mapping rather than assuming POIs begin
+            # immediately after the category slots. Istanbul's historical model
+            # reserves 10 category slots (type_classes=10) while its data uses 9
+            # semantic categories with POIs starting at token 13, so a POI token can
+            # overlap an unused trailing category slot. Require: the category token
+            # lies in the model category range; the POI token is a non-special,
+            # non-mask vocabulary class; and the POI token is not itself one of the
+            # categories actually in use (so a real category can never be read as a POI).
+            if not (self.num_spectial <= ct < category_end):
+                raise ValueError('category token outside the model category range')
+            if not (self.num_spectial <= pt < self.num_classes - 2) or pt in used_categories:
+                raise ValueError('POI token outside the model vocabulary')
             table[pt] = ct
         if enabled and not bool((table >= 0).any()):
             raise ValueError('Category-consistent decoding requires a nonempty POI map')

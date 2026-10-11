@@ -79,6 +79,33 @@ class TestCategoryConsistentDecoding(unittest.TestCase):
         for non_poi in [0, 1, 2, 3, 4, 5, 6, 11, 12]:
             self.assertEqual(int(t[non_poi]), -1)
 
+    def test_istanbul_style_extra_category_slot_poi_overlap_is_accepted(self):
+        # Istanbul-like layout: model reserves more category slots than the data
+        # uses semantically, so a POI token overlaps an unused trailing slot.
+        # num_spectial=4, type_classes=5 (slots 4..8), data uses categories {4,5},
+        # POI token 8 lives in the slot range but is an unused category -> valid POI.
+        d = types.SimpleNamespace()
+        d.num_classes = 4 + 5 + 3 + 2  # 14
+        d.num_spectial = 4
+        d.type_classes = 5
+        d.category_consistent_decoding = False
+        d.poi_class_to_category = None
+        poi_category = {8: 4, 9: 5, 10: 4}  # POI 8 overlaps unused category slot
+        DiffusionTransformer.enable_category_consistent_decoding(d, poi_category)
+        t = d.poi_class_to_category
+        self.assertEqual(int(t[8]), 4)
+        self.assertEqual(int(t[9]), 5)
+        self.assertEqual(int(t[10]), 4)
+        self.assertEqual(int(t[4]), -1)   # a USED category token is never a POI
+        self.assertEqual(int(t[5]), -1)
+        # A POI token colliding with a used category is rejected.
+        d.poi_class_to_category = None
+        with self.assertRaises(ValueError):
+            DiffusionTransformer.enable_category_consistent_decoding(d, {4: 4, 8: 5})
+        # A mask/out-of-vocab POI token is rejected.
+        with self.assertRaises(ValueError):
+            DiffusionTransformer.enable_category_consistent_decoding(d, {13: 4})
+
     def test_mask_restricts_to_intended_category(self):
         DiffusionTransformer.enable_category_consistent_decoding(self.dummy, self.poi_category)
         # L=2，类别计划 [4,5]；POI 位置故意偏好错类别 POI(9->cat5, 10->cat6)
