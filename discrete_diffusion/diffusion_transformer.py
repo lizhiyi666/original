@@ -504,13 +504,24 @@ class DiffusionTransformer(nn.Module):
         is_poi_e = is_poi.view(1, C, 1)
         match = is_poi_e & (c2cat_e == intended_cat.view(B, 1, T))
         supported = match.any(dim=1)
-        if final_step and bool((apply_pos & ~supported).any()):
-            invalid = intended_cat[apply_pos & ~supported].unique().tolist()
-            raise RuntimeError(f'Final sampled category has no legal POI: {invalid}')
         effective = apply_pos & supported
         allowed = match.clone()
         if not final_step:
-            allowed[:, C-1, :] = True  # Retain the diffusion POI-mask state only.
+            allowed[:, C - 1, :] = True  # Retain the diffusion POI-mask state only.
+        else:
+            # Final step: a POI slot whose sampled category has no legal POI (e.g. a
+            # non-semantic token leaked into the aligned category position) cannot be
+            # made category-consistent. Rather than abort the whole run, fall back to
+            # constraining it to ANY catalog POI, so On still emits a catalog POI at
+            # every cached slot (coverage/alignment invariant preserved). Such rare
+            # slots are not category-consistent and are reflected in
+            # category_poi_mismatch_rate. self.last_category_fallback_slots records the
+            # count for diagnostics.
+            fallback = apply_pos & ~supported  # (B, T)
+            self.last_category_fallback_slots = int(fallback.sum().item())
+            if bool(fallback.any()):
+                allowed = allowed | (is_poi_e & fallback.view(B, 1, T))
+                effective = effective | fallback
         keep = allowed | ~effective[:, None, :]
         return model_log_prob.masked_fill(~keep, float('-inf'))
 

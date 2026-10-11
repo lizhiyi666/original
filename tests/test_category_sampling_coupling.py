@@ -69,11 +69,14 @@ class CategorySamplingCouplingTests(unittest.TestCase):
         actual=run(d,b)
         self.assertTrue(bool(((actual[:,3]==7)|(actual[:,3]==8)).all()))
 
-    def test_unresolved_category_mid_step_skips_but_final_fails(self):
-        d,x,b=inputs();x[:,:,1]=-70.;x[:,11,1]=0.
+    def test_unresolved_category_mid_step_skips_and_final_falls_back_to_catalog_poi(self):
+        d,x,b=inputs();x[:,:,1]=-70.;x[:,11,1]=0.  # aligned category = token 11 (no legal POI)
         expected=reference(x,torch.Generator(device=DEVICE).manual_seed(135398))
-        self.assertTrue(torch.equal(run(d,b,10),expected))
-        with self.assertRaisesRegex(RuntimeError,'Final sampled category'):run(d,b)
+        self.assertTrue(torch.equal(run(d,b,10),expected))   # mid-step: unconstrained
+        actual=run(d,b)                                      # final-step: lenient fallback, no raise
+        table=d.poi_class_to_category.to(DEVICE)
+        self.assertTrue(bool((table[actual[:,3]]>=0).all()))  # still a catalog POI at every slot
+        self.assertEqual(d.last_category_fallback_slots,len(b.unpadded_length))
 
     def test_poi_mask_is_allowed_mid_step_only(self):
         d,x,b=inputs();x[:,:,1]=-70.;x[:,4,1]=0.;x[:,:,3]=-70.;x[:,12,3]=0.
@@ -87,8 +90,10 @@ class CategorySamplingCouplingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Actual sampled'):d._apply_category_consistent_poi_mask(x,b)
         with self.assertRaises(ValueError):d._apply_category_consistent_poi_mask(x,None,x.argmax(1))
         DiffusionTransformer.enable_category_consistent_decoding(d,{7:4,8:4})
-        x[:,:,1]=-70.;x[:,5,1]=0.
-        with self.assertRaisesRegex(RuntimeError,'no legal POI'):run(d,b)
+        x[:,:,1]=-70.;x[:,5,1]=0.  # aligned category = token 5 (no legal POI under {7:4,8:4})
+        actual=run(d,b)  # lenient final-step fallback: any catalog POI, no raise
+        self.assertTrue(bool((d.poi_class_to_category.to(DEVICE)[actual[:,3]]>=0).all()))
+        self.assertEqual(d.last_category_fallback_slots,1)
 
     def test_nonfinite_input_fails(self):
         d,x,b=inputs(1);x[0,7,3]=float('nan')
