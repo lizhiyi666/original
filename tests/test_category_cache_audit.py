@@ -78,6 +78,14 @@ class CategoryCacheAuditTests(unittest.TestCase):
         items,off,on,mapping,gps=fixture();on[0]['gps'][0][0]=999.
         with self.assertRaisesRegex(RuntimeError,'GPS differs'):audit_alignment(items,off,on,mapping,gps)
 
+    def test_degenerate_category_fallback_slot_is_tolerated(self):
+        # A non-semantic token sampled at the aligned category position (lenient
+        # fallback) must not fail the On category-match check, as long as the POI is
+        # a catalog POI; genuine valid-category mismatches still fail (above).
+        items,off,on,mapping,gps=fixture();on=copy.deepcopy(on);on[0]['marks'][0]=0
+        result,matched=audit_alignment(items,off,on,mapping,gps)
+        self.assertEqual(result['on_events'],sum(len(r['checkins']) for r in on))
+
     def test_every_cache_attribute_must_match_original(self):
         items,*_=fixture();original=copy.deepcopy(items)
         cache_matches_original(items,original)

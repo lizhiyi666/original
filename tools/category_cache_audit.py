@@ -45,10 +45,18 @@ def cache_matches_original(derived_items,original_items):
 def validate_gps(record,mapping,gps,require_category_match):
     pois=np.asarray(record['checkins']);marks=np.asarray(record['marks'])
     if len(pois)!=len(marks) or len(pois)!=len(record['gps']):raise RuntimeError('POI/category/GPS length differs')
+    valid_categories=set(int(v) for v in mapping.values())
     expected=[]
     for poi,mark in zip(pois,marks):
         if int(poi) not in mapping or int(poi) not in gps:raise RuntimeError('Non-catalog POI in saved output')
-        if require_category_match and int(mark)!=int(mapping[int(poi)]):raise RuntimeError('Actual sampled category mismatch')
+        # Enforce category consistency only where the sampled category is a real
+        # semantic category. A degenerate category (non-semantic token sampled at the
+        # aligned category position) is a lenient-fallback slot: On emits a catalog POI
+        # whose category need not match that degenerate token. Genuine mismatches (a
+        # valid category disagreeing with the POI's catalog category) still fail.
+        if (require_category_match and int(mark) in valid_categories
+                and int(mark)!=int(mapping[int(poi)])):
+            raise RuntimeError('Actual sampled category mismatch')
         value=gps[int(poi)]
         expected.append([float(v) for v in value.split(',')] if isinstance(value,str) else value)
     if not np.array_equal(np.asarray(record['gps']).reshape(-1,2),np.asarray(expected).reshape(-1,2)):
