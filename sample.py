@@ -52,6 +52,11 @@ parser.add_argument('--geometry_distance_weight', type=float, default=1.)
 parser.add_argument('--geometry_radius_weight', type=float, default=1.)
 parser.add_argument('--geometry_prior_weight', type=float, default=.01)
 parser.add_argument('--geometry_fit_indices', help='JSON list of train-only prior indices, excluding calibration pools')
+parser.add_argument('--distribution_balance', choices=['off', 'train_ref_v1'], default='off')
+parser.add_argument('--constraint_scale', type=float, default=1.)
+parser.add_argument('--category_distribution_weight', type=float, default=0.)
+parser.add_argument('--poi_distribution_weight', type=float, default=0.)
+parser.add_argument('--balance_reference_manifest', help='Sealed training split/reference manifest')
 parser.add_argument("--use_gumbel_softmax", action="store_true", default=None, help="Enable Gumbel-Softmax for gradient estimation")
 parser.add_argument("--no_gumbel_softmax", action="store_false", dest="use_gumbel_softmax",
                     help="Deterministic relaxation, including expected-route distance KL")
@@ -89,6 +94,10 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     from distance_kl import distance_metadata, distance_output_directory
     implementation = distance_metadata(args.distance_backend)
     geometry_on = args.geometry_refinement != 'off'
+    balance_on = args.distribution_balance != 'off'
+    if balance_on and (geometry_on or not args.output_tag or not args.use_constraint_projection
+                       or not args.balance_reference_manifest or args.baseline is not None):
+        raise ValueError('Distribution balance requires PCDG, own output tag/reference manifest, and no old geometry/baseline')
     if geometry_on and (not args.output_tag or not args.use_constraint_projection or not args.geometry_fit_indices):
         raise ValueError('Geometry requires PCDG, an independent output tag and training reference indices')
     if args.distance_backend == 'batched' and not args.output_tag:
@@ -143,7 +152,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
     sampling_config = {key: value for key, value in vars(args).items()
                        if key not in {"rank", "resume", "checkpoint", "output_tag", "run_id"}}
     sampling_config.update(batch_size=datamodule.batch_size, seed=seed_base)
-    if args.category_consistent_decoding:
+    if args.category_consistent_decoding or balance_on:
         from discrete_diffusion.diffusion_transformer import CATEGORY_DECODING_VERSION
         sampling_config['category_consistent_decoding_version'] = CATEGORY_DECODING_VERSION
     metadata = dict(schema_version=1, data_name=data_name, run_id=RUN_ID,
@@ -158,6 +167,20 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         for k in sampling_config_keys:
             sampling_config.pop(k)
     output_dir = distance_output_directory(test_path.parent, args.distance_backend, args.output_tag)
+    balance_config = balance_reference = None
+    balance_keys = ('distribution_balance', 'constraint_scale', 'category_distribution_weight',
+                    'poi_distribution_weight', 'balance_reference_manifest')
+    if balance_on:
+        from distribution_balance import BalanceConfig, load_reference_manifest, VERSION as BALANCE_VERSION
+        balance_config = BalanceConfig(**{k: getattr(args, k) for k in BalanceConfig.__dataclass_fields__})
+        balance_reference = load_reference_manifest(args.balance_reference_manifest, datamodule.name,
+            Path(datamodule.root)/datamodule.name/f'{datamodule.name}_train.pkl')
+        metadata.update(balance_config.metadata(), distribution_reference_sha256=balance_reference.fingerprint,
+                        balance_reference_manifest_sha256=sha256_file(args.balance_reference_manifest))
+        output_dir = test_path.parent / 'distribution-balance' / BALANCE_VERSION / safe_tag(args.output_tag)
+    else:
+        for k in balance_keys:
+            sampling_config.pop(k, None)
     geometry_config = geometry_reference = None
     if geometry_on:
         from geometry_projection import GeometryConfig, load_geometry_reference, geometry_output_directory
@@ -281,6 +304,10 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
                     gumbel_temperature=args.gumbel_temperature,
                    mu=dd.projection_mu))
 
+    if balance_on:
+        from distribution_balance import configure_balance
+        configure_balance(dd, balance_config, balance_reference)
+
     if args.baseline == "energy_guidance":
         if args.use_constraint_projection:
             raise ValueError('Energy guidance and ALM are mutually exclusive')
@@ -302,7 +329,7 @@ def simulation(RUN_ID="marionette", WANDB_DIR="wandb", PROJECT_ROOT="./"):
         dd.constraint_projector.project_with_matrices = trace_distance
 
     # ========== 方案A：类别一致的 POI 解码（默认关闭） ==========
-    if args.category_consistent_decoding:
+    if args.category_consistent_decoding or balance_on:
         dd.enable_category_consistent_decoding(test_data['poi_category'], enabled=True)
         print("[DEBUG] category-consistent POI decoding enabled")
     else:

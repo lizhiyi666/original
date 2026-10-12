@@ -20,7 +20,7 @@ from distance_kl import validate_distance_metadata
 
 def validate_category_decoding_result(job, result):
     from discrete_diffusion.diffusion_transformer import CATEGORY_DECODING_VERSION
-    if job.get('category_consistent_decoding'):
+    if job.get('category_consistent_decoding') or job.get('balance_config', {}).get('distribution_balance', 'off') != 'off':
         if (job.get('category_consistent_decoding_version', CATEGORY_DECODING_VERSION) != CATEGORY_DECODING_VERSION
                 or result.get('category_consistent_decoding_version') != CATEGORY_DECODING_VERSION
                 or result.get('category_consistent_decoding') is not True):
@@ -42,6 +42,19 @@ def validate_geometry_result(job, result):
     reference = job.get('geometry_reference_sha256')
     if not reference or result.get('geometry_reference_sha256') != reference:
         raise RuntimeError('Geometry result reference changed')
+
+
+def validate_balance_result(job, result):
+    from distribution_balance import BalanceConfig
+    config = BalanceConfig(**job.get('balance_config', {}))
+    if not config.enabled:
+        if result.get('distribution_balance', 'off') != 'off':
+            raise RuntimeError('Unexpected balanced result')
+        return
+    if any(result.get(k) != v for k, v in config.metadata().items()):
+        raise RuntimeError('Balanced result configuration changed')
+    if not job.get('distribution_reference_sha256') or result.get('distribution_reference_sha256') != job['distribution_reference_sha256']:
+        raise RuntimeError('Balanced result reference changed')
 
 
 def memory_guard(job):
@@ -195,13 +208,21 @@ def sample(job):
     # 方案A：类别一致的 POI 解码。仅当 job 显式带该键时启用；缺省关闭以保持既有
     # 作业的字节级可复现（payload['job'] 比较不受影响）。不消耗随机数、不改变
     # 投影调用计数，故与配对 RNG 与固定预算校验兼容。
-    if job.get('category_consistent_decoding'):
+    balance_on = job.get('balance_config', {}).get('distribution_balance', 'off') != 'off'
+    if job.get('category_consistent_decoding') or balance_on:
         from discrete_diffusion.diffusion_transformer import CATEGORY_DECODING_VERSION
         if job.get('category_consistent_decoding_version', CATEGORY_DECODING_VERSION) != CATEGORY_DECODING_VERSION:
             raise RuntimeError('Unsupported category decoding implementation')
         dd.enable_category_consistent_decoding(raw['poi_category'], enabled=True)
     else:
         dd.category_consistent_decoding = False
+    if balance_on:
+        from distribution_balance import BalanceConfig, load_reference_manifest, configure_balance
+        balance_reference = load_reference_manifest(job['balance_reference_manifest'], dm.name,
+            Path(dm.root)/dm.name/f'{dm.name}_train.pkl')
+        if balance_reference.fingerprint != job.get('distribution_reference_sha256'):
+            raise RuntimeError('Balance reference/projection mismatch')
+        configure_balance(dd, BalanceConfig(**job['balance_config']), balance_reference)
     if job.get('distance_reference_sha256') and p is not None and p.projection_distance_kl_weight:
         if p.distance_reference.fingerprint != job['distance_reference_sha256']:
             raise RuntimeError('Distance training reference changed')
@@ -254,6 +275,7 @@ def sample(job):
         dd.geometry_seed=job['seed']
         dd.geometry_global_start=item['global_start']
         dd.last_geometry_stats=None
+        dd.last_balance_stats=None
         energy_before=dd.energy_guidance.stats['calls'] if job['variant']=='energy' else 0
         cfg_before=dd.cfg_stats['calls'] if job['variant']=='cfg' else 0
         output=decode_preserving_empty(task,batch,raw['poi_gps'])
@@ -281,6 +303,8 @@ def sample(job):
             projection_stats=trace,global_rng_unchanged=True))
         if geometry_on:
             batch_traces[-1]['geometry_projection_stats'] = dd.last_geometry_stats
+        if balance_on:
+            batch_traces[-1]['distribution_projection_stats'] = dd.last_balance_stats
         atomic_json(Path(job['output_dir'])/'progress.json',dict(completed_samples=len(generated),
             total_samples=len(job['indices']),phase='spatial',elapsed_seconds=time.perf_counter()-started))
     torch.cuda.synchronize()
@@ -318,7 +342,9 @@ def sample(job):
     if geometry_on:
         result.update(dd.geometry_config.metadata(), geometry_reference_sha256=dd.geometry_reference.fingerprint,
                       geometry_optimizer_steps=sum((b.get('geometry_projection_stats') or {}).get('optimizer_steps',0) for b in batch_traces))
-    if job.get('category_consistent_decoding'):
+    if balance_on:
+        result.update(dd.balance_config.metadata(), distribution_reference_sha256=dd.balance_reference.fingerprint)
+    if job.get('category_consistent_decoding') or balance_on:
         result.update(category_consistent_decoding=True, category_consistent_decoding_version=CATEGORY_DECODING_VERSION)
     if job['variant']=='energy':
         result['energy_stats']=dict(dd.energy_guidance.stats)
@@ -357,6 +383,7 @@ def main():
             if job['kind'] != 'cache':
                 validate_distance_metadata(result, expected=implementation)
                 validate_geometry_result(job, result)
+                validate_balance_result(job, result)
                 validate_category_decoding_result(job, result)
             if result['state']!='complete' or payload['indices']!=job['indices']:
                 raise RuntimeError('Published artifact is not a complete matching job')

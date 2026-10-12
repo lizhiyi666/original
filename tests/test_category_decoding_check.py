@@ -5,6 +5,7 @@ import tempfile
 import types
 import unittest
 import numpy as np
+import torch
 
 from experiment_io import sha256_file
 from tools.run_category_decoding_check import subset_inputs,compare_pair,verify_delivery
@@ -12,12 +13,20 @@ from tools.run_category_decoding_check import subset_inputs,compare_pair,verify_
 
 class CategoryDiagnosticTests(unittest.TestCase):
     def inputs(self):
-        items=[dict(indices=list(range(i,i+64)),global_start=i,batch=types.SimpleNamespace(batch_size=64))
+        batch=types.SimpleNamespace(batch_size=64,time=torch.tensor([[.2,.4]]*64,dtype=torch.float64),
+            mask=torch.ones(64,2,dtype=torch.bool),unpadded_length=torch.full((64,),2))
+        for k in range(1,7):
+            setattr(batch,f'condition{k}',torch.ones(64,2,dtype=torch.long))
+            setattr(batch,f'condition{k}_indicator',torch.tensor([[1,0]]*64))
+        items=[dict(indices=list(range(i,i+64)),global_start=i,batch=copy.deepcopy(batch))
                for i in (0,64,128)]
         traces=[dict(indices=v['indices'],global_start=v['global_start'],spatial_rng_before='a',spatial_rng_after='b',
-                     projection_rng_after='p',distance_rng_before='d0',distance_rng_after='d1') for v in items]
+                     projection_rng_after='p',distance_rng_before='d0',distance_rng_after='d1',
+                     global_rng_unchanged=True,effective_constraints=False,projection_stats=[]) for v in items]
         records=[dict(arrival_times=np.array([.2,.4]),marks=np.array([4,5]),checkins=np.array([7,9]),
-                      gps=[[0.,0.],[1.,1.]],condition1_indicator=np.array([1,0])) for _ in range(192)]
+                      gps=[[0.,0.],[1.,1.]],
+                      **{f'condition{k}':np.ones(2,dtype=np.int64) for k in range(1,7)},
+                      **{f'condition{k}_indicator':np.array([1,0]) for k in range(1,7)}) for _ in range(192)]
         return dict(indices=list(range(192)),batches=items,manifest_sha256='old',result={'samples':192}),dict(sequences=records,batch_traces=traces)
 
     def test_exact_original_batches_are_reused_without_relabelling_source(self):
@@ -27,7 +36,8 @@ class CategoryDiagnosticTests(unittest.TestCase):
         self.assertEqual(subset['manifest_sha256'],'old');self.assertEqual(subset['result']['samples'],128)
         self.assertEqual(subset['source_result']['samples'],192)
         self.assertEqual(len(cache['batches']),3);self.assertEqual(len(cache['indices']),192)
-        compare_pair(records,copy.deepcopy(records),traces,copy.deepcopy(traces))
+        compare_pair(subset['batches'],records,copy.deepcopy(records),traces,copy.deepcopy(traces),
+                     {7:4,9:5},{7:[0.,0.],9:[1.,1.]})
 
     def test_partial_missing_reordered_inputs_are_rejected(self):
         cache,shard=self.inputs()
@@ -37,13 +47,16 @@ class CategoryDiagnosticTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):subset_inputs(cache,shard,list(range(128)))
 
     def test_time_length_or_rng_changes_fail_but_category_changes_are_measured(self):
-        cache,shard=self.inputs();_,before,traces=subset_inputs(cache,shard,list(range(128)))
+        cache,shard=self.inputs();subset,before,traces=subset_inputs(cache,shard,list(range(128)))
+        def compare(old,new,left,right):
+            return compare_pair(subset['batches'],old,new,left,right,{7:4,9:5},{7:[0.,0.],9:[1.,1.]})
         after=copy.deepcopy(before);after[0]['marks'][0]=5;after[0]['checkins'][0]=9
-        compare_pair(before,after,traces,copy.deepcopy(traces))
+        after[0]['gps'][0]=[1.,1.]
+        compare(before,after,traces,copy.deepcopy(traces))
         after[0]['arrival_times'][0]=.3
-        with self.assertRaises(RuntimeError):compare_pair(before,after,traces,copy.deepcopy(traces))
+        with self.assertRaises(RuntimeError):compare(before,after,traces,copy.deepcopy(traces))
         changed=copy.deepcopy(traces);changed[1]['spatial_rng_after']='changed'
-        with self.assertRaises(RuntimeError):compare_pair(before,before,traces,changed)
+        with self.assertRaises(RuntimeError):compare(before,before,traces,changed)
 
     def test_delivery_hashes_and_zero_mismatch_are_required(self):
         with tempfile.TemporaryDirectory() as folder:

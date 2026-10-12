@@ -233,7 +233,7 @@ class ConstraintProjection:
         W_B: torch.Tensor,
         category_mask: torch.Tensor,
         constraint_mask=None,
-        *, poi_mask=None,
+        *, poi_mask=None, category_times=None,
     ) -> torch.Tensor:
         distance_enabled = self.projection_distance_kl_weight > 0
         if distance_enabled and self.distance_reference is None:
@@ -248,6 +248,8 @@ class ConstraintProjection:
         if not (order_enabled or exist_enabled):
             constraint_mask = torch.zeros_like(constraint_mask)
         active_rows = constraint_mask.any(dim=1)
+        balance = getattr(self, 'balance_config', None)
+        balance_enabled = balance is not None and balance.enabled
         self.last_projection_stats = dict(active_constraints=int(constraint_mask.sum().item()),
                                           active_rows=int(active_rows.sum().item()),
                                           optimizer_steps=0, outer_iterations=0,
@@ -257,6 +259,17 @@ class ConstraintProjection:
             self.last_projection_stats.update(distance_metadata(self.distance_backend))
         if not active_rows.any():
             return log_probs.detach()
+        category_objective = None
+        if balance_enabled:
+            self.last_projection_stats.update(balance.metadata())
+            if balance.category_distribution_weight:
+                from distribution_balance import CategoryDistributionObjective
+                reference = getattr(self, 'category_reference', None)
+                if reference is None:
+                    raise ValueError('Distribution projection requires a category reference')
+                category_objective = CategoryDistributionObjective(reference, category_mask,
+                    category_times, active_rows, log_probs.shape[1])
+                self.last_projection_stats.update(category_objective.diagnostics)
         y_model = log_probs.transpose(1, 2).detach()  # [B, L, V]
         y = y_model.clone().detach().requires_grad_(True)
         # Invariant only within this projection invocation, never across diffusion steps.
@@ -356,7 +369,10 @@ class ConstraintProjection:
                         + self.projection_existence_weight * penalty_exist.sum(dim=1)
                     ).sum()
 
-                    loss = self.projection_kl_weight * kl_loss + constraint_loss
+                    loss = self.projection_kl_weight * kl_loss + (
+                        balance.constraint_scale * constraint_loss if balance_enabled else constraint_loss)
+                    if category_objective is not None:
+                        loss = loss + balance.category_distribution_weight * category_objective.loss(y)
                     if distance_objective is not None and distance_objective.rows:
                         distance_loss = distance_objective.loss(y, distance_noise)
                         loss = loss + self.projection_distance_kl_weight * distance_loss

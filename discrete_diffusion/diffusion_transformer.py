@@ -623,6 +623,10 @@ class DiffusionTransformer(nn.Module):
             if W_A is not None:
                 distance_options = ({'poi_mask': batch.poi_mask}
                     if getattr(self.constraint_projector, 'projection_distance_kl_weight', 0) > 0 else {})
+                balance = getattr(self.constraint_projector, 'balance_config', None)
+                if getattr(balance, 'enabled', False) is True and balance.category_distribution_weight:
+                    from distribution_balance import aligned_category_times
+                    distance_options['category_times'] = aligned_category_times(batch)
                 model_log_prob_after = self.constraint_projector.project_with_matrices(
                     model_log_prob,
                     W_A, W_B,
