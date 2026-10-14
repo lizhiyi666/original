@@ -23,6 +23,8 @@
 \newcommand{\todo}[1]{\textcolor{red}{\small[TODO: #1]}}
 % shared macros
 \newcommand{\pcdg}{\textsc{PCDG}\xspace}
+\newcommand{\pcdgp}{\textsc{PCDG-P}\xspace}
+\newcommand{\pcdgpd}{\textsc{PCDG-PD}\xspace}
 \usepackage{xspace}
 \newcommand{\Mmat}{\mathbf{M}}
 \newcommand{\dkl}{D_{\mathrm{KL}}}
@@ -30,7 +32,8 @@
 
 \begin{document}
 
-\title{Training-Free Partial-Order and Distance-Constrained Discrete Diffusion for Controllable POI Check-in Generation}
+\title{Training-Free Partial-Order Control and Distribution Correction for
+Discrete-Diffusion POI Check-in Generation}
 
 \author{Anonymous Author(s)}
 \affiliation{%
@@ -44,20 +47,26 @@ data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic
 synthetic generation. Beyond statistical realism, many downstream web applications need
 control over the \emph{semantic order} of activities---e.g., leisure before dining---a
 sample-level, cross-position requirement that single-step conditioning cannot express.
-We present \pcdg, a \emph{training-free}, sampling-time projection layer for conditional
-joint temporal\,+\,category/POI discrete-diffusion generators. From a sample-level
-category partial-order matrix, \pcdg compiles differentiable order-violation and
-existence energies and, in the late reverse-diffusion steps, projects \emph{only the
-category-position logits} through a KL-preserving augmented-Lagrangian optimization; a
-complementary distance-distribution KL term regularizes spatial travel length to preserve
-geographic fidelity. The projected category logits are then jointly sampled with the
-unaltered POI distribution. Across two cities under an out-of-distribution split and three
-sampling seeds, \pcdg more than halves the constraint-violation rate and nearly triples
-pairwise ordering coverage over the unconstrained base generator, surpassing energy
-guidance, post-hoc reordering, and even a \emph{fully retrained} partial-order conditional
-model---without any retraining of the base generator. Ablations isolate the role of each
-energy term, the adaptive multipliers, and the distance regularizer, and we characterize
-the resulting fidelity--constraint trade-off.
+Enforcing such constraints during sampling is commonly assumed to cost distributional
+fidelity; we show that this trade-off is largely \emph{separable}, and we remove most of
+it. We present \pcdg, a \emph{training-free} control stack for a frozen conditional joint
+temporal\,+\,category/POI discrete-diffusion generator. From a sample-level category
+partial-order matrix, \pcdg compiles differentiable order-violation and existence
+energies and, in the late reverse steps, projects \emph{only the category-position
+logits} through a KL-preserving augmented-Lagrangian optimization; a category-consistent
+POI decoder then eliminates residual category--POI inconsistency, and a
+distribution-aware same-category geometry refinement---which leaves every constraint
+metric unchanged \emph{by construction}---restores spatial realism by matching
+population-level travel-length and visitation statistics. Across two cities under an
+out-of-distribution split and three sampling seeds, \pcdg cuts the strict
+ordering-violation rate from $92.89\%$ to $4.04\%$ on Istanbul and from $89.45\%$ to
+$11.28\%$ on New York, raising pairwise ordering coverage by $6.5\times$ and
+$4.2\times$, while \emph{improving} all six fidelity divergences over the unconstrained
+backbone on Istanbul and four of six on New York. On Istanbul it surpasses a
+\emph{fully retrained} partial-order conditional model on all five constraint metrics and
+five of six fidelity divergences, without retraining anything. Stage-wise ablations
+localize where fidelity is lost and recovered, and we report the two New York statistics
+that remain above the backbone.
 \end{abstract}
 
 % ---- CCS (minimal; refine with the ACM CCS tool before camera-ready) ----

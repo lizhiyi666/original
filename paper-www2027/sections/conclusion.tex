@@ -5,15 +5,28 @@ Istanbul base model was trained historically with a different batch size than Ne
 York and its full data provenance is not retroactively verifiable, so we do not
 claim identical cross-city training conditions. (ii) The reported error bars are
 sample standard deviations over three sampling seeds at a \emph{fixed} checkpoint;
-they reflect sampling stochasticity, not training variability. (iii) PO-CFG is
-evaluated at guidance scale $1$; we do not claim an extrapolation-tuned optimum.
-(iv) The distance-KL weight is fixed, not tuned per city, and is a batch-level
-distribution-matching regularizer rather than a per-sample spatial guarantee.
-(v) \pcdg reduces---but does not certify zero---constraint violations; it reweights
-the sampling distribution and performs no hard candidate filtering. (vi) We do not
-yet report a downstream-utility study (e.g., training a next-POI model on the
-synthetic data). Addressing complex partial-order DAGs (transitivity, conflict
-detection), adaptive constraint scheduling, a training-time partial-order
+they reflect sampling stochasticity, not training variability, and we run no
+significance tests. (iii) PO-CFG is evaluated at guidance scale $1$; we do not claim an
+extrapolation-tuned optimum. (iv) The distance-KL weight is fixed, not tuned per city,
+and is a batch-level distribution-matching regularizer rather than a per-sample spatial
+guarantee. (v) \pcdg reduces---but does not certify zero---constraint violations; it
+reweights the sampling distribution and performs no hard candidate filtering.
+(vi) \textbf{Two New York statistics remain above the unconstrained backbone}
+(\emph{CategoryTransition} $0.0183$ vs.\ $0.0070$; \emph{G-RANK} $0.1914$ vs.\ $0.1612$),
+so our claim is that the trade-off is largely, not entirely, removable; on Istanbul all
+six divergences improve. (vii) The $\rho/\lambda/\beta$ configuration was selected on a
+training-side calibration split that the frozen backbone had seen, which is an
+engineering calibration rather than an independent validation set; no test metric
+entered selection, but neither of the two three-seed-confirmed configurations cleared
+all pre-specified calibration thresholds, and we report the held-out test result of the
+top-ranked configuration as-is. (viii) The transition from the geometry refinement to
+the full stack changes two factors at once ($\rho$ and $\beta$), so we do not attribute
+that difference to either factor alone. (ix) The geometry refinement is a migration of
+an already-frozen configuration; its candidate pools are built from the training
+reference and the backbone's own scores, but it is not a from-scratch generalization
+study. (x) We do not yet report a downstream-utility study (e.g., training a next-POI
+model on the synthetic data). Addressing complex partial-order DAGs (transitivity,
+conflict detection), adaptive constraint scheduling, a training-time partial-order
 objective, and downstream utility are natural directions for future work.
 
 \section{Conclusion}
@@ -21,16 +34,20 @@ objective, and downstream utility are natural directions for future work.
 We studied controllable synthetic generation of POI check-in sequences under
 sample-level activity-category precedence constraints---a web-native,
 privacy-relevant problem that single-step conditioning cannot address. We
-introduced \pcdg, a training-free, sampling-time projection that compiles a
-partial-order matrix into differentiable order and existence energies, projects
-the category-position logits of a frozen joint temporal\,+\,category\,+\,POI
-discrete-diffusion generator via a KL-preserving augmented Lagrangian, and
-preserves spatial fidelity through a distance-distribution regularizer on POI
-positions. Across two cities, \pcdg delivers the strongest constraint satisfaction
-among post-hoc, guidance, and even fully retrained conditional baselines, at a
-characterized and modest fidelity cost, without retraining the generator. We hope
-the training-free, sampling-time projection recipe proves useful for controllable
-generation of other structured web content.
+introduced \pcdg, a training-free, three-stage sampling-time control stack that compiles
+a partial-order matrix into differentiable order and existence energies, projects the
+category-position logits of a frozen joint temporal\,+\,category\,+\,POI
+discrete-diffusion generator via a KL-preserving augmented Lagrangian, removes residual
+category--POI inconsistency by category-consistent decoding, and restores spatial
+realism through a constraint-neutral, distribution-aware same-category geometry
+refinement. Across two cities \pcdg delivers the strongest constraint satisfaction among
+post-hoc, guidance, and even fully retrained conditional baselines while \emph{also}
+improving fidelity over the unconstrained generator on all six divergences on one city
+and four of six on the other---without retraining anything. Our stage-wise analysis
+locates the fidelity cost of constrained sampling on the spatial/POI side and shows it
+is largely an artifact of distribution-blind POI selection rather than a necessary price
+of control. We hope the training-free, sampling-time recipe proves useful for
+controllable generation of other structured web content.
 
 % ======================= Appendix =======================
 \appendix
@@ -63,9 +80,52 @@ reverse steps every $4$ steps. \todo{confirm $\eta$ and step schedule against th
 \end{algorithmic}
 \end{algorithm}
 
+\section{Distribution-Correction Grid and Selection}
+\label{app:grid}
+The distribution-correction stage has three weights. $\rho$ scales the existing
+constraint loss inside the augmented-Lagrangian objective
+(Eq.~\eqref{eq:auglag}); $\lambda$ weights a category-side distribution term---the mean
+of an hour--category JSD and a conditional category-transition JSD against the training
+reference pool; and $\beta$ weights a POI-side distribution term---the mean of an
+identity-aligned top-$1000$ visitation JSD and a soft expected-\emph{DailyLoc} JSD---inside
+the same-category geometry refinement objective. We screened the full grid
+$\rho\in\{0.25,0.5,1\}\times\lambda\in\{0,1\}\times\beta\in\{0,0.1,1\}$ ($18$
+configurations) on a single seed, retained at most two jointly feasible configurations
+per city, and confirmed those over three seeds, all on a training-side calibration split
+with $512$ conditions per city and seed. Configurations were ranked by the maximum, then
+the mean, of the twelve per-city JSD/JointGen ratios, with the parameter tuple as the
+final tie-break. The two configurations that reached confirmation were
+$(\rho,\lambda,\beta)=(0.5,0,1)$ and $(0.5,0,0.1)$; the first was selected and is the
+configuration reported throughout. Spatial results are cached by
+$(\textit{city},\textit{pool},\textit{seed},\rho,\lambda)$ and reused across the three
+$\beta$ refinements of each batch, so $\beta$ varies at fixed upstream randomness.
+No test-set metric participated in screening, confirmation, ranking, candidate
+construction, or the refinement objective. As stated in \S\ref{sec:limitations},
+neither confirmed configuration cleared all pre-specified calibration thresholds: both
+met the \emph{Distance}, \emph{Radius} and \emph{DailyLoc} ceilings in both cities but
+not the \emph{CategoryTransition}, \emph{Category} and \emph{G-RANK} ceilings on that
+calibration split. On the held-out test set the selected configuration then met all
+eleven gates on Istanbul and nine of eleven on New York.
+\todo{Appendix table: all 18 screened configurations with their twelve calibration ratios, from screen-selection.json.}
+
 \section{Metric Definitions}
 \label{app:metrics}
 \todo{one-line formal definitions of OVR\_strict, OVR\_skip, Pair/Category coverage, Unsat, and the six eval-v2 JSD marginals; copy from the unified evaluation module.}
+
+\paragraph{Two definitions that differ from common usage.} \emph{Radius} is computed as
+$\sqrt{\operatorname{mean}(d(\cdot,\bar{c}))}$, the square root of the mean distance to
+the arithmetic centroid, \emph{not} the standard root-mean-square radius of gyration; it
+is therefore comparable across the rows of our tables but not directly against
+differently defined radii in prior work. \emph{G-RANK} compares the visitation
+distributions of the top-$1000$ most frequent POIs; because many POIs tie at the
+truncation frequency, the membership of that top-$1000$ set is implementation-dependent
+under an unstable sort. All tables in this paper use the archived evaluation protocol
+(v2). We additionally recomputed a deterministic variant that sorts by count descending
+then POI id ascending and aligns the generated and reference sets by identity before
+normalization. The effect on \emph{G-RANK} is at most $0.0032$ in absolute value and
+changes no ordering or conclusion: on Istanbul the full stack remains below the backbone
+($0.1766$ vs.\ $0.1892$) and on New York it remains above it ($0.1912$ vs.\ $0.1628$).
+All other statistics agree with the archived values to within $10^{-12}$.
 
 \section{Cost}
 \label{app:cost}

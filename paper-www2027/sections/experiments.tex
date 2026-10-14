@@ -27,14 +27,16 @@ performed. We report the mean $\pm$ sample standard deviation over \textbf{three
 sampling seeds} at a fixed checkpoint; the reported variability reflects sampling
 stochasticity, not training variability.
 
-\paragraph{Baselines.} We compare five methods on the same frozen backbone unless
-stated: \textbf{JointGen} (unconstrained backbone); \textbf{PostSwap} (generate,
+\paragraph{Baselines.} We compare four external methods on the same frozen backbone
+unless stated: \textbf{JointGen} (unconstrained backbone); \textbf{PostSwap} (generate,
 then stably reorder categories to satisfy $\Mmat$); \textbf{EnergyGuide}
 (gradient guidance by the constraint-violation energy during
-sampling~\cite{schiff2025guidance}); \textbf{PO-CFG} (a \emph{retrained}
+sampling~\cite{schiff2025guidance}); and \textbf{PO-CFG} (a \emph{retrained}
 classifier-free-guidance model conditioned on the partial order, trained for
-$1000$ epochs; guidance scale $1$); and \textbf{\pcdg} (ours). PO-CFG is the only
-method that requires retraining.
+$1000$ epochs; guidance scale $1$). PO-CFG is the only method that requires retraining.
+We report three variants of our own stack: \pcdgp (projection only), \pcdgpd
+(\,$+$\,category-consistent POI decoding), and the full \pcdg
+(\,$+$\,distribution-aware geometry refinement).
 
 \paragraph{Metrics.}
 \emph{Fidelity} uses the Jensen--Shannon divergence (JSD, lower is better) of six
@@ -49,52 +51,122 @@ required relations/categories realized, higher is better), and \emph{Unsat}
 
 \subsection{Main results}
 \label{sec:exp:main}
-Table~\ref{tab:method} reports the method comparison on both cities.
+Tables~\ref{tab:method-jsd} and~\ref{tab:method} report the method comparison on both
+cities.
 \input{tables/method-comparison}
 
-\noindent\textbf{Findings.} \todo{fill from distance-v2 final tables}
-Qualitatively, we expect to report: (i) \pcdg attains the strongest
-\emph{constraint satisfaction} on both cities---more than halving \emph{Unsat}
-relative to the unconstrained JointGen and roughly tripling \emph{Pair
-coverage}---and surpasses PostSwap, EnergyGuide, and the \emph{retrained} PO-CFG
-on the ordering and coverage metrics, despite being training-free; (ii) PostSwap
-trivially drives OVR\textsubscript{skip} to $0$ by construction but cannot improve
-coverage and distorts \emph{Distance}; (iii) PO-CFG achieves the best raw
-\emph{fidelity} on several JSD metrics, exposing a genuine fidelity--constraint
-trade-off that we analyze in \S\ref{sec:exp:tradeoff}. \emph{All numeric claims in
-this subsection are to be finalized from the distance-v2 evaluation.}
+\noindent\textbf{Constraint satisfaction.} The full \pcdg reduces the strict
+ordering-violation rate from $92.89\%$ to $4.04\%$ on Istanbul and from $89.45\%$ to
+$11.28\%$ on New York ($-88.85$ and $-78.17$ percentage points; $-95.7\%$ and $-87.4\%$
+relative), lowers \emph{Unsat} from $95.57\%$ to $7.29\%$ and from $93.64\%$ to
+$15.86\%$, and raises pairwise ordering coverage by $6.5\times$ and $4.2\times$
+respectively. It exceeds the \emph{retrained} PO-CFG on all five constraint metrics in
+both cities by a wide margin ($63.45\%\!\to\!4.04\%$ and $41.91\%\!\to\!11.28\%$ strict
+violations), despite training nothing. PostSwap drives OVR\textsubscript{skip} to $0$ by
+construction, but because it cannot introduce a missing category its coverage is
+identical to JointGen's---showing that $\mathrm{skip}{=}0$ must not be read as
+constraint satisfaction. EnergyGuide, a single gradient correction without dual updates,
+barely moves any constraint metric.
 
-% --- PROVISIONAL reference numbers (integrated-20261005, eval-v1, no distance-KL) ---
-% Istanbul Unsat: JointGen 95.57 -> PCDG 36.83 ; PO-CFG 69.07
-% NewYork  Unsat: JointGen 93.64 -> PCDG 42.77 ; PO-CFG 49.48
-% Istanbul Pair coverage: 14.63 -> 70.92 ; NewYork 21.13 -> 67.33
-% These will be replaced by eval-v2 distance-v2 numbers before submission.
+\noindent\textbf{Fidelity.} The projection stage alone reproduces the trade-off reported
+for constrained sampling: \pcdgp improves \emph{CategoryTransition}, \emph{DailyLoc} and
+\emph{Category} on Istanbul but degrades \emph{Distance} ($0.1128\!\to\!0.1314$) and
+\emph{Radius} ($0.0226\!\to\!0.0516$). The full stack removes this cost. On Istanbul
+\emph{all six} divergences fall below the unconstrained backbone (e.g.\ Distance
+$-65.0\%$, Radius $-26.5\%$, DailyLoc $-39.9\%$), and five of six fall below PO-CFG,
+which was the best raw-fidelity method in the projection-only comparison (G-RANK is
+effectively tied, $0.1798$ vs.\ $0.1794$). On New York four of six improve over the
+backbone (Distance $-76.0\%$, Radius $-66.2\%$, DailyLoc $-26.4\%$, Category $-4.9\%$).
 
-\subsection{Ablation study}
+\noindent\textbf{Residuals we do not hide.} On New York, \emph{CategoryTransition}
+($0.0070\!\to\!0.0183$) and \emph{G-RANK} ($0.1612\!\to\!0.1914$) remain above the
+unconstrained backbone for every constrained variant of ours, and PO-CFG remains the
+best method on exactly those two plus \emph{Category}. Enforcing an ordering the data
+does not exhibit necessarily rewrites adjacent category pairs, so some
+\emph{CategoryTransition} loss is intrinsic to the task rather than to our mechanism;
+the \emph{G-RANK} gap is a POI-popularity effect that the distribution correction
+reduces but does not close on this city (\S\ref{sec:exp:tradeoff}). All comparisons are
+between three-seed means; we run no significance tests.
+
+\subsection{Ablation of the projection stage}
 \label{sec:exp:ablation}
-Table~\ref{tab:ablation} isolates each component by disabling it from the full
-model: \textsc{No Projection} (the backbone), \textsc{No Existence},
-\textsc{No Order}, \textsc{No KL} (both KL terms off), \textsc{No Distance KL}
-(only the distance term off), \textsc{Fixed Multipliers} (no dual update,
-Eq.~\eqref{eq:dual}), \textsc{No Gumbel} (deterministic relaxation), and
-\textsc{Full} ($=\pcdg$).
+Tables~\ref{tab:ablation-jsd} and~\ref{tab:ablation} isolate each component by disabling
+it from the projection stage: \textsc{No Projection} (the backbone), \textsc{No
+Existence}, \textsc{No Order}, \textsc{No KL} (both KL terms off), \textsc{No Distance
+KL} (only the distance term off), \textsc{Fixed Multipliers} (no dual update,
+Eq.~\eqref{eq:dual}), \textsc{No Gumbel} (deterministic relaxation), and \textsc{Full}
+($=\pcdgp$).
 \input{tables/ablation}
 
-\noindent\textbf{Findings.} \todo{fill from distance-v2 final tables}
-We expect the ablation to show that the \emph{existence} energy is responsible for
-coverage (removing it collapses pair/category coverage), the \emph{order} energy
-is responsible for strict ordering (removing it inflates
-OVR\textsubscript{strict}), and the \emph{adaptive multipliers} materially improve
-constraint satisfaction over fixed penalties. The \emph{token-KL} and
-\emph{Gumbel} terms have smaller marginal effects at this projection budget, which
-we report honestly; the \emph{distance-KL} term is evaluated specifically for its
-effect on spatial-fidelity metrics (Radius, Distance).
+\noindent\textbf{Findings.} The two energies have cleanly separated roles. Removing the
+\emph{existence} energy collapses pair coverage to $7.34\%$ (Istanbul) and $10.95\%$
+(New York)---\emph{below} the unconstrained backbone's $14.63\%$ and $21.13\%$---while
+OVR\textsubscript{skip} drops to $7.67\%$ and $18.04\%$: without it, the model satisfies
+ordering by \emph{omitting} the constrained categories, which is exactly the degeneracy
+Eq.~\eqref{eq:exist} is designed to block. Removing the \emph{order} energy keeps
+coverage high ($72.53\%$ / $69.92\%$) but inflates OVR\textsubscript{strict} from
+$32.80\%$ / $38.51\%$ to $63.50\%$ / $65.43\%$. Freezing the multipliers costs
+$9.90$ and $19.94$ percentage points of OVR\textsubscript{strict}, confirming that
+evaluating the dual update on \emph{hard} violations matters more than the penalty
+magnitude alone. The \emph{distance-KL} term improves both spatial metrics in both
+cities (Istanbul Distance $0.1441\!\to\!0.1314$, Radius $0.0582\!\to\!0.0516$; New York
+$0.2484\!\to\!0.2210$ and $0.1430\!\to\!0.1265$) at no measurable constraint cost. The
+\emph{token-KL} and \emph{Gumbel} terms have small and not uniformly positive marginal
+effects at this projection budget---removing the Gumbel noise even lowers New York
+\emph{Distance} to $0.2055$---and we report this rather than claiming a benefit for
+every component.
 
-\subsection{Fidelity--constraint trade-off}
+\subsection{Decomposing the fidelity--constraint trade-off}
 \label{sec:exp:tradeoff}
-\todo{Fig.~3: scatter of Unsat (x) vs.\ Distance/Radius JSD (y), one point per method per city, showing \pcdg on the favorable frontier and PO-CFG trading constraint satisfaction for raw fidelity.}
-We position each method in the Unsat--fidelity plane and discuss where \pcdg sits
-relative to the retraining-based PO-CFG and the post-hoc PostSwap.
+Table~\ref{tab:stagewise} walks the full stack one stage at a time and localizes where
+fidelity is lost and where it is recovered.
+\input{tables/stagewise}
+
+\noindent\textbf{Where fidelity is lost.} Two stages buy constraint satisfaction and
+both charge for it on the \emph{spatial} axis. The projection (b) raises Istanbul
+\emph{Radius} from $0.0226$ to $0.0516$, and category-consistent decoding (c)---which
+delivers the largest single constraint jump, $32.80\%\!\to\!3.72\%$ and
+$38.51\%\!\to\!9.52\%$ strict violations---raises it further to $0.0892$ ($0.1265$ to
+$0.1681$ on New York). Neither stage degrades the temporal or category-usage marginals;
+the damage is concentrated in \emph{Distance} and \emph{Radius}.
+
+\noindent\textbf{Where it is recovered.} The same-category geometry refinement (d) is
+constraint-neutral by construction---it swaps only POIs of the same \emph{realized}
+category together with their catalog coordinates, so every constraint metric is
+bit-identical to (c) to within $10^{-12}$---and it repays the entire spatial cost and
+more: Istanbul \emph{Distance} $0.1539\!\to\!0.0372$ and \emph{Radius}
+$0.0892\!\to\!0.0159$, New York $0.1989\!\to\!0.0610$ and $0.1681\!\to\!0.0382$. This is
+the central empirical point: the trade-off is not intrinsic to constrained sampling, it
+is an artifact of selecting POIs and coordinates without reference to the population
+spatial distribution. The refinement does, however, concentrate mass on its candidate
+pools and so degrades the POI-popularity statistic on New York (\emph{G-RANK}
+$0.1914\!\to\!0.2069$). Stage (e) adds the distribution-correction terms and a halved
+constraint weight, which repairs exactly that statistic ($0.2069\!\to\!0.1914$; Istanbul
+$0.1835\!\to\!0.1798$) and improves \emph{DailyLoc} in both cities, at the price of a
+small constraint regression ($3.72\!\to\!4.04$ and $9.52\!\to\!11.28$) and a slightly
+higher \emph{Distance}.
+
+\noindent\textbf{The loss is spatial, not categorical.} The configuration selected from
+the $\rho\!\times\!\lambda\!\times\!\beta$ grid (Appendix~\ref{app:grid}) is
+$\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$: it halves the constraint penalty, applies the
+POI-distribution term at full weight, and switches the category-side distribution term
+\emph{off} entirely. Combined with the stage-wise pattern above, this says the residual
+fidelity cost of partial-order control in this generator lives almost entirely on the
+spatial/POI side, and that a category-side distribution regularizer is not needed to
+correct it.
+
+\noindent\textbf{Selection protocol.} The $18$ configurations were ranked by a fixed
+rule---maximum, then mean, of the twelve per-city JSD/JointGen ratios---computed on a
+\emph{training-side} calibration split, and the top-ranked configuration was then
+evaluated once on the held-out OOD test set. No test metric entered candidate selection,
+hyper-parameter choice, candidate construction, or the refinement objective. We note
+explicitly that this calibration split is an engineering calibration rather than an
+independent validation set (the frozen backbone was trained on those records), and that
+of the two configurations which reached three-seed confirmation neither cleared all
+pre-specified calibration thresholds; we report the resulting held-out test numbers
+as-is rather than re-opening the search.
+\todo{Fig.~3: Unsat (x) vs.\ Distance JSD (y), one marker per method and a dashed path through stages (a)--(e) per city, showing the stack moving to the bottom-left corner while PO-CFG and PostSwap stay on the upper/right frontier.}
+\todo{\S\ref{sec:method} still defines only stage (b); add the two method subsections for stages (c) and (d)--(e) before submission.}
 
 \subsection{Cost and reproducibility}
 \label{sec:exp:cost}

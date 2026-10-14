@@ -34,17 +34,28 @@ constraints~\cite{cardei2025cdd}; neither has been specialized to the activity-%
 category precedence that arises in POI check-in sequences, nor to the joint
 temporal\,+\,category\,+\,POI setting.
 
-We introduce \pcdg, a \emph{training-free}, sampling-time projection layer that
-enforces sample-level category precedence directly inside the reverse diffusion of
-a frozen conditional generator. \pcdg compiles a partial-order matrix into
-differentiable order-violation and existence energies, and, during the late
-reverse steps, projects \emph{only the category-position logits} via a
-KL-preserving augmented-Lagrangian optimization; a complementary
-distance-distribution regularizer preserves spatial realism. The projected
-category logits are then jointly sampled with the unaltered POI logits. Because
-\pcdg operates on the per-step sampling distribution of a frozen model, it adds no
-parameters and needs no retraining, and it can be attached to an existing,
-already-deployed generator.
+We introduce \pcdg, a \emph{training-free} control stack that enforces sample-level
+category precedence directly inside the reverse diffusion of a frozen conditional
+generator, and that---crucially---does so without paying the fidelity penalty such
+control is usually assumed to require. \pcdg has three sampling-time stages. First, it
+compiles a partial-order matrix into differentiable order-violation and existence
+energies and, during the late reverse steps, projects \emph{only the category-position
+logits} via a KL-preserving augmented-Lagrangian optimization. Second, a
+category-consistent POI decoder resolves the residual mismatch between a sampled
+category and the POI actually emitted at that position. Third, a distribution-aware
+same-category geometry refinement re-selects each POI among candidates of the
+\emph{same} realized category so as to match population-level travel-length and
+visitation statistics; because it never touches category tokens, times, lengths or
+order, it leaves every constraint metric unchanged by construction. Because all three
+stages read and rewrite only the per-step sampling distribution and the realized POI
+assignment of a frozen model, \pcdg adds no parameters, needs no retraining, and can be
+attached to an existing, already-deployed generator.
+
+Our analysis traces the fidelity cost of constrained sampling to two separable
+sources---an over-weighted constraint penalty inside the projection, and a
+POI/coordinate selection that is blind to the population spatial distribution---and
+shows that correcting them recovers, and on one city surpasses, the unconstrained
+generator's fidelity while retaining almost all of the constraint gain.
 
 \paragraph{Relevance to the Web.}
 This work studies the Web as a socio-economic system and a responsible-data
@@ -64,14 +75,22 @@ generator---for controllable generation of other structured web content.
   anti-degeneracy existence condition---and express it as differentiable energies
   compatible with discrete-diffusion sampling (\S\ref{sec:problem},
   \S\ref{sec:method:energy}).
-  \item We propose \pcdg, a training-free sampling-time projection that enforces
-  these constraints on category positions via a KL-preserving augmented-Lagrangian
-  optimization and preserves spatial fidelity through a distance-distribution
-  regularizer on POI positions, all on a \emph{frozen} joint temporal\,+\,%
-  category\,+\,POI diffusion generator (\S\ref{sec:method}).
-  \item We conduct a two-city, out-of-distribution, multi-seed study with an
-  eight-way ablation, showing that \pcdg attains the strongest constraint
-  satisfaction among energy-guidance, post-hoc, and even \emph{fully retrained}
-  conditional baselines, and we characterize the fidelity--constraint trade-off
-  (\S\ref{sec:experiments}).
+  \item We propose \pcdg, a three-stage \emph{training-free} sampling-time control stack
+  on a \emph{frozen} joint temporal\,+\,category\,+\,POI diffusion generator: a
+  KL-preserving augmented-Lagrangian projection of the category-position logits,
+  category-consistent POI decoding, and a distribution-aware same-category geometry
+  refinement that is constraint-neutral by construction (\S\ref{sec:method}).
+  \item We show that the fidelity--constraint trade-off reported for constrained
+  sampling is \emph{separable} rather than intrinsic: it decomposes into an
+  over-weighted constraint penalty and a distribution-blind POI/coordinate selection.
+  Correcting both recovers the unconstrained generator's fidelity on every measured
+  divergence on one city, and the configuration that wins uses \emph{no}
+  category-side distribution term, localizing the loss to the spatial side
+  (\S\ref{sec:exp:tradeoff}).
+  \item We conduct a two-city, out-of-distribution, multi-seed study with a projection
+  ablation and a stage-wise ablation of the full stack, showing that \pcdg attains the
+  strongest constraint satisfaction among energy-guidance, post-hoc, and even
+  \emph{fully retrained} conditional baselines while matching or beating them on
+  fidelity, and we report the two New York statistics that remain above the
+  unconstrained backbone (\S\ref{sec:experiments}).
 \end{itemize}

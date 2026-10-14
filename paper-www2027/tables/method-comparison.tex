@@ -1,40 +1,58 @@
 %% Method comparison tables.
-%% PROVISIONAL anchor = integrated-20261005 (evaluation v1, no distance-KL).
-%% Before submission: regenerate from the distance-v2 run under evaluation v2
-%% (Interval column becomes CategoryTransition; PCDG rows reflect the distance-KL term).
-% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
+%% SOURCE OF TRUTH (evaluation v2, three sampling seeds 135398/135399/135400):
+%%   rows 1-5 : experiment_runs/two-city-distance-v2-batched-20261009/{methods-jsd,methods-constraints}.tex
+%%   PCDG-PD  : experiment_runs/ny-ist-category-formal-v1c-20261011   ("方案A：类别一致解码" in g(.)设计方案.md)
+%%   PCDG     : experiment_runs/ny-ist-distribution-best-formal-v1-20261013, frozen candidate r0.5-c0-p1
+%%              (rho=0.5, lambda=0, beta=1); 6 results / 21,066 trajectories.
+%% Naming map to the Chinese manuscript: PCDG-P = "PCDG"(投影) ; PCDG-PD = "方案A（类别一致解码）" ;
+%%   PCDG (full) = "分布校正版（最佳候选）".
+%% Bold = best unrounded three-seed mean within each city (NOT significance). Istanbul Category:
+%%   PCDG 0.04229393378375002 < PCDG-PD 0.04232732278162768, both display as 0.0423.
+%% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
 \begin{table*}[t]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Method comparison: distributional similarity (JSD $\downarrow$). \emph{Provisional eval-v1 anchor; final submission uses eval-v2 (CategoryTransition replaces Interval) on the distance-v2 run.}}
+\caption{Method comparison: distributional similarity (JSD $\downarrow$, evaluation v2).
+\textsc{PCDG-P} applies the constraint projection only; \textsc{PCDG-PD} adds category-consistent
+POI decoding; \textsc{PCDG} is the full stack with distribution-aware geometry refinement.}
 \label{tab:method-jsd}
 \begin{tabular}{lrrrrrr}
 \toprule
 \multicolumn{7}{l}{\textbf{Istanbul}} \\
 \midrule
-Method & Distance $\downarrow$ & Radius $\downarrow$ & Interval $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
+Method & Distance $\downarrow$ & Radius $\downarrow$ & CategoryTransition $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
 \midrule
-JointGen & $0.1128\pm 0.0087$ & $0.0226\pm 0.0017$ & $\mathbf{0.0049\pm 0.0005}$ & $0.0414\pm 0.0009$ & $0.0325\pm 0.0005$ & $0.1922\pm 0.0022$ \\
-PostSwap & $0.0949\pm 0.0127$ & $0.0226\pm 0.0017$ & $\mathbf{0.0049\pm 0.0005}$ & $0.0414\pm 0.0009$ & $0.0325\pm 0.0005$ & $0.1922\pm 0.0022$ \\
-EnergyGuide & $0.1156\pm 0.0052$ & $\mathbf{0.0222\pm 0.0025}$ & $0.0049\pm 0.0004$ & $0.0392\pm 0.0020$ & $0.0342\pm 0.0004$ & $0.1921\pm 0.0004$ \\
-PO-CFG (s=1) & $\mathbf{0.0890\pm 0.0050}$ & $0.0263\pm 0.0020$ & $0.0049\pm 0.0005$ & $0.0444\pm 0.0022$ & $0.0256\pm 0.0003$ & $\mathbf{0.1794\pm 0.0026}$ \\
-PCDG & $0.1441\pm 0.0073$ & $0.0582\pm 0.0025$ & $0.0049\pm 0.0005$ & $\mathbf{0.0366\pm 0.0008}$ & $\mathbf{0.0083\pm 0.0002}$ & $0.1828\pm 0.0026$ \\
+JointGen & $0.1128\pm 0.0087$ & $0.0226\pm 0.0017$ & $0.0403\pm 0.0001$ & $0.0414\pm 0.0009$ & $0.0649\pm 0.0003$ & $0.1922\pm 0.0022$ \\
+PostSwap & $0.0949\pm 0.0127$ & $0.0226\pm 0.0017$ & $0.0361\pm 0.0005$ & $0.0414\pm 0.0009$ & $0.0647\pm 0.0018$ & $0.1922\pm 0.0022$ \\
+EnergyGuide & $0.1156\pm 0.0052$ & $0.0222\pm 0.0025$ & $0.0424\pm 0.0009$ & $0.0392\pm 0.0020$ & $0.0643\pm 0.0016$ & $0.1921\pm 0.0004$ \\
+PO-CFG (s=1) & $0.0890\pm 0.0050$ & $0.0263\pm 0.0020$ & $0.0365\pm 0.0008$ & $0.0444\pm 0.0022$ & $0.0630\pm 0.0007$ & $\mathbf{0.1794\pm 0.0026}$ \\
+\midrule
+\textsc{PCDG-P} (projection) & $0.1314\pm 0.0035$ & $0.0516\pm 0.0022$ & $\mathbf{0.0162\pm 0.0006}$ & $0.0368\pm 0.0014$ & $0.0446\pm 0.0020$ & $0.1820\pm 0.0016$ \\
+\textsc{PCDG-PD} ($+$decoding) & $0.1539\pm 0.0028$ & $0.0892\pm 0.0024$ & $0.0238\pm 0.0011$ & $0.0297\pm 0.0012$ & $0.0423\pm 0.0009$ & $0.1813\pm 0.0018$ \\
+\textsc{PCDG} (full) & $\mathbf{0.0395\pm 0.0036}$ & $\mathbf{0.0166\pm 0.0007}$ & $0.0235\pm 0.0011$ & $\mathbf{0.0249\pm 0.0009}$ & $\mathbf{0.0423\pm 0.0018}$ & $0.1798\pm 0.0016$ \\
 \midrule
 \multicolumn{7}{l}{\textbf{New York}} \\
 \midrule
-Method & Distance $\downarrow$ & Radius $\downarrow$ & Interval $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
+Method & Distance $\downarrow$ & Radius $\downarrow$ & CategoryTransition $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
 \midrule
-JointGen & $0.2904\pm 0.0156$ & $0.1104\pm 0.0071$ & $0.0154\pm 0.0007$ & $0.0409\pm 0.0035$ & $0.0013\pm 0.0000$ & $0.1612\pm 0.0013$ \\
-PostSwap & $0.2276\pm 0.0448$ & $0.1104\pm 0.0071$ & $0.0154\pm 0.0007$ & $0.0409\pm 0.0035$ & $0.0013\pm 0.0000$ & $0.1612\pm 0.0013$ \\
-EnergyGuide & $0.2943\pm 0.0060$ & $0.1112\pm 0.0061$ & $0.0154\pm 0.0008$ & $0.0411\pm 0.0029$ & $0.0013\pm 0.0001$ & $0.1622\pm 0.0009$ \\
-PO-CFG (s=1) & $\mathbf{0.1228\pm 0.0160}$ & $\mathbf{0.0823\pm 0.0029}$ & $\mathbf{0.0153\pm 0.0006}$ & $0.0499\pm 0.0008$ & $\mathbf{0.0008\pm 0.0000}$ & $\mathbf{0.1525\pm 0.0025}$ \\
-PCDG & $0.2484\pm 0.0267$ & $0.1430\pm 0.0055$ & $0.0153\pm 0.0008$ & $\mathbf{0.0355\pm 0.0031}$ & $0.0047\pm 0.0008$ & $0.1937\pm 0.0082$ \\
+JointGen & $0.2904\pm 0.0156$ & $0.1104\pm 0.0071$ & $0.0070\pm 0.0008$ & $0.0409\pm 0.0035$ & $0.0184\pm 0.0002$ & $0.1612\pm 0.0013$ \\
+PostSwap & $0.2276\pm 0.0448$ & $0.1104\pm 0.0071$ & $0.0070\pm 0.0007$ & $0.0409\pm 0.0035$ & $0.0168\pm 0.0006$ & $0.1612\pm 0.0013$ \\
+EnergyGuide & $0.2943\pm 0.0060$ & $0.1112\pm 0.0061$ & $0.0071\pm 0.0011$ & $0.0411\pm 0.0029$ & $0.0183\pm 0.0003$ & $0.1622\pm 0.0009$ \\
+PO-CFG (s=1) & $0.1228\pm 0.0160$ & $0.0823\pm 0.0029$ & $\mathbf{0.0053\pm 0.0018}$ & $0.0499\pm 0.0008$ & $\mathbf{0.0121\pm 0.0007}$ & $\mathbf{0.1525\pm 0.0025}$ \\
+\midrule
+\textsc{PCDG-P} (projection) & $0.2210\pm 0.0224$ & $0.1265\pm 0.0051$ & $0.0132\pm 0.0004$ & $0.0351\pm 0.0035$ & $0.0173\pm 0.0013$ & $0.1942\pm 0.0041$ \\
+\textsc{PCDG-PD} ($+$decoding) & $0.1989\pm 0.0198$ & $0.1681\pm 0.0042$ & $0.0182\pm 0.0012$ & $0.0335\pm 0.0022$ & $0.0178\pm 0.0012$ & $0.1914\pm 0.0059$ \\
+\textsc{PCDG} (full) & $\mathbf{0.0698\pm 0.0107}$ & $\mathbf{0.0373\pm 0.0042}$ & $0.0183\pm 0.0005$ & $\mathbf{0.0301\pm 0.0010}$ & $0.0175\pm 0.0010$ & $0.1914\pm 0.0060$ \\
 \bottomrule
 \end{tabular}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded mean within each city, not statistical significance.
+Mean $\pm$ sample standard deviation over three sampling seeds at a fixed checkpoint; the spread
+reflects sampling stochasticity, not training variability, and is not a confidence interval. Bold
+denotes the best unrounded mean within each city, not statistical significance. On New York,
+\emph{CategoryTransition} and \emph{G-RANK} remain above the unconstrained JointGen for every
+constrained method of ours; we report this residual rather than omitting the columns.
 \end{minipage}
 \end{table*}
 
@@ -43,7 +61,9 @@ Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Method comparison: constraint satisfaction (\%). \pcdg attains the best ordering/coverage on both cities, surpassing the \emph{retrained} PO-CFG, while being training-free. \emph{Provisional eval-v1 anchor; to be refreshed from distance-v2.}}
+\caption{Method comparison: constraint satisfaction (\%, evaluation v2). Both \textsc{PCDG}
+variants with category-consistent decoding surpass the \emph{retrained} PO-CFG by a wide margin
+while remaining training-free.}
 \label{tab:method}
 \begin{tabular}{lrrrrr}
 \toprule
@@ -55,7 +75,10 @@ JointGen & $92.89\pm 0.08$ & $48.05\pm 0.74$ & $14.63\pm 0.19$ & $43.19\pm 0.20$
 PostSwap & $86.10\pm 0.15$ & $\mathbf{0.00\pm 0.00}$ & $14.63\pm 0.19$ & $43.19\pm 0.20$ & $85.37\pm 0.19$ \\
 EnergyGuide & $90.66\pm 0.06$ & $44.76\pm 0.58$ & $19.17\pm 0.43$ & $47.06\pm 0.25$ & $92.89\pm 0.16$ \\
 PO-CFG (s=1) & $63.45\pm 0.23$ & $19.09\pm 0.54$ & $43.72\pm 0.35$ & $66.00\pm 0.23$ & $69.07\pm 0.45$ \\
-PCDG & $\mathbf{32.96\pm 0.46}$ & $9.10\pm 0.16$ & $\mathbf{70.92\pm 0.23}$ & $\mathbf{85.29\pm 0.14}$ & $\mathbf{36.83\pm 0.24}$ \\
+\midrule
+\textsc{PCDG-P} (projection) & $32.80\pm 0.50$ & $9.12\pm 0.10$ & $70.99\pm 0.08$ & $85.36\pm 0.15$ & $36.86\pm 0.37$ \\
+\textsc{PCDG-PD} ($+$decoding) & $\mathbf{3.72\pm 0.13}$ & $1.76\pm 0.10$ & $\mathbf{94.74\pm 0.16}$ & $\mathbf{97.81\pm 0.07}$ & $\mathbf{6.90\pm 0.18}$ \\
+\textsc{PCDG} (full) & $4.04\pm 0.20$ & $2.02\pm 0.15$ & $94.68\pm 0.15$ & $97.75\pm 0.10$ & $7.29\pm 0.20$ \\
 \midrule
 \multicolumn{6}{l}{\textbf{New York}} \\
 \midrule
@@ -65,11 +88,18 @@ JointGen & $89.45\pm 0.20$ & $52.92\pm 0.86$ & $21.13\pm 0.15$ & $46.75\pm 0.12$
 PostSwap & $78.22\pm 0.48$ & $\mathbf{0.00\pm 0.00}$ & $21.13\pm 0.15$ & $46.75\pm 0.12$ & $78.87\pm 0.15$ \\
 EnergyGuide & $89.17\pm 0.14$ & $51.59\pm 0.88$ & $21.17\pm 0.19$ & $47.14\pm 0.14$ & $93.20\pm 0.39$ \\
 PO-CFG (s=1) & $41.91\pm 1.37$ & $8.97\pm 0.88$ & $59.92\pm 1.58$ & $74.99\pm 1.08$ & $49.48\pm 1.20$ \\
-PCDG & $\mathbf{38.48\pm 1.04}$ & $13.76\pm 0.72$ & $\mathbf{67.33\pm 1.86}$ & $\mathbf{81.38\pm 0.81}$ & $\mathbf{42.77\pm 1.79}$ \\
+\midrule
+\textsc{PCDG-P} (projection) & $38.51\pm 0.95$ & $14.11\pm 1.22$ & $67.60\pm 1.86$ & $81.54\pm 0.70$ & $42.42\pm 1.84$ \\
+\textsc{PCDG-PD} ($+$decoding) & $\mathbf{9.52\pm 1.04}$ & $3.47\pm 0.64$ & $\mathbf{88.67\pm 1.74}$ & $\mathbf{93.92\pm 0.68}$ & $\mathbf{14.09\pm 2.11}$ \\
+\textsc{PCDG} (full) & $11.28\pm 1.05$ & $4.50\pm 0.70$ & $87.87\pm 1.59$ & $93.46\pm 0.63$ & $15.86\pm 1.90$ \\
 \bottomrule
 \end{tabular}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded mean within each city. PostSwap drives OVR\_skip to $0$ by construction but cannot improve coverage.
+Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded
+mean within each city. PostSwap drives OVR\_skip to $0$ by construction but cannot introduce a
+missing category, so its coverage is identical to JointGen's. The full \textsc{PCDG} trades a small
+amount of constraint satisfaction (e.g.\ $3.72\!\to\!4.04$ on Istanbul) for the fidelity gains in
+Table~\ref{tab:method-jsd}; this is the effect of halving the constraint weight ($\rho{=}0.5$).
 \end{minipage}
 \end{table*}
