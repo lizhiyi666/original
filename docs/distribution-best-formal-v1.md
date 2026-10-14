@@ -57,3 +57,36 @@ At task recovery, inspect the existing remote run and exact PID commands first.
 If healthy, monitor quietly; never launch another copy. If the local delivery
 already exists, use the fetcher's `--verify-only`, never overwrite it. Technical
 failure preserves the scene and requires a user decision.
+
+## Delivery accepted on 2026-10-14
+
+The existing run completed and was sealed; controller 26040 and workers 26051 /
+26052 were confirmed exited. The server audit passed with 6/6 results and 21066
+trajectory records. Original inputs, selection evidence, models and temporal
+caches were preserved; there was no retraining, temporal/baseline resampling,
+restart or additional candidate search during delivery.
+
+- Runtime source commit: `a7e3c300d29f5a266320c90ae14d147782b9f599`.
+- Remote result directory: `/root/experiments/pcdg/ny-ist-distribution-best-formal-v1-20261013/experiment_runs/ny-ist-distribution-best-formal-v1-20261013`.
+- Local result directory: `experiment_runs/ny-ist-distribution-best-formal-v1-20261013`.
+- Transfer process exited successfully; archive and per-file SHA-256 checks passed for 1383 delivered files (1381 audit entries plus `audit.json` and `status.json`).
+- Local receipt: `experiment_runs/ny-ist-distribution-best-formal-v1-20261013/local-delivery-audit.json`, state `passed`, `transfer_exited=true`, `cpu_recomputed=true`.
+- All 18 deterministic CPU v3 metric sets passed; maximum absolute difference was `1.1102230246251565e-16`, below `1e-12`. Frozen v2 values were retained for the manuscript.
+- Archive SHA-256: `2332af438ecdc0e72924936853e52e0c85bb099790177a311a94f63f724a4880`.
+- Sealed summary SHA-256: `8f9bc62fa0c98a73250461d60282ebf54290c1c71d6889a13660b6c8181f49de`.
+
+Quality was not fully successful under either v2 or v3: New York
+`CategoryTransition` and `G-RANK` remain above JointGen. Istanbul passes all
+eleven gates, and both cities preserve all five PCDG constraint gates. These
+are comparisons of three-seed means, not significance claims.
+
+The downloaded manuscript `C:\Users\19542\Downloads\g(⋅)设计方案.md` and the
+repository manuscript `g(⋅)设计方案.md` now contain exactly four new
+`分布校正版（最佳候选）` method rows. All 22 metric cells (44 mean/SD values)
+were checked against `formal.results.r0.5-c0-p1.aggregate`, including sample
+SDs and percent conversion. Existing rows, historical text and ablations were
+preserved; only obsolete best-value bold markers were moved. No separate
+confirmation/v3 tables or duplicate baseline rows were added. Manuscript text
+is identical after newline normalization; each file retains its existing line
+endings. Istanbul Category uses the unrounded means to resolve the displayed
+0.0423 tie: candidate 0.04229393378375002 versus Scheme A 0.04232732278162768.
