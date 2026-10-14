@@ -20,8 +20,9 @@ engineering calibration rather than an independent validation set; no test metri
 entered selection, but neither of the two three-seed-confirmed configurations cleared
 all pre-specified calibration thresholds, and we report the held-out test result of the
 top-ranked configuration as-is. (viii) The transition from the geometry refinement to
-the full stack changes two factors at once ($\rho$ and $\beta$), so we do not attribute
-that difference to either factor alone. (ix) The geometry refinement is a migration of
+the full stack changes three things at once---$\rho$, $\beta$, and the composition of the
+same-category candidate pool---so we do not attribute that difference to any single
+factor. (ix) The geometry refinement is a migration of
 an already-frozen configuration; its candidate pools are built from the training
 reference and the backbone's own scores, but it is not a from-scratch generalization
 study. (x) We do not yet report a downstream-utility study (e.g., training a next-POI
@@ -60,7 +61,17 @@ $w_{\mathrm{dist}}{=}1$; Gumbel temperature $T{=}3$; outer iterations $10$, inne
 iterations $50$; SGD learning rate $\eta$, gradient clip $10$; multiplier growth
 $\alpha{=}2$, $\mu_{\max}{=}10^3$, tolerance $\tau_{\mathrm{tol}}{=}0.25$; distance
 routes $P{=}8$, candidates $\kappa{=}32$, bins $32$; applied over the last $40$
-reverse steps every $4$ steps. \todo{confirm $\eta$ and step schedule against the distance-v2 manifest before camera-ready.}
+reverse steps every $4$ steps. Geometry refinement (\S\ref{sec:method:geometry}):
+$w_{\mathrm{d}}{=}1$, $w_{\mathrm{r}}{=}2$, $w_{\mathrm{fid}}{=}0.1$, $P_g{=}8$ paths,
+$\kappa_g{=}32$ candidates, temperature $1$, Adam learning rate $0.05$, $200$ steps,
+geometry noise refreshed every $20$ steps. Distribution correction
+(\S\ref{sec:method:balance}): $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$. The geometry step
+budget was fixed by a speed qualification (median total spatial-sampling time within
+$1.10\times$ of the unrefined backbone) before any quality comparison, and the weights
+by the grid of Appendix~\ref{app:grid}. Algorithm~\ref{alg:pcdg} covers one projected
+reverse step only; the decoder of \S\ref{sec:method:decoding} acts inside its final line,
+and the refinement of \S\ref{sec:method:geometry} acts once after the reverse process
+terminates. \todo{confirm $\eta$ and step schedule against the distance-v2 manifest before camera-ready.}
 
 \begin{algorithm}[t]
 \caption{\pcdg projected reverse step (one controlled step $s$)}
@@ -76,7 +87,7 @@ reverse steps every $4$ steps. \todo{confirm $\eta$ and step schedule against th
   \EndFor
   \State evaluate hard violations $\hat\delta$; update $\lambda,\mu$ \Comment{Eq.~\eqref{eq:dual}}; early stop if satisfied
 \EndFor
-\State \Return joint categorical sample from projected $\mathbf{y}$
+\State \Return joint categorical sample from projected $\mathbf{y}$, decoded category-first \Comment{Eq.~\eqref{eq:ccdecode}}
 \end{algorithmic}
 \end{algorithm}
 
@@ -107,6 +118,12 @@ not the \emph{CategoryTransition}, \emph{Category} and \emph{G-RANK} ceilings on
 calibration split. On the held-out test set the selected configuration then met all
 eleven gates on Istanbul and nine of eleven on New York.
 \todo{Appendix table: all 18 screened configurations with their twelve calibration ratios, from screen-selection.json.}
+
+\section{Projection-Stage Ablation Tables}
+\label{app:ablation}
+Tables~\ref{tab:ablation-jsd} and~\ref{tab:ablation} are referenced from
+\S\ref{sec:exp:ablation} and placed here for space.
+\input{tables/ablation}
 
 \section{Metric Definitions}
 \label{app:metrics}

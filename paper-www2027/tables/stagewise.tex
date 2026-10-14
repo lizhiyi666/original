@@ -10,8 +10,12 @@
 %% Row (d) constraint cells are bit-identical to row (c) by construction (verified to 1e-12): the
 %% refinement swaps only same-actual-category POIs and their catalog coordinates, leaving category
 %% tokens, times, lengths, order and all conditions unchanged per event.
-%% CAUTION: (d) -> (e) changes TWO factors (rho 1 -> 0.5 and beta 0 -> 1); it is not a single-factor
-%% increment. The 18-configuration grid in Appendix isolates rho / lambda / beta on calibration data.
+%% CAUTION: (d) -> (e) changes THREE things, not one: rho 1 -> 0.5, beta 0 -> 1, and the candidate
+%% pool composition. (d) uses geometry_projection.GeometryObjective: original + model top-15 +
+%% nearest-16-to-centroid. (e) uses distribution_balance.BalancedGeometryObjective: original +
+%% model top-11 + nearest-12 + 8 most-visited in the training reference. Both fill to 32 by model
+%% score with catalog-id tie-breaks. The 18-configuration grid isolates rho / lambda / beta on
+%% calibration data at a fixed pool.
 \begin{table*}[t]
 \centering
 \scriptsize
@@ -48,10 +52,12 @@ Stage & Distance & Radius & CatTrans & DailyLoc & Category & G-RANK & & OVR\_str
 Three-seed means; sample standard deviations are omitted for width and are reported in
 Tables~\ref{tab:method-jsd}--\ref{tab:method} for rows (a), (b), (c) and (e). Row (d)'s constraint
 cells are identical to row (c)'s to within $10^{-12}$ \emph{by construction}, since the refinement
-replaces only same-category POIs and their coordinates. Row (e) changes two factors with respect to
-row (d)---the constraint weight $\rho$ ($1\!\to\!0.5$) and the POI-distribution weight $\beta$
-($0\!\to\!1$)---so we do not attribute the (d)$\to$(e) difference to either factor alone; the
-$\rho/\lambda/\beta$ grid is isolated on calibration data in Appendix~\ref{app:grid}. Stage (d) is a
-migration of an already-frozen geometry configuration, not a newly tuned one.
+replaces only same-category POIs and their coordinates. Row (e) differs from row (d) in three
+respects---the constraint weight $\rho$ ($1\!\to\!0.5$), the POI-distribution weight $\beta$
+($0\!\to\!1$), and the composition of the same-category candidate pool
+(\S\ref{sec:method:geometry})---so we do not attribute the (d)$\to$(e) difference to any single
+factor; the $\rho/\lambda/\beta$ grid is isolated at a fixed pool on calibration data in
+Appendix~\ref{app:grid}. Stage (d) is a migration of an already-frozen geometry configuration, not
+a newly tuned one.
 \end{minipage}
 \end{table*}

@@ -34,9 +34,9 @@ then stably reorder categories to satisfy $\Mmat$); \textbf{EnergyGuide}
 sampling~\cite{schiff2025guidance}); and \textbf{PO-CFG} (a \emph{retrained}
 classifier-free-guidance model conditioned on the partial order, trained for
 $1000$ epochs; guidance scale $1$). PO-CFG is the only method that requires retraining.
-We report three variants of our own stack: \pcdgp (projection only), \pcdgpd
-(\,$+$\,category-consistent POI decoding), and the full \pcdg
-(\,$+$\,distribution-aware geometry refinement).
+We report three variants of our own stack: \pcdgp (projection only), \pcdgpd (adding
+category-consistent POI decoding), and the full \pcdg (adding distribution-aware
+geometry refinement).
 
 \paragraph{Metrics.}
 \emph{Fidelity} uses the Jensen--Shannon divergence (JSD, lower is better) of six
@@ -90,13 +90,12 @@ between three-seed means; we run no significance tests.
 
 \subsection{Ablation of the projection stage}
 \label{sec:exp:ablation}
-Tables~\ref{tab:ablation-jsd} and~\ref{tab:ablation} isolate each component by disabling
-it from the projection stage: \textsc{No Projection} (the backbone), \textsc{No
-Existence}, \textsc{No Order}, \textsc{No KL} (both KL terms off), \textsc{No Distance
-KL} (only the distance term off), \textsc{Fixed Multipliers} (no dual update,
-Eq.~\eqref{eq:dual}), \textsc{No Gumbel} (deterministic relaxation), and \textsc{Full}
-($=\pcdgp$).
-\input{tables/ablation}
+Tables~\ref{tab:ablation-jsd} and~\ref{tab:ablation} (in Appendix~\ref{app:ablation},
+for space) isolate each component by disabling it from the projection stage:
+\textsc{No Projection} (the backbone), \textsc{No Existence}, \textsc{No Order},
+\textsc{No KL} (both KL terms off), \textsc{No Distance KL} (only the distance term off),
+\textsc{Fixed Multipliers} (no dual update, Eq.~\eqref{eq:dual}), \textsc{No Gumbel}
+(deterministic relaxation), and \textsc{Full} ($=\pcdgp$).
 
 \noindent\textbf{Findings.} The two energies have cleanly separated roles. Removing the
 \emph{existence} energy collapses pair coverage to $7.34\%$ (Istanbul) and $10.95\%$
@@ -166,7 +165,6 @@ of the two configurations which reached three-seed confirmation neither cleared 
 pre-specified calibration thresholds; we report the resulting held-out test numbers
 as-is rather than re-opening the search.
 \todo{Fig.~3: Unsat (x) vs.\ Distance JSD (y), one marker per method and a dashed path through stages (a)--(e) per city, showing the stack moving to the bottom-left corner while PO-CFG and PostSwap stay on the upper/right frontier.}
-\todo{\S\ref{sec:method} still defines only stage (b); add the two method subsections for stages (c) and (d)--(e) before submission.}
 
 \subsection{Cost and reproducibility}
 \label{sec:exp:cost}

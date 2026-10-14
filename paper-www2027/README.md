@@ -14,8 +14,9 @@ Analysis**.
 ```bash
 latexmk -pdf main.tex        # one command; latexmkrc handles the Chinese-path bibtex quirk
 ```
-Produces `main.pdf` (currently **10 pages total**: body ends p8, appendix A–D p8–9, refs p9–10;
-WWW limit is body ≤ 8 + total ≤ 12). Compiles clean: 0 undefined refs/cites, no overfull boxes.
+Produces `main.pdf` (currently **11 pages total**: body ends p8, appendix A–E p8–10, refs p10–11;
+WWW limit is body ≤ 8 + total ≤ 12). Compiles clean: 0 errors, 0 undefined refs/cites. 12 overfull
+hboxes remain, worst 15.5pt, all in pre-existing prose/inline math — cosmetic, not blocking.
 `latexmk` may print exit code 12 from strict first-pass warnings — the PDF is still
 correct and fully resolved. To clean aux files: `latexmk -c`.
 
@@ -30,26 +31,25 @@ correct and fully resolved. To clean aux files: `latexmk -c`.
 | `sections/intro.tex` | **Updated**: 3-stage method paragraph, trade-off-decomposition paragraph, 4 contributions |
 | `sections/related.tex` | Drafted (positions vs CDD / Marionette / ControlTraj; honest novelty delta) |
 | `sections/problem.tex` | **Complete draft** (task, partial-order matrix, eval axes) |
-| `sections/method.tex` | Stage (b) only — **still needs two subsections** for category-consistent POI decoding and distribution-aware same-category geometry refinement. Needs Fig.1 + Fig.2 |
+| `sections/method.tex` | **Complete** — §4.1–4.5 projection stage, §4.6 category-consistent decoding, §4.7 same-category geometry refinement (incl. the constraint-neutrality property), §4.8 ρ/λ/β distribution correction. Needs Fig.1 + Fig.2 |
 | `sections/experiments.tex` | **Numeric findings filled from eval-v2.** New §5.4 decomposes the trade-off. Remaining: Fig.3, cost numbers |
-| `sections/conclusion.tex` | Limitations expanded to (i)–(x); conclusion rewritten; new Appendix B (grid + selection) and metric-definition caveats |
+| `sections/conclusion.tex` | Limitations expanded to (i)–(x); conclusion rewritten; Appendix B (grid + selection), C (ablation tables), metric-definition caveats |
 | `tables/method-comparison.tex` | **Final eval-v2**, 7 rows (4 baselines + PCDG-P / PCDG-PD / PCDG) |
-| `tables/ablation.tex` | **Final eval-v2**, 8 rows incl. `No Distance KL` |
+| `tables/ablation.tex` | **Final eval-v2**, 8 rows incl. `No Distance KL`. Moved to **Appendix C** for the page budget; §5.3 references it |
 | `tables/stagewise.tex` | **New** — stage-wise ablation (a)–(e), the core evidence for the new contribution |
 | `references.bib` | 52 entries (copied from thesis); keys verified, bib resolves |
 
 ## What still must be done before submission
-- `method.tex`: write the two missing subsections (stages (c) and (d)–(e)); `experiments.tex`
-  carries a `\todo` pointing at this.
 - Export **Fig.1** (framework) and **Fig.2** (one projected reverse step) from
   `../figure_build/` into `figures/`, following the "must-show / do-NOT-draw" list in
-  `../method_innovation_map.md` §11–§15.
+  `../method_innovation_map.md` §11–§15. Fig.1 must now show four stages, not one.
 - Add **Fig.3**: Unsat (x) vs. Distance JSD (y), one marker per method plus a dashed path
   through stages (a)–(e) per city. This is now a core figure, not optional.
 - Fill the remaining `\todo`s: metric definitions (`app:metrics`), cost numbers (`app:cost`),
   the 18-configuration grid table (`app:grid`), and the OOD train/test counts in §5.1.
-- Page budget is tight (body already reaches p8). If Fig.1–3 overflow, move
-  `tables/ablation.tex` into the appendix and keep the stage-wise table in the body.
+- Page budget is exhausted (body already fills p8, total 11 of 12). Fig.1–3 will not fit
+  without cuts: the next candidates are merging the two method-comparison tables into one
+  wide table, or moving `tables/stagewise.tex` notes into the caption.
 
 ## Honesty guardrails (do not overclaim)
 - Base generator is **Marionette** (prior work), used frozen — credited, not claimed.
@@ -61,7 +61,9 @@ correct and fully resolved. To clean aux files: `latexmk -c`.
 - The ρ/λ/β configuration was chosen on a **training-side calibration split** (not an
   independent validation set) and **neither confirmed candidate cleared all pre-specified
   thresholds**; test metrics never entered selection. Never write "pre-registered and passed".
-- Stage (d)→(e) changes **two** factors (ρ and β) — no single-factor attribution.
+- Stage (d)→(e) changes **three** things (ρ, β, and the same-category candidate pool:
+  (d) = original + model top-15 + nearest-16; (e) = original + top-11 + nearest-12 +
+  8 most-visited in the training reference) — no single-factor attribution.
 - `Radius` uses `sqrt(mean(distance_to_centroid))`, **not** standard radius of gyration; tables
   are internally comparable but not against differently defined radii elsewhere.
 - All tables are evaluation **v2**; the deterministic G-RANK variant (v3) is a cross-check in

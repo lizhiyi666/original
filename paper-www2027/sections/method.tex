@@ -7,8 +7,14 @@ sampling. We first recall the backbone generator (\S\ref{sec:method:backbone}),
 then formalize the partial-order constraints as differentiable energies
 (\S\ref{sec:method:energy}), describe the KL-preserving augmented-Lagrangian
 projection (\S\ref{sec:method:project}) and the complementary distance
-regularizer (\S\ref{sec:method:distance}), and finally specify where the control
-is applied in the reverse process (\S\ref{sec:method:placement}).
+regularizer (\S\ref{sec:method:distance}), and specify where the control
+is applied in the reverse process (\S\ref{sec:method:placement}). Two further stages
+address what the projection alone cannot reach: category-consistent POI decoding ties
+the emitted POI to the \emph{realized} category at the same position
+(\S\ref{sec:method:decoding}), and a terminal same-category geometry refinement restores
+the spatial marginals without touching any constraint-relevant field
+(\S\ref{sec:method:geometry}). \S\ref{sec:method:balance} collects the three scalars that
+trade constraint strength against distributional fidelity.
 
 \subsection{Backbone: conditional joint discrete diffusion}
 \label{sec:method:backbone}
@@ -67,8 +73,11 @@ violations while staying close to the model's own distribution. Let
 $\mathbf{y}^{(0)}=\mathbf{z}$ be the detached backbone logits and $\mathbf{y}$ a
 trainable copy. We solve, per sequence,
 \begin{equation}
-  \min_{\mathbf{y}}\; \dkl\!\big(\mathrm{softmax}(\mathbf{y})\,\big\|\,\mathrm{softmax}(\mathbf{y}^{(0)})\big)
-  \quad\text{s.t.}\quad g^{\mathrm{ord}}_{(a,b)}\le\tau,\; g^{\mathrm{ex}}_{(a,b)}\le\tau\;\;\forall(a,b),
+\begin{aligned}
+  \min_{\mathbf{y}}\;&\dkl\!\big(\mathrm{softmax}(\mathbf{y})\,\big\|\,\mathrm{softmax}(\mathbf{y}^{(0)})\big)\\
+  \text{s.t.}\;&g^{\mathrm{ord}}_{(a,b)}\le\tau,\quad g^{\mathrm{ex}}_{(a,b)}\le\tau
+  \quad\forall(a,b),
+\end{aligned}
   \label{eq:constrained}
 \end{equation}
 where the KL term anchors the projected distribution to the base model so that
@@ -136,9 +145,135 @@ meaningful---specifically during the last $K$ steps and every $f$ steps therein.
 At each such step, \pcdg replaces the backbone category-position logits with their
 projected values (and, when enabled, the distance-adjusted POI-position logits),
 and the next discrete state is obtained by the backbone's ordinary joint
-categorical sampling over the full token sequence. The temporal branch is
+categorical sampling over the full token sequence, optionally through the
+category-consistent decoder of \S\ref{sec:method:decoding}. The temporal branch is
 unchanged. Because every operation reads and rewrites only the per-step sampling
 logits of a frozen model, \pcdg adds no trainable parameters and requires no
 retraining, and it reduces to the unconstrained backbone when the projection is
 disabled. Algorithm pseudocode and default hyper-parameters are given in
 Appendix~\ref{app:algo}. \todo{add Fig.~1 (framework) and Fig.~2 (one projected reverse step); export from figure\_build/}
+
+\subsection{Category-consistent POI decoding}
+\label{sec:method:decoding}
+The projection of \S\ref{sec:method:project} acts on category positions, but the
+backbone emits categories and POIs as separate segments of the same token string and
+samples every position from its own categorical. Nothing ties the POI emitted at
+position $l$ to the category sampled at position $l$. This matters because the
+constraint metrics are evaluated on the \emph{actual} category of each generated POI,
+$\mathrm{cat}(\cdot)$ from the POI catalog, not on the category tokens: a sequence whose
+category tokens are perfectly ordered still violates $\Mmat$ if the POIs realize a
+different category sequence. On a $128$-sequence single-seed diagnostic (not one of the
+formal runs) the projected backbone left $17.5\%$ of positions category--POI
+inconsistent; enabling the decoder below drove that rate to $0$ and, \emph{without
+altering a single category token}, cut the strict violation rate from $27.0\%$ to
+$2.2\%$---so almost all of those violations came from the POI segment disagreeing with an
+already correctly ordered category segment.
+
+We therefore decode the two segments \emph{sequentially within one step} rather than
+independently. Let $\mathbf{g}$ be the Gumbel draw used by the backbone's categorical
+sampler at this step. We first take the ordinary sample
+$\hat{x}_l=\arg\max_v(\mathbf{g}+\mathbf{z})_{lv}$, which fixes the realized category at
+every category position. We then set, at each POI position (the set
+$\mathcal{P}_{\mathrm{poi}}$ given by the POI mask) the logits of every POI
+whose catalog category differs from that realized category to $-\infty$ and re-take the
+arg-max \emph{reusing the same draw} $\mathbf{g}$:
+\begin{equation}
+  \hat{x}^{\,\mathrm{cc}}_l=\arg\max_v\big(\mathbf{g}+\widetilde{\mathbf{z}}\big)_{lv},
+  \quad
+  \widetilde{z}_{lv}=\begin{cases}-\infty & l\in\mathcal{P}_{\mathrm{poi}},\ \mathrm{cat}(v)\neq \hat{c}_l\\ z_{lv}&\text{otherwise,}\end{cases}
+  \label{eq:ccdecode}
+\end{equation}
+where $\hat{c}_l$ is the category realized for the event at position $l$. Three
+properties follow. (i) Category positions are never rewritten, so the realized category
+sequence---and hence the ordering the projection just enforced---is preserved exactly.
+(ii) Exactly one draw is consumed per step, identical in shape and order to the
+unmodified sampler, so the ``off'' and ``on'' runs are paired at matched randomness and
+no extra global, spatial, projection or distance randomness is used. (iii) Masking uses
+true $-\infty$ rather than a large finite penalty, which would let a low-scoring legal
+POI tie with an illegal one. At intermediate reverse steps the POI mask state is still
+admissible and no restriction is applied when the category is itself masked or no legal
+POI exists; at the final step only same-category POIs are legal and the sampler raises
+rather than silently emitting an inconsistent token. The decoder adds no parameters and
+no logit prior---it is a restriction on realized tokens.
+
+\subsection{Terminal same-category geometry refinement}
+\label{sec:method:geometry}
+The stages so far decide \emph{which} category and \emph{which} POI identity; the
+coordinates are then whatever the chosen POIs happen to be, and the spatial marginals
+drift as a result (\S\ref{sec:exp:tradeoff}). After the reverse process completes, we
+therefore re-select each POI \emph{within its own realized category}.
+
+For every POI position we build a candidate set of at most $\kappa_g{=}32$ POIs sharing
+the realized category: the originally sampled POI, the backbone's highest-scoring
+candidates, the POIs closest to the generated trajectory's own centroid, and---in the
+distribution-corrected variant---the most frequently visited POIs of the training
+reference; duplicates are removed, the set is filled by model score, and ties are broken
+by catalog id so the construction is deterministic. Scores come from one frozen,
+untruncated $t{=}0$ evaluation of the backbone; reference GPS from the test split never
+enters. Writing $\mathbf{w}$ for a relaxed assignment over candidates, we minimize
+\begin{equation}
+  \dkl\!\big(q\,\|\,\mathbf{w}\big)\,w_{\mathrm{fid}}
+  + w_{\mathrm{d}}\,\mathrm{JSD}\big(H^{\mathrm{dist}}_{\mathrm{train}},H^{\mathrm{dist}}(\mathbf{w})\big)
+  + w_{\mathrm{r}}\,\mathrm{JSD}\big(H^{\mathrm{rad}}_{\mathrm{train}},H^{\mathrm{rad}}(\mathbf{w})\big),
+  \label{eq:geometry}
+\end{equation}
+where the two soft histograms are differentiable in $\mathbf{w}$ and the proposal $q$
+places half of its mass on the original POI and spreads the other half over the
+candidates by model score, so the fidelity term penalizes drifting away from the
+backbone's own preference. We optimize Eq.~\eqref{eq:geometry} with $P_g{=}8$
+straight-through relaxed paths, temperature $1$, Adam at learning rate $0.05$, for a
+prequalified budget of $200$ steps, refreshing an independent geometry noise stream
+every $20$ steps. The output is a \emph{hard} assignment: among the original assignment
+and the $8$ optimized paths we keep the arg-min of the same training-side objective.
+Empty, single-point and single-candidate positions, and batches in which the base
+projection never ran, are skipped.
+
+\paragraph{Constraint neutrality.} Because the refinement substitutes only POIs of the
+same realized category, together with their catalog coordinates, and leaves category
+tokens, the realized category sequence, event times, sequence lengths, event order and
+all conditions unchanged \emph{per event}, every constraint-relevant statistic is
+invariant by construction: OVR\textsubscript{strict}, OVR\textsubscript{skip}, pair and
+category coverage, Unsat, \emph{Category}, \emph{CategoryTransition} and the
+category--POI mismatch rate. We verify this numerically on every test run, requiring
+agreement within $10^{-12}$ rather than assuming it. The refinement can therefore only
+move the spatial and popularity statistics---which is precisely why it can repay the
+fidelity cost of the constraint stages without giving any of their gains back.
+
+\subsection{Distribution correction}
+\label{sec:method:balance}
+Three scalars govern the balance between constraint strength and distributional
+fidelity, all referenced to the \emph{training} reference pool only. First,
+$\rho\in(0,1]$ scales the constraint term of Eq.~\eqref{eq:auglag}, so the projection
+objective becomes
+\begin{equation}
+\begin{aligned}
+  w_{\mathrm{kl}}\,\dkl
+  &+ \rho\!\sum_{(a,b)}\!\mathrm{AL}\big(g^{\mathrm{ord}},g^{\mathrm{ex}};\lambda^{\bullet},\mu^{\bullet}\big)\\
+  &+ w_{\mathrm{dist}}\,\dkl\big(H_{\mathrm{train}}\|H_{\mathrm{proj}}\big)
+   + \lambda\,\mathcal{L}_{\mathrm{cat}} .
+\end{aligned}
+\label{eq:balance}
+\end{equation}
+Second, $\lambda\ge 0$ weights a category-side term
+\begin{equation}
+  \mathcal{L}_{\mathrm{cat}}=\tfrac12\big(
+    \mathrm{JSD}_{\mathrm{hour}\times\mathrm{cat}}
+    +\mathrm{JSD}_{\mathrm{transition}}\big),
+  \label{eq:catbalance}
+\end{equation}
+computed from \emph{expected} counts under the relaxed assignment---no Monte Carlo
+draws, so no additional randomness is consumed---with self-transitions counted,
+sequence boundaries excluded, and reference rows without support contributing zero.
+Third, $\beta\ge 0$ adds to Eq.~\eqref{eq:geometry} a POI-side term
+$\tfrac12(\mathrm{JSD}_{\mathrm{top}1000}+\mathrm{JSD}_{\mathrm{DailyLoc}})$,
+where the first is an \emph{identity-aligned} top-$1000$ visitation divergence (the
+generated and reference top-$1000$ sets are unioned by POI id before normalization, not
+compared as sorted popularity curves) and the second a soft expected-\emph{DailyLoc}
+divergence. Spatial optimization results are cached independently of $\beta$, so the
+three $\beta$ settings of a batch are compared at identical upstream randomness.
+
+The configuration used throughout is $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$, selected
+on a training-side calibration grid (Appendix~\ref{app:grid}). We retain $\lambda$ in the
+formulation because it is the natural category-side counterpart of $\beta$; that the
+selected configuration switches it \emph{off} is an empirical finding about where the
+fidelity cost lives (\S\ref{sec:exp:tradeoff}), not a modelling assumption.
