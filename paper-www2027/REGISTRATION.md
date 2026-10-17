@@ -1,7 +1,21 @@
-# WWW 2027 摘要注册填写内容（截止 2026-10-18 AoE）
+# WWW 2027 摘要注册填写内容
 
 注册会**锁定标题与作者列表**。以下内容可直接粘贴进表单。
-正文全文截止 2026-10-25。
+
+## 截止时间（以 OpenReview venue 页显示为准）
+
+| 事项 | OpenReview 显示（UTC） | 北京时间（UTC+8） |
+|---|---|---|
+| Submission Start | Aug 29 2026 00:00 | 2026-08-29 08:00 |
+| **Abstract Registration** | **Oct 19 2026 13:00** | **2026-10-19 21:00** |
+| Submission Deadline（全文） | Oct 26 2026 13:00 | 2026-10-26 21:00 |
+
+CFP 常写成「Oct 18 AoE」，与上表并不冲突：AoE = UTC−12，10-18 日终 = 10-19 12:00 UTC，
+OpenReview 的 13:00 UTC 只比它晚一小时。**按北京时间 10-19 21:00 这个硬截点安排**，
+不要按本地 10-18 当天算，也不要指望 AoE 还能多出一天。
+
+投稿入口：OpenReview venue `The Web Conference 2027 - long papers`
+（Research Track 长文；**不要**用 `Conference_Short_Papers`）。
 
 ---
 
@@ -48,9 +62,16 @@ Location-based social networks are a core source of web-scale human-mobility dat
 
 ## Keywords
 
+表单限 5 个，与 `main.tex` 的 `\keywords` 已同步：
+
 ```text
-synthetic human mobility, controllable generation, discrete diffusion, training-free constrained sampling, partial-order constraints, distribution correction, POI check-in sequences, LBSN
+synthetic human mobility, discrete diffusion, partial-order constraints, training-free constrained sampling, POI check-in sequences
 ```
+
+覆盖领域 / 模型类 / 约束类型 / 机制主张 / 数据任务五个维度。砍掉的：`LBSN`（与前两项重复）、
+`distribution correction`（标题已有）、`controllable generation`（被 training-free constrained
+sampling 涵盖）。若更看重 PC bidding 匹配面而非精确度，可用 `controllable generation` 替掉
+`POI check-in sequences`。
 
 ## Track
 
@@ -63,7 +84,7 @@ Research Track — Web Mining, Multimedia and Multilingual Content Analysis
 
 ---
 
-## 注册后、全文截止前（10-25）必须完成
+## 注册后、全文截止前（10-26）必须完成
 
 1. `sections/method.tex` 需要 Fig.1（四阶段框架）与 Fig.2（单个投影步）。
 2. Fig.3：Unsat × Distance JSD 平面，每方法一个点 + 阶段 (a)–(e) 的虚线路径。
