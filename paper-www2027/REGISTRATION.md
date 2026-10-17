@@ -22,10 +22,11 @@ OpenReview 的 13:00 UTC 只比它晚一小时。**按北京时间 10-19 21:00 �
 ## Title
 
 ```text
-Training-Free Partial-Order Control and Distribution Correction for Discrete-Diffusion POI Check-in Generation
+Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation
 ```
 
-109 字符。
+82 字符。按导师意见（2026-10-14）去掉 "Distribution Correction"，标题只强调 partial-order control；
+分布保真相关机制保留在摘要和正文中。
 
 ## Authors
 
@@ -48,16 +49,17 @@ School of Computer Science and Technology, Harbin Institute of Technology, Shenz
 
 ## Abstract
 
-254 words。若表单限 250 words，用后面的短版。
+版本 A（保守改），与 `main.tex` 一致。表单支持 TeX，所以百分号写成 `\%`；
+粘贴后在 Preview 里确认数字完整，若显示出反斜杠则删掉 5 个 `\`。
 
 ```text
-Location-based social networks (LBSNs) are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic synthetic generation. Beyond statistical realism, many downstream web applications need control over the semantic order of activities—e.g., leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints during sampling is commonly assumed to cost distributional fidelity; we show that this trade-off is largely separable, and we remove most of it. We present PCDG, a training-free control stack for a frozen conditional joint temporal + category/POI discrete-diffusion generator. From a sample-level category partial-order matrix, PCDG compiles differentiable order-violation and existence energies and, in the late reverse steps, projects only the category-position logits through a KL-preserving augmented-Lagrangian optimization; a category-consistent POI decoder then eliminates residual category-POI inconsistency, and a distribution-aware same-category geometry refinement—which leaves every constraint metric unchanged by construction—restores spatial realism by matching population-level travel-length and visitation statistics. Across two cities under an out-of-distribution split and three sampling seeds, PCDG cuts the strict ordering-violation rate from 92.89% to 4.04% on Istanbul and from 89.45% to 11.28% on New York, raising pairwise ordering coverage by 6.5x and 4.2x, while improving all six fidelity divergences over the unconstrained backbone on Istanbul and four of six on New York. On Istanbul it surpasses a fully retrained partial-order conditional model on all five constraint metrics and five of six fidelity divergences, without retraining anything. Stage-wise ablations localize where fidelity is lost and recovered, and we report the two New York statistics that remain above the backbone.
+Location-based social networks (LBSNs) are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic synthetic generation. Beyond statistical realism, many downstream web applications need control over the semantic order of activities—e.g., leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints is commonly assumed to cost distributional fidelity; we show this trade-off is largely separable. We present PCDG, a training-free control stack for a frozen conditional joint temporal + category/POI discrete-diffusion generator. PCDG compiles category partial-order constraints into differentiable energies, projects the category-position logits through a KL-preserving augmented-Lagrangian optimization in the late reverse steps, eliminates residual category-POI inconsistency via a category-consistent decoder, and restores spatial realism through a distribution-aware same-category geometry refinement that leaves every constraint metric unchanged by construction. Across two cities under an out-of-distribution split and three sampling seeds, PCDG cuts the strict ordering-violation rate from 92.89\% to 4.04\% on Istanbul and from 89.45\% to 11.28\% on New York, raising pairwise ordering coverage by 6.5x and 4.2x, while improving all six fidelity divergences over the unconstrained backbone on Istanbul and four of six on New York. On Istanbul it surpasses a fully retrained partial-order conditional model on all five constraint metrics and five of six fidelity divergences, without retraining anything. Stage-wise ablations localize where fidelity is lost and recovered across the three-stage stack.
 ```
 
 ### 短版（150 words，仅在表单硬限 250 以下时使用）
 
 ```text
-Location-based social networks are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating synthetic generation. Many web applications additionally need control over the semantic order of activities—leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints is commonly assumed to cost distributional fidelity; we show the trade-off is largely separable and remove most of it. We present PCDG, a training-free control stack for a frozen joint temporal + category/POI discrete-diffusion generator: an augmented-Lagrangian projection of the category-position logits, category-consistent POI decoding, and a constraint-neutral, distribution-aware geometry refinement. Across two cities under an out-of-distribution split and three seeds, PCDG cuts strict ordering violations from 92.89% to 4.04% and from 89.45% to 11.28%, while improving all six fidelity divergences over the unconstrained backbone on one city and four of six on the other, surpassing a fully retrained conditional model without any retraining.
+Location-based social networks are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating synthetic generation. Many web applications additionally need control over the semantic order of activities—leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints is commonly assumed to cost distributional fidelity; we show the trade-off is largely separable. We present PCDG, a training-free control stack for a frozen joint temporal + category/POI discrete-diffusion generator: an augmented-Lagrangian projection of the category-position logits, category-consistent POI decoding, and a constraint-neutral, distribution-aware geometry refinement. Across two cities under an out-of-distribution split and three seeds, PCDG cuts strict ordering violations from 92.89% to 4.04% and from 89.45% to 11.28%, while improving all six fidelity divergences over the unconstrained backbone on one city and four of six on the other, surpassing a fully retrained conditional model without any retraining.
 ```
 
 ## Keywords

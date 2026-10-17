@@ -27,7 +27,7 @@ correct and fully resolved. To clean aux files: `latexmk -c`.
 ## Status by section (updated 2026-10-14)
 | File | Status |
 |---|---|
-| `main.tex` | **Abstract rewritten** for the three-stage stack + the separable-trade-off claim. Title changed to "Training-Free Partial-Order Control and Distribution Correction for Discrete-Diffusion POI Check-in Generation" — **re-check before the 10-18 abstract registration, which locks it** |
+| `main.tex` | Abstract = version A (226 words, no "remove most of it", no NY-residual sentence). Title = "Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation" per advisor (2026-10-14: emphasize partial-order control, drop "Distribution Correction"). Locked at abstract registration, 2026-10-19 13:00 UTC |
 | `sections/intro.tex` | **Updated**: 3-stage method paragraph, trade-off-decomposition paragraph, 4 contributions |
 | `sections/related.tex` | Drafted (positions vs CDD / Marionette / ControlTraj; honest novelty delta) |
 | `sections/problem.tex` | **Complete draft** (task, partial-order matrix, eval axes) |
