@@ -25,112 +25,197 @@ distributional similarity alone does not establish safe data release.
 
 \section{Conclusion}
 \label{sec:conclusion}
-\pcdg provides sampling-time partial-order control for a frozen POI check-in
-generator. Its order and existence energies control category logits,
-category-consistent decoding reduces disagreement with POI identities, and
-same-category geometry refinement improves spatial fidelity while preserving
-constraint-relevant fields. On two cities, the full stack improves all five
-constraint metrics over the retrained PO-CFG baseline. It improves all six
-fidelity JSDs over JointGen on Istanbul and four on New York. The stage-wise
-results show that spatial distortion can be reduced independently of constraint
-satisfaction in this setting, while the remaining category-transition and
-popularity gaps bound the scope of that separation.
+\pcdg combines order/existence projection, category-consistent decoding, and
+same-category geometry refinement for a frozen POI generator. On two cities, it
+improves all five constraint metrics over retrained PO-CFG. It lowers all six
+fidelity JSDs versus JointGen on Istanbul and four on New York. Refinement
+recovers spatial fidelity while preserving constraint-relevant fields;
+New York's residual category-transition and popularity errors delimit this
+separation.
+\label{end:main}
 
 % ======================= Appendix =======================
+\clearpage
 \appendix
 
 \section{Algorithm and Default Hyper-parameters}
 \label{app:algo}
-Algorithm~\ref{alg:pcdg} summarizes one projected reverse step. Defaults:
-$w_{\mathrm{ord}}{=}1$, $w_{\mathrm{ex}}{=}5$, $w_{\mathrm{kl}}{=}1$,
-$w_{\mathrm{dist}}{=}1$; Gumbel temperature $T{=}3$; outer iterations $10$, inner
-iterations $50$; SGD learning rate $\eta$, gradient clip $10$; multiplier growth
-$\alpha{=}2$, $\mu_{\max}{=}10^3$, tolerance $\tau_{\mathrm{tol}}{=}0.25$; distance
-routes $P{=}8$, candidates $\kappa{=}32$, bins $32$; applied over the last $40$
-reverse steps every $4$ steps. Geometry refinement (\S\ref{sec:method:geometry}):
-$w_{\mathrm{d}}{=}1$, $w_{\mathrm{r}}{=}2$, $w_{\mathrm{fid}}{=}0.1$, $P_g{=}8$ paths,
-$\kappa_g{=}32$ candidates, temperature $1$, Adam learning rate $0.05$, $200$ steps,
-geometry noise refreshed every $20$ steps. Distribution correction
-(\S\ref{sec:method:balance}): $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$. The geometry step
-budget was fixed by a speed qualification (median total spatial-sampling time within
-$1.10\times$ of the unrefined backbone) before any quality comparison, and the weights
-by the grid of Appendix~\ref{app:grid}. Algorithm~\ref{alg:pcdg} covers one projected
-reverse step only; the decoder of \S\ref{sec:method:decoding} acts inside its final line,
-and the refinement of \S\ref{sec:method:geometry} acts once after the reverse process
-terminates. \todo{confirm $\eta$ and step schedule against the distance-v2 manifest before camera-ready.}
+Projection uses nominal weights
+$(w_{\mathrm{ord}},w_{\mathrm{ex}},w_{\mathrm{kl}},w_{\mathrm{dist}})=(1,5,1,1)$,
+Gumbel temperature $3$, $10$ outer and $50$ inner iterations, SGD rate
+$\eta=1$, and gradient-norm clip $10$. Dual variables initialize at $1$,
+penalties grow by $2$ up to $10^3$, and the violation threshold is $\tau=0$
+with multiplier-update tolerance $10^{-6}$. Early stopping is disabled.
+In the batch implementation, token KL sums over vocabulary and positions for
+active sequences and divides by the full batch size; order/existence penalties
+sum over active relations and sequences without that division.
+The ten controlled steps are $36,32,\ldots,4,0$, totaling $5{,}000$ inner
+updates per active batch. Distance KL uses $8$ routes, top-$32$ candidates,
+$32$ bins, and path temperature $1$.
+
+Geometry uses distance/radius/fidelity weights $(1,2,0.1)$, $8$ paths, up to
+$32$ candidates, temperature $1$, Adam rate $0.05$, $200$ steps, and noise
+refresh every $20$ steps. The full-stack weights are $(\rho,\lambda,\beta)=(0.5,0,1)$.
+Algorithm~\ref{alg:pcdg} covers one controlled reverse step. Geometry acts once
+after the reverse process; its timing qualification is in Appendix~\ref{app:cost}.
 
 \begin{algorithm}[t]
-\caption{\pcdg projected reverse step (one controlled step $s$)}
+\caption{\pcdg: one controlled reverse step}
 \label{alg:pcdg}
 \begin{algorithmic}[1]
-\Require backbone logits $\mathbf{z}$; constraints $\{(a,b)\}$ with $\mathbf{W}_A,\mathbf{W}_B$; masks; distance reference $H_{\mathrm{train}}$
-\State $\mathbf{y}\gets \mathbf{z}$ (detached); initialize $\lambda,\mu$ for active rows
-\For{outer $=1$ to $T_{\mathrm{out}}$}
-  \For{inner $=1$ to $T_{\mathrm{in}}$}
-    \State relax $\mathbf{y}$ to $\boldsymbol\pi$; compute $g^{\mathrm{ord}},g^{\mathrm{ex}}$ on category positions \Comment{Eq.~\eqref{eq:order}--\eqref{eq:exist}}
-    \State $\mathcal{L}\gets w_{\mathrm{kl}}\dkl + \text{AL}(g^{\mathrm{ord}},g^{\mathrm{ex}};\lambda,\mu) + w_{\mathrm{dist}}\dkl(H_{\mathrm{train}}\|H_{\mathrm{proj}})$
-    \State SGD step on $\mathbf{y}$ (clip; restrict to active rows)
+\Require frozen logits $\mathbf z$, constraints $\Mmat$, position masks, training references
+\State $\mathbf y\gets\operatorname{detach}(\mathbf z)$; initialize duals
+\For{$o=1,\ldots,10$}
+  \For{$j=1,\ldots,50$}
+    \State Relax $\mathbf y$ with Gumbel-softmax
+    \State Compute order/existence and distribution terms
+    \State $\mathcal L\gets$ weighted objective in Eq.~\eqref{eq:balance}
+    \State SGD on active rows of $\mathbf y$; clip gradients
   \EndFor
-  \State evaluate hard violations $\hat\delta$; update $\lambda,\mu$ \Comment{Eq.~\eqref{eq:dual}}; early stop if satisfied
+  \State Update duals from hard violations, Eq.~\eqref{eq:dual}
 \EndFor
-\State \Return joint categorical sample from projected $\mathbf{y}$, decoded category-first \Comment{Eq.~\eqref{eq:ccdecode}}
+\State Sample category tokens; decode POIs with shared noise
+\State \Return next discrete state (Eq.~\eqref{eq:ccdecode} and fallback)
 \end{algorithmic}
 \end{algorithm}
 
 \section{Distribution-Correction Grid and Selection}
 \label{app:grid}
-The distribution-correction stage has three weights. $\rho$ scales the existing
-constraint loss inside the augmented-Lagrangian objective
-(Eq.~\eqref{eq:auglag}); $\lambda$ weights a category-side distribution term---the mean
-of an hour--category JSD and a conditional category-transition JSD against the training
-reference pool; and $\beta$ weights a POI-side distribution term---the mean of an
-identity-aligned top-$1000$ visitation JSD and a soft expected-\emph{DailyLoc} JSD---inside
-the same-category geometry refinement objective. We screened the full grid
-$\rho\in\{0.25,0.5,1\}\times\lambda\in\{0,1\}\times\beta\in\{0,0.1,1\}$ ($18$
-configurations) on a single seed, retained at most two jointly feasible configurations
-per city, and confirmed those over three seeds, all on a training-side calibration split
-with $512$ conditions per city and seed. Configurations were ranked by the maximum, then
-the mean, of the twelve per-city JSD/JointGen ratios, with the parameter tuple as the
-final tie-break. The two configurations that reached confirmation were
-$(\rho,\lambda,\beta)=(0.5,0,1)$ and $(0.5,0,0.1)$; the first was selected and is the
-configuration reported throughout. Spatial results are cached by
-$(\textit{city},\textit{pool},\textit{seed},\rho,\lambda)$ and reused across the three
-$\beta$ refinements of each batch, so $\beta$ varies at fixed upstream randomness.
-No test-set metric participated in screening, confirmation, ranking, candidate
-construction, or the refinement objective. As stated in \S\ref{sec:limitations},
-neither confirmed configuration cleared all pre-specified calibration thresholds: both
-met the \emph{Distance}, \emph{Radius} and \emph{DailyLoc} ceilings in both cities but
-not the \emph{CategoryTransition}, \emph{Category} and \emph{G-RANK} ceilings on that
-calibration split. On the held-out test set the selected configuration then met all
-eleven gates on Istanbul and nine of eleven on New York.
-\todo{Appendix table: all 18 screened configurations with their twelve calibration ratios, from screen-selection.json.}
+We screened
+$\rho\in\{0.25,0.5,1\}$, $\lambda\in\{0,1\}$, and $\beta\in\{0,0.1,1\}$
+on $512$ training-side conditions per city with one sampling seed.
+Table~\ref{tab:grid} retains the archived \emph{v2} screening values.
+The shared-city ranking minimizes the maximum, then mean, of twelve
+JSD/JointGen ratios, followed by the parameter tuple to break ties.
+Upstream samples are cached by city, calibration pool, seed, $\rho$, and
+$\lambda$, so the three $\beta$ refinements share upstream randomness and
+the grid uses a fixed candidate-pool construction.
+\input{tables/calibration-grid}
+
+The top two configurations, $(0.5,0,1)$ and $(0.5,0,0.1)$, underwent
+three-seed confirmation. Both retained the constraint gates and met the
+Distance, Radius, and DailyLoc ceilings, but failed CategoryTransition,
+Category, and G-RANK ceilings on calibration data. Thus the original
+all-gates confirmation selected no candidate. Formal sampling subsequently
+used an explicit override: rank the two confirmed candidates while retaining
+constraint gates but allowing failed distribution gates.
+
+This final ranking used the archived \emph{v3} deterministic-G-RANK
+re-evaluation. The $18$ screening ranks, two-candidate shortlist, failed
+confirmation gates, and final candidate order are unchanged under v2.
+For the selected $(0.5,0,1)$, the maximum/mean confirmation ratios are
+$1.4628/0.8884$ in v3 and $1.4628/0.8909$ in v2; the runner-up means are
+$0.9103$ and $0.9135$, respectively. The selected configuration was frozen
+before formal test sampling. Test metrics were used only for reporting:
+eleven of eleven gates hold on Istanbul and nine on New York.
+The calibration pool was seen during backbone training and is not an
+independent validation set.
 
 \section{Projection and Stage-wise Tables}
 \label{app:ablation}
-Tables~\ref{tab:ablation-jsd} and~\ref{tab:ablation} are referenced from
-\S\ref{sec:exp:ablation} and placed here for space.
+Tables~\ref{tab:ablation-jsd} and~\ref{tab:ablation} give the projection
+ablations; Table~\ref{tab:stagewise} reports the full stage-wise comparison.
+All values follow evaluation v2.
 \input{tables/ablation}
 \input{tables/stagewise}
 
 \section{Metric Definitions}
 \label{app:metrics}
-\todo{one-line formal definitions of OVR\_strict, OVR\_skip, Pair/Category coverage, Unsat, and the six eval-v2 JSD marginals; copy from the unified evaluation module.}
+All constraint metrics use actual categories $\mathrm{cat}(l)$ of generated
+POIs, not the sampled category tokens. For reference sequence $i$, let $R_i$
+contain each distinct-category pair $(a,b)$ satisfying
+$\max\operatorname{pos}_i(a)<\min\operatorname{pos}_i(b)$.
+Let $P_i\subseteq R_i$ contain pairs whose two categories both occur in the
+generated sequence; $C_i$ is the set of categories involved in $R_i$ and
+$\widehat C_i$ the generated category set.
+For a present pair, $v_i(a,b)$ is the number of inverted occurrence pairs
+divided by $n_a n_b$.
 
-\paragraph{Two definitions that differ from common usage.} \emph{Radius} is computed as
-$\sqrt{\operatorname{mean}(d(\cdot,\bar{c}))}$, the square root of the mean distance to
-the arithmetic centroid, \emph{not} the standard root-mean-square radius of gyration; it
-is therefore comparable across the rows of our tables but not directly against
-differently defined radii in prior work. \emph{G-RANK} compares the visitation
-distributions of the top-$1000$ most frequent POIs; because many POIs tie at the
-truncation frequency, the membership of that top-$1000$ set is implementation-dependent
-under an unstable sort. All tables in this paper use the archived evaluation protocol
-(v2). We additionally recomputed a deterministic variant that sorts by count descending
-then POI id ascending and aligns the generated and reference sets by identity before
-normalization. The effect on \emph{G-RANK} is at most $0.0032$ in absolute value and
-changes no ordering or conclusion: on Istanbul the full stack remains below the backbone
-($0.1766$ vs.\ $0.1892$) and on New York it remains above it ($0.1912$ vs.\ $0.1628$).
-All other statistics agree with the archived values to within $10^{-12}$.
+\paragraph{Ordering and coverage.}
+Strict OVR averages $v_i$ over $R_i$, assigning $1$ to missing-category pairs,
+then averages over sequences with nonempty $R_i$. Skip OVR averages $v_i$
+over $P_i$, then over sequences with nonempty $P_i$. In contrast, coverage
+and Unsat pool counts:
+\begin{align}
+ \mathrm{PairCov}&=\frac{\sum_i|P_i|}{\sum_i|R_i|},\\
+ \mathrm{CatCov}&=\frac{\sum_i|C_i\cap\widehat C_i|}{\sum_i|C_i|},\\
+ \mathrm{Unsat}&=\frac{\sum_i\sum_{(a,b)\in R_i}
+ \mathbf{1}[(a,b)\notin P_i\ \lor\ v_i(a,b)>0]}{\sum_i|R_i|}.
+\end{align}
+Thus Unsat counts unsatisfied \emph{relations}, not sequences; pair coverage
+does not require correct order. Empty denominators are undefined, not zero;
+undefined OVR sequences are omitted from their respective means.
+Tables express these rates in percent.
+The separate diagnostic \texttt{token\_strict\_ovr} uses category tokens.
+Mismatch rate pools the event-wise disagreements between tokens and catalog
+categories.
+
+\paragraph{JSD and filtering.}
+For count vectors $P,Q$, the implementation forms
+$p=P/\sum P+\epsilon$, $q=Q/\sum Q+\epsilon$, $\epsilon=10^{-14}$, without a
+second normalization, and evaluates
+$\frac12\sum_jp_j\log(p_j/m_j)+\frac12\sum_jq_j\log(q_j/m_j)$,
+$m=(p+q)/2$, using natural logarithms. A zero-total vector is undefined.
+Distance, Radius, DailyLoc, and G-RANK retain sequences with at least two GPS
+points, independently on each side; the two category metrics include shorter
+sequences. Distance additionally requires the aligned generated/reference
+first and last categories to match. This subset can vary by method, so the
+reported Distance is not an unconditional whole-population divergence.
+
+\paragraph{Six fidelity statistics.}
+Distance is cumulative consecutive-point Haversine distance (Earth radius
+$6371$ km). With arithmetic latitude/longitude centroid $\bar x$, Radius is
+\[
+  \mathrm{Radius}=\sqrt{n^{-1}\sum_j d_{\mathrm{Hav}}(x_j,\bar x)}.
+\]
+Its unit is $\sqrt{\mathrm{km}}$ and it
+is \emph{not} root-mean-square radius of gyration.
+DailyLoc counts distinct POI identities per sequence.
+For these three histograms, edges are exactly
+$\operatorname{arange}(0,M,M/100)$, where $M$ is the larger observed maximum.
+This usually produces $99$ bins, omits $M$, drops values beyond the last edge,
+and renormalizes retained mass. If $M=0$, the divergence is $0$; a zero
+histogram otherwise yields an undefined value. These historical conventions
+are preserved for comparability, not proposed as new estimators.
+
+Category averages category-frequency JSDs equally over the $24$ hours.
+CategoryTransition is the equal-weight mean of conditional next-category
+JSDs over source categories with any outgoing transition on either side;
+self-transitions are included and sequence boundaries excluded. A row/hour
+empty on both sides contributes $0$; one empty on only one side contributes
+$\ln2$. No events or no transitions, respectively, gives an undefined metric.
+G-RANK retains each side's top-$1000$ visited POIs (all if fewer), aligns
+their union by POI identity with zeros for missing retained IDs, and computes
+JSD after normalizing retained mass. It compares identities, not rank positions.
+
+\paragraph{Deterministic audit.}
+Evaluation v2 uses an unstable frequency sort at the top-$1000$ cutoff.
+The v3 audit breaks ties by POI id; identity alignment is present in both
+versions. Across the $18$ formal audit metric sets (six full-stack outputs
+and twelve reused baseline sets), the largest absolute G-RANK change is
+$0.0032$; other statistics agree within $10^{-12}$.
+The full-stack/backbone G-RANK comparison remains $0.1766<0.1892$ on
+Istanbul and $0.1912>0.1628$ on New York under v3.
+This audit does not replace any v2 table cell.
 
 \section{Cost}
 \label{app:cost}
-\todo{sampling wall-clock overhead vs.\ JointGen, and PO-CFG retraining cost (per-city GPU-hours), from distance-v2 diagnostics.}
+Table~\ref{tab:cost} reports the earlier selected-geometry qualification,
+not the later full-stack timing. On each city, ordinary and long cases are
+eligible $64$-sequence batches chosen by lower-median and maximum batchwise
+generated length, respectively. Each case uses two warmups and five measured
+repetitions, seed $135398$, FP32 with TF32 disabled, and the same CUDA device
+and input. CUDA synchronization brackets the timer. Ratios divide the two
+medians, rather than averaging per-trial ratios.
+\input{tables/cost}
+
+The timer covers spatial sampling and decoding, including fresh scoring,
+candidate construction, optimization, and discrete selection when geometry
+is enabled; it excludes temporal generation, model loading, and transfer.
+The denominator is projection \textsc{Full} (\pcdgp), not JointGen.
+The selected $200$-step configuration uses radius/fidelity weights $2/0.1$;
+an earlier step-budget probe used $1/0.01$. All four selected-configuration
+ratios are below the $1.10$ ceiling, with overhead $3.35$--$3.98\%$.
+These measurements cannot be transferred to \pcdgpd plus geometry or the
+final $(0.5,0,1)$ stack. Comparable full-stack/JointGen sampling overhead and
+PO-CFG training GPU-hours remain unmeasured in the archived cost evidence.

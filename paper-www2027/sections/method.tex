@@ -35,9 +35,8 @@ matrices~\cite{austin2021d3pm}; a Transformer denoiser with an
 $\mathbf{x}_0$-parameterization predicts, at each reverse step, per-position
 logits $\mathbf{z}\in\mathbb{R}^{V\times L}$ over the joint vocabulary of size $V$
 across the $L$ positions, from which the posterior $p(\mathbf{x}_{s-1}\!\mid\!\mathbf{x}_s)$
-and the next discrete state are sampled. \textbf{The backbone is used as-is and is
-never retrained by \pcdg}; our contribution modifies only the per-step sampling
-distribution $\mathbf{z}$.
+and the next discrete state are sampled. \pcdg keeps the backbone frozen and
+changes sampling distributions and terminal POI assignments.
 
 \subsection{Partial-order constraints as differentiable energies}
 \label{sec:method:energy}
@@ -66,8 +65,8 @@ energies:
 The \emph{order energy}~\eqref{eq:order} is the expected number of inverted pairs,
 i.e.\ the probability mass of a $b$ appearing \emph{before} an $a$; it is zero iff
 no $b$ precedes any $a$. The \emph{existence energy}~\eqref{eq:exist} penalizes an
-expected count below one for either constrained category, which prevents the model
-from trivially satisfying ordering by \emph{omitting} $a$ or $b$. Both energies are
+expected count below one for either constrained category, discouraging trivial
+satisfaction of ordering by \emph{omitting} $a$ or $b$. Both energies are
 computed only over category positions; POI logits do not enter
 Eqs.~\eqref{eq:order}--\eqref{eq:exist}.
 
@@ -79,14 +78,17 @@ $\mathbf{y}^{(0)}=\mathbf{z}$ be the detached backbone logits and $\mathbf{y}$ a
 trainable copy. We solve, per sequence,
 \begin{equation}
 \begin{aligned}
-  \min_{\mathbf{y}}\;&\dkl\!\big(\mathrm{softmax}(\mathbf{y})\,\big\|\,\mathrm{softmax}(\mathbf{y}^{(0)})\big)\\
+  \min_{\mathbf{y}}\;&\dkl\!\big(\mathrm{softmax}(\mathbf{y}^{(0)})\,\big\|\,\mathrm{softmax}(\mathbf{y})\big)\\
   \text{s.t.}\;&g^{\mathrm{ord}}_{(a,b)}\le\tau,\quad g^{\mathrm{ex}}_{(a,b)}\le\tau
   \quad\forall(a,b),
 \end{aligned}
   \label{eq:constrained}
 \end{equation}
-where the KL term anchors the projected distribution to the base model so that
-fidelity is preserved away from the constrained categories. We optimize the
+where the KL term penalizes deviation from the base model; it does not guarantee
+unchanged fidelity metrics. Its direction is base-to-projected: the frozen
+distribution is the target argument of the implementation's KL loss.
+Following the projection paradigm of
+CDD~\cite{cardei2025cdd}, we optimize the
 augmented-Lagrangian relaxation of~\eqref{eq:constrained}: with
 $\delta^{\bullet}=\relu(g^{\bullet}-\tau)$,
 \begin{equation}
@@ -109,12 +111,11 @@ updates the dual variables,
   \mu \leftarrow \min(\alpha\,\mu,\;\mu_{\max})\ \text{if}\ \hat{\delta}>\tau_{\mathrm{tol}},
   \label{eq:dual}
 \end{equation}
-stopping early once $\max\hat{\delta}<\tau_{\mathrm{tol}}$. Evaluating the
-multiplier update on hard violations lets the penalty grow precisely for the
-sequences and constraints that remain unsatisfied, rather than applying a uniform
-fixed penalty. Crucially, the projection reweights the sampling distribution
-over category positions only; it performs \emph{no} POI candidate filtering and
-imposes \emph{no} hard category$\rightarrow$POI consistency mask.
+using a fixed budget without early stopping in the reported runs.
+Hard violations determine which penalties grow. The order and existence terms
+act on category positions; distance KL also updates POI logits
+(\S\ref{sec:method:distance}). Hard POI-support masking belongs to the subsequent
+decoder, not these order/existence energies.
 
 \subsection{Distance-distribution regularization}
 \label{sec:method:distance}
@@ -136,7 +137,7 @@ $H_{\mathrm{proj}}(\mathbf{y})$. We add the term
 \end{equation}
 to the objective~\eqref{eq:auglag}. Unlike the order/existence energies, this term
 acts on \emph{POI-position} logits, and it is a batch-level distribution-matching
-regularizer rather than a per-sample hard constraint; it is applied only to
+regularizer, not a hard constraint on each sample. It is applied only to
 sequences with at least two POIs and uses an independent random stream. Its weight
 is not tuned per city and is not guaranteed to improve every fidelity metric; we
 quantify its effect via the \textsc{No Distance KL} ablation
@@ -144,62 +145,43 @@ quantify its effect via the \textsc{No Distance KL} ablation
 
 \subsection{Placement in the reverse process and joint sampling}
 \label{sec:method:placement}
-The control is applied in the \emph{late} reverse-diffusion steps---where the
+The control is applied in the \emph{late} reverse-diffusion steps, where the
 predicted categories are informative enough for the energies to be
-meaningful---specifically during the last $K$ steps and every $f$ steps therein.
+meaningful, specifically during the last $K$ steps and every $f$ steps therein.
 At each such step, \pcdg replaces the backbone category-position logits with their
 projected values (and, when enabled, the distance-adjusted POI-position logits),
 and the next discrete state is obtained by the backbone's ordinary joint
 categorical sampling over the full token sequence, optionally through the
 category-consistent decoder of \S\ref{sec:method:decoding}. The temporal branch is
-unchanged. Because every operation reads and rewrites only the per-step sampling
-logits of a frozen model, \pcdg adds no trainable parameters and requires no
-retraining, and it reduces to the unconstrained backbone when the projection is
-disabled. Algorithm pseudocode and default hyper-parameters are given in
+unchanged. \pcdg adds no model parameters and requires no retraining. Disabling
+all control stages recovers the unconstrained backbone. Algorithm pseudocode
+and default hyperparameters are given in
 Appendix~\ref{app:algo} and Figure~\ref{fig:framework}.
 
 \subsection{Category-consistent POI decoding}
 \label{sec:method:decoding}
-The projection of \S\ref{sec:method:project} acts on category positions, but the
-backbone emits categories and POIs as separate segments of the same token string and
-samples every position from its own categorical. Nothing ties the POI emitted at
-position $l$ to the category sampled at position $l$. This matters because the
-constraint metrics are evaluated on the \emph{actual} category of each generated POI,
-$\mathrm{cat}(\cdot)$ from the POI catalog, not on the category tokens: a sequence whose
-category tokens are perfectly ordered still violates $\Mmat$ if the POIs realize a
-different category sequence. On a $128$-sequence single-seed diagnostic (not one of the
-formal runs) the projected backbone left $17.5\%$ of positions category--POI
-inconsistent; enabling the decoder below drove that rate to $0$ and, \emph{without
-altering a single category token}, cut the strict violation rate from $27.0\%$ to
-$2.2\%$---so almost all of those violations came from the POI segment disagreeing with an
-already correctly ordered category segment.
+The category and POI segments are sampled at separate positions. A correctly
+ordered category-token sequence can therefore yield POIs with different actual
+categories. Since constraint metrics use $\mathrm{cat}(l)$ from the catalog,
+projection of category tokens alone does not ensure activity-order control.
 
-We therefore decode the two segments \emph{sequentially within one step} rather than
-independently. Let $\mathbf{g}$ be the Gumbel draw used by the backbone's categorical
-sampler at this step. We first take the ordinary sample
-$\hat{x}_l=\arg\max_v(\mathbf{g}+\mathbf{z})_{lv}$, which fixes the realized category at
-every category position. We then set, at each POI position (the set
-$\mathcal{P}_{\mathrm{poi}}$ given by the POI mask) the logits of every POI
-whose catalog category differs from that realized category to $-\infty$ and re-take the
-arg-max \emph{reusing the same draw} $\mathbf{g}$:
+The decoder couples the segments within each reverse step. With the backbone's
+Gumbel draw $\mathbf{g}$, first sample the full token string, fixing the realized
+category $\hat c_l$ aligned with each POI position. Then restrict its POI support
+and resample using the \emph{same} draw:
 \begin{equation}
-  \hat{x}^{\,\mathrm{cc}}_l=\arg\max_v\big(\mathbf{g}+\widetilde{\mathbf{z}}\big)_{lv},
-  \quad
-  \widetilde{z}_{lv}=\begin{cases}-\infty & l\in\mathcal{P}_{\mathrm{poi}},\ \mathrm{cat}(v)\neq \hat{c}_l\\ z_{lv}&\text{otherwise,}\end{cases}
-  \label{eq:ccdecode}
+ \hat x^{\mathrm{cc}}_l=\arg\max_{v\in S_l}(z_{lv}+g_{lv}),
+ \quad S_l=\{v:\mathrm{cat}(v)=\hat c_l\}.
+ \label{eq:ccdecode}
 \end{equation}
-where $\hat{c}_l$ is the category realized for the event at position $l$. Three
-properties follow. (i) Category positions are never rewritten, so the realized category
-sequence---and hence the ordering the projection just enforced---is preserved exactly.
-(ii) Exactly one draw is consumed per step, identical in shape and order to the
-unmodified sampler, so the ``off'' and ``on'' runs are paired at matched randomness and
-no extra global, spatial, projection or distance randomness is used. (iii) Masking uses
-true $-\infty$ rather than a large finite penalty, which would let a low-scoring legal
-POI tie with an illegal one. At intermediate reverse steps the POI mask state is still
-admissible and no restriction is applied when the category is itself masked or no legal
-POI exists; at the final step only same-category POIs are legal and the sampler raises
-rather than silently emitting an inconsistent token. The decoder adds no parameters and
-no logit prior---it is a restriction on realized tokens.
+For a supported category, logits outside $S_l$ are set to $-\infty$, not a large
+finite penalty. Category positions are untouched, and the sampler consumes
+exactly one draw of the original shape per step. At intermediate steps the POI
+mask token remains admissible; unsupported category positions are unrestricted.
+At the final step, an unsupported category falls back to \emph{any catalog POI}.
+Thus the implementation retains a small category--POI mismatch fraction,
+$0.0034\%$--$0.0219\%$ across the six full-stack runs, rather than eliminating it.
+The decoder introduces no parameters or logit prior.
 
 \subsection{Terminal same-category geometry refinement}
 \label{sec:method:geometry}
@@ -210,10 +192,12 @@ therefore re-select each POI \emph{within its own realized category}.
 
 For every POI position we build a candidate set of at most $\kappa_g{=}32$ POIs sharing
 the realized category: the originally sampled POI, the backbone's highest-scoring
-candidates, the POIs closest to the generated trajectory's own centroid, and---in the
-distribution-corrected variant---the most frequently visited POIs of the training
+candidates, the POIs closest to the generated trajectory's own centroid, and, in the
+distribution-corrected variant, the most frequently visited POIs of the training
 reference; duplicates are removed, the set is filled by model score, and ties are broken
-by catalog id so the construction is deterministic. Scores come from one frozen,
+by catalog id so the construction is deterministic. Stage (d) uses the original
+POI, top-$15$ by score and nearest-$16$ to the centroid; stage (e) uses the original,
+top-$11$, nearest-$12$, and the $8$ most visited training POIs. Scores come from one frozen,
 untruncated $t{=}0$ evaluation of the backbone; reference GPS from the test split never
 enters. Writing $\mathbf{w}$ for a relaxed assignment over candidates, we minimize
 \begin{equation}
@@ -241,8 +225,8 @@ invariant by construction: OVR\textsubscript{strict}, OVR\textsubscript{skip}, p
 category coverage, Unsat, \emph{Category}, \emph{CategoryTransition} and the
 category--POI mismatch rate. We verify this numerically on every test run, requiring
 agreement within $10^{-12}$ rather than assuming it. The refinement can therefore only
-move the spatial and popularity statistics---which is precisely why it can repay the
-fidelity cost of the constraint stages without giving any of their gains back.
+move the spatial and popularity statistics while leaving these constraint
+measurements unchanged.
 
 \subsection{Distribution correction}
 \label{sec:method:balance}
@@ -266,19 +250,17 @@ Second, $\lambda\ge 0$ weights a category-side term
     +\mathrm{JSD}_{\mathrm{transition}}\big),
   \label{eq:catbalance}
 \end{equation}
-computed from \emph{expected} counts under the relaxed assignment---no Monte Carlo
-draws, so no additional randomness is consumed---with self-transitions counted,
-sequence boundaries excluded, and reference rows without support contributing zero.
+computed from \emph{expected} counts under the relaxed assignment, without
+Monte Carlo draws or additional randomness. Self-transitions are counted,
+sequence boundaries excluded, and reference rows without support contribute zero.
 Third, $\beta\ge 0$ adds to Eq.~\eqref{eq:geometry} a POI-side term
 $\tfrac12(\mathrm{JSD}_{\mathrm{top}1000}+\mathrm{JSD}_{\mathrm{DailyLoc}})$,
 where the first is an \emph{identity-aligned} top-$1000$ visitation divergence (the
 generated and reference top-$1000$ sets are unioned by POI id before normalization, not
 compared as sorted popularity curves) and the second a soft expected-\emph{DailyLoc}
-divergence. Spatial optimization results are cached independently of $\beta$, so the
+divergence. Pre-refinement spatial samples are cached independently of $\beta$, so the
 three $\beta$ settings of a batch are compared at identical upstream randomness.
 
-The configuration used throughout is $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$, selected
-on a training-side calibration grid (Appendix~\ref{app:grid}). We retain $\lambda$ in the
-formulation because it is the natural category-side counterpart of $\beta$; that the
-selected configuration switches it \emph{off} is an empirical finding about where the
-fidelity cost lives (\S\ref{sec:exp:tradeoff}), not a modelling assumption.
+The full configuration is $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$, selected
+on training-side calibration data (Appendix~\ref{app:grid}). The selected value
+$\lambda=0$ describes this grid's outcome, not the absence of category-side error.

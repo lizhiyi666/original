@@ -40,7 +40,7 @@ def main():
     jsd, constraints = read_rows(ROOT / "paper-www2027/tables/method-comparison.tex")
     stages, = read_rows(ROOT / "paper-www2027/tables/stagewise.tex")
     plt.rcParams.update({"font.family": "Times New Roman", "font.size": 9,
-                         "pdf.fonttype": 42, "svg.fonttype": "none",
+                         "pdf.fonttype": 42, "svg.fonttype": "none", "svg.hashsalt": "pcdg-www2027",
                          "axes.spines.top": False, "axes.spines.right": False})
     fig, axes = plt.subplots(1, 2, figsize=(7, 2.65), sharex=True, sharey=True)
     fig.subplots_adjust(left=.078, right=.985, top=.89, bottom=.33, wspace=.13)
@@ -84,7 +84,9 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     BUILD.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "tradeoff.pdf", metadata={"Creator": "Matplotlib", "CreationDate": None})
-    fig.savefig(OUT / "tradeoff.svg")
+    fig.savefig(OUT / "tradeoff.svg", metadata={"Date": None})
+    svg = OUT / "tradeoff.svg"
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n", encoding="utf-8")
     fig.savefig(BUILD / "tradeoff.png", dpi=220)
     plt.close(fig)
     print("Validated stage coordinates against table means; exported tradeoff.pdf/.svg")

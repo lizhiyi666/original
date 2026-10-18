@@ -18,8 +18,10 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
-% draft-only helper; make it a no-op before submission
-\newcommand{\todo}[1]{\textcolor{red}{\small[TODO: #1]}}
+% No visible draft annotations in the review PDF.
+\newcommand{\todo}[1]{}
+% Permit flexible paragraph breaking without changing font, margins, or spacing.
+\setlength{\emergencystretch}{1em}
 % shared macros
 \newcommand{\pcdg}{\textsc{PCDG}\xspace}
 \newcommand{\pcdgp}{\textsc{PCDG-P}\xspace}
@@ -88,6 +90,8 @@ localize where fidelity is lost and recovered across the three-stage stack.
 % inherited from the thesis draft; regenerate the whole block from the official ACM CCS
 % tool (https://dl.acm.org/ccs) before the full-paper deadline rather than hand-editing
 % concept_ids, which must match ACM's taxonomy exactly.
+% 2026-10-18: official tool blocked by its security verification. This inherited
+% block remains UNVERIFIED; replace it with an official export before submission.
 \begin{CCSXML}
 <ccs2012>
    <concept>

@@ -1,79 +1,117 @@
-# PCDG — WWW 2027 submission (working draft)
+# PCDG — WWW 2027 working manuscript
 
-ACM `acmart` (sigconf, **anonymous, review**) paper for The Web Conference 2027,
-Research Track. Target track: **Web Mining, Multimedia and Multilingual Content
-Analysis**.
+Updated 2026-10-18. ACM `sigconf,anonymous,review`; Research Track long paper.
+Target area: Web Mining, Multimedia and Multilingual Content Analysis.
+T1–T8 are complete; T9 has an outstanding official CCS export. This is a complete
+advisor-review draft, **not an unconditional submission-ready sign-off**.
 
-## Hard deadlines (AoE, no extensions)
-- **Abstract registration: 2026-10-18** (locks title + author list/order)
-- **Full paper: 2026-10-25** — body **≤ 8 pages**, (refs + appendix) total ≤ 12
-- Reviews 2026-12-15 · rebuttal 12-15–12-20 · notify 2027-01-04 · camera-ready 2027-01-31
-- Short-paper fallback: abstract 2026-11-09, paper 2026-11-16
+## Locked metadata and open decisions
 
-## Build
-```bash
-latexmk -pdf main.tex        # one command; latexmkrc handles the Chinese-path bibtex quirk
+- Title, abstract, five keywords and author order are unchanged from `c828598`.
+  Do not add “distribution correction” back to the title.
+- Zhiyi Li: `25s151146@stu.hit.edu.cn`; then corresponding author Kaiqi Zhao:
+  `zhaokaiqi@hit.edu.cn`. Both HIT Shenzhen. Emails are in source; ORCIDs were not
+  supplied and must not be guessed. Keep the review PDF anonymous.
+- **Abstract conflict retained at the author's direction:** the phrase “eliminates
+  residual category–POI inconsistency” conflicts with the sealed six-run mismatch
+  range **0.0034%–0.0219%**. The body explains the unsupported-final-category catalog
+  fallback. Await advisor decision; zero mismatch is unsupported. Pair coverage means
+  both categories occur, not correct ordering, as the body now states explicitly.
+- **CCS pending:** the official tool <https://dl.acm.org/ccs> remained behind security
+  verification on 2026-10-18. The inherited block is marked unverified; replace it with
+  an official export before full submission. No concept IDs were invented or changed.
+- No OpenReview interaction or submission was performed. The author must register/upload.
+
+## Deadlines and format
+
+The [official WWW 2027 Research Track page](https://www2027.thewebconf.org/research-track-papers/),
+checked 2026-10-18, gives abstract **18 October 2026 AoE** and full-paper
+**25 October 2026 AoE**. End-of-day AoE converts to just before **20:00 Beijing on
+19/26 October**, respectively. The old handoff reported OpenReview 13:00 UTC / 21:00
+Beijing; that one-hour discrepancy remains unverified in the portal. Work to the earlier
+official-site deadline and confirm the portal yourself. Long papers allow **8 main-text
+pages / 12 total**, with Web/track relevance on page 1. Settle authors/order at registration.
+
+## Build and verification
+
+Run inside `paper-www2027/`:
+
+```powershell
+latexmk -pdf -interaction=nonstopmode main.tex
 ```
-Produces `main.pdf` (currently **11 pages total**: body ends p8, appendix A–E p8–10, refs p10–11;
-WWW limit is body ≤ 8 + total ≤ 12). Compiles clean: 0 errors, 0 undefined refs/cites. 12 overfull
-hboxes remain, worst 15.5pt, all in pre-existing prose/inline math — cosmetic, not blocking.
-`latexmk` may print exit code 12 from strict first-pass warnings — the PDF is still
-correct and fully resolved. To clean aux files: `latexmk -c`.
 
-> Note: classic BibTeX mishandles the non-ASCII (Chinese) directory path. `latexmkrc`
-> works around it by passing BibTeX only the basename. If you ever build by hand, run
-> `pdflatex main` → `bibtex main` → `pdflatex main` → `pdflatex main` **inside** this dir.
+Current PDF: **11 pages**, conclusion **p7**, Appendix A starts **p8**. Build exits
+**0** with no LaTeX errors, undefined references/citations, visible TODOs or overfull
+boxes. Fonts are embedded; PDF text, metadata and links pass the anonymity checks.
+Web relevance appears on page 1; final-size page renders have been inspected.
 
-## Status by section (updated 2026-10-14)
-| File | Status |
-|---|---|
-| `main.tex` | Abstract = version A (226 words, no "remove most of it", no NY-residual sentence). Title = "Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation" per advisor (2026-10-14: emphasize partial-order control, drop "Distribution Correction"). Locked at abstract registration, 2026-10-19 13:00 UTC |
-| `sections/intro.tex` | **Updated**: 3-stage method paragraph, trade-off-decomposition paragraph, 4 contributions |
-| `sections/related.tex` | Drafted (positions vs CDD / Marionette / ControlTraj; honest novelty delta) |
-| `sections/problem.tex` | **Complete draft** (task, partial-order matrix, eval axes) |
-| `sections/method.tex` | **Complete** — §4.1–4.5 projection stage, §4.6 category-consistent decoding, §4.7 same-category geometry refinement (incl. the constraint-neutrality property), §4.8 ρ/λ/β distribution correction. Needs Fig.1 + Fig.2 |
-| `sections/experiments.tex` | **Numeric findings filled from eval-v2.** New §5.4 decomposes the trade-off. Remaining: Fig.3, cost numbers |
-| `sections/conclusion.tex` | Limitations expanded to (i)–(x); conclusion rewritten; Appendix B (grid + selection), C (ablation tables), metric-definition caveats |
-| `tables/method-comparison.tex` | **Final eval-v2**, 7 rows (4 baselines + PCDG-P / PCDG-PD / PCDG) |
-| `tables/ablation.tex` | **Final eval-v2**, 8 rows incl. `No Distance KL`. Moved to **Appendix C** for the page budget; §5.3 references it |
-| `tables/stagewise.tex` | **New** — stage-wise ablation (a)–(e), the core evidence for the new contribution |
-| `references.bib` | 52 entries (copied from thesis); keys verified, bib resolves |
+Do not treat exit code 12 as harmless. The old draft had a real `\Bbbk` redefinition
+from redundant `amssymb`; that import was removed. Check file-line-style errors too,
+not only lines beginning `!`. Preserve `latexmkrc` for Chinese-path BibTeX support.
+Remaining nonfatal notices concern review-mode reference-block suppression, last-page
+column balancing, underfull vertical boxes and incomplete legacy BibTeX fields.
+The 52-entry database has not received a full metadata/claim-support audit; five directly
+relevant entries were checked against primary sources.
 
-## What still must be done before submission
-- Export **Fig.1** (framework) and **Fig.2** (one projected reverse step) from
-  `../figure_build/` into `figures/`, following the "must-show / do-NOT-draw" list in
-  `../method_innovation_map.md` §11–§15. Fig.1 must now show four stages, not one.
-- Add **Fig.3**: Unsat (x) vs. Distance JSD (y), one marker per method plus a dashed path
-  through stages (a)–(e) per city. This is now a core figure, not optional.
-- Fill the remaining `\todo`s: metric definitions (`app:metrics`), cost numbers (`app:cost`),
-  the 18-configuration grid table (`app:grid`), and the OOD train/test counts in §5.1.
-- Page budget is exhausted (body already fills p8, total 11 of 12). Fig.1–3 will not fit
-  without cuts: the next candidates are merging the two method-comparison tables into one
-  wide table, or moving `tables/stagewise.tex` notes into the caption.
+From the repository root, regenerate figures/tables without executing experiments:
 
-## Honesty guardrails (do not overclaim)
-- Base generator is **Marionette** (prior work), used frozen — credited, not claimed.
-- Projection mechanism is **adapted from CDD** — cited; novelty = partial-order+existence
-  energies, category-position restriction, distance-KL, the category-consistent decoder,
-  the constraint-neutral geometry refinement, and the training-free empirical win.
-- **New York `CategoryTransition` and `G-RANK` remain above the unconstrained backbone**, and
-  PO-CFG still wins those two plus `Category` there. Never write "no fidelity loss".
-- The ρ/λ/β configuration was chosen on a **training-side calibration split** (not an
-  independent validation set) and **neither confirmed candidate cleared all pre-specified
-  thresholds**; test metrics never entered selection. Never write "pre-registered and passed".
-- Stage (d)→(e) changes **three** things (ρ, β, and the same-category candidate pool:
-  (d) = original + model top-15 + nearest-16; (e) = original + top-11 + nearest-12 +
-  8 most-visited in the training reference) — no single-factor attribution.
-- `Radius` uses `sqrt(mean(distance_to_centroid))`, **not** standard radius of gyration; tables
-  are internally comparable but not against differently defined radii elsewhere.
-- All tables are evaluation **v2**; the deterministic G-RANK variant (v3) is a cross-check in
-  `app:metrics` only. Never mix a v3 G-RANK into a v2 row.
-- Error bars are three-seed sampling SDs at a fixed checkpoint — not significance, not CIs.
-- `po_encoding` global condition, hard category→POI logit filtering, complex partial-order DAGs,
-  adaptive scheduling, and a stable training-time partial-order loss are **NOT implemented**
-  → future work only.
+```powershell
+& 'D:\Anaconda\envs\Marionette\python.exe' figure_build/generate_method_main_v2.py
+& 'D:\Anaconda\envs\Marionette\python.exe' figure_build/generate_tradeoff.py
+& 'D:\Anaconda\envs\Marionette\python.exe' figure_build/generate_paper_evidence.py
+```
 
-## Before camera-ready
-Remove `review` from `\documentclass`, drop the `anonymous` option, fill real author/ORCID,
-set the proper `\setcopyright`/`\acmConference`/DOI, make `\todo` a no-op, and re-enable the
-ACM reference block (`\settopmatter{printacmref=true}`).
+After building, run `figure_build/verify_paper.py` with a Python environment providing
+`pypdf` (the app's bundled document runtime) and Poppler `pdffonts`. It checks locked
+blocks, original numeric rows/precision/bolding, page budget, fonts, anonymity, TODOs,
+log errors and protected-path diffs against `c828598`. Integrity passing does not resolve
+CCS or the abstract conflict. Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
+and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
+
+## Completed work
+
+| Task | Delivery |
+| --- | --- |
+| T1 | Combined fidelity/constraint table; full stage-wise table in Appendix C; compressed introduction/conclusion while retaining negative results and selection failures |
+| T2 | Unsat–Distance two-city figure from existing v2 table means, equal linear axes, unshifted measured coordinates |
+| T3 | Combined framework/reverse-step figure; distribution weights as objective inputs, not a fictitious serial fourth stage; fallback shown |
+| T4 | Exact metric definitions, denominators, endpoint filter, catalog/token distinction and historical histogram edge cases |
+| T5 | 18-row v2 grid, SHA-verified v3 selection source and unchanged screening/confirmation rankings and failures |
+| T6 | Manifest counts and evidence-bounded OOD definition, retaining Istanbul split-provenance gap |
+| T7 | Selected-geometry timing with projection-Full denominator; unavailable final-stack costs explicitly unmeasured |
+| T8 | Related work aligned to projection, support-constrained decoding and spatial refinement; five central citations verified |
+| T9 | Emails, no-op TODO, build/anonymity/fonts/page checks done; official CCS export pending |
+
+## Scientific guardrails
+
+- Marionette is the prior backbone; projection adapts CDD. The implemented token KL is
+  **base-to-projected**; Appendix A specifies batch normalization.
+- New York CategoryTransition 0.0183 vs JointGen 0.0070 and G-RANK 0.1914 vs 0.1612 remain
+  worse. PO-CFG wins those two and Category there. Istanbul improves all six vs JointGen
+  and five vs PO-CFG. Three-seed sample SDs do not establish significance.
+- All main/ablation tables and the screening-grid table use **v2**. Final selection used
+  **v3**. All 18 screening ranks and both confirmed-candidate ranks agree across versions.
+  Neither confirmation passed all distribution gates; final sampling used an explicit
+  override retaining constraint gates. Calibration was training-side, not independent
+  validation. No test metric entered selection, pool construction or refinement objectives.
+- Maximum v3 G-RANK shift 0.0032 is scoped to the **18 formal audit metric sets**.
+  v2 already aligns retained POIs by identity; v3 changes tie handling at the cutoff.
+- (d)→(e) jointly changes rho, beta and pool composition: original+top15+nearest16 becomes
+  original+top11+nearest12+train-most-visited8. No single-factor attribution.
+- Radius is `sqrt(mean(Haversine distance to arithmetic coordinate centroid))`, unit
+  sqrt(km), not standard radius of gyration. Distance is conditioned on endpoint-category
+  matching; eligible subsets vary by method. Unsat is relation-level, not sequence failure.
+- New York train/test counts: 3160/2108; Istanbul: 7035/4914. New York reverses precedence
+  preferences without guaranteeing disjoint complete constraint configurations.
+- Measured 3.35%–3.98% cost increase is from the **old selected 200-step geometry qualification
+  relative to projection Full**, not final PCDG relative to JointGen. It excludes temporal
+  generation, loading and transfer. Final-stack overhead and PO-CFG GPU-hours are unmeasured.
+- Hard category-conditioned POI-support masking **is implemented**, with fallback exceptions;
+  the old contrary note was wrong. Complex DAG evaluation, adaptive scheduling, formal privacy
+  and downstream utility remain unestablished. Do not edit sealed `experiment_runs/` or rerun.
+
+## Camera-ready only
+
+After acceptance: remove anonymous/review; confirm ORCIDs, copyright, conference/DOI/ISBN
+metadata and the ACM reference block under official instructions. Do not make these changes
+to the anonymous review PDF now. See `HANDOFF-codex.md` for evidence paths and next steps.

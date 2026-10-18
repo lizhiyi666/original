@@ -9,8 +9,8 @@ spatio-temporal, and graph-enhanced
 models~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, and diffusion models
 have recently been applied to next-POI and sequential
 recommendation~\cite{long2024cloudedge,wang2024dsdrec,chen2025sequentialdiffusion,qin2023diffpoi,wang2025gnprsid}.
-These methods target prediction or ranking of a single next step and do not emit a
-complete, constraint-satisfying sequence of time-stamped, categorized visits.
+These prediction and ranking objectives differ from generating complete
+time-stamped visits under sample-level activity-order requirements.
 
 \paragraph{Synthetic trajectory and mobility generation.}
 Data-driven generation spans GAN/Seq2Seq
@@ -23,12 +23,11 @@ and, increasingly, diffusion
 models~\cite{zhu2023difftraj,yuan2023stdpp,gong2025stcdm,chen2024trajgdm,wei2024diffrntraj,rao2025seed,long2026population}
 and LLM-based
 generators~\cite{zhang2024mobglm,hsu2024trajgpt,li2025geollama,haydari2026mobilitygpt}.
-Closest to our backbone, Marionette performs fine-grained conditional generation
-of spatiotemporal trajectories with a diffusion point process and a
-category-to-POI cascade~\cite{deng2025marionette}, and related benchmarks study
-imitative generation quality~\cite{deng2025mirage}. These works pursue
-distributional realism or coarse conditioning; none enforces a \emph{sample-level
-partial order over activity categories} within the generated sequence.
+Marionette supports fine-grained generation using global and partial mobility
+contexts~\cite{deng2025marionette}; we use its generator as a frozen backbone.
+Related benchmarks examine imitative generation quality~\cite{deng2025mirage}.
+Our target is an explicit relation between activity categories, together with
+the distributional effects of enforcing it on generated POI identities.
 
 \paragraph{Discrete diffusion.}
 Discrete diffusion extends denoising diffusion~\cite{ho2020ddpm} to categorical
@@ -38,21 +37,25 @@ formulations~\cite{sahoo2024mdlm}; guidance mechanisms steer discrete generation
 toward conditions~\cite{schiff2025guidance}. We adopt a discrete-diffusion
 backbone and intervene at sampling time rather than changing training.
 
-\paragraph{Controllable and constrained generation.}
-ControlTraj injects road-topology constraints into trajectory
-diffusion~\cite{zhu2024controltraj}; Geo-Llama conditions an LLM on mobility
-constraints~\cite{li2025geollama}. In NLP, structured decoding enforces grammars
-or DAG automata~\cite{geng2023grammar,chen2024controldag}, and precedence
-constraints are studied in temporal planning~\cite{hu2011precedence}. Most
-relevant methodologically, Constrained Discrete Diffusion (CDD) embeds
-differentiable constraint optimization into discrete-diffusion sampling via KL
-projection, Gumbel-softmax relaxation, and augmented Lagrangian
-updates~\cite{cardei2025cdd}. \pcdg \emph{specializes} this sampling-time
-projection paradigm to the previously unaddressed case of activity-category
-precedence in joint temporal\,+\,category\,+\,POI check-in generation: we
-contribute the order/existence energy formulation for sample-level partial orders,
-a category-position-restricted projection coupled with a spatial
-distance-distribution regularizer on POI positions, and---unlike prior controllable
-generators that retrain or post-process---a training-free controller that we show
-outperforms a \emph{fully retrained} partial-order conditional model on constraint
-satisfaction (\S\ref{sec:experiments}).
+\paragraph{Sampling-time constraint projection.}
+CDD integrates differentiable constraints into discrete-diffusion sampling
+through KL anchoring and augmented-Lagrangian optimization without
+retraining~\cite{cardei2025cdd}. We adapt that projection mechanism to order and
+existence energies on category positions. The KL anchor penalizes token-level
+drift from the denoiser; matching aggregate travel-distance and visitation
+statistics to training references is a separate objective in our stack.
+We evaluate those terms through projection and stage-wise comparisons rather
+than treating the KL anchor as a distributional-fidelity guarantee.
+
+\paragraph{Decoding support and spatial refinement.}
+Grammar-constrained decoding restricts language-model outputs to permitted
+formal structures~\cite{geng2023grammar}; Control-DAG uses weighted finite-state
+automata for lexical, vocabulary, and length control in non-autoregressive
+generation~\cite{chen2024controldag}. Our decoder instead couples category tokens
+to admissible catalog POIs. Its final-category fallback prevents a universal
+consistency guarantee. Geographic control is complementary: ControlTraj uses
+road topology and trip attributes to condition trajectory
+generation~\cite{zhu2024controltraj}. Our terminal refinement reselects POIs
+within their realized categories, changing spatial statistics while preserving
+the fields used by the constraint metrics. The empirical question is how much
+fidelity this restricted refinement recovers, and which errors remain.

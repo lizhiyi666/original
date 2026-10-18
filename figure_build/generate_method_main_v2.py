@@ -37,7 +37,7 @@ def arrow(ax, points, control=False, color=INK):
 def main():
     plt.rcParams.update({"font.family": "Times New Roman", "font.size": 9,
                          "mathtext.fontset": "stix", "pdf.fonttype": 42,
-                         "svg.fonttype": "none"})
+                         "svg.fonttype": "none", "svg.hashsalt": "pcdg-www2027"})
     fig = plt.figure(figsize=(7, 3.25))
     ax = fig.add_axes([0, 0, 1, 1], xlim=(0, 504), ylim=(0, 234))
     ax.axis("off")
@@ -92,7 +92,9 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     BUILD.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "framework.pdf", metadata={"Creator": "Matplotlib", "CreationDate": None})
-    fig.savefig(OUT / "framework.svg")
+    fig.savefig(OUT / "framework.svg", metadata={"Date": None})
+    svg = OUT / "framework.svg"
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n", encoding="utf-8")
     fig.savefig(BUILD / "framework.png", dpi=220)
     plt.close(fig)
     print("Exported framework.pdf/.svg; live vector text, final width 7 inches")

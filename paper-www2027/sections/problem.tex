@@ -17,7 +17,7 @@ while retaining substantial individual variability.
 \paragraph{Category partial-order constraints.}
 Many web applications do not merely require a statistically realistic sequence;
 they require that the \emph{activity semantics} follow an application-specified
-order---for instance, that leisure precedes dining, or that sightseeing precedes
+order, for instance, that leisure precedes dining or that sightseeing precedes
 shopping. We formalize such requirements as a sample-level \emph{partial order}
 over categories. Given a reference or user-specified ordering, we encode it as a
 binary matrix $\Mmat \in \{0,1\}^{C\times C}$, where $\Mmat[a,b]=1$ denotes the
@@ -47,12 +47,11 @@ therefore cannot be enforced by reweighting any single token independently.
 \paragraph{Evaluation axes.}
 We evaluate along two axes that are in tension. \emph{Distributional fidelity} is
 measured by the Jensen--Shannon divergence (JSD) between generated and reference
-marginals of travel distance, radius of gyration, category-transition structure,
+marginals of travel distance, centroid-based Radius, category-transition structure,
 daily location count, hourly category usage, and a global ranking statistic
 (G-RANK). \emph{Constraint satisfaction} is measured by ordering-violation rates
 (OVR), pairwise and category coverage of the required relations, and an overall
-unsatisfied-sequence rate (Unsat); full definitions are given in
-Section~\ref{sec:experiments}. A trivial reordering can satisfy the constraint
-while destroying fidelity, and an unconstrained generator maximizes fidelity while
-ignoring the constraint; the goal is to improve constraint satisfaction with
-minimal fidelity cost.
+unsatisfied-relation rate (Unsat); full definitions are given in
+Appendix~\ref{app:metrics}. Reordering can repair inversions but cannot supply
+missing categories. The goal is to improve constraint satisfaction while
+retaining distributional fidelity.

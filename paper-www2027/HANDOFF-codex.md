@@ -1,155 +1,116 @@
-# 交接文档：WWW 2027 论文剩余工作（交给 Codex）
+# WWW 2027 论文接续状态
 
-写于 2026-10-18。接手前先读完本文和仓库根目录的 `AGENTS.md`。
+更新：2026-10-18。原 T1–T9 任务说明保存在提交 `c828598`；本文记录执行结果。
+后续先读本文及根目录 `AGENTS.md`，不要重复运行已完成实验。
 
-## 1. 背景与截止时间
+## 1. 当前交付和未闭环项
 
-- 论文：PCDG，一个训练无关（training-free）的偏序约束控制栈，作用于冻结的离散扩散 POI 签到生成器。
-- 投稿：The Web Conference 2027，Research Track 长文，OpenReview venue `The Web Conference 2027 - long papers`，
-  Primary Subject Area 是 `Web Mining, Multimedia and Multilingual Content Analysis`。
-- **全文截止：2026-10-26 13:00 UTC（北京时间 21:00）**。目标是 10-26 中午前上传，10-24 把完整 PDF 交给导师通读。
-- 摘要注册（10-19 13:00 UTC）由作者本人在 OpenReview 完成，**Codex 不要操作 OpenReview**。
-- 作者：Zhiyi Li（第一作者）、Kaiqi Zhao（导师，通讯作者），都在哈工大（深圳）计算机科学与技术学院。
+T1–T8 已完成；T9 的邮箱、TODO、编译、匿名、字体、页数检查已完成，**官方 CCS 导出仍未取得**。
+当前是供导师通读的完整稿，不是无条件的投稿就绪声明。
 
-## 2. 锁定项，不能改
+1. **摘要事实冲突保留待导师决定。** 摘要写 decoder “eliminates residual category–POI
+   inconsistency”，六份正式输出却有 **0.0034%–0.0219%** mismatch。代码最终类别无支持时
+   回退到任意合法 catalog POI。正文、框架图、局限已更正；用户选择暂不改锁定摘要。
+   另须注意 “pairwise ordering coverage” 对应两个类别均出现，不表示排序正确，正文已区分。
+2. **CCS 工具受阻。** <https://dl.acm.org/ccs> 持续显示安全验证。未绕过、未编造编号。
+   `main.tex` 旧块已标注未核验，需作者给出官方导出后替换。
+3. **不操作 OpenReview。** 注册、核对 portal 时间及上传由作者本人完成。
 
-- **标题**（注册后锁定，导师已定）：
-  `Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation`
-  导师要求标题只突出 partial-order control，不要把 "distribution correction" 加回标题。
-- **作者与顺序**：见上，不能增删或调换。
-- **摘要**：`main.tex` 里是注册时用的“版本 A”（226 词）。如果要改，只能做小的措辞调整，和注册版本的主张、数字保持一致。
-- **关键词**（5 个）：`synthetic human mobility, discrete diffusion, partial-order constraints, training-free constrained sampling, POI check-in sequences`。
+## 2. 锁定内容和作者
 
-## 3. 仓库、构建与环境
+- 标题：`Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation`。
+  导师要求不要加回 “distribution correction”。
+- 标题、摘要、五关键词、作者顺序与 `c828598` 完全一致。
+- 第一作者 Zhiyi Li：`25s151146@stu.hit.edu.cn`。
+- 通讯作者 Kaiqi Zhao：`zhaokaiqi@hit.edu.cn`。
+- 两人均为哈工大（深圳）计算机科学与技术学院；邮箱已填，ORCID 未提供，不猜。
+- 保留 `anonymous,review`。源文件有身份信息，不要将源包作为匿名附件公开提交。
 
-- 仓库：`D:\桌面\轨迹\轨迹\轨迹生成\实验\original`，GitHub `lizhiyi666/original`。
-- 分支：`codex/distribution-best-formal-v1`。交接时 HEAD 为 `7553eda`，已推送，工作区干净。
-- 论文目录：`paper-www2027/`。构建方法：
+## 3. 截止时间：保留一小时差异
 
-  ```bash
-  cd paper-www2027 && latexmk -pdf -interaction=nonstopmode main.tex
-  ```
+[官方 Research Track 页面](https://www2027.thewebconf.org/research-track-papers/)
+于 2026-10-18 核实：摘要 10-18 AoE 日终、全文 10-25 AoE 日终，分别对应北京时间
+**10-19 / 10-26 接近 20:00**，不是 21:00。旧交接写 OpenReview 为 13:00 UTC / 21:00 北京时间，
+本任务未进入 OpenReview，不能确认 portal。按更早官网时间安排，作者自行核对差异。
+长文正文最多 8 页、含参考文献及附录最多 12 页；第一页须说明 Web/track 相关性。
 
-  latexmk 返回码 12 是首轮的严格警告，PDF 仍然正确。判断是否正常要看 `main.log`：`^! ` 错误数和 undefined reference 数都要为 0。
-  `latexmkrc` 处理了中文路径下 BibTeX 的问题，不要删。
-- Python：`D:\Anaconda\envs\Marionette\python.exe`。系统的 `python` 是 3.14，没有项目依赖。
-- 统计 overfull 时注意：在 Bash 单行里写 `\\hbox` 的正则容易被 shell 吞掉反斜杠，结果显示 0 个也不可信。
-  可以用 `Overfull .hbox` 这种写法。目前有 12 处，最差 15.5pt，都在原有正文里，不影响投稿。
+## 4. 环境和 Git 规则
 
-## 4. Git 规则（来自 AGENTS.md，必须遵守）
+- 仓库：`D:\桌面\轨迹\轨迹\轨迹生成\实验\original`。
+- 分支：`codex/distribution-best-formal-v1`；远程 `lizhiyi666/original`。
+- 修改前 `c828598`，T1 后 `fca940c`，矢量图/概要压缩后 `faccb4f`；最终正文/核验修订
+  为后续提交，查 `git log`。每组修改前后仍需提交、推送并核对远程 SHA。
+- 只暂存本任务文件，不 `git add .`；不提交数据、权重、缓存、日志、字节码、依赖目录。
+- 直连曾超时；现有代理 `git -c http.proxy=http://127.0.0.1:7897 push origin
+  HEAD:refs/heads/codex/distribution-best-formal-v1` 可用。相同 `-c` 配合 `ls-remote`
+  核验分支。未修改全局配置，不强推、不 reset；前置推送失败就停止新修改。
+- 作图 Python：`D:\Anaconda\envs\Marionette\python.exe`。
+- 论文目录内构建：`latexmk -pdf -interaction=nonstopmode main.tex`。
+- **当前真实退出 0**，11 页，结论 p7，附录 A 从 p8 开始；零错误、未解析引用、TODO 调用、
+  overfull。第一页 Web 相关性、PDF 字体嵌入、文本/元数据/链接匿名检查及逐页视觉检查通过。
+- 原稿 `amssymb` 造成 `\Bbbk` 重定义，已移除重复导入。**返回码 12 不应被称为无害**；
+  只搜索 `^!` 会漏 file-line-style 错误。保留 `latexmkrc` 的中文路径 BibTeX 修复。
+- 剩余非致命提示：review 的 reference block 隐藏、末页列平衡、underfull vbox、部分旧 BibTeX
+  缺 publisher/address/pages。未进行 52 条文献全量审计。
 
-- 每组逻辑修改前后都要提交并推送到 GitHub，推送后核对 `git rev-parse HEAD` 与 `origin/codex/distribution-best-formal-v1` 一致。只完成本地 commit 不算已提交到 GitHub。
-- 只暂存本任务相关的文件，不用 `git add .`。不提交数据集、权重、缓存、`main.aux/.log/.bbl` 之类的编译中间文件。`main.pdf` 已被跟踪，可以提交。
-- 推送失败时保留本地提交并报告，不强推、不 reset。github.com 443 端口偶尔连不上，可以 `timeout 90 git push ...` 重试几次。
-- **不能改动 `experiment_runs/` 下的任何封存产物，也不能重跑实验。** 论文里的所有数字都来自已封存的结果。
+## 5. T1–T9 执行记录
 
-## 5. 当前状态
+| 任务 | 结果与依据 |
+| --- | --- |
+| T1 | 主比较两表合成上下共享 caption 面板；stage-wise 移入附录 C；概要压缩。三张原表数据行/精度/SD/粗体保持不变 |
+| T2 | `figure_build/generate_tradeoff.py` → `figures/tradeoff.pdf/.svg`；仅用已有 v2 均值，等量程线性轴，不移动测量坐标 |
+| T3 | `figure_build/generate_method_main_v2.py` → `figures/framework.pdf/.svg`；框架+单步细节合图；标注 fallback；权重是目标输入而非第四串行操作 |
+| T4 | 附录 D 指标定义来自 `evaluations/statistical_metrics.py`、`evaluations/ovr.py`、`tools/ablation_common.py`；补分母、过滤、catalog/token、历史直方图边界 |
+| T5 | `generate_paper_evidence.py` 生成 `tables/calibration-grid.tex`，18 行 v2；SHA 校验 v3 selection source，顺序与失败门槛均一致 |
+| T6 | manifest 的 NY 3160/2108、IST 7035/4914；`tools/make_opposite_split.py` 说明 NY 是偏好反转，非完整配置绝对不相交；IST 来源缺口保留 |
+| T7 | `pcdg-geo-v1-tol10-20261010/speed/confirm-r2-b0.1-summary.json` → `tables/cost.tex`；64 条 batch，3.35%–3.98%，分母 projection Full |
+| T8 | 相关工作对齐投影/解码/细化；核验五篇主要引用；移除无证据的“此前无人处理”和“其他均需重训”；CDD 采用会议版作者顺序，补部分页码 |
+| T9 | 邮箱、TODO 空操作、锁定块/匿名/字体/页数/日志检查完成；官方 CCS 导出未完成 |
 
-编译正常：0 错误，0 undefined reference，正文到第 8 页，总共 11 页（上限：正文 8 页，含参考文献和附录 12 页）。
+另修正文 token KL 方向：实现 `F.kl_div(log_p, log_q, log_target=True)` 是
+**base→projected**。附录写明 token KL 除以完整 batch 大小，约束 penalty 按关系/样本求和。
+未修改科学实现或实验结果。
 
-| 文件 | 状态 |
-|---|---|
-| `main.tex` | 标题、作者、摘要、关键词已定稿。CCS 块是旧的，需要重新生成 |
-| `sections/intro.tex` | 已改为三阶段主线，4 条贡献 |
-| `sections/related.tex` | 还是旧稿，没有覆盖新增的两个阶段（见 T8） |
-| `sections/problem.tex` | 已完成 |
-| `sections/method.tex` | §4.1–4.8 已完成。缺 Fig.1 |
-| `sections/experiments.tex` | 数字已全部按 eval v2 填好。缺 Fig.3、§5.1 计数和成本数字 |
-| `sections/conclusion.tex` | 局限 (i)–(x)、结论、附录 A–E。附录里还有 TODO |
-| `tables/method-comparison.tex` | 定稿，两张 7 行表 |
-| `tables/ablation.tex` | 定稿，8 行，放在附录 C |
-| `tables/stagewise.tex` | 定稿，阶段 (a)–(e) |
-| `figures/` | **空的** |
+图按最终正文尺寸检查，SVG 可编辑文字，固定 ID 盐值并去时间元数据；同环境可稳定再生。
+临时渲染只放 `ccfa-workfiles/writing/www2027/build/`，不提交。
+`figure_build/verify_paper.py` 使用 pypdf 与 Poppler，构建后运行，检查锁定块、原表数据行、
+日志、页数、匿名/字体和受保护路径差异；可用应用自带文档 Python。通过不等于 CCS/科学审稿通过。
 
-剩下 9 处 `\todo`，可以用 `grep -n '\\todo{' paper-www2027/sections/*.tex` 列出。
+## 6. 科学边界与来源
 
-## 6. 必须遵守的写作边界
+- NY CategoryTransition 0.0183 vs JointGen 0.0070、G-RANK 0.1914 vs 0.1612；PO-CFG 在这两项
+  及 Category 最好。IST 六项优于 JointGen、五项优于 PO-CFG。
+- 三个固定 checkpoint 采样种子的样本 SD，不是 CI、显著性或训练种子稳定性。
+- 主结果/消融/网格表为 v2；最终候选用 v3 重评估排序。18 组初筛、两组确认顺序一致，
+  因此未触发换候选的作者决策。两组确认均未通过全部分布门槛，all-gates 排名为空；
+  正式采样经授权 override，保留约束门槛、容许分布失败。不能说全部门槛通过。
+- v2：`experiment_runs/ny-ist-distribution-balanced-v1-20261012/{screen-selection,confirm-selection}.json`。
+  v3：`experiment_runs/ny-ist-distribution-balanced-v1-eval-v3-20261013-linux/summary.json`。
+  最终：`experiment_runs/ny-ist-distribution-best-formal-v1-20261013/selected-candidate.json`。
+- 训练侧校准数据 backbone 见过，非独立验证；无测试指标进入选择/候选构造/优化。
+- v2 已按 POI 身份对齐；v3 使 top1000 频数并列排序确定化。0.0032 最大偏移只适用于
+  18 组正式审计指标，不能推广到全部历史方法；不把 v3 单元混入 v2 行。
+- (d)→(e) 同时改 rho、beta、候选池。(d) original+top15+nearest16；
+  (e) original+top11+nearest12+train-most-visited8。不能单因素归因。
+- (c)→(d) 保持实际类别、事件顺序、条件、约束指标及 Distance 端点过滤集。
+  但不同方法的 Distance 子集不保证一致。
+- Radius=`sqrt(mean(Haversine distance to arithmetic lat/lon centroid))`，单位 sqrt(km)，
+  不是标准回转半径。Unsat 是关系微平均，不是失败轨迹比例；pair coverage 不要求排序正确。
+- 旧几何计时分母是 projection Full，不是 JointGen；不含时间生成、加载、传输，不能套于
+  PCDG-PD+Geo 或最终全栈。最终全栈成本、PO-CFG GPU-hours 未测。
+- 旧交接“未实现类别→POI 硬过滤”不正确：已有 hard support masking，附带 fallback。
+  复杂 DAG 验证、自适应调度、正式隐私保证、下游效用没有已完成实验证据。
+- 不修改 `experiment_runs/`，不重训、不重采样、不重启运行。
 
-这些是已经和用户确认过的事实，改写时不能弱化或拔高：
+## 7. 后续最短路径
 
-- **纽约有两项指标仍差于无约束 backbone**：CategoryTransition 0.0183 对 0.0070，G-RANK 0.1914 对 0.1612。纽约的 CategoryTransition、Category、G-RANK 三项仍是 PO-CFG 最好。不能写 "no fidelity loss"、"without any trade-off" 这类说法。伊斯坦布尔六项全部优于 backbone。
-- **超参数选择**：ρ/λ/β 是在训练侧校准集上选的（backbone 见过这些数据，不是独立验证集）。进入三种子确认的两组配置**都没有通过全部预设门槛**。测试集指标从未参与选择。不能写成 "pre-registered and passed"。
-- **(d)→(e) 改了三个因素**：ρ、β，以及同类别候选池的构造。(d) 的候选池是原 POI + top-15 + 最近 16，(e) 是原 POI + top-11 + 最近 12 + 训练集访问最多的 8 个。不能把这一步的差异归因于单个因素。
-- **评估版本**：所有表格都用 evaluation v2。v3（确定性 G-RANK）只在附录里作为交叉验证，最大偏移 0.0032，不改变任何结论。不能把 v3 的数字放进 v2 的行里。
-- **Radius 定义**是 `sqrt(mean(distance_to_centroid))`，不是标准的回转半径。
-- **误差棒**是固定 checkpoint 下三个采样种子的样本标准差，不代表显著性检验，也不是置信区间。
-- **命名对照**：`PCDG-P` 对应中文稿里的 "PCDG"（只有投影），`PCDG-PD` 对应 "方案A（类别一致解码）"，`PCDG`（full）对应 "分布校正版（最佳候选）"。
-- 没有实现的东西只能写进 future work：`po_encoding` 全局条件、类别到 POI 的硬 logit 过滤、复杂偏序 DAG、自适应调度、训练期偏序损失。
-- Backbone 是 Marionette（前人工作），投影机制改编自 CDD，引用时都要说明，不能当作本文贡献。
+作者/导师决定摘要非零残差措辞 → 作者提供官方 CCS 导出 → 修改相应源块 →
+重建及完整性检查 → 检查受影响页面 → 提交/推送/核对 SHA → 作者自行提交。
+不要顺带扩展实验、切换评估版本或改锁定标题。
 
-## 7. 任务清单（按优先级）
-
-### T1　腾出正文版面（先做，否则图放不进去）
-
-- 正文已经满 8 页，三张图大约需要 0.7–1 页。
-- 做法：把 `tables/method-comparison.tex` 的两张表（JSD 和约束）合并成一张宽表；把 `tables/stagewise.tex` 的长表注压缩进 caption。如果还不够，再把 Fig.2 并进 Fig.1。
-- 不能删正文中的“残差说明”和“选择协议”段落。
-- 验收：插入三张图的占位（可以先用 `\rule`）后，`sec:conclusion` 之前的内容仍在第 8 页以内。
-
-### T2　Fig.3：取舍平面图（核心图，可以完全用脚本生成）
-
-- 内容：横轴 Unsat（%），纵轴 Distance JSD。两个子图，分别是两座城市。每个方法一个点，再用虚线把阶段 (a)→(b)→(c)→(d)→(e) 连起来。
-- 数据：只能用 `tables/method-comparison.tex` 和 `tables/stagewise.tex` 里已有的三种子均值，并在脚本中注明来源。
-- 输出：脚本放 `figure_build/`，矢量 PDF 输出到 `paper-www2027/figures/tradeoff.pdf`。替换 `experiments.tex:167` 的 `\todo`。
-
-### T3　Fig.1：四阶段框架图
-
-- 现有脚本 `figure_build/generate_method_main_v2.py` 画的是旧版单阶段框架，输出到仓库根目录的 `figures/method_main`，不是 `paper-www2027/figures`。
-- 要扩展成四个阶段：投影 → 类别一致解码 → 同类别几何细化 → 分布校正（ρ/λ/β）。图里要明确标出几何细化“约束不变”。
-- 必须画和不要画的内容，参考 `method_innovation_map.md` 的 §11–§15。
-- 替换 `method.tex:154` 的 `\todo`。
-
-### T4　附录 D：指标定义
-
-- 替换 `conclusion.tex:130` 的 `\todo`，同时删掉 `experiments.tex:50` 指向这里的 `\todo`。
-- 照代码写，不要凭印象：
-  - 六项 JSD 指标：`evaluations/statistical_metrics.py`（`Get_Statistical_Metrics`、`grank_jsd`、`radius` 等）。
-  - 约束指标：`tools/ablation_common.py` 第 95–125 行附近，以及 `evaluations/ovr.py`。
-- 重点说明：`strict_ovr` 是在 POI 的**实际类别**（`poi_category[POI]`）上计算的，`token_strict_ovr` 才是在类别 token 上计算的。§4.6 的论证依赖这个区别。
-
-### T5　附录 B：18 组网格表
-
-- 数据：`experiment_runs/ny-ist-distribution-balanced-v1-20261012/screen-selection.json` 和 `confirm-selection.json`。
-- 替换 `conclusion.tex:120` 的 `\todo`。如果版面不够，可以只列 18 组的最差比值和平均比值。
-- **还有一处需要核对**：`ny-ist-distribution-best-formal-v1-20261013/selected-candidate.json` 里的 `selection_source` 指向 `...-eval-v3-20261013`，说明最终排序用的是校准集上的 v3 重新评估结果。附录 B 目前没写评估版本，要查清楚后补一句。如果 v2 和 v3 下的排序结果不同，要报告给用户，不能自己选一个写进去。
-
-### T6　§5.1 数据集计数
-
-- 来自 `ny-ist-distribution-best-formal-v1-20261013/manifest.json` 的 `profiles`：纽约 train 3160 / test 2108，伊斯坦布尔 train 7035 / test 4914。
-- OOD 的定义去 `docs/newyork_ood_experiment.md` 查证后再写。替换 `experiments.tex:18` 的 `\todo`。
-
-### T7　附录 E 和 §5.5：成本
-
-- 只能写实际测过的数字。来源：`experiment_runs/pcdg-geo-v1-tol10-20261010/performance-qualification.json` 和同目录下的 `speed/`。几何细化固定为 200 步，资格条件是中位空间采样时间不超过 backbone 的 1.10 倍。
-- 文档里已经说明：离线细化的耗时不等于在线采样总耗时，旧几何实验的速度比例也不能套用到 A+Geo。缺少可比计时的阶段，就在文中如实写“未测量”。PO-CFG 的重训成本如果没有日志，同样这样处理。
-- 替换 `conclusion.tex:149` 和 `experiments.tex:175` 的 `\todo`。
-
-### T8　Related Work 对齐新主线
-
-- 现在的 `related.tex` 没有涉及类别一致解码、后处理的空间修正和分布匹配正则这几个方向。
-- 只能引用 `references.bib` 里已有的条目，或者经过核实的真实文献。**不要编造引用。** 新增的条目要能在 DBLP 或出版商页面上查到。
-
-### T9　投稿前收尾
-
-- `conclusion.tex:74` 的 `\eta` 核对可以留到 camera-ready，但要把 `\todo` 去掉，改成注释。
-- 把 `main.tex` 里的 `\todo` 宏改成空操作，确认 PDF 里没有红字残留。
-- 用 ACM 官方工具 <https://dl.acm.org/ccs> 重新生成 CCS 块，不要手改 `concept_id`。
-- 两个作者邮箱目前是 `TODO-confirm@hit.edu.cn` 占位符，而且没有 ORCID。**不要猜，向用户要真实值。** 由于 `anonymous` 选项，评审版 PDF 不会显示这些信息，所以投稿不受影响，但要在交付说明里提醒用户。
-
-## 8. 最终验收清单
-
-- [ ] 0 错误，0 undefined reference，0 处 `\todo` 残留
-- [ ] 正文不超过 8 页，总页数不超过 12 页
-- [ ] 匿名检查：`pdftotext main.pdf - | grep -i "Zhiyi\|Harbin\|hit.edu"` 应该没有结果。参考文献里出现 Kaiqi Zhao 是正常的（GETNext 那篇文献的作者）。PDF 元数据里也不能有真实姓名
-- [ ] 标题与注册版本完全一致
-- [ ] 全文数字和表格一致，表格数字和第 6 节的事实一致
-- [ ] 如果附代码链接，要用匿名仓库
-- [ ] 每组修改都已推送，并核对过远程哈希
-
-## 9. 参考资料
-
-- `paper-www2027/README.md`：各章节状态和诚信边界
-- `paper-www2027/REGISTRATION.md`：注册时填写的内容
-- `docs/distribution-best-formal-v1.md`：最终结果的来源和审计记录
-- `docs/category-consistent-decoding-v2.md`、`docs/pcdg-geo-v1.md`、`docs/distribution-balanced-v1.md`：三个阶段的协议
-- `g(⋅)设计方案.md` 第 726 行起：中文版的结果总表
+核验的五篇主要来源：
+[Marionette](https://github.com/UM-Data-Intelligence-Lab/Marionette)、
+[CDD](https://proceedings.neurips.cc/paper_files/paper/2025/hash/124c1cc9f7750f512ed81cdbf2fd5bf5-Abstract-Conference.html)、
+[ControlTraj](https://arxiv.org/html/2404.15380v1)、
+[Grammar-constrained decoding](https://aclanthology.org/2023.emnlp-main.674/)、
+[Control-DAG](https://aclanthology.org/2024.naacl-short.42/)。本次是受影响论证的定向核查，不是全稿录用判断。
