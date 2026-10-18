@@ -1,96 +1,60 @@
 \section{Introduction}
 \label{sec:intro}
 
-Location-based social networks (LBSNs) and location-aware web services generate
-vast streams of \emph{check-in} data: time-stamped visits to points of interest
-(POIs), each carrying an activity semantics such as dining, leisure, or shopping.
-These web-scale traces underpin POI recommendation, urban analytics, and mobility
-simulation~\cite{feng2018deepmove,luo2021stan,yang2022getnext}. Yet releasing raw
-traces is privacy-sensitive, and long-tail scenarios are scarce, which has made
-the generation of realistic \emph{synthetic} mobility an active research
-direction~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
-
-Most prior generators optimize statistical realism alone. Many web applications,
-however, require \emph{control over activity semantics}---in particular, over the
-\emph{order} in which categories of activities occur. A scenario designer may need
-sequences in which leisure precedes dining, or sightseeing precedes shopping, in
-order to study specific behavioral patterns, stress-test a recommender, or
-augment data for a target scenario. Such a requirement is a \emph{sample-level
-partial order} over categories: it couples multiple, possibly non-adjacent
-positions of a sequence and therefore cannot be expressed by reweighting any
-single token, nor by next-location prediction, which outputs one step at a time
-rather than a complete constrained sequence.
-
-Enforcing such constraints is surprisingly hard for modern generators. Generating
-freely and then \emph{reordering} the output satisfies the constraint but distorts
-the jointly learned distribution over time, category, and space. Classifier-free
-or classifier-based guidance can bias generation toward a condition, but a
-condition embedding does not \emph{guarantee} a global ordering, and retraining a
-conditional model for every constraint family is expensive and city-specific.
-Recent work on controllable trajectory generation enforces \emph{geometric}
-constraints such as road topology~\cite{zhu2024controltraj}, and generic
-constrained discrete diffusion enforces sequence-level logical
-constraints~\cite{cardei2025cdd}; neither has been specialized to the activity-%
-category precedence that arises in POI check-in sequences, nor to the joint
-temporal\,+\,category\,+\,POI setting.
-
-We introduce \pcdg, a \emph{training-free} control stack that enforces sample-level
-category precedence directly inside the reverse diffusion of a frozen conditional
-generator, and that---crucially---does so without paying the fidelity penalty such
-control is usually assumed to require. \pcdg has three sampling-time stages. First, it
-compiles a partial-order matrix into differentiable order-violation and existence
-energies and, during the late reverse steps, projects \emph{only the category-position
-logits} via a KL-preserving augmented-Lagrangian optimization. Second, a
-category-consistent POI decoder resolves the residual mismatch between a sampled
-category and the POI actually emitted at that position. Third, a distribution-aware
-same-category geometry refinement re-selects each POI among candidates of the
-\emph{same} realized category so as to match population-level travel-length and
-visitation statistics; because it never touches category tokens, times, lengths or
-order, it leaves every constraint metric unchanged by construction. Because all three
-stages read and rewrite only the per-step sampling distribution and the realized POI
-assignment of a frozen model, \pcdg adds no parameters, needs no retraining, and can be
-attached to an existing, already-deployed generator.
-
-Our analysis traces the fidelity cost of constrained sampling to two separable
-sources---an over-weighted constraint penalty inside the projection, and a
-POI/coordinate selection that is blind to the population spatial distribution---and
-shows that correcting them recovers, and on one city surpasses, the unconstrained
-generator's fidelity while retaining almost all of the constraint gain.
+Location-based social networks (LBSNs) produce time-stamped visits to points of
+interest (POIs), linking human mobility to activity categories such as dining,
+leisure, and shopping. These traces support POI recommendation, urban analytics,
+and simulation~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, but releasing raw
+traces exposes sensitive behavior. Synthetic mobility generation offers an
+alternative data source~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
 
 \paragraph{Relevance to the Web.}
-This work studies the Web as a socio-economic system and a responsible-data
-problem. LBSN check-in logs are a native web data source that powers POI
-recommendation and urban web services, but releasing raw traces risks user
-privacy. Generating controllable, constraint-satisfying synthetic mobility lets
-practitioners share and augment web-behavior data while honoring
-application-specified activity semantics, directly serving privacy-conscious web
-data sharing and downstream recommendation. The method also contributes a reusable
-recipe---training-free, sampling-time constraint projection on a frozen
-generator---for controllable generation of other structured web content.
+We study a control problem for LBSN data generation: how to generate complete
+check-in sequences under activity-order requirements while retaining the
+population statistics used in web-data analysis. Scenario-specific synthetic
+traces could support recommender stress tests and data augmentation without
+releasing individual logs. The evaluated contribution is controllable generation;
+downstream utility and formal privacy protection remain unevaluated.
+
+A scenario may require leisure before dining or sightseeing before shopping.
+Such precedence couples multiple, non-adjacent positions. A local condition
+embedding does not ensure that every occurrence of one category precedes every
+occurrence of another, or that both categories appear. Reordering completed
+sequences can fix inversions but cannot supply missing activities. Road-topology
+control~\cite{zhu2024controltraj} addresses geographic structure, whereas constrained
+discrete diffusion (CDD)~\cite{cardei2025cdd} provides a general framework for
+sampling under differentiable constraints. POI generation adds a further
+difficulty: category tokens and POI identities can disagree, so controlling the
+former need not control the actual activities of the emitted POIs.
+
+We introduce \pcdg, a training-free control stack on the frozen Marionette
+generator~\cite{deng2025marionette}. It adapts CDD's KL-anchored projection to
+sample-level order and existence energies, with a distance-distribution
+regularizer on POI logits. Category-consistent decoding then restricts POI support
+using the sampled category. After diffusion, same-category geometry refinement
+changes POI identities and coordinates while preserving actual categories,
+times, and event order. This separates spatial refinement from the fields that
+determine constraint satisfaction.
+
+Across Istanbul and New York, the stack improves every constraint metric over
+the retrained PO-CFG baseline. Geometry refinement lowers spatial divergences
+without changing constraint metrics; the full stack improves all six fidelity
+JSDs over the unconstrained backbone on Istanbul and four on New York. New York
+CategoryTransition and G-RANK remain worse. These results identify a recoverable
+spatial cost in this generator, rather than establishing that every
+fidelity--control trade-off can be removed.
 
 \paragraph{Contributions.}
 \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
-  \item We formalize \emph{category partial-order constrained POI check-in
-  generation}---a sample-level, cross-position precedence requirement with an
-  anti-degeneracy existence condition---and express it as differentiable energies
-  compatible with discrete-diffusion sampling (\S\ref{sec:problem},
-  \S\ref{sec:method:energy}).
-  \item We propose \pcdg, a three-stage \emph{training-free} sampling-time control stack
-  on a \emph{frozen} joint temporal\,+\,category\,+\,POI diffusion generator: a
-  KL-preserving augmented-Lagrangian projection of the category-position logits,
-  category-consistent POI decoding, and a distribution-aware same-category geometry
-  refinement that is constraint-neutral by construction (\S\ref{sec:method}).
-  \item We show that the fidelity--constraint trade-off reported for constrained
-  sampling is \emph{separable} rather than intrinsic: it decomposes into an
-  over-weighted constraint penalty and a distribution-blind POI/coordinate selection.
-  Correcting both recovers the unconstrained generator's fidelity on every measured
-  divergence on one city, and the configuration that wins uses \emph{no}
-  category-side distribution term, localizing the loss to the spatial side
-  (\S\ref{sec:exp:tradeoff}).
-  \item We conduct a two-city, out-of-distribution, multi-seed study with a projection
-  ablation and a stage-wise ablation of the full stack, showing that \pcdg attains the
-  strongest constraint satisfaction among energy-guidance, post-hoc, and even
-  \emph{fully retrained} conditional baselines while matching or beating them on
-  fidelity, and we report the two New York statistics that remain above the
-  unconstrained backbone (\S\ref{sec:experiments}).
+  \item We formulate category-precedence control for complete POI check-in
+  sequences using order and existence energies (\S\ref{sec:problem}).
+  \item We develop a training-free stack combining logit projection,
+  category-consistent decoding, and constraint-neutral same-category geometry
+  refinement (\S\ref{sec:method}).
+  \item We separate category-order control from spatial refinement and measure
+  the resulting constraint--fidelity trade-offs, including residual category
+  and popularity errors (\S\ref{sec:exp:tradeoff}).
+  \item We provide a two-city, three-seed evaluation, projection ablations,
+  and a stage-wise comparison under a fixed selection protocol
+  (\S\ref{sec:experiments}).
 \end{itemize}

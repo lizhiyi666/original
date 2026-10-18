@@ -1,54 +1,40 @@
 \section{Limitations}
 \label{sec:limitations}
-Several limitations frame our claims honestly. (i) We evaluate two cities; the
-Istanbul base model was trained historically with a different batch size than New
-York and its full data provenance is not retroactively verifiable, so we do not
-claim identical cross-city training conditions. (ii) The reported error bars are
-sample standard deviations over three sampling seeds at a \emph{fixed} checkpoint;
-they reflect sampling stochasticity, not training variability, and we run no
-significance tests. (iii) PO-CFG is evaluated at guidance scale $1$; we do not claim an
-extrapolation-tuned optimum. (iv) The distance-KL weight is fixed, not tuned per city,
-and is a batch-level distribution-matching regularizer rather than a per-sample spatial
-guarantee. (v) \pcdg reduces---but does not certify zero---constraint violations; it
-reweights the sampling distribution and performs no hard candidate filtering.
-(vi) \textbf{Two New York statistics remain above the unconstrained backbone}
-(\emph{CategoryTransition} $0.0183$ vs.\ $0.0070$; \emph{G-RANK} $0.1914$ vs.\ $0.1612$),
-so our claim is that the trade-off is largely, not entirely, removable; on Istanbul all
-six divergences improve. (vii) The $\rho/\lambda/\beta$ configuration was selected on a
-training-side calibration split that the frozen backbone had seen, which is an
-engineering calibration rather than an independent validation set; no test metric
-entered selection, but neither of the two three-seed-confirmed configurations cleared
-all pre-specified calibration thresholds, and we report the held-out test result of the
-top-ranked configuration as-is. (viii) The transition from the geometry refinement to
-the full stack changes three things at once---$\rho$, $\beta$, and the composition of the
-same-category candidate pool---so we do not attribute that difference to any single
-factor. (ix) The geometry refinement is a migration of
-an already-frozen configuration; its candidate pools are built from the training
-reference and the backbone's own scores, but it is not a from-scratch generalization
-study. (x) We do not yet report a downstream-utility study (e.g., training a next-POI
-model on the synthetic data). Addressing complex partial-order DAGs (transitivity,
-conflict detection), adaptive constraint scheduling, a training-time partial-order
-objective, and downstream utility are natural directions for future work.
+The study covers two cities and three sampling seeds at fixed checkpoints, not
+variation across training runs or a significance test. Istanbul's historical
+backbone used a different training batch size from New York, and its full
+training provenance cannot be reconstructed. PO-CFG is evaluated at scale $1$,
+not an extrapolation-tuned optimum. The fixed distance-KL weight is shared across
+cities; its batch-level objective gives no per-sequence spatial guarantee.
+
+\pcdg reduces constraint violations without certifying feasibility. The decoder
+uses hard POI-support masking but permits a catalog fallback for unsupported
+final categories (\S\ref{sec:method:decoding}). New York CategoryTransition
+($0.0183$ vs.\ $0.0070$) and G-RANK ($0.1914$ vs.\ $0.1612$) remain above
+JointGen. Hyperparameters were selected on training-side calibration records
+already seen by the backbone; neither three-seed-confirmed candidate passed all
+distribution thresholds. Test metrics never entered that selection.
+
+The (d)$\to$(e) comparison changes $\rho$, $\beta$, and candidate-pool
+composition jointly, precluding single-factor attribution. Stage (d) transfers
+an already-fixed geometry configuration rather than establishing a separately
+tuned generalization result. Complex partial-order DAGs, conflict detection,
+adaptive scheduling, training-time order losses, and downstream recommendation
+utility remain open. Synthetic output has no formal privacy guarantee here;
+distributional similarity alone does not establish safe data release.
 
 \section{Conclusion}
 \label{sec:conclusion}
-We studied controllable synthetic generation of POI check-in sequences under
-sample-level activity-category precedence constraints---a web-native,
-privacy-relevant problem that single-step conditioning cannot address. We
-introduced \pcdg, a training-free, three-stage sampling-time control stack that compiles
-a partial-order matrix into differentiable order and existence energies, projects the
-category-position logits of a frozen joint temporal\,+\,category\,+\,POI
-discrete-diffusion generator via a KL-preserving augmented Lagrangian, removes residual
-category--POI inconsistency by category-consistent decoding, and restores spatial
-realism through a constraint-neutral, distribution-aware same-category geometry
-refinement. Across two cities \pcdg delivers the strongest constraint satisfaction among
-post-hoc, guidance, and even fully retrained conditional baselines while \emph{also}
-improving fidelity over the unconstrained generator on all six divergences on one city
-and four of six on the other---without retraining anything. Our stage-wise analysis
-locates the fidelity cost of constrained sampling on the spatial/POI side and shows it
-is largely an artifact of distribution-blind POI selection rather than a necessary price
-of control. We hope the training-free, sampling-time recipe proves useful for
-controllable generation of other structured web content.
+\pcdg provides sampling-time partial-order control for a frozen POI check-in
+generator. Its order and existence energies control category logits,
+category-consistent decoding reduces disagreement with POI identities, and
+same-category geometry refinement improves spatial fidelity while preserving
+constraint-relevant fields. On two cities, the full stack improves all five
+constraint metrics over the retrained PO-CFG baseline. It improves all six
+fidelity JSDs over JointGen on Istanbul and four on New York. The stage-wise
+results show that spatial distortion can be reduced independently of constraint
+satisfaction in this setting, while the remaining category-transition and
+popularity gaps bound the scope of that separation.
 
 % ======================= Appendix =======================
 \appendix

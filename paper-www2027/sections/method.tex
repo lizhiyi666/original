@@ -8,8 +8,16 @@ $\rho,\lambda,\beta$ enter the projection and refinement objectives, rather than
 forming a separate execution stage.
 \begin{figure*}[t]
   \centering
-  \fbox{\rule{0pt}{2.05in}\rule{0.97\textwidth}{0pt}}
-  \caption{Framework and one controlled reverse step (reserved layout for T3).}
+  \includegraphics[width=\textwidth]{figures/framework.pdf}
+  \caption{\pcdg at sampling time. (a) Projection and decoding operate inside the
+  frozen reverse process; same-category geometry refinement follows it, preserving
+  actual categories, times, and event order. (b) Category energies and distance KL
+  act on different logit positions. The decoder reuses the sampling noise and
+  restricts POI support using the sampled category; unsupported final categories
+  fall back to the catalog. Dashed edges carry conditions or objective inputs.}
+  \Description{A frozen denoiser feeds logit projection and category-first POI decoding
+  within a reverse loop, followed by same-category geometry refinement. A detail panel
+  separates category and POI logits, their objectives, and shared-noise decoding.}
   \label{fig:framework}
 \end{figure*}
 

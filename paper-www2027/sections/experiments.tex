@@ -121,8 +121,15 @@ Figure~\ref{fig:tradeoff} compares the stages in the Unsat--Distance plane;
 Table~\ref{tab:stagewise} in Appendix~\ref{app:ablation} gives all stage-wise means.
 \begin{figure*}[t]
   \centering
-  \fbox{\rule{0pt}{2.0in}\rule{0.97\textwidth}{0pt}}
-  \caption{Unsat--Distance trade-off (reserved layout for T2).}
+  \includegraphics[width=\textwidth]{figures/tradeoff.pdf}
+  \caption{Unsat--Distance trade-off using the evaluation-v2 three-seed means in
+  Tables~\ref{tab:method} and~\ref{tab:stagewise}; lower is better on both axes.
+  Dashed paths connect (a)--(e); shared method/stage points are plotted once.
+  Geometry (c)$\to$(d) lowers Distance JSD without changing Unsat. Transition
+  (d)$\to$(e) changes three factors jointly, not a single regularizer.}
+  \Description{Two scatter panels for Istanbul and New York show five connected stages
+  and three other baselines, with unsatisfied required relations on the horizontal
+  axis and Distance JSD on the vertical axis.}
   \label{fig:tradeoff}
 \end{figure*}
 
