@@ -20,11 +20,12 @@
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2pt}
-\caption{Stage-wise ablation of the full stack. Each stage addresses the residual error of the
-previous one: the projection buys constraint satisfaction, category-consistent decoding buys another
-large constraint jump at a spatial cost, the geometry refinement repays that spatial cost at
-\emph{bit-identical} constraint satisfaction, and the distribution correction repairs the POI-popularity
-statistic (G-RANK) that the refinement degrades on New York.}
+\caption{Stage-wise comparison, evaluation-v2 three-seed means. SDs for (a), (b), (c),
+and (e) are in Table~\ref{tab:method}. Geometry (d) preserves (c)'s constraints within
+$10^{-12}$ and uses a previously fixed configuration. Transition (d)$\to$(e) jointly
+changes $\rho$ ($1\to0.5$), $\beta$ ($0\to1$), and the same-category candidate pool;
+it does not isolate a single factor. The calibration grid (Appendix~\ref{app:grid})
+holds the pool construction fixed.}
 \label{tab:stagewise}
 \begin{tabular}{lrrrrrrcrrr}
 \toprule
@@ -47,17 +48,4 @@ Stage & Distance & Radius & CatTrans & DailyLoc & Category & G-RANK & & OVR\_str
 (e) $+$ distribution correction (full) & $0.0698$ & $0.0373$ & $0.0183$ & $0.0301$ & $0.0175$ & $0.1914$ & & $11.28$ & $87.87$ & $15.86$ \\
 \bottomrule
 \end{tabular}
-\par\smallskip
-\begin{minipage}{\textwidth}\footnotesize
-Three-seed means; sample standard deviations are omitted for width and are reported in
-Tables~\ref{tab:method-jsd}--\ref{tab:method} for rows (a), (b), (c) and (e). Row (d)'s constraint
-cells are identical to row (c)'s to within $10^{-12}$ \emph{by construction}, since the refinement
-replaces only same-category POIs and their coordinates. Row (e) differs from row (d) in three
-respects---the constraint weight $\rho$ ($1\!\to\!0.5$), the POI-distribution weight $\beta$
-($0\!\to\!1$), and the composition of the same-category candidate pool
-(\S\ref{sec:method:geometry})---so we do not attribute the (d)$\to$(e) difference to any single
-factor; the $\rho/\lambda/\beta$ grid is isolated at a fixed pool on calibration data in
-Appendix~\ref{app:grid}. Stage (d) is a migration of an already-frozen geometry configuration, not
-a newly tuned one.
-\end{minipage}
 \end{table*}

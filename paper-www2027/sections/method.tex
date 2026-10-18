@@ -1,20 +1,17 @@
 \section{Method}
 \label{sec:method}
 
-\pcdg is a \emph{training-free} control layer that is attached to a frozen,
-pre-trained conditional check-in generator and acts only during reverse-diffusion
-sampling. We first recall the backbone generator (\S\ref{sec:method:backbone}),
-then formalize the partial-order constraints as differentiable energies
-(\S\ref{sec:method:energy}), describe the KL-preserving augmented-Lagrangian
-projection (\S\ref{sec:method:project}) and the complementary distance
-regularizer (\S\ref{sec:method:distance}), and specify where the control
-is applied in the reverse process (\S\ref{sec:method:placement}). Two further stages
-address what the projection alone cannot reach: category-consistent POI decoding ties
-the emitted POI to the \emph{realized} category at the same position
-(\S\ref{sec:method:decoding}), and a terminal same-category geometry refinement restores
-the spatial marginals without touching any constraint-relevant field
-(\S\ref{sec:method:geometry}). \S\ref{sec:method:balance} collects the three scalars that
-trade constraint strength against distributional fidelity.
+\pcdg controls a frozen generator at sampling time through logit projection,
+category-consistent POI decoding, and terminal same-category geometry refinement.
+Figure~\ref{fig:framework} combines the framework and a controlled reverse step;
+$\rho,\lambda,\beta$ enter the projection and refinement objectives, rather than
+forming a separate execution stage.
+\begin{figure*}[t]
+  \centering
+  \fbox{\rule{0pt}{2.05in}\rule{0.97\textwidth}{0pt}}
+  \caption{Framework and one controlled reverse step (reserved layout for T3).}
+  \label{fig:framework}
+\end{figure*}
 
 \subsection{Backbone: conditional joint discrete diffusion}
 \label{sec:method:backbone}
@@ -151,7 +148,7 @@ unchanged. Because every operation reads and rewrites only the per-step sampling
 logits of a frozen model, \pcdg adds no trainable parameters and requires no
 retraining, and it reduces to the unconstrained backbone when the projection is
 disabled. Algorithm pseudocode and default hyper-parameters are given in
-Appendix~\ref{app:algo}. \todo{add Fig.~1 (framework) and Fig.~2 (one projected reverse step); export from figure\_build/}
+Appendix~\ref{app:algo} and Figure~\ref{fig:framework}.
 
 \subsection{Category-consistent POI decoding}
 \label{sec:method:decoding}

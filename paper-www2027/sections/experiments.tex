@@ -51,7 +51,7 @@ required relations/categories realized, higher is better), and \emph{Unsat}
 
 \subsection{Main results}
 \label{sec:exp:main}
-Tables~\ref{tab:method-jsd} and~\ref{tab:method} report the method comparison on both
+Table~\ref{tab:method} reports the method comparison on both
 cities.
 \input{tables/method-comparison}
 
@@ -117,9 +117,14 @@ every component.
 
 \subsection{Decomposing the fidelity--constraint trade-off}
 \label{sec:exp:tradeoff}
-Table~\ref{tab:stagewise} walks the full stack one stage at a time and localizes where
-fidelity is lost and where it is recovered.
-\input{tables/stagewise}
+Figure~\ref{fig:tradeoff} compares the stages in the Unsat--Distance plane;
+Table~\ref{tab:stagewise} in Appendix~\ref{app:ablation} gives all stage-wise means.
+\begin{figure*}[t]
+  \centering
+  \fbox{\rule{0pt}{2.0in}\rule{0.97\textwidth}{0pt}}
+  \caption{Unsat--Distance trade-off (reserved layout for T2).}
+  \label{fig:tradeoff}
+\end{figure*}
 
 \noindent\textbf{Where fidelity is lost.} Two stages buy constraint satisfaction and
 both charge for it on the \emph{spatial} axis. The projection (b) raises Istanbul
@@ -164,7 +169,6 @@ independent validation set (the frozen backbone was trained on those records), a
 of the two configurations which reached three-seed confirmation neither cleared all
 pre-specified calibration thresholds; we report the resulting held-out test numbers
 as-is rather than re-opening the search.
-\todo{Fig.~3: Unsat (x) vs.\ Distance JSD (y), one marker per method and a dashed path through stages (a)--(e) per city, showing the stack moving to the bottom-left corner while PO-CFG and PostSwap stay on the upper/right frontier.}
 
 \subsection{Cost and reproducibility}
 \label{sec:exp:cost}

@@ -13,10 +13,13 @@
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Method comparison: distributional similarity (JSD $\downarrow$, evaluation v2).
-\textsc{PCDG-P} applies the constraint projection only; \textsc{PCDG-PD} adds category-consistent
-POI decoding; \textsc{PCDG} is the full stack with distribution-aware geometry refinement.}
+\caption{Method comparison (evaluation v2): fidelity JSDs (upper panel) and constraint
+metrics in percent (lower panel). Cells are mean $\pm$ sample SD over three sampling seeds
+at fixed checkpoints, not confidence intervals. Bold marks the best unrounded city-wise
+mean, not significance. \textsc{PCDG-P}: projection; \textsc{PCDG-PD}: adds decoding;
+\textsc{PCDG}: full stack. New York CategoryTransition and G-RANK remain above JointGen.}
 \label{tab:method-jsd}
+\label{tab:method}
 \begin{tabular}{lrrrrrr}
 \toprule
 \multicolumn{7}{l}{\textbf{Istanbul}} \\
@@ -46,25 +49,7 @@ PO-CFG (s=1) & $0.1228\pm 0.0160$ & $0.0823\pm 0.0029$ & $\mathbf{0.0053\pm 0.00
 \textsc{PCDG} (full) & $\mathbf{0.0698\pm 0.0107}$ & $\mathbf{0.0373\pm 0.0042}$ & $0.0183\pm 0.0005$ & $\mathbf{0.0301\pm 0.0010}$ & $0.0175\pm 0.0010$ & $0.1914\pm 0.0060$ \\
 \bottomrule
 \end{tabular}
-\par\smallskip
-\begin{minipage}{\textwidth}\footnotesize
-Mean $\pm$ sample standard deviation over three sampling seeds at a fixed checkpoint; the spread
-reflects sampling stochasticity, not training variability, and is not a confidence interval. Bold
-denotes the best unrounded mean within each city, not statistical significance. On New York,
-\emph{CategoryTransition} and \emph{G-RANK} remain above the unconstrained JointGen for every
-constrained method of ours; we report this residual rather than omitting the columns.
-\end{minipage}
-\end{table*}
-
-% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
-\begin{table*}[t]
-\centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\caption{Method comparison: constraint satisfaction (\%, evaluation v2). Both \textsc{PCDG}
-variants with category-consistent decoding surpass the \emph{retrained} PO-CFG by a wide margin
-while remaining training-free.}
-\label{tab:method}
+\par\medskip
 \begin{tabular}{lrrrrr}
 \toprule
 \multicolumn{6}{l}{\textbf{Istanbul}} \\
@@ -94,12 +79,4 @@ PO-CFG (s=1) & $41.91\pm 1.37$ & $8.97\pm 0.88$ & $59.92\pm 1.58$ & $74.99\pm 1.
 \textsc{PCDG} (full) & $11.28\pm 1.05$ & $4.50\pm 0.70$ & $87.87\pm 1.59$ & $93.46\pm 0.63$ & $15.86\pm 1.90$ \\
 \bottomrule
 \end{tabular}
-\par\smallskip
-\begin{minipage}{\textwidth}\footnotesize
-Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded
-mean within each city. PostSwap drives OVR\_skip to $0$ by construction but cannot introduce a
-missing category, so its coverage is identical to JointGen's. The full \textsc{PCDG} trades a small
-amount of constraint satisfaction (e.g.\ $3.72\!\to\!4.04$ on Istanbul) for the fidelity gains in
-Table~\ref{tab:method-jsd}; this is the effect of halving the constraint weight ($\rho{=}0.5$).
-\end{minipage}
 \end{table*}
