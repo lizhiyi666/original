@@ -7,11 +7,35 @@ from collections import Counter
 from pathlib import Path
 import re
 import subprocess
+import xml.etree.ElementTree as ET
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper-www2027"
 BASELINE = "c828598216bd4949fd12f1e59aa1eca9ccba0e72"
+# Official https://dl.acm.org/ccs Generate Code export, checked 2026-10-18.
+OFFICIAL_CCS = {
+    ("10002951.10003227.10003236.10003101", "Information systems~Location based services", "500"),
+    ("10002951.10003227.10003351", "Information systems~Data mining", "300"),
+    ("10010147.10010257", "Computing methodologies~Machine learning", "500"),
+    ("10010147.10010257.10010293.10010294", "Computing methodologies~Neural networks", "100"),
+    ("10003120.10003130.10003131.10003292", "Human-centered computing~Social networks", "300"),
+}
+
+
+def verify_ccs(current):
+    blocks = re.findall(r"\\begin\{CCSXML\}(.*?)\\end\{CCSXML\}", current, re.S)
+    assert len(blocks) == 1, "Expected exactly one CCSXML block"
+    root = ET.fromstring(blocks[0].strip())
+    assert root.tag == "ccs2012"
+    concepts = [tuple(node.findtext(field) for field in
+                      ("concept_id", "concept_desc", "concept_significance"))
+                for node in root.findall("concept")]
+    assert len(concepts) == len(OFFICIAL_CCS) and set(concepts) == OFFICIAL_CCS
+    descriptions = re.findall(r"\\ccsdesc\[(\d+)\]\{([^}]+)\}", current)
+    expected = {(weight, description) for _, description, weight in OFFICIAL_CCS}
+    assert len(descriptions) == len(expected) and set(descriptions) == expected
+    print("PASS CCSXML IDs / descriptions / weights and five matching ccsdesc commands")
 
 
 def git(*args):
@@ -27,6 +51,7 @@ def data_rows(text):
 def main():
     original = git("show", f"{BASELINE}:paper-www2027/main.tex")
     current = (PAPER / "main.tex").read_text(encoding="utf-8")
+    verify_ccs(current)
     patterns = {
         "title": r"\\title\{[^\n]+\}",
         "abstract": r"\\begin\{abstract\}.*?\\end\{abstract\}",
@@ -83,7 +108,7 @@ def main():
     assert not changed, f"Scientific inputs or implementation changed: {changed}"
     print(f"PASS PDF: {len(reader.pages)} pages; main text ends p{body_page}; appendix p{appendix_page}; embedded fonts; anonymous text/metadata/links")
     print("PASS no changes to sealed experiments or audited scientific implementation")
-    print("OPEN: locked abstract's 'eliminates' conflicts with nonzero decoder mismatch; official CCS export still required")
+    print("OPEN: locked abstract's 'eliminates' conflicts with nonzero decoder mismatch; advisor decision still required")
 
 
 if __name__ == "__main__":

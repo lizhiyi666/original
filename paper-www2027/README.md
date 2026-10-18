@@ -2,7 +2,7 @@
 
 Updated 2026-10-18. ACM `sigconf,anonymous,review`; Research Track long paper.
 Target area: Web Mining, Multimedia and Multilingual Content Analysis.
-T1–T8 are complete; T9 has an outstanding official CCS export. This is a complete
+T1–T9 are complete, including the official CCS export. This is a complete
 advisor-review draft, **not an unconditional submission-ready sign-off**.
 
 ## Locked metadata and open decisions
@@ -17,9 +17,12 @@ advisor-review draft, **not an unconditional submission-ready sign-off**.
   range **0.0034%–0.0219%**. The body explains the unsupported-final-category catalog
   fallback. Await advisor decision; zero mismatch is unsupported. Pair coverage means
   both categories occur, not correct ordering, as the body now states explicitly.
-- **CCS pending:** the official tool <https://dl.acm.org/ccs> remained behind security
-  verification on 2026-10-18. The inherited block is marked unverified; replace it with
-  an official export before full submission. No concept IDs were invented or changed.
+- **CCS complete:** five concepts were selected through the official tool
+  <https://dl.acm.org/ccs> on 2026-10-18 and its Generate Code output replaced the
+  inherited block. Location based services and Machine learning have weight 500,
+  Data mining and Social networks 300, and Neural networks 100. All IDs, descriptions
+  and weights agree with the supplied candidate code. The six newly suggested keywords
+  were not substituted for the five locked keywords.
 - No OpenReview interaction or submission was performed. The author must register/upload.
 
 ## Deadlines and format
@@ -64,8 +67,11 @@ From the repository root, regenerate figures/tables without executing experiment
 After building, run `figure_build/verify_paper.py` with a Python environment providing
 `pypdf` (the app's bundled document runtime) and Poppler `pdffonts`. It checks locked
 blocks, original numeric rows/precision/bolding, page budget, fonts, anonymity, TODOs,
-log errors and protected-path diffs against `c828598`. Integrity passing does not resolve
-CCS or the abstract conflict. Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
+log errors and protected-path diffs against `c828598`. It also validates exactly five
+CCSXML entries and matching LaTeX descriptions against the verified official export.
+Negative checks reject incorrect IDs/weights, duplicate descriptions and missing XML.
+The CCS rebuild exited 0; page 1 and the p7/p8 main-text/appendix transition were inspected.
+Integrity passing does not resolve the abstract conflict. Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
 and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 
 ## Completed work
@@ -80,7 +86,7 @@ and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 | T6 | Manifest counts and evidence-bounded OOD definition, retaining Istanbul split-provenance gap |
 | T7 | Selected-geometry timing with projection-Full denominator; unavailable final-stack costs explicitly unmeasured |
 | T8 | Related work aligned to projection, support-constrained decoding and spatial refinement; five central citations verified |
-| T9 | Emails, no-op TODO, build/anonymity/fonts/page checks done; official CCS export pending |
+| T9 | Emails, no-op TODO, build/anonymity/fonts/page checks done; official five-concept CCS export integrated and XML/LaTeX consistency verified |
 
 ## Scientific guardrails
 

@@ -5,15 +5,18 @@
 
 ## 1. 当前交付和未闭环项
 
-T1–T8 已完成；T9 的邮箱、TODO、编译、匿名、字体、页数检查已完成，**官方 CCS 导出仍未取得**。
+T1–T9 已完成，包含官方 CCS 导出、邮箱、TODO、编译、匿名、字体、页数检查。
 当前是供导师通读的完整稿，不是无条件的投稿就绪声明。
 
 1. **摘要事实冲突保留待导师决定。** 摘要写 decoder “eliminates residual category–POI
    inconsistency”，六份正式输出却有 **0.0034%–0.0219%** mismatch。代码最终类别无支持时
    回退到任意合法 catalog POI。正文、框架图、局限已更正；用户选择暂不改锁定摘要。
    另须注意 “pairwise ordering coverage” 对应两个类别均出现，不表示排序正确，正文已区分。
-2. **CCS 工具受阻。** <https://dl.acm.org/ccs> 持续显示安全验证。未绕过、未编造编号。
-   `main.tex` 旧块已标注未核验，需作者给出官方导出后替换。
+2. **CCS 已闭环。** 2026-10-18 从 <https://dl.acm.org/ccs> 正常浏览器页面逐层选择五项，
+   使用 Generate Code 取得官方 CCSXML 和 `\ccsdesc`，已替换 `main.tex` 旧块。
+   Location based services / Machine learning 为 500，Social networks / Data mining 为 300，
+   Neural networks 为 100。五项编号、名称及权重均与用户提供内容一致。
+   新提供的六关键词未替换锁定的五关键词；标题、摘要和作者顺序也未改变。
 3. **不操作 OpenReview。** 注册、核对 portal 时间及上传由作者本人完成。
 
 ## 2. 锁定内容和作者
@@ -65,7 +68,7 @@ T1–T8 已完成；T9 的邮箱、TODO、编译、匿名、字体、页数检�
 | T6 | manifest 的 NY 3160/2108、IST 7035/4914；`tools/make_opposite_split.py` 说明 NY 是偏好反转，非完整配置绝对不相交；IST 来源缺口保留 |
 | T7 | `pcdg-geo-v1-tol10-20261010/speed/confirm-r2-b0.1-summary.json` → `tables/cost.tex`；64 条 batch，3.35%–3.98%，分母 projection Full |
 | T8 | 相关工作对齐投影/解码/细化；核验五篇主要引用；移除无证据的“此前无人处理”和“其他均需重训”；CDD 采用会议版作者顺序，补部分页码 |
-| T9 | 邮箱、TODO 空操作、锁定块/匿名/字体/页数/日志检查完成；官方 CCS 导出未完成 |
+| T9 | 邮箱、TODO 空操作、锁定块/匿名/字体/页数/日志检查完成；官方五项 CCS 导出已接入，XML/LaTeX 一致性检查通过 |
 
 另修正文 token KL 方向：实现 `F.kl_div(log_p, log_q, log_target=True)` 是
 **base→projected**。附录写明 token KL 除以完整 batch 大小，约束 penalty 按关系/样本求和。
@@ -74,7 +77,12 @@ T1–T8 已完成；T9 的邮箱、TODO、编译、匿名、字体、页数检�
 图按最终正文尺寸检查，SVG 可编辑文字，固定 ID 盐值并去时间元数据；同环境可稳定再生。
 临时渲染只放 `ccfa-workfiles/writing/www2027/build/`，不提交。
 `figure_build/verify_paper.py` 使用 pypdf 与 Poppler，构建后运行，检查锁定块、原表数据行、
-日志、页数、匿名/字体和受保护路径差异；可用应用自带文档 Python。通过不等于 CCS/科学审稿通过。
+日志、页数、匿名/字体和受保护路径差异；可用应用自带文档 Python。
+CCS 检查对照 2026-10-18 官方导出的五个 ID/名称/权重，并验证恰好五条对应 `\ccsdesc`。
+错误 ID、错误权重、重复 `\ccsdesc`、缺失 XML 的内存负例均被拒绝。
+CCS 接入后 `latexmk` 退出 0，仍为 11 页、正文结束 p7、附录 p8；第一页和 p7/p8 接口重新目视核验。
+官方导出截图保存在本地 `ccfa-workfiles/writing/www2027/build/ccs-official-export.png`，不提交缓存。
+完整性通过不等于摘要冲突已解决或科学审稿通过。
 
 ## 6. 科学边界与来源
 
@@ -104,7 +112,7 @@ T1–T8 已完成；T9 的邮箱、TODO、编译、匿名、字体、页数检�
 
 ## 7. 后续最短路径
 
-作者/导师决定摘要非零残差措辞 → 作者提供官方 CCS 导出 → 修改相应源块 →
+作者/导师决定摘要非零残差措辞 → 仅修改获准的摘要措辞 →
 重建及完整性检查 → 检查受影响页面 → 提交/推送/核对 SHA → 作者自行提交。
 不要顺带扩展实验、切换评估版本或改锁定标题。
 
