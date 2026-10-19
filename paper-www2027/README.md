@@ -1,34 +1,37 @@
 # PCDG — WWW 2027 working manuscript
 
-Updated 2026-10-18. ACM `sigconf,anonymous,review`; Research Track long paper.
+Updated 2026-10-19. ACM `sigconf,anonymous,review`; Research Track long paper.
 Target area: Web Mining, Multimedia and Multilingual Content Analysis.
-T1–T9 are complete, including the official CCS export. This is a complete
-advisor-review draft, **not an unconditional submission-ready sign-off**.
+T1–T9 and the authorized evidence-focused revision are complete, including the
+official CCS export and the bibliography audit. Scientific limitations below
+remain; successful build and format checks are not a scientific acceptance judgment.
 
 ## Locked metadata and open decisions
 
-- Title, abstract, five keywords and author order are unchanged from `c828598`.
+- Title, five keywords and author order are unchanged from `c828598`.
+  The abstract allows exactly one authorized change: `eliminates residual` to
+  `reduces residual`. All other abstract text remains locked.
   Do not add “distribution correction” back to the title.
 - Zhiyi Li: `25s151146@stu.hit.edu.cn`; then corresponding author Kaiqi Zhao:
   `zhaokaiqi@hit.edu.cn`. Both HIT Shenzhen. Emails are in source; ORCIDs were not
   supplied and must not be guessed. Keep the review PDF anonymous.
-- **Abstract conflict retained at the author's direction:** the phrase “eliminates
-  residual category–POI inconsistency” conflicts with the sealed six-run mismatch
-  range **0.0034%–0.0219%**. The body explains the unsupported-final-category catalog
-  fallback. Await advisor decision; zero mismatch is unsupported. Pair coverage means
-  both categories occur, not correct ordering, as the body now states explicitly.
+- **Abstract conflict corrected with authorization:** “reduces residual” agrees
+  with the sealed six-run mismatch range **0.0034%–0.0219%**. The body retains the
+  unsupported-final-category catalog fallback. Pair coverage means both categories
+  occur, not correct ordering.
 - **CCS complete:** five concepts were selected through the official tool
   <https://dl.acm.org/ccs> on 2026-10-18 and its Generate Code output replaced the
   inherited block. Location based services and Machine learning have weight 500,
   Data mining and Social networks 300, and Neural networks 100. All IDs, descriptions
   and weights agree with the supplied candidate code. The six newly suggested keywords
   were not substituted for the five locked keywords.
-- No OpenReview interaction or submission was performed. The author must register/upload.
+- No WWW submission-portal operations were performed. Public OpenReview literature
+  records were read only for citation verification. Registration/upload remains with the author.
 
 ## Deadlines and format
 
 The [official WWW 2027 Research Track page](https://www2027.thewebconf.org/research-track-papers/),
-checked 2026-10-18, gives abstract **18 October 2026 AoE** and full-paper
+checked 2026-10-19, gives abstract **18 October 2026 AoE** and full-paper
 **25 October 2026 AoE**. End-of-day AoE converts to just before **20:00 Beijing on
 19/26 October**, respectively. The old handoff reported OpenReview 13:00 UTC / 21:00
 Beijing; that one-hour discrepancy remains unverified in the portal. Work to the earlier
@@ -43,18 +46,26 @@ Run inside `paper-www2027/`:
 latexmk -pdf -interaction=nonstopmode main.tex
 ```
 
-Current PDF: **11 pages**, conclusion **p7**, Appendix A starts **p8**. Build exits
+Current PDF: **12 pages**, conclusion **p7**, Appendix A starts **p8**. Build exits
 **0** with no LaTeX errors, undefined references/citations, visible TODOs or overfull
 boxes. Fonts are embedded; PDF text, metadata and links pass the anonymity checks.
-Web relevance appears on page 1; final-size page renders have been inspected.
+Web relevance appears on page 1; all 12 current page renders have been inspected.
+The unchanged method table and trade-off figure are queued earlier in the source
+to avoid an isolated float page. The native `acmart` option `balance=false` disables
+optional last-page column balancing, which produced an overfull bibliography box.
+Fonts, margins, table styling and figure assets were not reduced or redesigned.
 
 Do not treat exit code 12 as harmless. The old draft had a real `\Bbbk` redefinition
 from redundant `amssymb`; that import was removed. Check file-line-style errors too,
 not only lines beginning `!`. Preserve `latexmkrc` for Chinese-path BibTeX support.
-Remaining nonfatal notices concern review-mode reference-block suppression, last-page
-column balancing, underfull vertical boxes and incomplete legacy BibTeX fields.
-The 52-entry database has not received a full metadata/claim-support audit; five directly
-relevant entries were checked against primary sources.
+Remaining nonfatal notices concern review-mode reference-block suppression,
+underfull vertical boxes and 34 BibTeX style warnings (missing optional addresses,
+ICLR's non-paginated record, and AAAI volume/issue combinations). No missing fields
+were invented to silence those warnings.
+The database has **50 records, 45 actually cited**. All 50 received metadata checks;
+six central references received targeted context checks. Background citations were
+checked at identity/title/available-abstract level, not all read in full.
+See [CITATION-AUDIT.md](CITATION-AUDIT.md) for sources, corrections and coverage limits.
 
 From the repository root, regenerate figures/tables without executing experiments:
 
@@ -70,8 +81,13 @@ blocks, original numeric rows/precision/bolding, page budget, fonts, anonymity, 
 log errors and protected-path diffs against `c828598`. It also validates exactly five
 CCSXML entries and matching LaTeX descriptions against the verified official export.
 Negative checks reject incorrect IDs/weights, duplicate descriptions and missing XML.
-The CCS rebuild exited 0; page 1 and the p7/p8 main-text/appendix transition were inspected.
-Integrity passing does not resolve the abstract conflict. Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
+The strict abstract whitelist is tested by `figure_build/test_verify_paper.py`:
+all eight tests pass, including rejection of other abstract edits, title/keyword
+changes and author reordering. From the root, run `python -B -m unittest discover
+-s figure_build -p test_verify_paper.py -v` with the same Python environment.
+Equation/align environments, all table files and figure assets are unchanged from
+the pre-revision checkpoint. Integrity passing does not close the scientific gaps below.
+Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
 and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 
 ## Completed work
@@ -92,6 +108,10 @@ and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 
 - Marionette is the prior backbone; projection adapts CDD. The implemented token KL is
   **base-to-projected**; Appendix A specifies batch normalization.
+- Actual activities are catalog POI categories, not independently sampled category
+  tokens. Decoding connects those representations; same-category refinement preserves
+  constraint-relevant fields, not all distributional fidelity. EnergyGuide is the
+  local order/existence-gradient baseline, not an exact reproduction of discrete CBG.
 - New York CategoryTransition 0.0183 vs JointGen 0.0070 and G-RANK 0.1914 vs 0.1612 remain
   worse. PO-CFG wins those two and Category there. Istanbul improves all six vs JointGen
   and five vs PO-CFG. Three-seed sample SDs do not establish significance.

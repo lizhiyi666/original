@@ -1,29 +1,33 @@
 # WWW 2027 论文接续状态
 
-更新：2026-10-18。原 T1–T9 任务说明保存在提交 `c828598`；本文记录执行结果。
+更新：2026-10-19。原 T1–T9 任务说明保存在提交 `c828598`；本文记录执行结果及本轮深化证据修订。
 后续先读本文及根目录 `AGENTS.md`，不要重复运行已完成实验。
 
 ## 1. 当前交付和未闭环项
 
-T1–T9 已完成，包含官方 CCS 导出、邮箱、TODO、编译、匿名、字体、页数检查。
-当前是供导师通读的完整稿，不是无条件的投稿就绪声明。
+T1–T9 和本轮已授权修订均已完成，包含官方 CCS 导出、摘要白名单、50 条文献元数据核验、
+正文定向改写、编译、匿名、字体与逐页检查。科学边界见第 6 节，不把编译通过当作科学问题解决。
 
-1. **摘要事实冲突保留待导师决定。** 摘要写 decoder “eliminates residual category–POI
-   inconsistency”，六份正式输出却有 **0.0034%–0.0219%** mismatch。代码最终类别无支持时
-   回退到任意合法 catalog POI。正文、框架图、局限已更正；用户选择暂不改锁定摘要。
+1. **摘要事实冲突已按用户授权修正。** 仅将 `eliminates residual` 改为 `reduces residual`，
+   与六份正式输出的 **0.0034%–0.0219%** mismatch 一致。代码最终类别无支持时
+   回退到任意合法 catalog POI。其他摘要内容继续锁定，零 mismatch 仍不成立。
    另须注意 “pairwise ordering coverage” 对应两个类别均出现，不表示排序正确，正文已区分。
 2. **CCS 已闭环。** 2026-10-18 从 <https://dl.acm.org/ccs> 正常浏览器页面逐层选择五项，
    使用 Generate Code 取得官方 CCSXML 和 `\ccsdesc`，已替换 `main.tex` 旧块。
    Location based services / Machine learning 为 500，Social networks / Data mining 为 300，
    Neural networks 为 100。五项编号、名称及权重均与用户提供内容一致。
-   新提供的六关键词未替换锁定的五关键词；标题、摘要和作者顺序也未改变。
-3. **不操作 OpenReview。** 注册、核对 portal 时间及上传由作者本人完成。
+   新提供的六关键词未替换锁定的五关键词；标题和作者顺序未改变。
+3. **不操作 WWW 投稿系统。** 注册、核对 portal 时间及上传由作者本人完成。
+   本轮仅为文献核验只读访问公开 OpenReview 论文记录，未进行投稿操作。
+4. **引用核验已交付。** 文献库 50 条、正文实际引用 45 条，5 条未引用记录保留。
+   46 个 DOI 与 4 个无 DOI 的官方记录已核验；核心六篇做定向语境核查。
+   背景文献为身份/题目/可得摘要层级，不声称通读 50 篇全文。详见 `CITATION-AUDIT.md`。
 
 ## 2. 锁定内容和作者
 
 - 标题：`Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation`。
   导师要求不要加回 “distribution correction”。
-- 标题、摘要、五关键词、作者顺序与 `c828598` 完全一致。
+- 标题、五关键词、作者顺序与 `c828598` 完全一致；摘要只允许上述单处授权替换。
 - 第一作者 Zhiyi Li：`25s151146@stu.hit.edu.cn`。
 - 通讯作者 Kaiqi Zhao：`zhaokaiqi@hit.edu.cn`。
 - 两人均为哈工大（深圳）计算机科学与技术学院；邮箱已填，ORCID 未提供，不猜。
@@ -32,7 +36,7 @@ T1–T9 已完成，包含官方 CCS 导出、邮箱、TODO、编译、匿名、
 ## 3. 截止时间：保留一小时差异
 
 [官方 Research Track 页面](https://www2027.thewebconf.org/research-track-papers/)
-于 2026-10-18 核实：摘要 10-18 AoE 日终、全文 10-25 AoE 日终，分别对应北京时间
+于 2026-10-19 核实：摘要 10-18 AoE 日终、全文 10-25 AoE 日终，分别对应北京时间
 **10-19 / 10-26 接近 20:00**，不是 21:00。旧交接写 OpenReview 为 13:00 UTC / 21:00 北京时间，
 本任务未进入 OpenReview，不能确认 portal。按更早官网时间安排，作者自行核对差异。
 长文正文最多 8 页、含参考文献及附录最多 12 页；第一页须说明 Web/track 相关性。
@@ -41,20 +45,25 @@ T1–T9 已完成，包含官方 CCS 导出、邮箱、TODO、编译、匿名、
 
 - 仓库：`D:\桌面\轨迹\轨迹\轨迹生成\实验\original`。
 - 分支：`codex/distribution-best-formal-v1`；远程 `lizhiyi666/original`。
-- 修改前 `c828598`，T1 后 `fca940c`，矢量图/概要压缩后 `faccb4f`；最终正文/核验修订
-  为后续提交，查 `git log`。每组修改前后仍需提交、推送并核对远程 SHA。
+- 历史检查点：`c828598` → `fca940c` → `faccb4f`；本轮基线为 `5efc4cc`。
+  摘要与测试组 `d1c088e`、证据/引用/正文组 `e5abed7` 均已推送并核对远程完整 SHA。
+  最终交接核验为本文件所在的后续提交，查 `git log`。每组前后仍需提交、推送并核对 SHA。
 - 只暂存本任务文件，不 `git add .`；不提交数据、权重、缓存、日志、字节码、依赖目录。
 - 直连曾超时；现有代理 `git -c http.proxy=http://127.0.0.1:7897 push origin
   HEAD:refs/heads/codex/distribution-best-formal-v1` 可用。相同 `-c` 配合 `ls-remote`
   核验分支。未修改全局配置，不强推、不 reset；前置推送失败就停止新修改。
 - 作图 Python：`D:\Anaconda\envs\Marionette\python.exe`。
 - 论文目录内构建：`latexmk -pdf -interaction=nonstopmode main.tex`。
-- **当前真实退出 0**，11 页，结论 p7，附录 A 从 p8 开始；零错误、未解析引用、TODO 调用、
+- **当前真实退出 0**，12 页，结论 p7，附录 A 从 p8 开始；零错误、未解析引用、TODO 调用、
   overfull。第一页 Web 相关性、PDF 字体嵌入、文本/元数据/链接匿名检查及逐页视觉检查通过。
 - 原稿 `amssymb` 造成 `\Bbbk` 重定义，已移除重复导入。**返回码 12 不应被称为无害**；
   只搜索 `^!` 会漏 file-line-style 错误。保留 `latexmkrc` 的中文路径 BibTeX 修复。
-- 剩余非致命提示：review 的 reference block 隐藏、末页列平衡、underfull vbox、部分旧 BibTeX
-  缺 publisher/address/pages。未进行 52 条文献全量审计。
+- 保留原 ACM 双栏、字体和边距；仅将现有主表/权衡图提前排队，避免独立浮动页。
+  `acmart` 原生 `balance=false` 关闭可选末页列平衡，消除参考文献尾页的 overfull vbox；
+  尾页按普通双栏流排，未缩小字号或图表。
+- 剩余非致命提示：review 的 reference block 隐藏、underfull vbox，以及 34 条 BibTeX
+  样式提示，主要是可选 address、ICLR 非分页记录和 AAAI 卷期组合；不为消警告编造字段。
+  旧“52 条、未全量审计”已更正为 50 条元数据核验，语境覆盖边界见审计报告。
 
 ## 5. T1–T9 执行记录
 
@@ -82,10 +91,26 @@ CCS 检查对照 2026-10-18 官方导出的五个 ID/名称/权重，并验证�
 错误 ID、错误权重、重复 `\ccsdesc`、缺失 XML 的内存负例均被拒绝。
 CCS 接入后 `latexmk` 退出 0，仍为 11 页、正文结束 p7、附录 p8；第一页和 p7/p8 接口重新目视核验。
 官方导出截图保存在本地 `ccfa-workfiles/writing/www2027/build/ccs-official-export.png`，不提交缓存。
-完整性通过不等于摘要冲突已解决或科学审稿通过。
+以上 CCS 接入的 11 页状态为历史记录。本轮当前 PDF 为 12 页；摘要事实冲突已按授权修正，
+但完整性通过仍不等于科学审稿通过。
+
+### 本轮“深化现有证据”修订
+
+- 按 Reviewer 的证据核查收紧论证，Writer 配合 Humanization 改写，删除重复背景和重复
+  几何超参数叙述；完整设置仍在附录 A，公式含义和实现未改。
+- §3 区分 category token 和 catalog POI category；§4 说明解码衔接两者，同类别替换的
+  不变字段只支持受限空间可分离性，不推出所有分布误差可消除。
+- 区分 Marionette backbone、CDD 投影范式及本任务适配；修正“projected-gradient”为
+  SGD penalty optimization，明确松弛 inverted-pair mass 不等于离散可行性保证。
+- EnergyGuide 是本地 order+5×existence 梯度基线，不是 Schiff 等 discrete CBG 的精确复现。
+- 引用修正包括 González 原论文 DOI、TrajGDM 首作者、Diff-POI/Act2Loc 正式卷期年、
+  CDD 官方页码，以及完整作者/卷页信息。50 个 citation key 保持不变。
+- 没有新增文献、结果表或图形重绘。没有更改科学代码、种子、评估协议、训练/采样任务或封存文件。
 
 ## 6. 科学边界与来源
 
+- 同类别细化保持实际类别、时间、顺序和条件等字段；它不能修复保持不变的类别分布误差，
+  也不保证候选池中存在匹配所有参考分布的解。decoder 仍有 unsupported-category fallback。
 - NY CategoryTransition 0.0183 vs JointGen 0.0070、G-RANK 0.1914 vs 0.1612；PO-CFG 在这两项
   及 Category 最好。IST 六项优于 JointGen、五项优于 PO-CFG。
 - 三个固定 checkpoint 采样种子的样本 SD，不是 CI、显著性或训练种子稳定性。
@@ -112,13 +137,31 @@ CCS 接入后 `latexmk` 退出 0，仍为 11 页、正文结束 p7、附录 p8�
 
 ## 7. 后续最短路径
 
-作者/导师决定摘要非零残差措辞 → 仅修改获准的摘要措辞 →
-重建及完整性检查 → 检查受影响页面 → 提交/推送/核对 SHA → 作者自行提交。
-不要顺带扩展实验、切换评估版本或改锁定标题。
+作者通读当前稿及 `CITATION-AUDIT.md`，确认接受第 6 节保留的证据边界，再自行核对注册信息
+和投稿期限并上传 PDF。本轮无需再等待摘要单词替换授权。不要顺带扩展实验、切换评估版本
+或改锁定标题；任何后续新修改继续遵守 GitHub 检查点规则。
 
 核验的五篇主要来源：
 [Marionette](https://github.com/UM-Data-Intelligence-Lab/Marionette)、
 [CDD](https://proceedings.neurips.cc/paper_files/paper/2025/hash/124c1cc9f7750f512ed81cdbf2fd5bf5-Abstract-Conference.html)、
 [ControlTraj](https://arxiv.org/html/2404.15380v1)、
 [Grammar-constrained decoding](https://aclanthology.org/2023.emnlp-main.674/)、
-[Control-DAG](https://aclanthology.org/2024.naacl-short.42/)。本次是受影响论证的定向核查，不是全稿录用判断。
+[Control-DAG](https://aclanthology.org/2024.naacl-short.42/)。本轮另核验
+[Discrete Guidance](https://openreview.net/forum?id=i5MrJ6g5G1) 的 §3.1–3.2 方法语境。
+全量记录见 `CITATION-AUDIT.md`；本次是受影响论证的定向核查，不是全稿录用判断。
+
+## 8. 最终交付核验
+
+- `latexmk -pdf -interaction=nonstopmode main.tex`：退出 0，12 页；正文 p1–7，附录从 p8，
+  参考文献从 p10 延续至 p12。主文及浮动图表均在官方 8 页正文上限内，总页数不超过 12。
+- `figure_build/verify_paper.py`：通过。标题/关键词/作者顺序、官方 CCS、摘要白名单、
+  原表数值/精度/SD/粗体、匿名、字体、引用、无溢出和受保护路径检查通过。
+- `python -B -m unittest discover -s figure_build -p test_verify_paper.py -v`：8/8 通过。
+  授权替换通过；旧 overclaim、其他摘要词句改动、摘要缺失、标题/关键词及作者重排均被拒绝。
+- 与 `d1c088e` 比较：全部 table/figure 源文件及资产无差异，equation/align 环境无差异；
+  无论文目录外改动。v2 表格与 v3 审计描述分离。
+- Writer 的只读 prose checker 已运行；剩余句长/分号/precision-term 提示经上下文检查保留，
+  不为消除启发式提示而删除科学限定。对受影响论证再次检查后，未新增待解决事实冲突。
+- 当前 12 页均已渲染目视检查，无重叠、裁切或缺失字体。草图缓存在已有工作目录，未提交。
+- 当前交付 PDF SHA256：`e6c6cfd07fbcebe076f440a21b4f9edc062b33ec105317f5d444c80c44c584db`。
+  PDF 与源文件位于 `e5abed7e7069319642dadcd5c99d30c832fa3418`；最终交接组仅更新文档。
