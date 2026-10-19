@@ -28,13 +28,30 @@ at fixed checkpoints, not training variability or confidence intervals.
 \paragraph{Baselines.}
 \textbf{JointGen} is the unconstrained backbone.
 \textbf{PostSwap} stably reorders generated events according to $\Mmat$.
-\textbf{EnergyGuide} uses a single gradient correction from the constraint
-energy during sampling, following the guidance
-paradigm~\cite{schiff2025guidance}.
+\textbf{EnergyGuide} is a local sampling-time baseline: one gradient correction
+of the order-plus-five-times-existence energy at each controlled step, without
+the KL anchor or dual updates used by projection.
 \textbf{PO-CFG} is trained with partial-order conditioning for $1000$ epochs and
 evaluated at classifier-free guidance scale $1$; it is the only retrained
 baseline. Our variants are \pcdgp (projection), \pcdgpd (projection and
 category-consistent decoding), and \pcdg (the full stack).
+
+% Queue the unchanged double-column table before the page break in Setup.
+\input{tables/method-comparison}
+% Queue the unchanged trade-off figure next, avoiding an isolated float page.
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/tradeoff.pdf}
+  \caption{Unsat--Distance trade-off using the evaluation-v2 three-seed means in
+  Tables~\ref{tab:method} and~\ref{tab:stagewise}; lower is better on both axes.
+  Dashed paths connect (a)--(e); shared method/stage points are plotted once.
+  Geometry (c)$\to$(d) lowers Distance JSD without changing Unsat. Transition
+  (d)$\to$(e) changes three factors jointly, not a single regularizer.}
+  \Description{Two scatter panels for Istanbul and New York show five connected stages
+  and three other baselines, with unsatisfied required relations on the horizontal
+  axis and Distance JSD on the vertical axis.}
+  \label{fig:tradeoff}
+\end{figure*}
 
 \paragraph{Metrics.}
 We retain the archived evaluation-v2 protocol for every table.
@@ -53,7 +70,6 @@ Appendix~\ref{app:metrics} specifies denominators and filtering.
 \subsection{Main results}
 \label{sec:exp:main}
 Table~\ref{tab:method} compares all methods on both cities.
-\input{tables/method-comparison}
 
 \paragraph{Constraint satisfaction.}
 The full \pcdg reduces strict OVR from $92.89\%$ to $4.04\%$ on Istanbul and
@@ -97,33 +113,22 @@ removing Gumbel noise lowers New York Distance to $0.2055$.
 \label{sec:exp:tradeoff}
 Figure~\ref{fig:tradeoff} shows the Unsat--Distance plane; the complete stage-wise
 means are in Table~\ref{tab:stagewise}, Appendix~\ref{app:ablation}.
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/tradeoff.pdf}
-  \caption{Unsat--Distance trade-off using the evaluation-v2 three-seed means in
-  Tables~\ref{tab:method} and~\ref{tab:stagewise}; lower is better on both axes.
-  Dashed paths connect (a)--(e); shared method/stage points are plotted once.
-  Geometry (c)$\to$(d) lowers Distance JSD without changing Unsat. Transition
-  (d)$\to$(e) changes three factors jointly, not a single regularizer.}
-  \Description{Two scatter panels for Istanbul and New York show five connected stages
-  and three other baselines, with unsatisfied required relations on the horizontal
-  axis and Distance JSD on the vertical axis.}
-  \label{fig:tradeoff}
-\end{figure*}
 
 \paragraph{Projection and decoding.}
 Decoding (b)$\to$(c) reduces strict OVR from $32.80\%$ to $3.72\%$ on Istanbul
 and from $38.51\%$ to $9.52\%$ on New York. Radius increases from $0.0516$ to
 $0.0892$ and from $0.1265$ to $0.1681$, respectively. The fidelity changes are
 metric-dependent: category-transition JSD also increases in both cities.
+Thus coupling the token and catalog representations strengthens realized
+activity-order control, but also changes the distribution of available POIs.
 
 \paragraph{Geometry and distribution correction.}
 At (c)$\to$(d), geometry preserves constraint metrics within $10^{-12}$.
 Distance/Radius fall from $0.1539/0.0892$ to $0.0372/0.0159$ on Istanbul and
 from $0.1989/0.1681$ to $0.0610/0.0382$ on New York.
 Because actual categories are unchanged, Distance's endpoint filter is also
-unchanged in this comparison. Spatial fidelity can therefore improve while
-these constraint statistics stay fixed.
+unchanged in this comparison. This isolates the spatial refinement effect under
+fixed realized activities and a fixed Distance evaluation subset.
 New York G-RANK nevertheless rises from $0.1914$ to $0.2069$.
 Stage (e) lowers it to $0.1914$ and lowers Istanbul G-RANK from $0.1835$ to
 $0.1798$, with a modest constraint regression. This transition jointly changes

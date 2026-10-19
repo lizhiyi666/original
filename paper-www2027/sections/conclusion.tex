@@ -9,9 +9,9 @@ cities; its batch-level objective gives no per-sequence spatial guarantee.
 
 \pcdg reduces constraint violations without certifying feasibility. The decoder
 uses hard POI-support masking but permits a catalog fallback for unsupported
-final categories (\S\ref{sec:method:decoding}). New York CategoryTransition
-($0.0183$ vs.\ $0.0070$) and G-RANK ($0.1914$ vs.\ $0.1612$) remain above
-JointGen. Hyperparameters were selected on training-side calibration records
+final categories (\S\ref{sec:method:decoding}). New York retains the
+category-transition and popularity gaps reported in \S\ref{sec:exp:main};
+same-category refinement cannot alter the former. Hyperparameters were selected on training-side calibration records
 already seen by the backbone; neither three-seed-confirmed candidate passed all
 distribution thresholds. Test metrics never entered that selection.
 
@@ -25,13 +25,14 @@ distributional similarity alone does not establish safe data release.
 
 \section{Conclusion}
 \label{sec:conclusion}
-\pcdg combines order/existence projection, category-consistent decoding, and
-same-category geometry refinement for a frozen POI generator. On two cities, it
+\pcdg adapts CDD-style order/existence projection to frozen Marionette sampling,
+couples category tokens to catalog POIs through decoding, and refines locations
+within each realized category. On two cities, it
 improves all five constraint metrics over retrained PO-CFG. It lowers all six
 fidelity JSDs versus JointGen on Istanbul and four on New York. Refinement
-recovers spatial fidelity while preserving constraint-relevant fields;
-New York's residual category-transition and popularity errors delimit this
-separation.
+recovers spatial fidelity while preserving constraint-relevant fields. This
+restricted separability explains the stage-wise spatial recovery; New York's
+remaining category-transition and popularity errors show its distributional limits.
 \label{end:main}
 
 % ======================= Appendix =======================

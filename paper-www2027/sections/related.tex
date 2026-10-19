@@ -21,7 +21,7 @@ privacy-oriented
 approaches~\cite{feng2020simulate,wang2023pategail,sun2023sprt,rao2023cats,hu2024retrasyn,netzler2024privacy},
 and, increasingly, diffusion
 models~\cite{zhu2023difftraj,yuan2023stdpp,gong2025stcdm,chen2024trajgdm,wei2024diffrntraj,rao2025seed,long2026population}
-and LLM-based
+and Transformer/LLM-based
 generators~\cite{zhang2024mobglm,hsu2024trajgpt,li2025geollama,haydari2026mobilitygpt}.
 Marionette supports fine-grained generation using global and partial mobility
 contexts~\cite{deng2025marionette}; we use its generator as a frozen backbone.
@@ -33,9 +33,11 @@ the distributional effects of enforcing it on generated POI identities.
 Discrete diffusion extends denoising diffusion~\cite{ho2020ddpm} to categorical
 data via structured transition matrices~\cite{austin2021d3pm}, concrete score
 matching~\cite{meng2022concrete}, score-entropy~\cite{lou2024sedd}, and masked
-formulations~\cite{sahoo2024mdlm}; guidance mechanisms steer discrete generation
-toward conditions~\cite{schiff2025guidance}. We adopt a discrete-diffusion
-backbone and intervene at sampling time rather than changing training.
+formulations~\cite{sahoo2024mdlm}. Discrete classifier-free and classifier-based
+guidance steer generation toward conditions~\cite{schiff2025guidance}.
+Our EnergyGuide baseline instead takes a gradient of the local order/existence
+energy; it does not reproduce that work's classifier-likelihood construction.
+\pcdg intervenes in the frozen backbone at sampling time.
 
 \paragraph{Sampling-time constraint projection.}
 CDD integrates differentiable constraints into discrete-diffusion sampling
@@ -55,7 +57,7 @@ generation~\cite{chen2024controldag}. Our decoder instead couples category token
 to admissible catalog POIs. Its final-category fallback prevents a universal
 consistency guarantee. Geographic control is complementary: ControlTraj uses
 road topology and trip attributes to condition trajectory
-generation~\cite{zhu2024controltraj}. Our terminal refinement reselects POIs
-within their realized categories, changing spatial statistics while preserving
-the fields used by the constraint metrics. The empirical question is how much
-fidelity this restricted refinement recovers, and which errors remain.
+generation~\cite{zhu2024controltraj}. This differs from preserving an activity
+sequence while changing its locations. Our terminal refinement reselects POIs
+within their realized categories; the stage-wise evaluation measures how much
+spatial fidelity this restriction permits us to recover, and which errors remain.

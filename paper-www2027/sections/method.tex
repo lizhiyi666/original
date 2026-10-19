@@ -23,11 +23,9 @@ forming a separate execution stage.
 
 \subsection{Backbone: conditional joint discrete diffusion}
 \label{sec:method:backbone}
-We build on a conditional generator that models arrival times with a diffusion
-point process and the discrete content (categories and POIs) with a conditional
-discrete diffusion model, following the fine-grained trajectory generator of
-\citet{deng2025marionette}. The temporal branch samples event times; the discrete
-branch represents a sequence as a token string
+We use Marionette's diffusion point process for arrival times and conditional
+discrete diffusion for categories and POIs~\cite{deng2025marionette}. Its discrete
+branch represents a sequence as
 $\mathbf{x}=[\textsc{start},\,k_{1:n},\,\textsc{sep},\,l_{1:n},\,\textsc{end}]$,
 with a \emph{category mask} and a \emph{POI mask} identifying the two segments.
 Categories and POIs use separate absorbing-state transition
@@ -62,9 +60,11 @@ energies:
                            + \relu\!\Big(1-\textstyle\sum_{l} P^B_l\Big).
      \label{eq:exist}
 \end{align}
-The \emph{order energy}~\eqref{eq:order} is the expected number of inverted pairs,
-i.e.\ the probability mass of a $b$ appearing \emph{before} an $a$; it is zero iff
-no $b$ precedes any $a$. The \emph{existence energy}~\eqref{eq:exist} penalizes an
+The \emph{order energy}~\eqref{eq:order} sums relaxed inverted-pair mass: under
+independent draws at category positions it is the expected number of $b$-before-$a$
+pairs. For a one-hot assignment, zero energy means no such inversion; a small
+relaxed value alone does not certify the decoded sequence.
+The \emph{existence energy}~\eqref{eq:exist} penalizes an
 expected count below one for either constrained category, discouraging trivial
 satisfaction of ordering by \emph{omitting} $a$ or $b$. Both energies are
 computed only over category positions; POI logits do not enter
@@ -75,7 +75,7 @@ Eqs.~\eqref{eq:order}--\eqref{eq:exist}.
 At a controlled reverse step, we project the backbone logits to reduce constraint
 violations while staying close to the model's own distribution. Let
 $\mathbf{y}^{(0)}=\mathbf{z}$ be the detached backbone logits and $\mathbf{y}$ a
-trainable copy. We solve, per sequence,
+trainable copy. The sequence-level constrained formulation is
 \begin{equation}
 \begin{aligned}
   \min_{\mathbf{y}}\;&\dkl\!\big(\mathrm{softmax}(\mathbf{y}^{(0)})\,\big\|\,\mathrm{softmax}(\mathbf{y})\big)\\
@@ -101,9 +101,10 @@ $\delta^{\bullet}=\relu(g^{\bullet}-\tau)$,
 \end{aligned}
 \label{eq:auglag}
 \end{equation}
-An \emph{inner} loop takes projected-gradient steps on $\mathbf{y}$ (SGD with
-learning rate $\eta$, gradient-norm clipping, updates restricted to positions of
-constrained sequences). An \emph{outer} loop evaluates the \emph{hard} violations
+The \emph{inner} loop uses SGD on active rows of $\mathbf{y}$ with rate $\eta$
+and gradient-norm clipping. It optimizes the penalty objective without an
+additional hard feasible-set projection.
+An \emph{outer} loop evaluates the \emph{hard} violations
 $\hat{\delta}$ (from the $\arg\max$ one-hot assignment, not the relaxation) and
 updates the dual variables,
 \begin{equation}
@@ -112,6 +113,8 @@ updates the dual variables,
   \label{eq:dual}
 \end{equation}
 using a fixed budget without early stopping in the reported runs.
+The batch objective averages token KL over the full batch size but sums
+order/existence penalties over active rows and relations (Appendix~\ref{app:algo}).
 Hard violations determine which penalties grow. The order and existence terms
 act on category positions; distance KL also updates POI logits
 (\S\ref{sec:method:distance}). Hard POI-support masking belongs to the subsequent
@@ -120,8 +123,8 @@ decoder, not these order/existence energies.
 \subsection{Distance-distribution regularization}
 \label{sec:method:distance}
 Enforcing category order perturbs the category marginals and, indirectly, the
-induced spatial statistics. To preserve geographic realism we add an independent
-distance regularizer that matches the \emph{population} distribution of travel
+induced spatial statistics. We therefore add a separate distance regularizer
+to match the \emph{population} distribution of travel
 length. From the training split only, we compute the cumulative great-circle
 (Haversine) route length $d$ of every training sequence with at least two POIs and
 summarize it as a soft histogram $H_{\mathrm{train}}$ over $\log(1+d)$ with fixed
@@ -185,10 +188,9 @@ The decoder introduces no parameters or logit prior.
 
 \subsection{Terminal same-category geometry refinement}
 \label{sec:method:geometry}
-The stages so far decide \emph{which} category and \emph{which} POI identity; the
-coordinates are then whatever the chosen POIs happen to be, and the spatial marginals
-drift as a result (\S\ref{sec:exp:tradeoff}). After the reverse process completes, we
-therefore re-select each POI \emph{within its own realized category}.
+The chosen POIs determine coordinates and can shift spatial marginals
+(\S\ref{sec:exp:tradeoff}). After diffusion, we therefore re-select each POI
+\emph{within its own realized category}.
 
 For every POI position we build a candidate set of at most $\kappa_g{=}32$ POIs sharing
 the realized category: the originally sampled POI, the backbone's highest-scoring
@@ -209,11 +211,10 @@ enters. Writing $\mathbf{w}$ for a relaxed assignment over candidates, we minimi
 where the two soft histograms are differentiable in $\mathbf{w}$ and the proposal $q$
 places half of its mass on the original POI and spreads the other half over the
 candidates by model score, so the fidelity term penalizes drifting away from the
-backbone's own preference. We optimize Eq.~\eqref{eq:geometry} with $P_g{=}8$
-straight-through relaxed paths, temperature $1$, Adam at learning rate $0.05$, for a
-prequalified budget of $200$ steps, refreshing an independent geometry noise stream
-every $20$ steps. The output is a \emph{hard} assignment: among the original assignment
-and the $8$ optimized paths we keep the arg-min of the same training-side objective.
+backbone's preference. Optimization uses $8$ straight-through paths and a
+prequalified $200$-step budget; Appendix~\ref{app:algo} gives the settings.
+For the \emph{hard} output, we retain the lowest-objective assignment among the
+original and $8$ optimized paths.
 Empty, single-point and single-candidate positions, and batches in which the base
 projection never ran, are skipped.
 
@@ -224,9 +225,10 @@ all conditions unchanged \emph{per event}, every constraint-relevant statistic i
 invariant by construction: OVR\textsubscript{strict}, OVR\textsubscript{skip}, pair and
 category coverage, Unsat, \emph{Category}, \emph{CategoryTransition} and the
 category--POI mismatch rate. We verify this numerically on every test run, requiring
-agreement within $10^{-12}$ rather than assuming it. The refinement can therefore only
-move the spatial and popularity statistics while leaving these constraint
-measurements unchanged.
+agreement within $10^{-12}$. This invariance permits spatial and popularity
+statistics to change, but does not guarantee a match to every reference
+distribution within the candidate sets. Refinement cannot repair the category-side
+divergences it preserves.
 
 \subsection{Distribution correction}
 \label{sec:method:balance}

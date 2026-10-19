@@ -1,40 +1,39 @@
 \section{Introduction}
 \label{sec:intro}
 
-Location-based social networks (LBSNs) produce time-stamped visits to points of
-interest (POIs), linking human mobility to activity categories such as dining,
-leisure, and shopping. These traces support POI recommendation, urban analytics,
-and simulation~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, but releasing raw
-traces exposes sensitive behavior. Synthetic mobility generation offers an
+Location-based social networks (LBSNs) record time-stamped visits to points of
+interest (POIs). Such traces support POI recommendation~\cite{feng2018deepmove,luo2021stan,yang2022getnext},
+but expose sensitive behavior. Synthetic mobility generation offers an
 alternative data source~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
 
 \paragraph{Relevance to the Web.}
-We study a control problem for LBSN data generation: how to generate complete
-check-in sequences under activity-order requirements while retaining the
-population statistics used in web-data analysis. Scenario-specific synthetic
-traces could support recommender stress tests and data augmentation without
-releasing individual logs. The evaluated contribution is controllable generation;
-downstream utility and formal privacy protection remain unevaluated.
+We generate complete LBSN check-in sequences under activity-order requirements
+while retaining population statistics. These traces could support recommender
+stress tests and data augmentation without releasing individual logs. We evaluate
+controllable generation; downstream utility and formal privacy protection remain
+unevaluated.
 
 A scenario may require leisure before dining or sightseeing before shopping.
-Such precedence couples multiple, non-adjacent positions. A local condition
-embedding does not ensure that every occurrence of one category precedes every
-occurrence of another, or that both categories appear. Reordering completed
-sequences can fix inversions but cannot supply missing activities. Road-topology
+Precedence couples non-adjacent positions: every occurrence of one category must
+precede every occurrence of another, and both must appear. A local condition
+embedding does not ensure this. Reordering fixes inversions but cannot supply
+missing activities. Road-topology
 control~\cite{zhu2024controltraj} addresses geographic structure, whereas constrained
 discrete diffusion (CDD)~\cite{cardei2025cdd} provides a general framework for
 sampling under differentiable constraints. POI generation adds a further
 difficulty: category tokens and POI identities can disagree, so controlling the
-former need not control the actual activities of the emitted POIs.
+former need not control the actual activities of the emitted POIs. The control
+must therefore survive the mapping from category tokens to catalog locations.
 
 We introduce \pcdg, a training-free control stack on the frozen Marionette
 generator~\cite{deng2025marionette}. It adapts CDD's KL-anchored projection to
 sample-level order and existence energies, with a distance-distribution
 regularizer on POI logits. Category-consistent decoding then restricts POI support
-using the sampled category. After diffusion, same-category geometry refinement
-changes POI identities and coordinates while preserving actual categories,
-times, and event order. This separates spatial refinement from the fields that
-determine constraint satisfaction.
+using the sampled category, connecting token-level control to realized
+activities. After diffusion, same-category geometry refinement changes POI
+identities and coordinates while preserving actual categories, times, and event
+order. This restricted substitution leaves the fields that determine constraint
+satisfaction invariant, while allowing spatial statistics to change.
 
 Across Istanbul and New York, the stack improves every constraint metric over
 the retrained PO-CFG baseline. Geometry refinement lowers spatial divergences
@@ -46,15 +45,13 @@ fidelity--control trade-off can be removed.
 
 \paragraph{Contributions.}
 \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
-  \item We formulate category-precedence control for complete POI check-in
-  sequences using order and existence energies (\S\ref{sec:problem}).
-  \item We develop a training-free stack combining logit projection,
-  category-consistent decoding, and geometry refinement within each realized
-  category (\S\ref{sec:method}).
-  \item We separate category-order control from spatial refinement and measure
-  the resulting constraint--fidelity trade-offs, including residual category
-  and popularity errors (\S\ref{sec:exp:tradeoff}).
-  \item We provide a two-city, three-seed evaluation, projection ablations,
-  and a stage-wise comparison under a fixed selection protocol
-  (\S\ref{sec:experiments}).
+  \item We formulate activity-precedence control over actual POI categories and
+  adapt CDD's projection to order/existence energies on a frozen Marionette
+  backbone (\S\ref{sec:problem}--\S\ref{sec:method:project}).
+  \item We connect category tokens to catalog POIs through support-constrained
+  decoding, then refine spatial assignments within each realized category while
+  preserving constraint-relevant fields (\S\ref{sec:method:decoding}--\S\ref{sec:method:geometry}).
+  \item We use two-city, three-seed comparisons and projection ablations to
+  identify a recoverable spatial cost of control, alongside unresolved category
+  and popularity errors (\S\ref{sec:experiments}).
 \end{itemize}

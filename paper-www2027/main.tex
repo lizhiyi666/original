@@ -1,6 +1,7 @@
 %% PCDG — WWW 2027 submission (Research Track)
 %% Double-blind, review mode. Compile with:  latexmk -pdf main.tex
-\documentclass[sigconf,anonymous,review]{acmart}
+% Disable optional last-page balancing: it overfills the bibliography box.
+\documentclass[sigconf,anonymous,review,balance=false]{acmart}
 
 % ---- review / draft conveniences (remove `review` and set copyright for camera-ready) ----
 \settopmatter{printacmref=false}          % suppress ACM reference block during review
