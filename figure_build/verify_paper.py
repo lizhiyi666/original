@@ -4,6 +4,7 @@ Run with a Python environment providing pypdf. Build main.pdf first with latexmk
 An integrity pass is NOT a scientific-readiness or official CCS approval.
 """
 from collections import Counter
+import argparse
 from pathlib import Path
 import re
 import subprocess
@@ -48,10 +49,8 @@ def data_rows(text):
                    and line.rstrip().endswith(r"\\"))
 
 
-def main():
-    original = git("show", f"{BASELINE}:paper-www2027/main.tex")
-    current = (PAPER / "main.tex").read_text(encoding="utf-8")
-    verify_ccs(current)
+def verify_locked_metadata(original, current):
+    """Allow only the author's 2026-10-19 correction within locked metadata."""
     patterns = {
         "title": r"\\title\{[^\n]+\}",
         "abstract": r"\\begin\{abstract\}.*?\\end\{abstract\}",
@@ -61,8 +60,20 @@ def main():
     for label, pattern in patterns.items():
         old = re.findall(pattern, original, re.S)
         new = re.findall(pattern, current, re.S)
+        if label == "abstract":
+            assert len(old) == 1 and old[0].count("eliminates residual") == 1
+            old = [old[0].replace("eliminates residual", "reduces residual", 1)]
         assert old and old == new, f"Locked {label} changed"
-        print(f"PASS locked {label}")
+        suffix = " (authorized eliminates -> reduces correction only)" if label == "abstract" else ""
+        print(f"PASS locked {label}{suffix}")
+
+
+def main(build_dir=None):
+    build_dir = Path(build_dir) if build_dir is not None else PAPER
+    original = git("show", f"{BASELINE}:paper-www2027/main.tex")
+    current = (PAPER / "main.tex").read_text(encoding="utf-8")
+    verify_ccs(current)
+    verify_locked_metadata(original, current)
     for filename in ("method-comparison.tex", "ablation.tex", "stagewise.tex"):
         old = git("show", f"{BASELINE}:paper-www2027/tables/{filename}")
         new = (PAPER / "tables" / filename).read_text(encoding="utf-8")
@@ -72,17 +83,17 @@ def main():
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"\\todo\s*\{", text), path
         assert "\ufffd" not in text, f"Replacement character in {path}"
-    log = (PAPER / "main.log").read_text(encoding="utf-8", errors="replace")
+    log = (build_dir / "main.log").read_text(encoding="utf-8", errors="replace")
     failures = re.findall(r"^!.*|^.*(?:LaTeX Error|Package \w+ Error|Undefined control sequence).*$", log, re.M)
     assert not failures, failures
     assert not re.search(r"(?:Citation|Reference).*undefined|There were undefined|Rerun to get", log)
     assert "Overfull" not in log
     print("PASS no TODO calls, LaTeX errors, unresolved references/citations, or overfull boxes")
-    aux = (PAPER / "main.aux").read_text(encoding="utf-8")
+    aux = (build_dir / "main.aux").read_text(encoding="utf-8")
     body_page = int(re.search(r"\\newlabel\{end:main\}\{\{[^}]+\}\{(\d+)\}", aux).group(1))
     appendix_page = int(re.search(r"\\newlabel\{app:algo\}\{\{[^}]+\}\{(\d+)\}", aux).group(1))
     assert body_page <= 8 and appendix_page <= 9
-    reader = PdfReader(PAPER / "main.pdf")
+    reader = PdfReader(build_dir / "main.pdf")
     assert len(reader.pages) <= 12
     texts = [page.extract_text() for page in reader.pages]
     assert "Relevance to the Web" in texts[0]
@@ -101,15 +112,18 @@ def main():
             if uri:
                 urls.append(uri)
     assert not any(re.search(r"lizhiyi666|hit\.edu|25s151146|file:|[CD]:", uri, re.I) for uri in urls)
-    font_rows = subprocess.check_output(["pdffonts", str(PAPER / "main.pdf")]).decode().splitlines()[2:]
+    font_rows = subprocess.check_output(["pdffonts", str(build_dir / "main.pdf")]).decode().splitlines()[2:]
     assert font_rows and all(row.split()[-5] == "yes" for row in font_rows if row.strip())
     assert not any("Type 3" in row for row in font_rows)
     changed = git("diff", "--name-only", BASELINE, "--", "experiment_runs", "constraint_projection.py", "geometry_projection.py", "distribution_balance.py", "discrete_diffusion", "evaluations")
     assert not changed, f"Scientific inputs or implementation changed: {changed}"
     print(f"PASS PDF: {len(reader.pages)} pages; main text ends p{body_page}; appendix p{appendix_page}; embedded fonts; anonymous text/metadata/links")
     print("PASS no changes to sealed experiments or audited scientific implementation")
-    print("OPEN: locked abstract's 'eliminates' conflicts with nonzero decoder mismatch; advisor decision still required")
+    print("PASS abstract correction agrees with nonzero decoder mismatch; other abstract text remains locked")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--build-dir", type=Path, default=PAPER,
+                        help="Directory containing main.pdf, main.log and main.aux; sources stay in paper-www2027")
+    main(parser.parse_args().build_dir)

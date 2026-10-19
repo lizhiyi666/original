@@ -71,7 +71,7 @@ this trade-off is largely \emph{separable}. We present \pcdg, a \emph{training-f
 control stack for a frozen conditional joint temporal\,+\,category/POI
 discrete-diffusion generator. \pcdg compiles category partial-order constraints into
 differentiable energies, projects the category-position logits through a KL-preserving
-augmented-Lagrangian optimization in the late reverse steps, eliminates residual
+augmented-Lagrangian optimization in the late reverse steps, reduces residual
 category--POI inconsistency via a category-consistent decoder, and restores spatial
 realism through a distribution-aware same-category geometry refinement that leaves every
 constraint metric unchanged \emph{by construction}. Across two cities under an
