@@ -1,9 +1,10 @@
 # PCDG — WWW 2027 working manuscript
 
-Updated 2026-10-19. ACM `sigconf,anonymous,review`; Research Track long paper.
+Updated 2026-10-20. ACM `sigconf,anonymous,review`; Research Track long paper.
 Target area: Web Mining, Multimedia and Multilingual Content Analysis.
 T1–T9 and the authorized evidence-focused revision are complete, including the
-official CCS export and the bibliography audit. Scientific limitations below
+official CCS export and the bibliography audit. Figure 1's four-panel redesign and
+caption/accessibility integration are also complete. Scientific limitations below
 remain; successful build and format checks are not a scientific acceptance judgment.
 
 ## Locked metadata and open decisions
@@ -53,7 +54,8 @@ Web relevance appears on page 1; all 12 current page renders have been inspected
 The unchanged method table and trade-off figure are queued earlier in the source
 to avoid an isolated float page. The native `acmart` option `balance=false` disables
 optional last-page column balancing, which produced an overfull bibliography box.
-Fonts, margins, table styling and figure assets were not reduced or redesigned.
+Fonts, margins and table styling were not reduced. Figure 1 was redesigned at the
+existing 7 × 3.25 inch size; its live labels remain at least 8 pt.
 
 Do not treat exit code 12 as harmless. The old draft had a real `\Bbbk` redefinition
 from redundant `amssymb`; that import was removed. Check file-line-style errors too,
@@ -85,10 +87,20 @@ The strict abstract whitelist is tested by `figure_build/test_verify_paper.py`:
 all eight tests pass, including rejection of other abstract edits, title/keyword
 changes and author reordering. From the root, run `python -B -m unittest discover
 -s figure_build -p test_verify_paper.py -v` with the same Python environment.
-Equation/align environments, all table files and figure assets are unchanged from
-the pre-revision checkpoint. Integrity passing does not close the scientific gaps below.
+For the Figure 1 revision, the method body from §4.1 onward, all equations and
+table files, other figures, scientific code and sealed results are unchanged from
+`4389ee0`. Only the framework generator/tests, framework SVG/PDF, method opening,
+caption/accessibility description, compiled paper and handoff documents changed.
+The five figure-contract tests pass in the existing plotting environment; run
+`python -B -m unittest discover -s figure_build -p test_generate_method_main_v2.py -v`
+there. The document runtime provides `pypdf`; it need not provide Matplotlib.
+Integrity passing does not close the scientific gaps below.
 Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
 and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
+The current verified build has been copied to `paper-www2027/main.pdf`; its SHA256 is
+`77903bfcac8cd4fdd5ee693713dfb7b702d3ad0a497e714d60c74febc8e625a9`.
+Figure 1 is on p3; affected p3/p7/p8 were re-inspected after integration. The
+other page inspections remain applicable to unchanged content.
 
 ## Completed work
 
@@ -96,7 +108,7 @@ and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 | --- | --- |
 | T1 | Combined fidelity/constraint table; full stage-wise table in Appendix C; compressed introduction/conclusion while retaining negative results and selection failures |
 | T2 | Unsat–Distance two-city figure from existing v2 table means, equal linear axes, unshifted measured coordinates |
-| T3 | Combined framework/reverse-step figure; distribution weights as objective inputs, not a fictitious serial fourth stage; fallback shown |
+| T3 | Four-panel framework: reverse-loop overview, logit projection, shared-Gumbel category-conditioned POI decoding, and same-frame refinement; objective inputs and fallback shown |
 | T4 | Exact metric definitions, denominators, endpoint filter, catalog/token distinction and historical histogram edge cases |
 | T5 | 18-row v2 grid, SHA-verified v3 selection source and unchanged screening/confirmation rankings and failures |
 | T6 | Manifest counts and evidence-bounded OOD definition, retaining Istanbul split-provenance gap |

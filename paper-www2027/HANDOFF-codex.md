@@ -1,12 +1,13 @@
 # WWW 2027 论文接续状态
 
-更新：2026-10-19。原 T1–T9 任务说明保存在提交 `c828598`；本文记录执行结果及本轮深化证据修订。
+更新：2026-10-20。原 T1–T9 任务说明保存在提交 `c828598`；本文记录证据修订和 Figure 1 四面板重设计的交付。
 后续先读本文及根目录 `AGENTS.md`，不要重复运行已完成实验。
 
 ## 1. 当前交付和未闭环项
 
 T1–T9 和本轮已授权修订均已完成，包含官方 CCS 导出、摘要白名单、50 条文献元数据核验、
 正文定向改写、编译、匿名、字体与逐页检查。科学边界见第 6 节，不把编译通过当作科学问题解决。
+Figure 1 重设计、图注及无障碍描述已完成；正式 `main.pdf` 已同步最新构建，验收与指纹见第 8 节。
 
 1. **摘要事实冲突已按用户授权修正。** 仅将 `eliminates residual` 改为 `reduces residual`，
    与六份正式输出的 **0.0034%–0.0219%** mismatch 一致。代码最终类别无支持时
@@ -47,6 +48,8 @@ T1–T9 和本轮已授权修订均已完成，包含官方 CCS 导出、摘要�
 - 分支：`codex/distribution-best-formal-v1`；远程 `lizhiyi666/original`。
 - 历史检查点：`c828598` → `fca940c` → `faccb4f`；本轮基线为 `5efc4cc`。
   摘要与测试组 `d1c088e`、证据/引用/正文组 `e5abed7` 均已推送并核对远程完整 SHA。
+  Figure 1 基线 `4389ee0`；恢复检查点 `b205989`、正式矢量图 `f56b5e5`、论文图注集成
+  `09b462d0900c3b9da86d300e66ee913aec8de8bb` 已推送。最后一项于 2026-10-20 重新核对远程 SHA 一致。
   最终交接核验为本文件所在的后续提交，查 `git log`。每组前后仍需提交、推送并核对 SHA。
 - 只暂存本任务文件，不 `git add .`；不提交数据、权重、缓存、日志、字节码、依赖目录。
 - 直连曾超时；现有代理 `git -c http.proxy=http://127.0.0.1:7897 push origin
@@ -71,7 +74,7 @@ T1–T9 和本轮已授权修订均已完成，包含官方 CCS 导出、摘要�
 | --- | --- |
 | T1 | 主比较两表合成上下共享 caption 面板；stage-wise 移入附录 C；概要压缩。三张原表数据行/精度/SD/粗体保持不变 |
 | T2 | `figure_build/generate_tradeoff.py` → `figures/tradeoff.pdf/.svg`；仅用已有 v2 均值，等量程线性轴，不移动测量坐标 |
-| T3 | `figure_build/generate_method_main_v2.py` → `figures/framework.pdf/.svg`；框架+单步细节合图；标注 fallback；权重是目标输入而非第四串行操作 |
+| T3 | `figure_build/generate_method_main_v2.py` → `figures/framework.pdf/.svg`；逆循环总览、logit 投影、同 Gumbel 类别条件 POI 解码、同坐标系细化四面板；标注 fallback，权重仍是目标输入 |
 | T4 | 附录 D 指标定义来自 `evaluations/statistical_metrics.py`、`evaluations/ovr.py`、`tools/ablation_common.py`；补分母、过滤、catalog/token、历史直方图边界 |
 | T5 | `generate_paper_evidence.py` 生成 `tables/calibration-grid.tex`，18 行 v2；SHA 校验 v3 selection source，顺序与失败门槛均一致 |
 | T6 | manifest 的 NY 3160/2108、IST 7035/4914；`tools/make_opposite_split.py` 说明 NY 是偏好反转，非完整配置绝对不相交；IST 来源缺口保留 |
@@ -150,18 +153,29 @@ CCS 接入后 `latexmk` 退出 0，仍为 11 页、正文结束 p7、附录 p8�
 [Discrete Guidance](https://openreview.net/forum?id=i5MrJ6g5G1) 的 §3.1–3.2 方法语境。
 全量记录见 `CITATION-AUDIT.md`；本次是受影响论证的定向核查，不是全稿录用判断。
 
-## 8. 最终交付核验
+## 8. Figure 1 最终交付核验（2026-10-20）
 
-- `latexmk -pdf -interaction=nonstopmode main.tex`：退出 0，12 页；正文 p1–7，附录从 p8，
-  参考文献从 p10 延续至 p12。主文及浮动图表均在官方 8 页正文上限内，总页数不超过 12。
+- 用户已批准跳过不可用的图像概念稿，直接重建可编辑矢量图；没有生成新的实验结果。
+  四面板为逆循环总览、投影、类别条件解码和同类别细化。相同 A/B/C 事件贯穿后两面板，
+  示例是 schematic；实线数据流、虚线条件/目标输入。图注保留中间步 mask 与最终 fallback 的边界。
+- 既有 LaTeX 编译脚本以 TeX Live 和现有 build 目录核验，退出 0，目标已是最新；
+  12 页，正文 p1–7，附录从 p8。Figure 1 在 p3，p3/p7/p8 已重新渲染并目视检查；
+  未改变的页面沿用上一轮检查。未缩小正文、边距、表格或图内字号，未放宽检查器。
 - `figure_build/verify_paper.py`：通过。标题/关键词/作者顺序、官方 CCS、摘要白名单、
   原表数值/精度/SD/粗体、匿名、字体、引用、无溢出和受保护路径检查通过。
 - `python -B -m unittest discover -s figure_build -p test_verify_paper.py -v`：8/8 通过。
   授权替换通过；旧 overclaim、其他摘要词句改动、摘要缺失、标题/关键词及作者重排均被拒绝。
-- 与 `d1c088e` 比较：全部 table/figure 源文件及资产无差异，equation/align 环境无差异；
-  无论文目录外改动。v2 表格与 v3 审计描述分离。
-- Writer 的只读 prose checker 已运行；剩余句长/分号/precision-term 提示经上下文检查保留，
-  不为消除启发式提示而删除科学限定。对受影响论证再次检查后，未新增待解决事实冲突。
-- 当前 12 页均已渲染目视检查，无重叠、裁切或缺失字体。草图缓存在已有工作目录，未提交。
-- 当前交付 PDF SHA256：`e6c6cfd07fbcebe076f440a21b4f9edc062b33ec105317f5d444c80c44c584db`。
-  PDF 与源文件位于 `e5abed7e7069319642dadcd5c99d30c832fa3418`；最终交接组仅更新文档。
+- `test_generate_method_main_v2.py`：5/5 通过，覆盖 7 × 3.25 英寸、Times New Roman、
+  最小 8 pt、相同目录/实际类别、条件虚线、必要标签、live text、唯一语义 ID 和无嵌入位图。
+  图形测试使用原 Marionette 作图环境；摘要/PDF 检查用带 `pypdf` 的文档环境。
+- 与 `4389ee0` 比较，§4.1 起的方法正文及公式完全不变；全部表格、其他图稿、
+  科学实现和封存实验未改。只更新 framework 源码/测试/图稿、方法开头/图注/描述、PDF 和交接文档。
+  v2 表格与 v3 审计描述继续分离。
+- 正式导出：`paper-www2027/figures/framework.svg`（live text 与独立矢量对象）及
+  `framework.pdf`（嵌入字体的矢量图）；预览为 `ccfa-workfiles/writing/www2027/build/framework.png`。
+  图形源码为 `figure_build/generate_method_main_v2.py`，未重新生成已验收的图稿。
+- 最新构建已同步到正式 `paper-www2027/main.pdf`，两份 SHA256 相同：
+  `77903bfcac8cd4fdd5ee693713dfb7b702d3ad0a497e714d60c74febc8e625a9`。
+  SVG SHA256：`303404bd24088487fbf0c7d3b1698a9a985fce2589ef2d09cc1bc77da95b613a`；
+  图形 PDF SHA256：`42e8722a72e9ac4edbb938613d62f8b440f53917744bb371560bc1609ec88a50`。
+  旧论文 PDF 保留在 `4389ee0` 等 Git 历史中；本地未跟踪缓存不批量提交或清理。
