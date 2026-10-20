@@ -149,6 +149,9 @@ def overview(ax):
     # Refinement is outside the loop, following its terminal exit.
     rect(ax, 47, 157, 333, 57, edge="#aeb7be", fill="#fafbfc", name="reverse-loop")
     text(ax, 54, 207, "Reverse diffusion", size=8, color=MUTED)
+    text(ax, 191.5, 210, "Partial order M; ρ, λ", size=8, align="center", color=MUTED)
+    arrow(ax, [(191.5, 206), (191.5, 202.5)], dashed=True, color=MUTED,
+          name="partial-order-condition")
     node(ax, 55, 177, 73, 25, "Frozen\ndenoiser")
     node(ax, 153, 177, 77, 25, "(b) Logit\nprojection", ORANGE)
     node(ax, 255, 177, 116, 25, "(c) Category-consistent\ndecoding", BLUE)
@@ -208,7 +211,8 @@ def decoding(ax):
     centers = (183, 249, 315)
     for event, (x, cat, key) in enumerate(zip(centers, CATEGORY, BEFORE), 1):
         symbol(ax, x, 108, cat, radius=6.6, label=cat, name=f"event-{event}-category")
-        arrow(ax, [(x, 99), (x, 91)], color=CATEGORY[cat][0], name=f"event-{event}-condition")
+        arrow(ax, [(x, 99), (x, 91)], color=CATEGORY[cat][0], dashed=True,
+              name=f"event-{event}-condition")
         catalog(ax, (x-25, 49, 50, 32), category=cat, chosen=(key,))
         arrow(ax, [(x, 47), (x, 40)], name=f"event-{event}-poi-reselection")
         symbol(ax, x-9, 32, cat, radius=3, name=f"event-{event}-decoded-poi")

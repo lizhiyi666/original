@@ -37,6 +37,7 @@ class FigureContractTests(unittest.TestCase):
     def test_required_mechanism_labels(self):
         labels = "\n".join(t.get_text() for t in self.ax.texts)
         for required in ("Controlled late steps", "Time branch unchanged",
+                         "Partial order M; ρ, λ",
                          "Token KL: base → projected", "Distance KL",
                          "λ·category JSD", "Filter catalog by sampled category",
                          "Reselect with same g; category tokens retained",
@@ -44,6 +45,14 @@ class FigureContractTests(unittest.TestCase):
                          "Times, length, event order", "Final unsupported category"):
             self.assertIn(required, labels)
         self.assertNotIn("category KL", labels)
+
+    def test_condition_arrows_are_dashed(self):
+        arrows = [p for p in self.ax.patches
+                  if (p.get_gid() or "").startswith("partial-order-condition-")
+                  or ((p.get_gid() or "").startswith("event-")
+                      and "-condition-" in p.get_gid())]
+        self.assertEqual(len(arrows), 4)
+        self.assertTrue(all(p.get_linestyle() == (0, (2.5, 2)) for p in arrows))
 
     def test_live_vector_svg_and_unique_semantic_ids(self):
         stream = io.StringIO()
