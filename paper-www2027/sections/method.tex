@@ -1,23 +1,29 @@
 \section{Method}
 \label{sec:method}
 
-\pcdg controls a frozen generator at sampling time through logit projection,
-category-consistent POI decoding, and terminal same-category geometry refinement.
-Figure~\ref{fig:framework} combines the framework and a controlled reverse step;
-$\rho,\lambda,\beta$ enter the projection and refinement objectives, rather than
-forming a separate execution stage.
+\pcdg controls a frozen generator through sampling-time logit projection,
+category-consistent POI decoding, and terminal same-category refinement
+(Figure~\ref{fig:framework}). The weights $\rho,\lambda,\beta$ enter their objectives.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/framework.pdf}
-  \caption{\pcdg at sampling time. (a) Projection and decoding operate inside the
-  frozen reverse process; same-category geometry refinement follows it, preserving
-  actual categories, times, and event order. (b) Category energies and distance KL
-  act on different logit positions. The decoder reuses the sampling noise and
-  restricts POI support using the sampled category; unsupported final categories
-  fall back to the catalog. Dashed edges carry conditions or objective inputs.}
-  \Description{A frozen denoiser feeds logit projection and category-first POI decoding
-  within a reverse loop, followed by same-category geometry refinement. A detail panel
-  separates category and POI logits, their objectives, and shared-noise decoding.}
+  \caption{\pcdg (schematic). (a) Frozen reverse loop and terminal refinement.
+  (b) Category order/existence energies and POI distance KL, anchored by base-to-projected token KL.
+  (c) Category-filtered POI reselection reuses Gumbel noise.
+  (d) Same-frame refinement preserves actual categories, times, length, and order.
+  Dashed edges carry conditions/objectives.
+  Intermediate steps allow POI masks and leave unresolved categories unfiltered.
+  Unsupported final categories allow any catalog POI, permitting nonzero mismatch.}
+  \Description{Four panels trace sampling-time category control. Panel a places a
+  frozen denoiser, late-step logit projection, and category-consistent decoding
+  inside a reverse-diffusion loop, followed by terminal same-category refinement.
+  Panel b separates category and POI logit positions and their objectives.
+  Panel c uses blue circles A, orange squares B, and green triangles C for three
+  events. Each sampled category filters a common six-POI catalog; incompatible
+  candidates are gray and crossed out. Shared-noise reselection yields a1, b1, c1.
+  Panel d uses the same coordinates to replace these with a2, b2, c2 while retaining
+  actual categories, times, length, and event order. A note marks the final
+  unsupported-category fallback to any catalog POI.}
   \label{fig:framework}
 \end{figure*}
 
