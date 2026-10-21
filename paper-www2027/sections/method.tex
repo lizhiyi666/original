@@ -208,9 +208,11 @@ top-$11$, nearest-$12$, and the $8$ most visited training POIs. Scores come from
 untruncated $t{=}0$ evaluation of the backbone; reference GPS from the test split never
 enters. Writing $\mathbf{w}$ for a relaxed assignment over candidates, we minimize
 \begin{equation}
-  \dkl\!\big(q\,\|\,\mathbf{w}\big)\,w_{\mathrm{fid}}
-  + w_{\mathrm{d}}\,\mathrm{JSD}\big(H^{\mathrm{dist}}_{\mathrm{train}},H^{\mathrm{dist}}(\mathbf{w})\big)
-  + w_{\mathrm{r}}\,\mathrm{JSD}\big(H^{\mathrm{rad}}_{\mathrm{train}},H^{\mathrm{rad}}(\mathbf{w})\big),
+\begin{aligned}
+  &\dkl\!\big(q\,\|\,\mathbf{w}\big)\,w_{\mathrm{fid}}
+  + w_{\mathrm{d}}\,\mathrm{JSD}\big(H^{\mathrm{dist}}_{\mathrm{train}},H^{\mathrm{dist}}(\mathbf{w})\big)\\
+  &\quad + w_{\mathrm{r}}\,\mathrm{JSD}\big(H^{\mathrm{rad}}_{\mathrm{train}},H^{\mathrm{rad}}(\mathbf{w})\big),
+\end{aligned}
   \label{eq:geometry}
 \end{equation}
 where the two soft histograms are differentiable in $\mathbf{w}$ and the proposal $q$

@@ -18,6 +18,7 @@
 | F06 / 中 | p1 已解释 Web 用途，但未点明所投 track | 当前官方规则要求第一页同时说明 Web 与 track 相关性；在现有 Relevance to the Web 段补 Web Mining, Multimedia and Multilingual Content Analysis | 在实际 p1 可见；没有把未测下游效用写成结果 |
 | F07 / 低 | 注册说明含旧摘要措辞、占位邮箱说明和过期待办 | `main.tex`、既有作者信息及当前官方时间；更新 `REGISTRATION.md`，旧短摘要明确标为历史 | 当前锁定摘要与注册长摘要说明一致；实际 portal 内容仍待作者核对 |
 | F08 / 低 | 分页与交接记录未跟随恢复修订更新 | 更新正式 PDF、README 和 HANDOFF；说明旧 `balance=false` 在当前 acmart 中被忽略，实际版式由输出验收 | 当前来源、页数、PDF 指纹、问题报告和构建命令一致 |
+| F09 / 低 | p4 公式（10）过长，编号自动落到公式下方单独一行 | 用户授权后，使用 `equation` + `aligned` 在加号处分两行；数学内容、编号、字号和边距保持不变 | 编号在右侧垂直居中；编译及完整性检查通过，锁定测试 8/8；仍为 12 页，与 `58d66fe` 逐页像素比较仅 p4 变化 |
 
 上述修订未改变方法机制、实验结果、随机种子、训练/采样任务或评估器。
 标题、当前摘要、五关键词及作者顺序相对 `9b05681` 原样保留；历史 `eliminates` → `reduces` 授权修正没有重新执行。
@@ -67,6 +68,6 @@
 - PDF：12 页逐页渲染并目视检查；无裁切、重叠、丢字或孤立结论页。字体嵌入，无 Type 3，文本/元数据/链接匿名，无 TODO、undefined 引用或 overfull。
 - 非阻断提示：underfull、review reference-block 提示、34 条原有 BibTeX 样式警告及未使用的 `balance=false` 选项。没有捏造元数据消除警告。
 - prose checker：本轮改动的 method/conclusion（含附录）已运行；剩余提示是 precision-term/分号密度启发项，经语境检查保留实际技术条件与公式叙述。
-- 正式输出：`main.pdf`；SHA256 `72db36579d257ccef77888fef305daf5ab6a55535a0fbd83fbdeb27a9621b487`。旧正式 PDF 可从 `9b05681` 恢复。缓存、日志和预览不进入 Git 提交。
+- 正式输出：`main.pdf`；SHA256 `06b821125d36e8f14c674fc0c051d0ce6575f80d9ee10dbd7cdd3df19372e5cf`。公式（10）调整后重新目视检查 p4/p5，其余页面与已验收版本像素一致；调整前 PDF 可从 `58d66fe` 恢复。缓存、日志和预览不进入 Git 提交。
 
 本轮完成条件是范围内文字/分页问题修正、构建保护检查和交付同步；E/L/A 类作者或科学问题不因编译成功自动关闭。

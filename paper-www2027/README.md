@@ -104,8 +104,11 @@ Integrity passing does not close the scientific gaps below.
 Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
 and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 The current verified build has been copied to `paper-www2027/main.pdf`; its SHA256 is
-`72db36579d257ccef77888fef305daf5ab6a55535a0fbd83fbdeb27a9621b487`.
+`06b821125d36e8f14c674fc0c051d0ce6575f80d9ee10dbd7cdd3df19372e5cf`.
 Figure 1 is on p3. All twelve pages were rendered and inspected on 2026-10-21.
+The subsequent equation (10) layout edit uses two aligned lines with a centered
+number, preserving all mathematical content. Page 4 was reinspected; the other
+eleven pages render pixel-identically to `58d66fe`. The page count remains twelve.
 The recovered 13-page build placed two conclusion lines alone on p8. Concise wording
 in the method placement, limitations and conclusion restored the 12-page layout
 without changing fonts, margins, tables or figures. Source and regression checks
