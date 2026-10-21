@@ -181,17 +181,18 @@ def logits(ax):
     text(ax, 5, 140, "(b) Logit projection", size=10, bold=True)
     text(ax, 5, 127, "Order + existence; λ·category JSD", size=8)
     text(ax, 32, 114, "Base", size=8, align="center", color=MUTED)
-    text(ax, 110, 114, "Projected", size=8, align="center", color=ORANGE)
+    text(ax, 104, 114, "Projected", size=8, align="center", color=ORANGE)
     for prefix, y in (("k", 93), ("l", 69)):
-        for col, start in enumerate((8, 86)):
+        for col, start in enumerate((8, 80)):
             for index in range(3):
                 x = start+16*index
                 rect(ax, x, y, 16, 13, edge=ORANGE if col else "#9aa4ad",
                      fill=to_rgba(ORANGE if col else BLUE, .07+.04*index),
                      name=f"{'projected' if col else 'base'}-{prefix}{index+1}")
                 text(ax, x+8, y+6.5, f"{prefix}{index+1}", size=8, align="center")
-        arrow(ax, [(60, y+6.5), (82, y+6.5)], color=ORANGE, name=f"project-{prefix}")
-    arrow(ax, [(136, 127), (139, 127), (139, 99.5), (135, 99.5)],
+        arrow(ax, [(60, y+6.5), (76, y+6.5)], color=ORANGE, name=f"project-{prefix}")
+    # Reserve separate objective/input lanes to the right of the projected tokens.
+    arrow(ax, [(121, 127), (133, 127), (133, 99.5), (129, 99.5)],
           color=ORANGE, dashed=True, name="category-energies")
     text(ax, 8, 86.5, "Category positions", size=8, color=MUTED)
     text(ax, 8, 61.5, "POI positions", size=8, color=MUTED)
@@ -200,7 +201,8 @@ def logits(ax):
     text(ax, 5, 37, "Training reference; weights", size=8, color=MUTED)
     arrow(ax, [(112, 37), (132, 37), (132, 51), (128, 51)],
           dashed=True, color=MUTED, name="training-distance-target")
-    arrow(ax, [(132, 37), (142, 37), (142, 132), (106, 132)],
+    # Training input joins the category objective, clear of its label and heading.
+    arrow(ax, [(132, 37), (143, 37), (143, 119), (133, 119)],
           dashed=True, color=MUTED, name="training-category-target")
     text(ax, 5, 23, "Token KL: base → projected", size=8, bold=True)
 

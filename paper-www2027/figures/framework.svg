@@ -173,36 +173,36 @@ z
 " clip-path="url(#p594eaeb98c)" style="fill: #0072b2; fill-opacity: 0.15; stroke: #9aa4ad; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="projected-k1-43">
-    <path d="M 86 141
-L 102 141
-L 102 128
-L 86 128
+    <path d="M 80 141
+L 96 141
+L 96 128
+L 80 128
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; fill-opacity: 0.07; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="projected-k2-45">
-    <path d="M 102 141
-L 118 141
-L 118 128
-L 102 128
+    <path d="M 96 141
+L 112 141
+L 112 128
+L 96 128
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; fill-opacity: 0.11; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="projected-k3-47">
-    <path d="M 118 141
-L 134 141
-L 134 128
-L 118 128
+    <path d="M 112 141
+L 128 141
+L 128 128
+L 112 128
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; fill-opacity: 0.15; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="project-k-49">
     <path d="M 60 134.5
-Q 71 134.5 81.161475 134.5
+Q 68 134.5 75.161475 134.5
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke: #d55e00; stroke-width: 0.75; stroke-linecap: round"/>
-    <path d="M 78.761475 133.3
-L 81.161475 134.5
-L 78.761475 135.7
+    <path d="M 72.761475 133.3
+L 75.161475 134.5
+L 72.761475 135.7
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; stroke: #d55e00; stroke-width: 0.75; stroke-linecap: round"/>
    </g>
@@ -231,46 +231,46 @@ z
 " clip-path="url(#p594eaeb98c)" style="fill: #0072b2; fill-opacity: 0.15; stroke: #9aa4ad; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="projected-l1-56">
-    <path d="M 86 165
-L 102 165
-L 102 152
-L 86 152
+    <path d="M 80 165
+L 96 165
+L 96 152
+L 80 152
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; fill-opacity: 0.07; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="projected-l2-58">
-    <path d="M 102 165
-L 118 165
-L 118 152
-L 102 152
+    <path d="M 96 165
+L 112 165
+L 112 152
+L 96 152
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; fill-opacity: 0.11; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="projected-l3-60">
-    <path d="M 118 165
-L 134 165
-L 134 152
-L 118 152
+    <path d="M 112 165
+L 128 165
+L 128 152
+L 112 152
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; fill-opacity: 0.15; stroke: #d55e00; stroke-width: 0.6; stroke-linejoin: miter"/>
    </g>
    <g id="project-l-62">
     <path d="M 60 158.5
-Q 71 158.5 81.161475 158.5
+Q 68 158.5 75.161475 158.5
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke: #d55e00; stroke-width: 0.75; stroke-linecap: round"/>
-    <path d="M 78.761475 157.3
-L 81.161475 158.5
-L 78.761475 159.7
+    <path d="M 72.761475 157.3
+L 75.161475 158.5
+L 72.761475 159.7
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; stroke: #d55e00; stroke-width: 0.75; stroke-linecap: round"/>
    </g>
    <g id="category-energies-64">
-    <path d="M 139 134.5
-Q 137 134.5 135.838525 134.5
+    <path d="M 133 134.5
+Q 131 134.5 129.838525 134.5
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #d55e00; stroke-width: 0.75; stroke-linecap: round"/>
-    <path d="M 138.238525 135.7
-L 135.838525 134.5
-L 138.238525 133.3
+    <path d="M 132.238525 135.7
+L 129.838525 134.5
+L 132.238525 133.3
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #d55e00; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #d55e00; stroke-width: 0.75; stroke-linecap: round"/>
    </g>
@@ -295,12 +295,12 @@ z
 " clip-path="url(#p594eaeb98c)" style="fill: #59616a; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #59616a; stroke-width: 0.75; stroke-linecap: round"/>
    </g>
    <g id="training-category-target-73">
-    <path d="M 142 102
-Q 124 102 106.838525 102
+    <path d="M 143 115
+Q 138 115 133.838525 115
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #59616a; stroke-width: 0.75; stroke-linecap: round"/>
-    <path d="M 109.238525 103.2
-L 106.838525 102
-L 109.238525 100.8
+    <path d="M 136.238525 116.2
+L 133.838525 115
+L 136.238525 113.8
 z
 " clip-path="url(#p594eaeb98c)" style="fill: #59616a; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #59616a; stroke-width: 0.75; stroke-linecap: round"/>
    </g>
@@ -844,9 +844,9 @@ L 499 83
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke: #ccd2d6; stroke-width: 0.7; stroke-linecap: square"/>
    </g>
    <g id="category-energies-63">
-    <path d="M 136 107
-L 139 107
-L 139 134.5
+    <path d="M 121 107
+L 133 107
+L 133 134.5
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #d55e00; stroke-width: 0.75"/>
    </g>
    <g id="training-distance-target-70">
@@ -857,8 +857,8 @@ L 132 183
    </g>
    <g id="training-category-target-72">
     <path d="M 132 197
-L 142 197
-L 142 102
+L 143 197
+L 143 115
 " clip-path="url(#p594eaeb98c)" style="fill: none; stroke-dasharray: 1.875,1.5; stroke-dashoffset: 0; stroke: #59616a; stroke-width: 0.75"/>
    </g>
    <g id="coordinate-grid-81">
@@ -1149,7 +1149,7 @@ L 355 88
     <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #59616a" x="32" y="121.921875" transform="rotate(-0 32 121.921875)">Base</text>
    </g>
    <g id="label-36">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="110" y="121.91625" transform="rotate(-0 110 121.91625)">Projected</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="104" y="121.91625" transform="rotate(-0 104 121.91625)">Projected</text>
    </g>
    <g id="label-38">
     <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="16" y="136.421875" transform="rotate(-0 16 136.421875)">k1</text>
@@ -1161,13 +1161,13 @@ L 355 88
     <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="48" y="136.421875" transform="rotate(-0 48 136.421875)">k3</text>
    </g>
    <g id="label-44">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="94" y="136.421875" transform="rotate(-0 94 136.421875)">k1</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="88" y="136.421875" transform="rotate(-0 88 136.421875)">k1</text>
    </g>
    <g id="label-46">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="110" y="136.421875" transform="rotate(-0 110 136.421875)">k2</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="104" y="136.421875" transform="rotate(-0 104 136.421875)">k2</text>
    </g>
    <g id="label-48">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="126" y="136.421875" transform="rotate(-0 126 136.421875)">k3</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="120" y="136.421875" transform="rotate(-0 120 136.421875)">k3</text>
    </g>
    <g id="label-51">
     <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="16" y="160.421875" transform="rotate(-0 16 160.421875)">l1</text>
@@ -1179,13 +1179,13 @@ L 355 88
     <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="48" y="160.421875" transform="rotate(-0 48 160.421875)">l3</text>
    </g>
    <g id="label-57">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="94" y="160.421875" transform="rotate(-0 94 160.421875)">l1</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="88" y="160.421875" transform="rotate(-0 88 160.421875)">l1</text>
    </g>
    <g id="label-59">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="110" y="160.421875" transform="rotate(-0 110 160.421875)">l2</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="104" y="160.421875" transform="rotate(-0 104 160.421875)">l2</text>
    </g>
    <g id="label-61">
-    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="126" y="160.421875" transform="rotate(-0 126 160.421875)">l3</text>
+    <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="120" y="160.421875" transform="rotate(-0 120 160.421875)">l3</text>
    </g>
    <g id="label-65">
     <text style="font-size: 8px; font-family: 'Times New Roman'; text-anchor: start; fill: #59616a" x="8" y="149.414375" transform="rotate(-0 8 149.414375)">Category positions</text>
