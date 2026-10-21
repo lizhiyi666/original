@@ -1,38 +1,31 @@
 \section{Limitations}
 \label{sec:limitations}
-The study covers two cities and three sampling seeds at fixed checkpoints, not
-variation across training runs or a significance test. Istanbul's historical
-backbone used a different training batch size from New York, and its full
-training provenance cannot be reconstructed. PO-CFG is evaluated at scale $1$,
-not an extrapolation-tuned optimum. The fixed distance-KL weight is shared across
-cities; its batch-level objective gives no per-sequence spatial guarantee.
+The two-city, three-sampling-seed study does not assess training variability or
+statistical significance. Istanbul's historical backbone used a different
+training batch size from New York; its full training provenance is unavailable.
+PO-CFG uses scale $1$, without extrapolation tuning. The shared distance-KL
+weight and batch-level objective give no per-sequence spatial guarantee.
 
-\pcdg reduces constraint violations without certifying feasibility. The decoder
-uses hard POI-support masking but permits a catalog fallback for unsupported
-final categories (\S\ref{sec:method:decoding}). New York retains the
-category-transition and popularity gaps reported in \S\ref{sec:exp:main};
-same-category refinement cannot alter the former. Hyperparameters were selected on training-side calibration records
-already seen by the backbone; neither three-seed-confirmed candidate passed all
-distribution thresholds. Test metrics never entered that selection.
+Finite-budget projection and decoder fallback leave residual violations
+(\S\ref{sec:method:decoding}). Same-category refinement cannot repair New York's
+category-transition gap. Training-side calibration is not independent validation;
+its failed distribution gates and override are detailed in
+\S\ref{sec:exp:tradeoff} and Appendix~\ref{app:grid}.
 
-The (d)$\to$(e) comparison changes $\rho$, $\beta$, and candidate-pool
-composition jointly, precluding single-factor attribution. Stage (d) transfers
-an already-fixed geometry configuration rather than establishing a separately
-tuned generalization result. Complex partial-order DAGs, conflict detection,
-adaptive scheduling, training-time order losses, and downstream recommendation
-utility remain open. Synthetic output has no formal privacy guarantee here;
-distributional similarity alone does not establish safe data release.
+Stage (d) transfers a fixed geometry configuration; (d)$\to$(e) changes three
+factors jointly, precluding single-factor attribution. Complex partial-order
+DAGs, conflict detection, adaptive scheduling, training-time order losses and
+downstream recommendation utility remain open. Synthetic output has no formal
+privacy guarantee; distributional similarity does not establish safe data release.
 
 \section{Conclusion}
 \label{sec:conclusion}
-\pcdg adapts CDD-style order/existence projection to frozen Marionette sampling,
-couples category tokens to catalog POIs through decoding, and refines locations
-within each realized category. On two cities, it
-improves all five constraint metrics over retrained PO-CFG. It lowers all six
-fidelity JSDs versus JointGen on Istanbul and four on New York. Refinement
-recovers spatial fidelity while preserving constraint-relevant fields. This
-restricted separability explains the stage-wise spatial recovery; New York's
-remaining category-transition and popularity errors show its distributional limits.
+\pcdg combines CDD-style projection, category-consistent decoding and same-category
+refinement on frozen Marionette. It improves all five constraint metrics over
+retrained PO-CFG in both cities, and all six fidelity JSDs versus JointGen on
+Istanbul and four on New York. Refinement recovers spatial fidelity while
+preserving constraint-relevant fields. This restricted separability leaves New
+York's category-transition and popularity errors unresolved.
 \label{end:main}
 
 % ======================= Appendix =======================
@@ -53,6 +46,7 @@ sum over active relations and sequences without that division.
 The ten controlled steps are $36,32,\ldots,4,0$, totaling $5{,}000$ inner
 updates per active batch. Distance KL uses $8$ routes, top-$32$ candidates,
 $32$ bins, and path temperature $1$.
+Formal sampling uses batches of $64$ sequences in FP32 with TF32 disabled.
 
 Geometry uses distance/radius/fidelity weights $(1,2,0.1)$, $8$ paths, up to
 $32$ candidates, temperature $1$, Adam rate $0.05$, $200$ steps, and noise
@@ -64,7 +58,7 @@ after the reverse process; its timing qualification is in Appendix~\ref{app:cost
 \caption{\pcdg: one controlled reverse step}
 \label{alg:pcdg}
 \begin{algorithmic}[1]
-\Require frozen logits $\mathbf z$, constraints $\Mmat$, position masks, training references
+\Require reverse-step logits $\mathbf z$, constraints $\Mmat$, position masks, training references
 \State $\mathbf y\gets\operatorname{detach}(\mathbf z)$; initialize duals
 \For{$o=1,\ldots,10$}
   \For{$j=1,\ldots,50$}
@@ -86,6 +80,13 @@ We screened
 $\rho\in\{0.25,0.5,1\}$, $\lambda\in\{0,1\}$, and $\beta\in\{0,0.1,1\}$
 on $512$ training-side conditions per city with one sampling seed.
 Table~\ref{tab:grid} retains the archived \emph{v2} screening values.
+Screening requires all five constraint metrics to be no worse than \pcdgp
+in each city: strict OVR, skip OVR and Unsat must not increase, and pair/category
+coverage must not decrease. Confirmation additionally requires each of the six
+JSDs to be no greater than JointGen's. Comparisons use unrounded city-wise
+sampling-seed means, an absolute tolerance of $10^{-12}$, and reject undefined
+metrics. Confirmation uses a separate $512$-condition training-side pool per city;
+the remaining training records form the distribution-correction reference pool.
 The shared-city ranking minimizes the maximum, then mean, of twelve
 JSD/JointGen ratios, followed by the parameter tuple to break ties.
 Upstream samples are cached by city, calibration pool, seed, $\rho$, and

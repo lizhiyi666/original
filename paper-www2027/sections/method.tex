@@ -36,11 +36,14 @@ $\mathbf{x}=[\textsc{start},\,k_{1:n},\,\textsc{sep},\,l_{1:n},\,\textsc{end}]$,
 with a \emph{category mask} and a \emph{POI mask} identifying the two segments.
 Categories and POIs use separate absorbing-state transition
 matrices~\cite{austin2021d3pm}; a Transformer denoiser with an
-$\mathbf{x}_0$-parameterization predicts, at each reverse step, per-position
-logits $\mathbf{z}\in\mathbb{R}^{V\times L}$ over the joint vocabulary of size $V$
-across the $L$ positions, from which the posterior $p(\mathbf{x}_{s-1}\!\mid\!\mathbf{x}_s)$
-and the next discrete state are sampled. \pcdg keeps the backbone frozen and
-changes sampling distributions and terminal POI assignments.
+$\mathbf{x}_0$-parameterization predicts clean-token distributions, from which
+the backbone constructs the reverse-step distribution
+$p(\mathbf{x}_{s-1}\!\mid\!\mathbf{x}_s)$.
+We denote its per-position log-probabilities by
+$\mathbf{z}\in\mathbb{R}^{V\times L}$, with vocabulary size $V$ and $L$ positions.
+Projection acts on these reverse-step logits, not directly on the denoiser's
+clean-token predictions. \pcdg keeps the backbone frozen and changes sampling
+distributions and terminal POI assignments.
 
 \subsection{Partial-order constraints as differentiable energies}
 \label{sec:method:energy}
@@ -174,12 +177,13 @@ ordered category-token sequence can therefore yield POIs with different actual
 categories. Since constraint metrics use $\mathrm{cat}(l)$ from the catalog,
 projection of category tokens alone does not ensure activity-order control.
 
-The decoder couples the segments within each reverse step. With the backbone's
-Gumbel draw $\mathbf{g}$, first sample the full token string, fixing the realized
-category $\hat c_l$ aligned with each POI position. Then restrict its POI support
-and resample using the \emph{same} draw:
+The decoder couples the segments within each reverse step. Let $\widetilde{\mathbf z}$
+be the projected logits $\mathbf y$, or $\mathbf z$ at an uncontrolled step.
+With Gumbel draw $\mathbf{g}$, first sample the full token string from these logits,
+fixing category token $\hat c_l$ aligned with each POI position. Then restrict its
+POI support and reselect using the \emph{same} draw:
 \begin{equation}
- \hat x^{\mathrm{cc}}_l=\arg\max_{v\in S_l}(z_{lv}+g_{lv}),
+ \hat x^{\mathrm{cc}}_l=\arg\max_{v\in S_l}(\widetilde z_{lv}+g_{lv}),
  \quad S_l=\{v:\mathrm{cat}(v)=\hat c_l\}.
  \label{eq:ccdecode}
 \end{equation}

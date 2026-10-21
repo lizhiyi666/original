@@ -106,8 +106,10 @@ strict OVR to $63.50\%$/$65.43\%$. Fixed multipliers increase strict OVR by
 $9.90$/$19.94$ percentage points, supporting adaptive dual updates at this budget.
 Distance KL lowers Distance and Radius in both cities: from $0.1441/0.0582$ to
 $0.1314/0.0516$ on Istanbul and from $0.2484/0.1430$ to $0.2210/0.1265$ on New
-York. Token KL and Gumbel relaxation have small, nonuniform marginal effects;
-removing Gumbel noise lowers New York Distance to $0.2055$.
+York. Comparing \textsc{No KL} with \textsc{No Distance KL} isolates the token
+anchor only with distance regularization disabled; it does not establish its
+marginal effect in the full projection. Removing Gumbel noise has nonuniform
+effects and lowers New York Distance to $0.2055$.
 
 \subsection{Decomposing the fidelity--constraint trade-off}
 \label{sec:exp:tradeoff}

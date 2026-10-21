@@ -1,18 +1,18 @@
 # WWW 2027 摘要注册填写内容
 
-注册会**锁定标题与作者列表**。以下内容可直接粘贴进表单。
+更新：2026-10-21。本文用于作者核对已注册内容，不代表已经进入或核验投稿系统。
+标题、作者顺序、五关键词及当前摘要继续锁定，以 `main.tex` 和作者实际注册记录为准。
 
-## 截止时间（以 OpenReview venue 页显示为准）
+## 截止时间（官网已核实，portal 由作者核对）
 
-| 事项 | OpenReview 显示（UTC） | 北京时间（UTC+8） |
+| 事项 | 官方 CFP（AoE 日终） | 北京时间（UTC+8） |
 |---|---|---|
-| Submission Start | Aug 29 2026 00:00 | 2026-08-29 08:00 |
-| **Abstract Registration** | **Oct 19 2026 13:00** | **2026-10-19 21:00** |
-| Submission Deadline（全文） | Oct 26 2026 13:00 | 2026-10-26 21:00 |
+| Abstract Registration | 2026-10-18 | 2026-10-19 20:00 前（已过） |
+| Submission Deadline（全文） | 2026-10-25 | 2026-10-26 20:00 前 |
 
-CFP 常写成「Oct 18 AoE」，与上表并不冲突：AoE = UTC−12，10-18 日终 = 10-19 12:00 UTC，
-OpenReview 的 13:00 UTC 只比它晚一小时。**按北京时间 10-19 21:00 这个硬截点安排**，
-不要按本地 10-18 当天算，也不要指望 AoE 还能多出一天。
+[官方 Research Track 页面](https://www2027.thewebconf.org/research-track-papers/)
+于 2026-10-21 重新读取。旧记录的 OpenReview 13:00 UTC / 北京时间 21:00 比官网晚一小时，
+本轮未进入 portal，不能确认该记录。按更早的官网时间安排，由作者核对实际系统截止时间。
 
 投稿入口：OpenReview venue `The Web Conference 2027 - long papers`
 （Research Track 长文；**不要**用 `Conference_Short_Papers`）。
@@ -43,20 +43,20 @@ Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generati
 School of Computer Science and Technology, Harbin Institute of Technology, Shenzhen
 ```
 
-> **需要你自己填的两项**：两位作者的真实 e-mail，以及（表单若要求）ORCID。
-> `main.tex` 里目前是 `TODO-confirm@hit.edu.cn` 占位符 —— 我没有这两个真实值，
-> 没有替你猜。ORCID 必须从 orcid.org 本人账号查，填错会把工作归到他人名下。
+两位作者的真实邮箱已按作者提供的信息写入 `main.tex`；旧占位符说明已失效。
+请作者核对 portal 与源文件是否一致。ORCID 尚未提供，由本人确认，不猜测或代填。
 
 ## Abstract
 
-版本 A（保守改），与 `main.tex` 一致。表单支持 TeX，所以百分号写成 `\%`；
-粘贴后在 Preview 里确认数字完整，若显示出反斜杠则删掉 5 个 `\`。
+当前长摘要沿用已授权的 `eliminates residual` → `reduces residual` 单处修正；
+其余内容保持原样，本轮没有重新改写摘要。作者需确认 portal 中保存的实际版本。
+下列为便于核对的纯文本／TeX 摘录，正式排版以 `main.tex` 为准。
 
 ```text
-Location-based social networks (LBSNs) are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic synthetic generation. Beyond statistical realism, many downstream web applications need control over the semantic order of activities—e.g., leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints is commonly assumed to cost distributional fidelity; we show this trade-off is largely separable. We present PCDG, a training-free control stack for a frozen conditional joint temporal + category/POI discrete-diffusion generator. PCDG compiles category partial-order constraints into differentiable energies, projects the category-position logits through a KL-preserving augmented-Lagrangian optimization in the late reverse steps, eliminates residual category-POI inconsistency via a category-consistent decoder, and restores spatial realism through a distribution-aware same-category geometry refinement that leaves every constraint metric unchanged by construction. Across two cities under an out-of-distribution split and three sampling seeds, PCDG cuts the strict ordering-violation rate from 92.89\% to 4.04\% on Istanbul and from 89.45\% to 11.28\% on New York, raising pairwise ordering coverage by 6.5x and 4.2x, while improving all six fidelity divergences over the unconstrained backbone on Istanbul and four of six on New York. On Istanbul it surpasses a fully retrained partial-order conditional model on all five constraint metrics and five of six fidelity divergences, without retraining anything. Stage-wise ablations localize where fidelity is lost and recovered across the three-stage stack.
+Location-based social networks (LBSNs) are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic synthetic generation. Beyond statistical realism, many downstream web applications need control over the semantic order of activities—e.g., leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints is commonly assumed to cost distributional fidelity; we show this trade-off is largely separable. We present PCDG, a training-free control stack for a frozen conditional joint temporal + category/POI discrete-diffusion generator. PCDG compiles category partial-order constraints into differentiable energies, projects the category-position logits through a KL-preserving augmented-Lagrangian optimization in the late reverse steps, reduces residual category-POI inconsistency via a category-consistent decoder, and restores spatial realism through a distribution-aware same-category geometry refinement that leaves every constraint metric unchanged by construction. Across two cities under an out-of-distribution split and three sampling seeds, PCDG cuts the strict ordering-violation rate from 92.89\% to 4.04\% on Istanbul and from 89.45\% to 11.28\% on New York, raising pairwise ordering coverage by 6.5x and 4.2x, while improving all six fidelity divergences over the unconstrained backbone on Istanbul and four of six on New York. On Istanbul it surpasses a fully retrained partial-order conditional model on all five constraint metrics and five of six fidelity divergences, without retraining anything. Stage-wise ablations localize where fidelity is lost and recovered across the three-stage stack.
 ```
 
-### 短版（150 words，仅在表单硬限 250 以下时使用）
+### 历史短版（非当前锁定摘要，不用于替换）
 
 ```text
 Location-based social networks are a core source of web-scale human-mobility data, yet sharing raw check-in traces is privacy-sensitive, motivating synthetic generation. Many web applications additionally need control over the semantic order of activities—leisure before dining—a sample-level, cross-position requirement that single-step conditioning cannot express. Enforcing such constraints is commonly assumed to cost distributional fidelity; we show the trade-off is largely separable. We present PCDG, a training-free control stack for a frozen joint temporal + category/POI discrete-diffusion generator: an augmented-Lagrangian projection of the category-position logits, category-consistent POI decoding, and a constraint-neutral, distribution-aware geometry refinement. Across two cities under an out-of-distribution split and three seeds, PCDG cuts strict ordering violations from 92.89% to 4.04% and from 89.45% to 11.28%, while improving all six fidelity divergences over the unconstrained backbone on one city and four of six on the other, surpassing a fully retrained conditional model without any retraining.
@@ -70,10 +70,7 @@ Location-based social networks are a core source of web-scale human-mobility dat
 synthetic human mobility, discrete diffusion, partial-order constraints, training-free constrained sampling, POI check-in sequences
 ```
 
-覆盖领域 / 模型类 / 约束类型 / 机制主张 / 数据任务五个维度。砍掉的：`LBSN`（与前两项重复）、
-`distribution correction`（标题已有）、`controllable generation`（被 training-free constrained
-sampling 涵盖）。若更看重 PC bidding 匹配面而非精确度，可用 `controllable generation` 替掉
-`POI check-in sequences`。
+五关键词与当前 `main.tex` 一致；不替换或新增。标题不包含 distribution correction。
 
 ## Track
 
@@ -81,15 +78,17 @@ Research Track — Web Mining, Multimedia and Multilingual Content Analysis
 
 ## CCS
 
-摘要注册阶段**不需要** CCS。全文截止前用官方工具 <https://dl.acm.org/ccs> 重新生成整块，
-不要手改 `concept_id`。
+五项 CCS 已于 2026-10-18 从官方工具导出并接入 `main.tex`，本轮一致性复核通过。
+无需重复生成或手改编号。
 
 ---
 
-## 注册后、全文截止前（10-26）必须完成
+## 全文提交前由作者确认
 
-1. `sections/method.tex` 需要 Fig.1（四阶段框架）与 Fig.2（单个投影步）。
-2. Fig.3：Unsat × Distance JSD 平面，每方法一个点 + 阶段 (a)–(e) 的虚线路径。
-3. 三个 `\todo`：`app:metrics` 指标定义、`app:cost` 成本数字、`app:grid` 的 18 组网格表。
-4. §5.1 的 OOD train/test 计数。
-5. 页数已满（正文到 p8，总 11/12）。插图前需要腾位置，见 `README.md`。
+1. 已完成摘要注册；实际题名、作者顺序、邮箱、摘要和所选 track 与锁定内容一致。
+2. 阅读 `REVIEW-AND-FIXES.md` 中“摘要锁定未改”“证据不足”和“待作者确认”项。
+3. 确认数据许可、伦理要求、作者责任、AI 使用披露（如适用）、COI 与无并行投稿。
+4. 核对 portal 截止时间，上传经验证的匿名 `main.pdf`，不要上传含作者身份的源包。
+
+框架图、权衡图、指标附录、校准网格、成本表和 train/test 计数均已交付；
+旧“待补图／TODO”的说明不再适用。当前构建状态见 `README.md` 和交接记录。
