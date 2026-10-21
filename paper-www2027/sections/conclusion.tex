@@ -1,10 +1,10 @@
 \section{Limitations}
 \label{sec:limitations}
-The two-city, three-sampling-seed study does not assess training variability or
-statistical significance. Istanbul's historical backbone used a different
-training batch size from New York; its full training provenance is unavailable.
-PO-CFG uses scale $1$, without extrapolation tuning. The shared distance-KL
-weight and batch-level objective give no per-sequence spatial guarantee.
+The two-city, three-sampling-seed study assesses neither training variability nor
+statistical significance. Istanbul's backbone used a different training batch
+size from New York; full training provenance is unavailable.
+PO-CFG uses scale $1$ without extrapolation tuning. The shared distance-KL
+weight and batch-level objective provide no per-sequence spatial guarantee.
 
 Finite-budget projection and decoder fallback leave residual violations
 (\S\ref{sec:method:decoding}). Same-category refinement cannot repair New York's
@@ -21,11 +21,11 @@ privacy guarantee; distributional similarity does not establish safe data releas
 \section{Conclusion}
 \label{sec:conclusion}
 \pcdg combines CDD-style projection, category-consistent decoding and same-category
-refinement on frozen Marionette. It improves all five constraint metrics over
-retrained PO-CFG in both cities, and all six fidelity JSDs versus JointGen on
-Istanbul and four on New York. Refinement recovers spatial fidelity while
-preserving constraint-relevant fields. This restricted separability leaves New
-York's category-transition and popularity errors unresolved.
+refinement on frozen Marionette. It outperforms retrained PO-CFG on all five
+constraint metrics in both cities and JointGen on six fidelity JSDs in Istanbul
+and four in New York. Refinement preserves constraint-relevant fields while
+recovering spatial fidelity, but leaves New York's category-transition and
+popularity errors unresolved.
 \label{end:main}
 
 % ======================= Appendix =======================

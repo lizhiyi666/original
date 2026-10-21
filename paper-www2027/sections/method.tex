@@ -157,18 +157,13 @@ quantify its effect via the \textsc{No Distance KL} ablation
 
 \subsection{Placement in the reverse process and joint sampling}
 \label{sec:method:placement}
-The control is applied in the \emph{late} reverse-diffusion steps, where the
-predicted categories are informative enough for the energies to be
-meaningful, specifically during the last $K$ steps and every $f$ steps therein.
-At each such step, \pcdg replaces the backbone category-position logits with their
-projected values (and, when enabled, the distance-adjusted POI-position logits),
-and the next discrete state is obtained by the backbone's ordinary joint
-categorical sampling over the full token sequence, optionally through the
-category-consistent decoder of \S\ref{sec:method:decoding}. The temporal branch is
-unchanged. \pcdg adds no model parameters and requires no retraining. Disabling
-all control stages recovers the unconstrained backbone. Algorithm pseudocode
-and default hyperparameters are given in
-Appendix~\ref{app:algo} and Figure~\ref{fig:framework}.
+Control runs every $f$ steps within the last $K$ reverse steps, when category
+predictions inform the energies. It replaces category-position logits with
+projected values and, when enabled, POI-position logits with distance-adjusted
+values. Joint categorical sampling then produces the next state, optionally
+using the decoder in \S\ref{sec:method:decoding}. The temporal branch is unchanged;
+disabling all control stages recovers the unconstrained backbone.
+Appendix~\ref{app:algo} gives pseudocode and default hyperparameters.
 
 \subsection{Category-consistent POI decoding}
 \label{sec:method:decoding}

@@ -1,11 +1,16 @@
 # PCDG — WWW 2027 working manuscript
 
-Updated 2026-10-20. ACM `sigconf,anonymous,review`; Research Track long paper.
+Updated 2026-10-21. ACM `sigconf,anonymous,review`; Research Track long paper.
 Target area: Web Mining, Multimedia and Multilingual Content Analysis.
 T1–T9 and the authorized evidence-focused revision are complete, including the
 official CCS export and the bibliography audit. Figure 1's four-panel redesign and
 caption/accessibility integration are also complete. Scientific limitations below
 remain; successful build and format checks are not a scientific acceptance judgment.
+The submission-review revision is complete: reverse-step projection and decoder
+notation, calibration gates, token-KL attribution, and registration notes are aligned.
+See [REVIEW-AND-FIXES.md](REVIEW-AND-FIXES.md) for resolved issues, locked-abstract
+concerns, evidence gaps, and author-only decisions. The current abstract is unchanged
+from `9b05681`; no new abstract correction was made in this revision.
 
 ## Locked metadata and open decisions
 
@@ -32,7 +37,7 @@ remain; successful build and format checks are not a scientific acceptance judgm
 ## Deadlines and format
 
 The [official WWW 2027 Research Track page](https://www2027.thewebconf.org/research-track-papers/),
-checked 2026-10-19, gives abstract **18 October 2026 AoE** and full-paper
+checked 2026-10-21, gives abstract **18 October 2026 AoE** and full-paper
 **25 October 2026 AoE**. End-of-day AoE converts to just before **20:00 Beijing on
 19/26 October**, respectively. The old handoff reported OpenReview 13:00 UTC / 21:00
 Beijing; that one-hour discrepancy remains unverified in the portal. Work to the earlier
@@ -44,7 +49,7 @@ pages / 12 total**, with Web/track relevance on page 1. Settle authors/order at 
 Run inside `paper-www2027/`:
 
 ```powershell
-latexmk -pdf -interaction=nonstopmode main.tex
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=../ccfa-workfiles/writing/www2027/build main.tex
 ```
 
 Current PDF: **12 pages**, conclusion **p7**, Appendix A starts **p8**. Build exits
@@ -52,8 +57,9 @@ Current PDF: **12 pages**, conclusion **p7**, Appendix A starts **p8**. Build ex
 boxes. Fonts are embedded; PDF text, metadata and links pass the anonymity checks.
 Web relevance appears on page 1; all 12 current page renders have been inspected.
 The unchanged method table and trade-off figure are queued earlier in the source
-to avoid an isolated float page. The native `acmart` option `balance=false` disables
-optional last-page column balancing, which produced an overfull bibliography box.
+to avoid an isolated float page. The inherited `balance=false` option is retained;
+the current TeX Live `acmart` 2.16 reports it as unused, so it is not evidence that
+column balancing was disabled. The actual current bibliography has no overfull box.
 Fonts, margins and table styling were not reduced. Figure 1 was redesigned at the
 existing 7 × 3.25 inch size; its live labels remain at least 8 pt.
 
@@ -98,9 +104,13 @@ Integrity passing does not close the scientific gaps below.
 Scratch renders stay in `ccfa-workfiles/writing/www2027/build/`
 and are not committed. PDF/SVG exports live in `paper-www2027/figures/`.
 The current verified build has been copied to `paper-www2027/main.pdf`; its SHA256 is
-`77903bfcac8cd4fdd5ee693713dfb7b702d3ad0a497e714d60c74febc8e625a9`.
-Figure 1 is on p3; affected p3/p7/p8 were re-inspected after integration. The
-other page inspections remain applicable to unchanged content.
+`72db36579d257ccef77888fef305daf5ab6a55535a0fbd83fbdeb27a9621b487`.
+Figure 1 is on p3. All twelve pages were rendered and inspected on 2026-10-21.
+The recovered 13-page build placed two conclusion lines alone on p8. Concise wording
+in the method placement, limitations and conclusion restored the 12-page layout
+without changing fonts, margins, tables or figures. Source and regression checks
+were not relaxed. The source baseline for this revision is `9b05681`, with recovered
+edits checkpointed at `160b20a` before page fitting.
 
 ## Completed work
 
