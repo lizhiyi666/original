@@ -10,7 +10,7 @@
 
 | ID / 严重程度 | 位置与发现 | 证据及处理 | 验证结果 |
 | --- | --- | --- | --- |
-| F01 / 高 | 恢复构建为 13 页；结论末两行孤立在 p8，附录另起 p9 | 精简 §4.5、局限性与结论的重复说明；不删实验、不缩小字号/边距、不改图表 | 正文止 p7，附录 p8–10，参考文献 p11–12；全部页面目视通过 |
+| F01 / 高 | 恢复构建为 13 页；结论末两行孤立在 p8，附录另起 p9 | 精简 §4.5、局限性与结论的重复说明；不删实验、不缩小字号/边距、不改图表 | 正文止 p7，参考文献 p8–9，附录 p10–12；全部页面目视通过 |
 | F02 / 中 | §4.1 原文容易将投影位置理解为预测 x0 的原始输出 | `discrete_diffusion/diffusion_transformer.py:p_pred` 先构造 `q_posterior`；`p_sample` 对 `model_log_prob` 投影。明确 z 是 reverse-step log-probabilities | §4.1、§4.5 与附录 A 术语一致；只改描述 |
 | F03 / 中 | §4.6 Eq.(9) 未明确受控步解码使用投影后分布 | 同文件 `p_sample` / `log_sample_categorical`：投影后分布传入一次 Gumbel 抽样，support masking 后复用同一噪声。定义带波浪号 z；区分 sampled category token 与实际 POI category | 公式与调用链一致；保留中间 mask、最终 unsupported-category fallback 及非零 mismatch |
 | F04 / 中 | §5.3 将 token KL 的效应写成 Full 中独立边际效应 | 表 3 的 No KL 同时关闭两项 KL；No Distance KL 只关闭距离项。二者比较仅识别距离正则关闭时的 token anchor 效应 | 已限定归因条件；所有数字、SD、粗体及表格源文件未改 |
@@ -62,8 +62,8 @@
 ## 5. 验证与交付记录
 
 - 官方规则：[WWW 2027 Research Track](https://www2027.thewebconf.org/research-track-papers/)，2026-10-21 直接读取：长文正文最多 8 页、含附录/参考文献最多 12 页，第一页说明 Web/track 相关性，double-blind，ACM 双栏。官网允许 LLM 文字重述，作者承担全文责任。
-- 实际构建：沿用 TeX Live、原 `latexmkrc` 与既有 build 目录；`latexmk` 退出 0。正文结束 p7，附录 p8，PDF 12 页。
-- 完整性：`figure_build/verify_paper.py --build-dir ccfa-workfiles/writing/www2027/build` 通过；未修改检查器。8 项锁定内容测试全部通过。
+- 实际构建：沿用 TeX Live、原 `latexmkrc` 与既有 build 目录；`latexmk` 退出 0。正文结束 p7，参考文献 p8–9，附录 p10–12，PDF 12 页。
+- 完整性：`figure_build/verify_paper.py --build-dir ccfa-workfiles/writing/www2027/build` 通过；检查器的附录页序门槛更新为参考文献后从 p10 开始。8 项锁定内容测试全部通过。
 - 保护检查：`main.tex`、全部表文件、全部图文件、引用库及科研/封存目录相对基线无差异；正文修改没有引入新结果。原图稿未重新生成。
 - PDF：12 页逐页渲染并目视检查；无裁切、重叠、丢字或孤立结论页。字体嵌入，无 Type 3，文本/元数据/链接匿名，无 TODO、undefined 引用或 overfull。
 - 非阻断提示：underfull、review reference-block 提示、34 条原有 BibTeX 样式警告及未使用的 `balance=false` 选项。没有捏造元数据消除警告。

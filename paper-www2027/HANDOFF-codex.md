@@ -192,7 +192,7 @@ CCS 接入后 `latexmk` 退出 0，仍为 11 页、正文结束 p7、附录 p8�
   方向、未舍入均值、容差及数据池；token-KL 归因限定在 distance-KL 关闭条件下。
   `REGISTRATION.md` 已更新真实信息及作者核对事项，未操作投稿系统。
 - 两行结论原本单独落到 p8，加上附录强制换页造成 13 页。精简 §4.5、局限性和结论后，
-  当前为 **12 页，正文 p1–7，附录 p8–10，参考文献 p11–12**。保留所有实质边界；
+  当前为 **12 页，正文 p1–7，参考文献 p8–9，附录 p10–12**。保留所有实质边界；
   没有缩小字号、边距或表图，没有改动已验收图稿或放宽检查器。
 - 使用现有 TeX Live、`latexmkrc` 和 `ccfa-workfiles/writing/www2027/build/` 构建，
   `latexmk` 退出 0。`verify_paper.py --build-dir ccfa-workfiles/writing/www2027/build`

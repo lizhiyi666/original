@@ -52,7 +52,7 @@ Run inside `paper-www2027/`:
 latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=../ccfa-workfiles/writing/www2027/build main.tex
 ```
 
-Current PDF: **12 pages**, conclusion **p7**, Appendix A starts **p8**. Build exits
+Current PDF: **12 pages**, conclusion **p7**, references **p8-9**, appendix **p10-12**. Build exits
 **0** with no LaTeX errors, undefined references/citations, visible TODOs or overfull
 boxes. Fonts are embedded; PDF text, metadata and links pass the anonymity checks.
 Web relevance appears on page 1; all 12 current page renders have been inspected.

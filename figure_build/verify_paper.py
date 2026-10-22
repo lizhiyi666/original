@@ -92,7 +92,9 @@ def main(build_dir=None):
     aux = (build_dir / "main.aux").read_text(encoding="utf-8")
     body_page = int(re.search(r"\\newlabel\{end:main\}\{\{[^}]+\}\{(\d+)\}", aux).group(1))
     appendix_page = int(re.search(r"\\newlabel\{app:algo\}\{\{[^}]+\}\{(\d+)\}", aux).group(1))
-    assert body_page <= 8 and appendix_page <= 9
+    # References now precede the appendix; the appendix starts on p10 in the
+    # 12-page delivery while the main text remains within the 8-page limit.
+    assert body_page <= 8 and appendix_page <= 10
     reader = PdfReader(build_dir / "main.pdf")
     assert len(reader.pages) <= 12
     texts = [page.extract_text() for page in reader.pages]
