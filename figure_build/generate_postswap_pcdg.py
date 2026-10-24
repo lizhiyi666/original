@@ -132,18 +132,18 @@ def draw_postswap(ax, x0, y0, w, h):
     panel_frame(ax, x0, y0, w, h, "postswap")
     txt(ax, x0+7, y0+h-12, "(a) Post-generation reorder", size=8.2, bold=True,
         name="postswap-title")
-    txt(ax, x0+w-7, y0+h-12, "POIs fixed", size=6.8, color=MUTED, align="right",
-        name="postswap-fixed")
-    txt(ax, x0+8, y0+h-30, "Generated: shopping  →  sightseeing", size=6.9,
+    txt(ax, x0+8, y0+h-31, "Sampled", size=6.9,
         color=MUTED, name="postswap-generated-label")
-    sequence(ax, x0+56, y0+h-30, "WS", scale=.82, name="postswap-generated")
-    txt(ax, x0+8, y0+h-51, "Reordered: sightseeing  →  shopping", size=6.9,
+    sequence(ax, x0+72, y0+h-31, "WS", scale=.82, name="postswap-generated")
+    txt(ax, x0+8, y0+h-52, "After reorder", size=6.9,
         color=MUTED, name="postswap-reordered-label")
-    sequence(ax, x0+56, y0+h-51, "SW", scale=.82, name="postswap-reordered")
+    sequence(ax, x0+72, y0+h-52, "SW", scale=.82, name="postswap-reordered")
     points = {"w": ("W", .15, .72), "s": ("S", .86, .25)}
-    route_map(ax, (x0+9, y0+23, w-18, 35), points, ("s", "w"),
-              "postswap-route", "same POIs; long inter-area move")
-    txt(ax, x0+9, y0+11, "Missing required category cannot be added.", size=6.7,
+    route_map(ax, (x0+9, y0+22, w-18, 37), points, ("s", "w"),
+              "postswap-route", None)
+    txt(ax, x0+w/2, y0+12, "Same POIs; long inter-area move", size=6.4,
+        color=MUTED, align="center", name="postswap-route-caption")
+    txt(ax, x0+w/2, y0+3, "Missing category: unavailable.", size=6.4,
         color=MUTED, name="postswap-missing")
 
 
@@ -151,33 +151,31 @@ def draw_pcdg(ax, x0, y0, w, h):
     panel_frame(ax, x0, y0, w, h, "pcdg")
     txt(ax, x0+7, y0+h-12, "(b) PCDG during generation", size=8.2, bold=True,
         name="pcdg-title")
-    txt(ax, x0+w-7, y0+h-12, "category + POI control", size=6.8, color=MUTED,
-        align="right", name="pcdg-control")
     # Three compact stages mirror the implemented stack without claiming a
     # deterministic nearest-POI rule.
     stages = [
-        ("1", "Order + existence", "S  →  W", ORANGE),
-        ("2", "Category-aware decode", "filter catalog", BLUE),
-        ("3", "Same-category refine", "S  →  W", GREEN),
+        ("1", "Order + existence", ORANGE),
+        ("2", "Category-aware decode", BLUE),
+        ("3", "Same-category refine", GREEN),
     ]
-    ys = [y0+h-34, y0+h-56, y0+h-78]
-    for i, ((num, title, detail, accent), yy) in enumerate(zip(stages, ys)):
+    ys = [y0+h-37, y0+h-58, y0+h-79]
+    for i, ((num, title, accent), yy) in enumerate(zip(stages, ys)):
         box(ax, x0+8, yy-7, w-16, 15, edge=to_rgba(accent, .85),
             fill=to_rgba(accent, .055), name=f"pcdg-stage-{num}", lw=.75)
         txt(ax, x0+13, yy, num, size=7.1, color=accent, bold=True,
             align="center", name=f"pcdg-stage-{num}-num")
-        txt(ax, x0+23, yy, title, size=6.9, bold=True,
+        txt(ax, x0+25, yy, title, size=6.7, bold=True,
             name=f"pcdg-stage-{num}-title")
-        txt(ax, x0+w-14, yy, detail, size=6.6, color=MUTED, align="right",
-            name=f"pcdg-stage-{num}-detail")
         if i + 1 < len(stages):
             arrow(ax, [(x0+w/2, yy-8), (x0+w/2, ys[i+1]+8)],
                   color=MUTED, width=.55, name=f"pcdg-stage-edge-{num}")
     points = {"s": ("S", .25, .25), "w": ("W", .68, .72)}
-    route_map(ax, (x0+9, y0+23, w-18, 30), points, ("s", "w"),
-              "pcdg-route", "one possible refined route")
-    txt(ax, x0+9, y0+11, "Category-to-catalog control.", size=6.5,
-        color=MUTED, name="pcdg-mapping")
+    route_map(ax, (x0+9, y0+22, w-18, 37), points, ("s", "w"),
+              "pcdg-route", None)
+    txt(ax, x0+w/2, y0+12, "One possible refined route", size=6.4,
+        color=MUTED, align="center", name="pcdg-route-caption")
+    txt(ax, x0+w/2, y0+3, "Categories preserved.", size=6.3,
+        color=MUTED, align="center", name="pcdg-mapping")
 
 
 def make_figure():
@@ -192,16 +190,10 @@ def make_figure():
     ax.set_gid("pcdg-postswap-intro")
     txt(ax, 166.5, 248, "Requested order: sightseeing before shopping", size=8.0,
         align="center", bold=True, name="requested-relation")
-    txt(ax, 166.5, 238, "S and W must both occur; the route is schematic.", size=6.8,
+    txt(ax, 166.5, 235, "Both categories must occur; routes are schematic.", size=6.5,
         align="center", color=MUTED, name="schematic-note")
-    draw_postswap(ax, 5, 5, 155, 226)
-    draw_pcdg(ax, 173, 5, 155, 226)
-    # Legend is compact and shared by both panels.
-    for i, cat in enumerate(("S", "W")):
-        xx = 109 + i*25
-        symbol(ax, xx, 236, cat, radius=2.4, name="legend-" + cat)
-        txt(ax, xx+6, 236, {"S": "sightseeing", "W": "shopping"}[cat],
-            size=6.3, color=MUTED, name="legend-label-" + cat)
+    draw_postswap(ax, 5, 10, 155, 221)
+    draw_pcdg(ax, 173, 10, 155, 221)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     for label in ax.texts:
