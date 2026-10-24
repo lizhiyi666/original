@@ -1,7 +1,7 @@
-\section{Problem Formulation}
+\section{Problem Definition}
 \label{sec:problem}
 
-\paragraph{POI check-in sequences.}
+\begin{definition}[POI check-in sequence]
 We model a user's daily behavior on an LBSN as a variable-length sequence of
 check-in events. A sequence of length $n$ consists of arrival times
 $t_{1:n}$ (continuous, strictly increasing), activity categories
@@ -15,8 +15,9 @@ behavioral conditions (e.g., time-of-day occupancy indicators). The empirical
 distribution over such sequences is highly structured: it reflects the
 regularity and bounded predictability of human mobility~\cite{gonzalez2008mobility,song2010predictability}
 while retaining substantial individual variability.
+\end{definition}
 
-\paragraph{Category partial-order constraints.}
+\begin{definition}[Category partial-order constraint]
 We encode a reference or user-specified category order as a sample-level binary
 matrix $\Mmat \in \{0,1\}^{C\times C}$, where $\Mmat[a,b]=1$ denotes the
 strict precedence constraint ``category $a$ precedes category $b$'': in a
@@ -25,8 +26,9 @@ satisfying sequence, \emph{every} occurrence of category $a$ must appear before
 sequence, we set $\Mmat[a,b]=1$ iff the last position of $a$ precedes the first
 position of $b$. A constraint $(a,b)$ is \emph{violated} by an inversion
 (some $b$ before some $a$) or by dropping either category entirely.
+\end{definition}
 
-\paragraph{Task.}
+\begin{definition}[Partial-order-constrained POI generation]
 Given a frozen conditional generator of complete check-in sequences and a
 sample-level partial-order matrix $\Mmat$, we seek to sample
 \begin{equation}
@@ -42,8 +44,7 @@ prediction~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, the task outputs
 \emph{complete} time-stamped, categorized, geolocated sequence; unlike single-step
 conditioning, the constraint couples \emph{multiple, non-adjacent} positions and
 therefore cannot be enforced by reweighting any single token independently.
-
-\paragraph{Evaluation axes.}
+\end{definition}
 We evaluate along two axes that are in tension. \emph{Distributional fidelity} is
 measured by the Jensen--Shannon divergence (JSD) between generated and reference
 marginals of travel distance, centroid-based Radius, category-transition structure,

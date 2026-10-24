@@ -40,10 +40,10 @@ energy; it does not reproduce that work's classifier-likelihood construction.
 \pcdg intervenes in the frozen backbone at sampling time.
 
 \paragraph{Sampling-time constraint projection.}
-CDD integrates differentiable constraints into discrete-diffusion sampling
+As prior background, CDD integrates differentiable constraints into discrete-diffusion sampling
 through KL anchoring and augmented-Lagrangian optimization without
-retraining~\cite{cardei2025cdd}. We adapt that projection mechanism to order and
-existence energies on category positions. The KL anchor penalizes token-level
+retraining~\cite{cardei2025cdd}. PCDG builds on this general sampling-time projection idea but derives its own cross-position order energy and
+existence energy under a KL-anchored augmented-Lagrangian projection over category positions, rather than reusing that prior system as a dependency. The KL anchor penalizes token-level
 drift from the denoiser; matching aggregate travel-distance and visitation
 statistics to training references is a separate objective in our stack.
 We evaluate those terms through projection and stage-wise comparisons rather

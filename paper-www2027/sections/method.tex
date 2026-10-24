@@ -29,7 +29,7 @@ category-consistent POI decoding, and terminal same-category refinement
 
 \subsection{Backbone: conditional joint discrete diffusion}
 \label{sec:method:backbone}
-We use Marionette's diffusion point process for arrival times and conditional
+The current implementation uses a frozen generator whose discrete branch follows the Marionette-style diffusion point process for arrival times and conditional
 discrete diffusion for categories and POIs~\cite{deng2025marionette}. Its discrete
 branch represents a sequence as
 $\mathbf{x}=[\textsc{start},\,k_{1:n},\,\textsc{sep},\,l_{1:n},\,\textsc{end}]$,
@@ -96,8 +96,7 @@ trainable copy. The sequence-level constrained formulation is
 where the KL term penalizes deviation from the base model; it does not guarantee
 unchanged fidelity metrics. Its direction is base-to-projected: the frozen
 distribution is the target argument of the implementation's KL loss.
-Following the projection paradigm of
-CDD~\cite{cardei2025cdd}, we optimize the
+We optimize the
 augmented-Lagrangian relaxation of~\eqref{eq:constrained}: with
 $\delta^{\bullet}=\relu(g^{\bullet}-\tau)$,
 \begin{equation}
