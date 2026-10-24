@@ -1,59 +1,50 @@
 \section{Introduction}
 \label{sec:intro}
 
-Location-based social networks (LBSNs) record time-stamped visits to points of
-interest (POIs). Such traces support POI recommendation~\cite{feng2018deepmove,luo2021stan,yang2022getnext},
-but expose sensitive behavior. Synthetic mobility generation offers an
-alternative data source~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
+Location-based social networks (LBSNs) connect users' online activities with their visits to physical places, proudcing time-stamped check-in sequences that support human mobility modeling and POI recommendations~\cite{feng2018deepmove,luo2021stan,yang2022getnext}. Generating realistic check-in sequences can support behavioral simulation and the evaluation of location-based Web services~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}. 
 
-\paragraph{Relevance to the Web.}
-We generate complete LBSN check-in sequences under activity-order requirements
-while retaining population statistics. These traces could support recommender
-stress tests and data augmentation without releasing individual logs. We evaluate
-controllable generation; downstream utility and formal privacy protection remain
-unevaluated.
-This addresses Web data generation and simulation in the Web Mining, Multimedia
-and Multilingual Content Analysis track.
+Activities in check-in sequences can be represented by POI categories, such as sightseeing, shopping and dining~\cite{deng2025marionette}. Beyond statistical fidelity, applications such as itinerary planning and POI recommendations further demand control over the relative order of categories, e.g., sightseeing before shopping, while leaving the exact POIs and other categories unrestricted. We formulate this problem as partial-order-constrained POI check-in generation.
 
-A scenario may require leisure before dining or sightseeing before shopping.
-Precedence couples non-adjacent positions: every occurrence of one category must
-precede every occurrence of another, and both must appear. A local condition
-embedding does not ensure this. Reordering fixes inversions but cannot supply
-missing activities. Road-topology
-control~\cite{zhu2024controltraj} addresses geographic structure, whereas constrained
-discrete diffusion (CDD)~\cite{cardei2025cdd} provides a general framework for
-sampling under differentiable constraints. POI generation adds a further
-difficulty: category tokens and POI identities can disagree, so controlling the
-former need not control the actual activities of the emitted POIs. The control
-must therefore survive the mapping from category tokens to catalog locations.
+Existing mobility generators have made substantial progress in modeling spatiotemporal patterns through neural networks, point processes, and diffusion models~\cite{luo2021stan,yang2022getnext,chen2025sequentialdiffusion}. Conditional generation further enables control through mobility contexts. Marionette~\cite{deng2025marionette} incorporates global and partial mobility contexts into fine-grained trajectory generation. Geo-Llama~\cite{li2025geollama} generates check-in sequences with explicit visit constraints. ControlTraj~\cite{zhu2024controltraj} constrains the generated sequence with road topology and trip attributes. However, these forms of control do not provide an \emph{explicit mechanism for preserving user-specified category-level partial orders} in the generated check-in sequences. Post-generation offers a straightforward alternative, but it cannot introduce missing required categories and may disrupt spatial coherence. As illustrated in Figure~\ref{}, rearranging visits while retaining their original POIs can introduce long inter-area travel. Generating a coherent sequence therefore requires coordinating category precedence with POI selection, rather and simply rearranging an already generated itinerary.
 
-We introduce \pcdg, a training-free control stack on the frozen Marionette
-generator~\cite{deng2025marionette}. It adapts CDD's KL-anchored projection to
-sample-level order and existence energies, with a distance-distribution
-regularizer on POI logits. Category-consistent decoding then restricts POI support
-using the sampled category, connecting token-level control to realized
-activities. After diffusion, same-category geometry refinement changes POI
-identities and coordinates while preserving actual categories, times, and event
-order. This restricted substitution leaves the fields that determine constraint
-satisfaction invariant, while allowing spatial statistics to change.
+Partial-order-constrained generation presents three challenges. \textbf{First, user-specified partial orders need to be accommodated at generation time without retraining the model.} Users may request different combinations of partial order relations that are unknown beforehand. Anticipating all such combinations in a fixed training scheme is impractical. \textbf{Second, constraint satisfaction requires both the presence and correct ordering of the specified categories}. Penalizing ordering violations alone admits trivial solutions omitting the required categories. \textbf{Third, the satisfaction of partial order constrains must be balanced with preserving realistic spatial patterns}. The required categories and their relative order varies the POI choices and may distort travel distances and visit patterns. Preserving both spatial fidelity and the partial-order constrains remains an open challenge.
 
-Across Istanbul and New York, the stack improves every constraint metric over
-the retrained PO-CFG baseline. Geometry refinement lowers spatial divergences
-without changing constraint metrics; the full stack improves all six fidelity
-JSDs over the unconstrained backbone on Istanbul and four on New York. New York
-CategoryTransition and G-RANK remain worse. These results identify a recoverable
-spatial cost in this generator, rather than establishing that every
-fidelity--control trade-off can be removed.
 
-\paragraph{Contributions.}
+% \paragraph{Relevance to the Web.}
+% We generate complete LBSN check-in sequences under activity-order requirements
+% while retaining population statistics. These traces could support recommender
+% stress tests and data augmentation without releasing individual logs. We evaluate
+% controllable generation; downstream utility and formal privacy protection remain
+% unevaluated.
+% This addresses Web data generation and simulation in the Web Mining, Multimedia
+% and Multilingual Content Analysis track.
+
+% A scenario may require leisure before dining or sightseeing before shopping.
+% Precedence couples non-adjacent positions: every occurrence of one category must
+% precede every occurrence of another, and both must appear. A local condition
+% embedding does not ensure this. Reordering fixes inversions but cannot supply
+% missing activities. Road-topology
+% control~\cite{zhu2024controltraj} addresses geographic structure, whereas constrained
+% discrete diffusion (CDD)~\cite{cardei2025cdd} provides a general framework for
+% sampling under differentiable constraints. POI generation adds a further
+% difficulty: category tokens and POI identities can disagree, so controlling the
+% former need not control the actual activities of the emitted POIs. The control
+% must therefore survive the mapping from category tokens to catalog locations.
+
+In response to the above challenges, 
+we introduce \pcdg, a training-free framework for partial-order-constrained POI check-in sequence generation. PCDG expresses category precedence through a cross-position energy and couples it with an existence energy that penalizes the absence of required categories. It incorporates these energies into inference-time projection, adapting the KL-anchored constrained optimization mechanism of CDD~\cite{cardei2025cdd} to guide the generation process. This joint formulation discourages both incorrect ordering and the the avoidance of the constrained categories. Category-consistent decoding then restricts POI selection according to the sampled activity categories, connecting category-level control to the emitted POIs. After diffusion, category-preserving spatial refinement adjusts the final POI selection within the same categories, allowing spatial coherent generation while preserving the category constraints. Experiments on Istanbul and New York demonstrate substantial improvements in constraint satisfaction without additional parameter training. PCDG reduces the strict ordering-violation score from 92.89\% to 4.04\% on Istanbul and from 89.45\% to 11.28\% on New York. 
+
+% Across Istanbul and New York, the stack improves every constraint metric over
+% the retrained PO-CFG baseline. Geometry refinement lowers spatial divergences
+% without changing constraint metrics; the full stack improves all six fidelity
+% JSDs over the unconstrained backbone on Istanbul and four on New York. New York
+% CategoryTransition and G-RANK remain worse. These results identify a recoverable
+% spatial cost in this generator, rather than establishing that every
+% fidelity--control trade-off can be removed.
+
+Our constributions are threefold:
 \begin{itemize}[leftmargin=1.2em,itemsep=2pt,topsep=2pt]
-  \item We formulate activity-precedence control over actual POI categories and
-  adapt CDD's projection to order/existence energies on a frozen Marionette
-  backbone (\S\ref{sec:problem}--\S\ref{sec:method:project}).
-  \item We connect category tokens to catalog POIs through support-constrained
-  decoding, then refine spatial assignments within each realized category while
-  preserving constraint-relevant fields (\S\ref{sec:method:decoding}--\S\ref{sec:method:geometry}).
-  \item We use two-city, three-seed comparisons and projection ablations to
-  identify a recoverable spatial cost of control, alongside unresolved category
-  and popularity errors (\S\ref{sec:experiments}).
+  \item To the best of our knowledge, we are the first to study partial-order-constrained POI check-in generation, where required activity categories must appear and satisfy specified precedence relations without prescribing a complete itinerary.
+  \item We propose PCDG, a training-free framework that combines joint order-and-existence projection, category-consistent POI decoding, and category-preserving spatial refinement to coordinate activity-order control with POI selection.
+  \item Experiments on two real-world LBSN datasets demonstrate substantial improvements in constraint satisfaction. Ablation and stage-wise analyses establish the complementary roles of the components and identify spatial discrepancies that can be reduced without altering the realized activity sequence. (\S\ref{sec:experiments}).
 \end{itemize}
