@@ -4,7 +4,7 @@ from io import StringIO
 import re
 import unittest
 
-from verify_paper import BASELINE, git, verify_locked_metadata
+from verify_paper import BASELINE, git, main_float_labels, verify_locked_metadata, verify_page_layout
 
 
 class LockedMetadataTests(unittest.TestCase):
@@ -52,6 +52,50 @@ class LockedMetadataTests(unittest.TestCase):
         text = re.sub(r"\\begin\{abstract\}.*?\\end\{abstract\}", "", self.authorized, flags=re.S)
         with self.assertRaises(AssertionError):
             self.check(text)
+
+
+class PageLayoutTests(unittest.TestCase):
+    def aux(self, body=8, refs=9, appendix=11, figure=2):
+        return "\n".join(
+            rf"\newlabel{{{label}}}{{{{1}}{{{page}}}{{Heading}}{{anchor}}{{}}}}"
+            for label, page in (("end:main", body), ("start:references", refs),
+                                ("app:algo", appendix), ("fig:example", figure)))
+
+    def test_exact_eight_page_layout(self):
+        self.assertEqual(verify_page_layout(self.aux(), 12, {"fig:example"}), (8, 9, 11))
+
+    def test_short_main_text_rejected(self):
+        with self.assertRaisesRegex(AssertionError, "expected p8"):
+            verify_page_layout(self.aux(body=7), 12, {"fig:example"})
+
+    def test_late_main_text_rejected(self):
+        with self.assertRaises(AssertionError):
+            verify_page_layout(self.aux(body=9), 12, {"fig:example"})
+
+    def test_float_spilling_into_references_rejected(self):
+        with self.assertRaisesRegex(AssertionError, "float outside"):
+            verify_page_layout(self.aux(figure=9), 12, {"fig:example"})
+
+    def test_early_references_rejected(self):
+        with self.assertRaisesRegex(AssertionError, "expected p9"):
+            verify_page_layout(self.aux(refs=8), 12, {"fig:example"})
+
+    def test_appendix_order_rejected(self):
+        with self.assertRaisesRegex(AssertionError, "follow references"):
+            verify_page_layout(self.aux(appendix=9), 12, {"fig:example"})
+
+    def test_thirteenth_page_rejected(self):
+        with self.assertRaisesRegex(AssertionError, "maximum 12"):
+            verify_page_layout(self.aux(), 13, {"fig:example"})
+
+    def test_missing_float_label_rejected(self):
+        with self.assertRaisesRegex(AssertionError, "Missing page label"):
+            verify_page_layout(self.aux(), 12, {"fig:missing"})
+
+    def test_main_include_tree_excludes_appendix_floats(self):
+        self.assertEqual(main_float_labels(), {
+            "fig:postswap-pcdg", "fig:framework", "fig:tradeoff",
+            "tab:method", "tab:method-jsd", "alg:pcdg"})
 
 
 if __name__ == "__main__":

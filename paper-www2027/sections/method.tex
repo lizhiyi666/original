@@ -162,7 +162,8 @@ projected values and, when enabled, POI-position logits with distance-adjusted
 values. Joint categorical sampling then produces the next state, optionally
 using the decoder in \S\ref{sec:method:decoding}. The temporal branch is unchanged;
 disabling all control stages recovers the unconstrained backbone.
-Appendix~\ref{app:algo} gives pseudocode and default hyperparameters.
+Algorithm~\ref{alg:pcdg} gives the controlled step;
+Appendix~\ref{app:algo} lists additional implementation settings.
 
 \subsection{Category-consistent POI decoding}
 \label{sec:method:decoding}
@@ -272,3 +273,34 @@ three $\beta$ settings of a batch are compared at identical upstream randomness.
 The full configuration is $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$, selected
 on training-side calibration data (Appendix~\ref{app:grid}). The selected value
 $\lambda=0$ describes this grid's outcome, not the absence of category-side error.
+
+\subsection{Controlled-step algorithm}
+\label{sec:method:algorithm}
+Algorithm~\ref{alg:pcdg} combines the objectives above at one controlled
+reverse step. Projection updates a detached copy of the reverse-step logits;
+the frozen denoiser is never optimized. The inner loop uses relaxed energies,
+whereas hard assignments determine the outer-loop dual updates.
+After projection, category sampling and POI reselection share the same Gumbel
+draw (\S\ref{sec:method:decoding}). The resulting discrete state feeds the next
+reverse step. Terminal geometry refinement runs once, after diffusion ends,
+and changes only same-category POI choices (\S\ref{sec:method:geometry}).
+
+\begin{algorithm}[t]
+\caption{\pcdg: one controlled reverse step}
+\label{alg:pcdg}
+\begin{algorithmic}[1]
+\Require reverse-step logits $\mathbf z$, constraints $\Mmat$, position masks, training references
+\State $\mathbf y\gets\operatorname{detach}(\mathbf z)$; initialize duals
+\For{$o=1,\ldots,10$}
+  \For{$j=1,\ldots,50$}
+    \State Relax $\mathbf y$ with Gumbel-softmax
+    \State Compute order/existence and distribution terms
+    \State $\mathcal L\gets$ weighted objective in Eq.~\eqref{eq:balance}
+    \State SGD on active rows of $\mathbf y$; clip gradients
+  \EndFor
+  \State Update duals from hard violations, Eq.~\eqref{eq:dual}
+\EndFor
+\State Sample category tokens; decode POIs with shared noise
+\State \Return next discrete state (Eq.~\eqref{eq:ccdecode} and fallback)
+\end{algorithmic}
+\end{algorithm}

@@ -20,7 +20,11 @@ backbones; PO-CFG is separately retrained.
 Nominal order, existence, token-KL, and distance-KL weights are $(1,5,1,1)$.
 Projection uses Gumbel temperature $3$ and runs every fourth step in the last
 $40$ reverse steps, with $10$ outer and $50$ inner iterations and no early
-stopping. Distance KL uses $8$ routes, top-$32$ candidates, and $32$ bins.
+stopping. The ten controlled steps are $36,32,\ldots,4,0$, totaling $5{,}000$
+inner updates per active batch. SGD uses rate $1$ and gradient-norm clip $10$.
+Distance KL uses $8$ routes, top-$32$ candidates,
+$32$ bins, and path temperature $1$. Formal sampling uses batches of $64$
+sequences in FP32 with TF32 disabled.
 The full stack uses the shared calibration choice $(\rho,\lambda,\beta)=(0.5,0,1)$.
 All reported spreads are sample SDs across seeds $135398$, $135399$, and $135400$
 at fixed checkpoints, not training variability or confidence intervals.
@@ -54,6 +58,7 @@ category-consistent decoding), and \pcdg (the full stack).
 \end{figure*}
 
 \paragraph{Metrics.}
+\label{sec:exp:metrics}
 We retain the archived evaluation-v2 protocol for every table.
 Fidelity uses six JSDs: cumulative travel \emph{Distance}, \emph{Radius},
 conditional \emph{CategoryTransition}, distinct daily POI count
@@ -61,11 +66,30 @@ conditional \emph{CategoryTransition}, distinct daily POI count
 POI visitation (\emph{G-RANK}). Distance is conditional on generated/reference
 first and last categories matching; the eligible subset can differ by method.
 Radius is the square root of mean distance to the centroid, not standard radius
-of gyration. Constraint metrics use the catalog categories of emitted POIs:
-strict and skip OVR, pair/category coverage, and \emph{Unsat}, the fraction of
-required relation instances with a missing category or any inversion.
-Pair coverage requires both categories to occur, not correct ordering.
-Appendix~\ref{app:metrics} specifies denominators and filtering.
+of gyration. Appendix~\ref{app:metrics} specifies the fidelity statistics and filtering.
+
+Constraint metrics use the catalog categories $\mathrm{cat}(l)$ of emitted
+POIs, not the sampled category tokens. For reference sequence $i$, let $R_i$
+contain each distinct-category pair $(a,b)$ satisfying
+$\max\operatorname{pos}_i(a)<\min\operatorname{pos}_i(b)$.
+Let $P_i\subseteq R_i$ contain pairs whose two categories both occur in the
+generated sequence; $C_i$ is the set of categories involved in $R_i$ and
+$\widehat C_i$ the generated category set. For a present pair, $v_i(a,b)$ is
+the number of inverted occurrence pairs divided by $n_a n_b$.
+
+Strict OVR averages $v_i$ over $R_i$, assigning $1$ to missing-category pairs,
+then averages over sequences with nonempty $R_i$. Skip OVR averages $v_i$
+over $P_i$, then over sequences with nonempty $P_i$. Coverage and Unsat pool counts:
+\begin{align}
+ \mathrm{PairCov}&=\frac{\sum_i|P_i|}{\sum_i|R_i|},\\
+ \mathrm{CatCov}&=\frac{\sum_i|C_i\cap\widehat C_i|}{\sum_i|C_i|},\\
+ \mathrm{Unsat}&=\frac{\sum_i\sum_{(a,b)\in R_i}
+ \mathbf{1}[(a,b)\notin P_i\ \lor\ v_i(a,b)>0]}{\sum_i|R_i|}.
+\end{align}
+Unsat counts unsatisfied relations, not sequences; pair coverage requires
+both categories to occur, not correct order. Empty denominators are undefined,
+not zero; undefined OVR sequences are omitted from their respective means.
+Tables express these rates in percent.
 
 \subsection{Main results}
 \label{sec:exp:main}

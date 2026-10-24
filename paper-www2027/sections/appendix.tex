@@ -2,47 +2,19 @@
 \clearpage
 \appendix
 
-\section{Algorithm and Default Hyper-parameters}
+\section{Additional Implementation Settings}
 \label{app:algo}
-Projection uses nominal weights
-$(w_{\mathrm{ord}},w_{\mathrm{ex}},w_{\mathrm{kl}},w_{\mathrm{dist}})=(1,5,1,1)$,
-Gumbel temperature $3$, $10$ outer and $50$ inner iterations, SGD rate
-$\eta=1$, and gradient-norm clip $10$. Dual variables initialize at $1$,
+Algorithm~\ref{alg:pcdg} and \S\ref{sec:exp:setup} give the controlled step
+and main sampling settings. Dual variables initialize at $1$,
 penalties grow by $2$ up to $10^3$, and the violation threshold is $\tau=0$
 with multiplier-update tolerance $10^{-6}$. Early stopping is disabled.
 In the batch implementation, token KL sums over vocabulary and positions for
 active sequences and divides by the full batch size; order/existence penalties
 sum over active relations and sequences without that division.
-The ten controlled steps are $36,32,\ldots,4,0$, totaling $5{,}000$ inner
-updates per active batch. Distance KL uses $8$ routes, top-$32$ candidates,
-$32$ bins, and path temperature $1$.
-Formal sampling uses batches of $64$ sequences in FP32 with TF32 disabled.
-
 Geometry uses distance/radius/fidelity weights $(1,2,0.1)$, $8$ paths, up to
 $32$ candidates, temperature $1$, Adam rate $0.05$, $200$ steps, and noise
 refresh every $20$ steps. The full-stack weights are $(\rho,\lambda,\beta)=(0.5,0,1)$.
-Algorithm~\ref{alg:pcdg} covers one controlled reverse step. Geometry acts once
-after the reverse process; its timing qualification is in Appendix~\ref{app:cost}.
-
-\begin{algorithm}[t]
-\caption{\pcdg: one controlled reverse step}
-\label{alg:pcdg}
-\begin{algorithmic}[1]
-\Require reverse-step logits $\mathbf z$, constraints $\Mmat$, position masks, training references
-\State $\mathbf y\gets\operatorname{detach}(\mathbf z)$; initialize duals
-\For{$o=1,\ldots,10$}
-  \For{$j=1,\ldots,50$}
-    \State Relax $\mathbf y$ with Gumbel-softmax
-    \State Compute order/existence and distribution terms
-    \State $\mathcal L\gets$ weighted objective in Eq.~\eqref{eq:balance}
-    \State SGD on active rows of $\mathbf y$; clip gradients
-  \EndFor
-  \State Update duals from hard violations, Eq.~\eqref{eq:dual}
-\EndFor
-\State Sample category tokens; decode POIs with shared noise
-\State \Return next discrete state (Eq.~\eqref{eq:ccdecode} and fallback)
-\end{algorithmic}
-\end{algorithm}
+Geometry's timing qualification is in Appendix~\ref{app:cost}.
 
 \section{Distribution-Correction Grid and Selection}
 \label{app:grid}
@@ -91,33 +63,9 @@ All values follow evaluation v2.
 \input{tables/ablation}
 \input{tables/stagewise}
 
-\section{Metric Definitions}
+\section{Fidelity Metrics and Audit Details}
 \label{app:metrics}
-All constraint metrics use actual categories $\mathrm{cat}(l)$ of generated
-POIs, not the sampled category tokens. For reference sequence $i$, let $R_i$
-contain each distinct-category pair $(a,b)$ satisfying
-$\max\operatorname{pos}_i(a)<\min\operatorname{pos}_i(b)$.
-Let $P_i\subseteq R_i$ contain pairs whose two categories both occur in the
-generated sequence; $C_i$ is the set of categories involved in $R_i$ and
-$\widehat C_i$ the generated category set.
-For a present pair, $v_i(a,b)$ is the number of inverted occurrence pairs
-divided by $n_a n_b$.
-
-\paragraph{Ordering and coverage.}
-Strict OVR averages $v_i$ over $R_i$, assigning $1$ to missing-category pairs,
-then averages over sequences with nonempty $R_i$. Skip OVR averages $v_i$
-over $P_i$, then over sequences with nonempty $P_i$. In contrast, coverage
-and Unsat pool counts:
-\begin{align}
- \mathrm{PairCov}&=\frac{\sum_i|P_i|}{\sum_i|R_i|},\\
- \mathrm{CatCov}&=\frac{\sum_i|C_i\cap\widehat C_i|}{\sum_i|C_i|},\\
- \mathrm{Unsat}&=\frac{\sum_i\sum_{(a,b)\in R_i}
- \mathbf{1}[(a,b)\notin P_i\ \lor\ v_i(a,b)>0]}{\sum_i|R_i|}.
-\end{align}
-Thus Unsat counts unsatisfied \emph{relations}, not sequences; pair coverage
-does not require correct order. Empty denominators are undefined, not zero;
-undefined OVR sequences are omitted from their respective means.
-Tables express these rates in percent.
+Section~\ref{sec:exp:metrics} defines the five catalog-category constraint metrics.
 The separate diagnostic \texttt{token\_strict\_ovr} uses category tokens.
 Mismatch rate pools the event-wise disagreements between tokens and catalog
 categories.

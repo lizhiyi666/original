@@ -68,6 +68,36 @@ def verify_locked_metadata(original, current):
         print(f"PASS locked {label}{suffix}")
 
 
+def main_float_labels():
+    """Read the main-text include tree, excluding bibliography and appendices."""
+    def expand(text):
+        text = re.sub(r"(?<!\\)%[^\n]*", "", text)
+        for name in re.findall(r"\\input\{([^}]+)\}", text):
+            yield from expand((PAPER / (name + ".tex")).read_text(encoding="utf-8"))
+        yield text
+    main = (PAPER / "main.tex").read_text(encoding="utf-8").split(r"\bibliographystyle", 1)[0]
+    return {label for text in expand(main)
+            for label in re.findall(r"\\label\{((?:fig|tab|alg):[^}]+)\}", text)}
+
+
+def verify_page_layout(aux, total_pages, float_labels):
+    def page(label):
+        match = re.search(r"\\newlabel\{" + re.escape(label)
+                          + r"\}\{\{[^}]*\}\{(\d+)\}", aux)
+        assert match, f"Missing page label: {label}"
+        return int(match.group(1))
+
+    body_page, reference_page, appendix_page = map(page, ("end:main", "start:references", "app:algo"))
+    assert body_page == 8, f"Main text ends on p{body_page}, expected p8"
+    assert reference_page == 9, f"References start on p{reference_page}, expected p9"
+    assert reference_page < appendix_page <= total_pages, "Appendix must follow references"
+    assert total_pages <= 12, f"PDF has {total_pages} pages, maximum 12"
+    assert float_labels, "No main-text floats found"
+    for label in sorted(float_labels):
+        assert 1 <= page(label) <= 8, f"Main-text float outside first eight pages: {label}"
+    return body_page, reference_page, appendix_page
+
+
 def main(build_dir=None):
     build_dir = Path(build_dir) if build_dir is not None else PAPER
     original = git("show", f"{BASELINE}:paper-www2027/main.tex")
@@ -90,13 +120,9 @@ def main(build_dir=None):
     assert "Overfull" not in log
     print("PASS no TODO calls, LaTeX errors, unresolved references/citations, or overfull boxes")
     aux = (build_dir / "main.aux").read_text(encoding="utf-8")
-    body_page = int(re.search(r"\\newlabel\{end:main\}\{\{[^}]+\}\{(\d+)\}", aux).group(1))
-    appendix_page = int(re.search(r"\\newlabel\{app:algo\}\{\{[^}]+\}\{(\d+)\}", aux).group(1))
-    # References now precede the appendix; the appendix starts on p10 in the
-    # 12-page delivery while the main text remains within the 8-page limit.
-    assert body_page <= 8 and appendix_page <= 10
     reader = PdfReader(build_dir / "main.pdf")
-    assert len(reader.pages) <= 12
+    body_page, reference_page, appendix_page = verify_page_layout(
+        aux, len(reader.pages), main_float_labels())
     texts = [page.extract_text() for page in reader.pages]
     assert "Relevance to the Web" in texts[0]
     assert not re.search(r"Zhiyi|Harbin|hit\.edu|25s151146|zhaokaiqi|\bTODO\b|lizhiyi666", "\n".join(texts), re.I)
@@ -119,7 +145,7 @@ def main(build_dir=None):
     assert not any("Type 3" in row for row in font_rows)
     changed = git("diff", "--name-only", BASELINE, "--", "experiment_runs", "constraint_projection.py", "geometry_projection.py", "distribution_balance.py", "discrete_diffusion", "evaluations")
     assert not changed, f"Scientific inputs or implementation changed: {changed}"
-    print(f"PASS PDF: {len(reader.pages)} pages; main text ends p{body_page}; appendix p{appendix_page}; embedded fonts; anonymous text/metadata/links")
+    print(f"PASS PDF: {len(reader.pages)} pages; main text ends p{body_page}; all main floats within p1-8; references p{reference_page}; appendix p{appendix_page}; embedded fonts; anonymous text/metadata/links")
     print("PASS no changes to sealed experiments or audited scientific implementation")
     print("PASS abstract correction agrees with nonzero decoder mismatch; other abstract text remains locked")
 

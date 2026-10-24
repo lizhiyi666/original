@@ -3,17 +3,34 @@
 
 Location-based social networks (LBSNs) connect users' online activities with their visits to physical places, producing time-stamped check-in sequences that support human mobility modeling and POI recommendations~\cite{feng2018deepmove,luo2021stan,yang2022getnext}. Generating realistic check-in sequences can support behavioral simulation and the evaluation of location-based Web services~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
 
+\paragraph{Relevance to the Web.}
+We study how to control the semantic order of synthetic LBSN visits while
+preserving population-level mobility statistics. This connects controllable
+Web-data generation to the Web Mining, Multimedia and Multilingual Content
+Analysis track; such traces could support simulation of location-based services.
+
 Activities in check-in sequences can be represented by POI categories, such as sightseeing, shopping and dining~\cite{deng2025marionette}. Beyond statistical fidelity, applications such as itinerary planning and POI recommendations further demand control over the relative order of categories, e.g., sightseeing before shopping, while leaving the exact POIs and other categories unrestricted. We formulate this problem as partial-order-constrained POI check-in generation.
 
 Existing mobility generators have made substantial progress in modeling spatiotemporal patterns through neural networks, point processes, and diffusion models~\cite{luo2021stan,yang2022getnext,chen2025sequentialdiffusion}. Conditional generation further enables control through mobility contexts. Diffusion-based generators such as Marionette~\cite{deng2025marionette} incorporate global and partial mobility contexts into fine-grained trajectory generation, and can serve as frozen backbones for sampling-time control. Geo-Llama~\cite{li2025geollama} generates check-in sequences with explicit visit constraints. ControlTraj~\cite{zhu2024controltraj} constrains the generated sequence with road topology and trip attributes. However, these forms of control do not provide an \emph{explicit mechanism for preserving user-specified category-level partial orders} in the generated check-in sequences. Post-generation offers a straightforward alternative, but it cannot introduce missing required categories and may disrupt spatial coherence. As illustrated in Figure~\ref{fig:postswap-pcdg}, rearranging visits while retaining their original POIs can introduce long inter-area travel. Generating a coherent sequence therefore requires coordinating category precedence with POI selection, rather than simply rearranging an already generated itinerary.
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/postswap-pcdg.pdf}
-  \caption{Why post-generation reordering is insufficient and how \pcdg addresses the gap. (a) Reordering changes the visit order but keeps the sampled POIs, so a missing category remains unavailable and the resulting route can span distant areas. (b) \pcdg applies order and existence control during generation, decodes POIs from the realized category, and performs same-category refinement; the routes are schematic.}
-  \Description{Two panels compare post-generation reordering with PCDG. The left panel keeps two sampled POIs while reversing their order, producing a long inter-area route and no way to add a missing category. The right panel shows three PCDG stages: order and existence control, category-aware POI decoding, and same-category refinement, followed by a schematic refined route.}
+  \includegraphics[width=\textwidth]{figures/postswap-pcdg.pdf}
+  \caption{Activity-order control and POI selection on the same schematic map.
+  Both routes satisfy sightseeing before shopping. (a) Post-generation reordering
+  retains the sampled POIs, leaving a cross-district detour.
+  (b) \pcdg can select different POIs within the same activity categories, yielding
+  a spatially coherent route in this example. Numbers indicate visit order.
+  These illustrative routes are not measured samples or a shortest-path guarantee.}
+  \Description{Two identical maps share six POIs: an eastern sightseeing POI,
+  western and eastern shopping and dining POIs, and an eastern hotel.
+  The left route visits sightseeing, western shopping, western dining, then
+  the hotel. The right route visits sightseeing, eastern shopping, eastern
+  dining, then the same hotel. Both routes are numbered one through four.
+  Category icons and a shared legend distinguish sightseeing, shopping, dining
+  and hotel independently of route color.}
   \label{fig:postswap-pcdg}
-\end{figure}
+\end{figure*}
 
 Partial-order-constrained generation presents three challenges. \textbf{First, user-specified partial orders need to be accommodated at generation time without retraining the model.} Users may request different combinations of partial-order relations that are unknown beforehand. Anticipating all such combinations in a fixed training scheme is impractical. \textbf{Second, constraint satisfaction requires both the presence and correct ordering of the specified categories}. Penalizing ordering violations alone admits trivial solutions that omit the required categories. \textbf{Third, satisfying partial-order constraints must be balanced with preserving realistic spatial patterns}. The required categories and their relative order vary the POI choices and may distort travel distances and visit patterns. Preserving both spatial fidelity and the partial-order constraints remains an open challenge.
 
