@@ -120,22 +120,21 @@ This audit does not replace any v2 table cell.
 
 \section{Cost}
 \label{app:cost}
-Table~\ref{tab:cost} reports the earlier selected-geometry qualification,
-not the later full-stack timing. On each city, ordinary and long cases are
-eligible $64$-sequence batches chosen by lower-median and maximum batchwise
-generated length, respectively. Each case uses two warmups and five measured
-repetitions, seed $135398$, FP32 with TF32 disabled, and the same CUDA device
-and input. CUDA synchronization brackets the timer. Ratios divide the two
-medians, rather than averaging per-trial ratios.
+Table~\ref{tab:cost} reports the earlier selected-geometry qualification, not
+later full-stack timing. For each city, ordinary and long cases are eligible
+$64$-sequence batches selected by lower-median and maximum batchwise generated
+length. Each uses two warmups, five measured repetitions, seed $135398$, FP32
+with TF32 disabled, and the same CUDA device and input. CUDA synchronization
+brackets the timer; ratios divide medians rather than averaging per-trial ratios.
 \input{tables/cost}
 
 The timer covers spatial sampling and decoding, including fresh scoring,
-candidate construction, optimization, and discrete selection when geometry
-is enabled; it excludes temporal generation, model loading, and transfer.
-The denominator is projection \textsc{Full} (\pcdgp), not JointGen.
-The selected $200$-step configuration uses radius/fidelity weights $2/0.1$;
-an earlier step-budget probe used $1/0.01$. All four selected-configuration
-ratios are below the $1.10$ ceiling, with overhead $3.35$--$3.98\%$.
-These measurements cannot be transferred to \pcdgpd plus geometry or the
-final $(0.5,0,1)$ stack. Comparable full-stack/JointGen sampling overhead and
-PO-CFG training GPU-hours remain unmeasured in the archived cost evidence.
+candidate construction, optimization, and discrete selection with geometry;
+it excludes temporal generation, model loading, and transfer. The denominator
+is projection \textsc{Full} (\pcdgp), not JointGen. The selected $200$-step
+configuration uses radius/fidelity weights $2/0.1$; an earlier step-budget probe
+used $1/0.01$. All four ratios are below the $1.10$ ceiling, with overhead
+$3.35$--$3.98\%$. These measurements do not transfer to \pcdgpd plus geometry
+or the final $(0.5,0,1)$ stack. Comparable full-stack/JointGen sampling
+overhead and PO-CFG training GPU-hours remain unmeasured in the archived cost
+evidence.
