@@ -1,17 +1,17 @@
 \section{Introduction}
 \label{sec:intro}
 
-Location-based social networks (LBSNs) connect users' online activities with their visits to physical places, producing time-stamped check-in sequences that support human mobility modeling and POI recommendations~\cite{feng2018deepmove,luo2021stan,yang2022getnext}. Generating realistic check-in sequences can support behavioral simulation and the evaluation of location-based Web services~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
+Location-based social networks (LBSNs) link online activity to visits to physical places, producing time-stamped check-in sequences for mobility modeling and POI recommendation~\cite{feng2018deepmove,luo2021stan,yang2022getnext}. Realistic synthetic sequences support behavioral simulation and evaluation of location-based Web services~\cite{feng2020simulate,yuan2022activity,long2023synthetic,deng2025marionette}.
 
 \paragraph{Relevance to the Web.}
-We study how to control the semantic order of synthetic LBSN visits while
-preserving population-level mobility statistics. This connects controllable
-Web-data generation to the Web Mining, Multimedia and Multilingual Content
-Analysis track; such traces could support simulation of location-based services.
+We control the semantic order of synthetic LBSN visits while preserving
+population-level mobility statistics, connecting controllable Web-data
+generation to the Web Mining, Multimedia and Multilingual Content Analysis
+track and simulation of location-based services.
 
-Activities in check-in sequences can be represented by POI categories, such as sightseeing, shopping and dining~\cite{deng2025marionette}. Beyond statistical fidelity, applications such as itinerary planning and POI recommendations further demand control over the relative order of categories, e.g., sightseeing before shopping, while leaving the exact POIs and other categories unrestricted. We formulate this problem as partial-order-constrained POI check-in generation.
+POI categories represent activities such as sightseeing, shopping and dining~\cite{deng2025marionette}. Itinerary planning and POI recommendation also require relative category order, such as sightseeing before shopping, while leaving exact POIs and other categories unrestricted. We formulate this as partial-order-constrained POI check-in generation.
 
-Existing mobility generators have made substantial progress in modeling spatiotemporal patterns through neural networks, point processes, and diffusion models~\cite{luo2021stan,yang2022getnext,chen2025sequentialdiffusion}. Conditional generation further enables control through mobility contexts. Diffusion-based generators such as Marionette~\cite{deng2025marionette} incorporate global and partial mobility contexts into fine-grained trajectory generation, and can serve as frozen backbones for sampling-time control. Geo-Llama~\cite{li2025geollama} generates check-in sequences with explicit visit constraints. ControlTraj~\cite{zhu2024controltraj} constrains the generated sequence with road topology and trip attributes. However, these forms of control do not provide an \emph{explicit mechanism for preserving user-specified category-level partial orders} in the generated check-in sequences. Post-generation offers a straightforward alternative, but it cannot introduce missing required categories and may disrupt spatial coherence. As illustrated in Figure~\ref{fig:postswap-pcdg}, rearranging visits while retaining their original POIs can introduce long inter-area travel. Generating a coherent sequence therefore requires coordinating category precedence with POI selection, rather than simply rearranging an already generated itinerary.
+Neural, point-process and diffusion generators model spatiotemporal patterns~\cite{luo2021stan,yang2022getnext,chen2025sequentialdiffusion}. Conditional generation controls mobility context: Marionette~\cite{deng2025marionette} supports fine-grained generation and a frozen sampling-time backbone; Geo-Llama~\cite{li2025geollama} imposes visit constraints; and ControlTraj~\cite{zhu2024controltraj} uses road topology and trip attributes. These methods lack an explicit mechanism for preserving user-specified category-level partial orders. Post-generation reordering cannot add missing categories and can disrupt spatial coherence: retaining POI identities while changing visit order can create long inter-area travel (Figure~\ref{fig:postswap-pcdg}). Coherent generation must coordinate category precedence with POI selection.
 
 \begin{figure*}[t]
   \centering
@@ -32,7 +32,7 @@ Existing mobility generators have made substantial progress in modeling spatiote
   \label{fig:postswap-pcdg}
 \end{figure*}
 
-Partial-order-constrained generation presents three challenges. \textbf{First, user-specified partial orders need to be accommodated at generation time without retraining the model.} Users may request different combinations of partial-order relations that are unknown beforehand. Anticipating all such combinations in a fixed training scheme is impractical. \textbf{Second, constraint satisfaction requires both the presence and correct ordering of the specified categories}. Penalizing ordering violations alone admits trivial solutions that omit the required categories. \textbf{Third, satisfying partial-order constraints must be balanced with preserving realistic spatial patterns}. The required categories and their relative order vary the POI choices and may distort travel distances and visit patterns. Preserving both spatial fidelity and the partial-order constraints remains an open challenge.
+Partial-order-constrained generation has three challenges. User-specified relations vary, so accommodating them at generation time avoids retraining for each order. Satisfaction requires both category presence and correct order; an ordering penalty alone permits omission. Finally, constraints alter POI choices and can distort spatial patterns, requiring a balance between order and mobility fidelity.
 
 
 % \paragraph{Relevance to the Web.}

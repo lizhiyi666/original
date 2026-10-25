@@ -1,28 +1,25 @@
 \section{Limitations}
 \label{sec:limitations}
-The two-city, three-sampling-seed study assesses neither training variability nor
-statistical significance. Istanbul's backbone used a different training batch
-size from New York; full training provenance is unavailable.
-PO-CFG uses scale $1$ without extrapolation tuning. The shared distance-KL
-weight and batch-level objective provide no per-sequence spatial guarantee.
-
-Finite-budget projection and decoder fallback leave residual violations
-(\S\ref{sec:method:decoding}). Same-category refinement cannot repair New York's
-category-transition gap. Training-side calibration is not independent validation;
-its failed distribution gates and override are detailed in
-\S\ref{sec:exp:tradeoff} and Appendix~\ref{app:grid}.
-
-Stage (d) transfers a fixed geometry configuration; (d)$\to$(e) changes three
-factors jointly, precluding single-factor attribution. Complex partial-order
-DAGs, conflict detection, adaptive scheduling, training-time order losses and
-downstream recommendation utility remain open. Synthetic output has no formal
-privacy guarantee; distributional similarity does not establish safe data release.
+The two-city, three-seed study measures neither training variability nor
+statistical significance. Istanbul and New York use different backbone batch
+sizes, and full training provenance is unavailable. PO-CFG uses scale $1$
+without extrapolation tuning; batch-level distance KL gives no per-sequence
+spatial guarantee. Finite-budget projection and decoder fallback leave residual
+violations, while same-category refinement cannot repair New York's category-
+transition gap. Training-side calibration is not independent validation; its
+failed distribution gates and override are reported in \S\ref{sec:exp:tradeoff}
+and Appendix~\ref{app:grid}. Stage (d) uses fixed geometry settings, whereas
+(d)$\to$(e) jointly changes three factors. Complex order DAGs, conflict
+detection, adaptive scheduling, training-time order losses and downstream
+recommendation utility remain open. Synthetic output has no formal privacy
+guarantee, and distributional similarity does not establish safe release.
 
 \section{Conclusion}
 \label{sec:conclusion}
-\pcdg combines sampling-time order-and-existence projection, category-consistent decoding and same-category spatial refinement on a frozen conditional generator. It outperforms retrained PO-CFG on all five
-constraint metrics in both cities and JointGen on six fidelity JSDs in Istanbul
-and four in New York. Refinement preserves constraint-relevant fields while
+\pcdg combines order-and-existence projection, category-consistent decoding and
+same-category refinement on a frozen generator. It outperforms retrained PO-CFG
+on all five constraint metrics in both cities and JointGen on six fidelity JSDs
+in Istanbul and four in New York. Refinement preserves constraint metrics while
 recovering spatial fidelity, but leaves New York's category-transition and
 popularity errors unresolved.
 \label{end:main}

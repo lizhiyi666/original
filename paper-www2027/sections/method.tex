@@ -276,14 +276,10 @@ $\lambda=0$ describes this grid's outcome, not the absence of category-side erro
 
 \subsection{Controlled-step algorithm}
 \label{sec:method:algorithm}
-Algorithm~\ref{alg:pcdg} combines the objectives above at one controlled
-reverse step. Projection updates a detached copy of the reverse-step logits;
-the frozen denoiser is never optimized. The inner loop uses relaxed energies,
-whereas hard assignments determine the outer-loop dual updates.
-After projection, category sampling and POI reselection share the same Gumbel
-draw (\S\ref{sec:method:decoding}). The resulting discrete state feeds the next
-reverse step. Terminal geometry refinement runs once, after diffusion ends,
-and changes only same-category POI choices (\S\ref{sec:method:geometry}).
+Algorithm~\ref{alg:pcdg} summarizes one controlled step: relaxed energies
+update detached logits, hard assignments update duals, and category decoding
+shares its Gumbel draw with POI reselection. Geometry refinement follows the
+final reverse step and changes only same-category POI choices.
 
 \begin{algorithm}[t]
 \caption{\pcdg: one controlled reverse step}

@@ -6,35 +6,30 @@ of projection, decoding, and geometry refinement.
 \subsection{Setup}
 \label{sec:exp:setup}
 \paragraph{Datasets.}
-New York contains $3{,}160$ training and $2{,}108$ test sequences; Istanbul contains
-$7{,}035$ and $4{,}914$. New York uses a sequence-level repartition designed to
-reverse category-precedence preferences between training and test data. This is
-a distribution shift, not a guarantee of disjoint complete partial-order
-configurations. Istanbul uses the supplied historical OOD partition; its
-original split-construction provenance is not fully recoverable. Each test
-reference supplies a partial-order matrix from actual category first/last
-positions (\S\ref{sec:problem}). Sampling-time methods share frozen city-specific
-backbones; PO-CFG is separately retrained.
+New York has $3{,}160$ training and $2{,}108$ test sequences; Istanbul has
+$7{,}035$ and $4{,}914$. New York's sequence-level split reverses category-
+precedence preferences, but does not guarantee disjoint complete partial-order
+configurations. Istanbul uses the supplied historical OOD split, whose original
+construction provenance is not fully recoverable. Each test reference supplies
+an order matrix from actual category first/last positions (\S\ref{sec:problem}).
+Sampling-time methods share frozen city-specific backbones; PO-CFG is retrained.
 
 \paragraph{Protocol.}
-Nominal order, existence, token-KL, and distance-KL weights are $(1,5,1,1)$.
-Projection uses Gumbel temperature $3$ and runs every fourth step in the last
-$40$ reverse steps, with $10$ outer and $50$ inner iterations and no early
-stopping. The ten controlled steps are $36,32,\ldots,4,0$, totaling $5{,}000$
-inner updates per active batch. SGD uses rate $1$ and gradient-norm clip $10$.
-Distance KL uses $8$ routes, top-$32$ candidates,
-$32$ bins, and path temperature $1$. Formal sampling uses batches of $64$
-sequences in FP32 with TF32 disabled.
-The full stack uses the shared calibration choice $(\rho,\lambda,\beta)=(0.5,0,1)$.
-All reported spreads are sample SDs across seeds $135398$, $135399$, and $135400$
-at fixed checkpoints, not training variability or confidence intervals.
+Order, existence, token-KL, and distance-KL weights are $(1,5,1,1)$.
+Projection uses Gumbel temperature $3$ every fourth step in the final $40$
+reverse steps: $10$ outer by $50$ inner iterations (5,000 updates per active
+batch), SGD rate $1$, gradient clip $10$, and no early stopping. Distance KL
+uses $8$ routes, top-$32$ candidates and bins, and path temperature $1$.
+Formal sampling uses $64$-sequence FP32 batches with TF32 disabled. The full
+stack uses $(\rho,\lambda,\beta)=(0.5,0,1)$. Reported spreads are sample SDs
+across seeds $135398$, $135399$, $135400$ at fixed checkpoints, not training
+variability or confidence intervals.
 
 \paragraph{Baselines.}
 \textbf{JointGen} is the unconstrained backbone.
 \textbf{PostSwap} stably reorders generated events according to $\Mmat$.
-\textbf{EnergyGuide} is a local sampling-time baseline: one gradient correction
-of the order-plus-five-times-existence energy at each controlled step, without
-the KL anchor or dual updates used by projection.
+\textbf{EnergyGuide} takes one gradient step on order plus five times existence
+energy per controlled step, without projection's KL anchor or dual updates.
 \textbf{PO-CFG} is trained with partial-order conditioning for $1000$ epochs and
 evaluated at classifier-free guidance scale $1$; it is the only retrained
 baseline. Our variants are \pcdgp (projection), \pcdgpd (projection and
@@ -59,7 +54,7 @@ category-consistent decoding), and \pcdg (the full stack).
 
 \paragraph{Metrics.}
 \label{sec:exp:metrics}
-We retain the archived evaluation-v2 protocol for every table.
+All tables use the archived evaluation-v2 protocol.
 Fidelity uses six JSDs: cumulative travel \emph{Distance}, \emph{Radius},
 conditional \emph{CategoryTransition}, distinct daily POI count
 (\emph{DailyLoc}), hourly \emph{Category} usage, and identity-aligned top-$1000$
