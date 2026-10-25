@@ -1,0 +1,828 @@
+   Marionette: Fine-Grained Conditional Generative Modeling of
+    Spatiotemporal Human Trajectory Data Beyond Imitation
+                 Bangchao Deng                                                  Ling Ding                                            Lianhua Ji
+                University of Macau                                      University of Macau                                   University of Macau
+                 Macao SAR, China                                         Macao SAR, China                                      Macao SAR, China
+                yc37980@um.edu.mo                                        mc36510@um.edu.mo                                     mc45079@um.edu.mo
+
+                  Chunhua Chen                                                   Xin Jing                                          Bingqing Qu
+              University of Macau                                        University of Macau                          Beijing Normal-Hong Kong Baptist
+               Macao SAR, China                                           Macao SAR, China                                     University, China
+           chunhuachen@um.edu.mo                                         yc27431@um.edu.mo                                  bingqingqu@uic.edu.cn
+
+                                                                             Dingqi Yang∗
+                                                                         University of Macau
+                                                                          Macao SAR, China
+                                                                       dingqiyang@um.edu.mo
+
+Abstract                                                                                      Keywords
+Synthetic human trajectory data becoming increasingly prominent                               Human Mobility; Trajectory Generation; Generative Model; Mobil-
+in various applications, including urban planning, traffic control,                           ity Simulation; Diffusion Model
+and crowd monitoring. Recent neural generative models for human                               ACM Reference Format:
+trajectory data mostly follow an unconditional generative para-                               Bangchao Deng, Ling Ding, Lianhua Ji, Chunhua Chen, Xin Jing, Bingqing
+digm that relies on a pure data-driven imitative learning scheme,                             Qu, and Dingqi Yang. 2025. Marionette: Fine-Grained Conditional Genera-
+without considering the rich context of human mobility (e.g., social                          tive Modeling of Spatiotemporal Human Trajectory Data Beyond Imitation.
+events or weather conditions) which may significantly impact the                              In Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery
+underlying human mobility patterns. Against this background, we                               and Data Mining V.2 (KDD ’25), August 3–7, 2025, Toronto, ON, Canada. ACM,
+propose Marionette, a Manipulatable generative model for human                                New York, NY, USA, 11 pages. https://doi.org/10.1145/3711896.3737039
+trajectory data with fine-grained conditions. Specifically, Mari-
+                                                                                              KDD Availability Link:
+onette integrates both global and partial mobility-related contexts
+                                                                                              The source code of this paper has been made publicly available at https:
+and extracts both sequence-level and event-level conditions. After-
+                                                                                              //doi.org/10.5281/zenodo.15523812.
+ward, it designs fine-grained and cascading conditioning mecha-
+nisms for modeling the temporal and spatial dynamics based on
+diffusion-alike Temporal Point Processes (TPPs) and discrete diffu-                           1    Introduction
+sion models, respectively, offering fine-grained controllable genera-                         Human trajectory data analytics offer valuable insights into individ-
+tive modeling of human trajectory data with both global and partial                           ual movement and collective mobility patterns, which can support
+mobility-related contexts. We conduct a thorough evaluation on                                a wide range of applications, including urban planning [62], traffic
+two real-world human trajectory datasets against a sizeable col-                              control [35], and crowd monitoring [5], etc. However, the avail-
+lection of baselines. Results show that our Marionette consistently                           ability of publicly accessible and high-quality trajectory datasets is
+outperforms the best baselines by 13.96-54.13% on statistical and dis-                        becoming severely limited due to privacy concerns and stringent
+tributional similarity metrics and by 9.36-40.63% in task-based data                          regulatory requirements [21]. In response to these challenges, syn-
+utility evaluation. Ablation studies verify our key design choices.                           thetic human trajectory data emerges as an alternative solution
+Case studies also demonstrate the manipulability of Marionette in                             by generating artificial trajectories that resemble real human tra-
+generating data in previously unseen scenarios.                                               jectories under certain spatiotemporal and statistical similarities
+                                                                                              without leaking any sensitive information.
+CCS Concepts                                                                                     Toward this goal, early approaches captured the regularity of
+• Information systems → Spatial-temporal systems.                                             human mobility behaviors by designing mechanistic models with
+                                                                                              explicit physical meanings under a small number of parameters
+∗ Corresponding author
+                                                                                              [15, 42]. However, these models, mostly based on simple assump-
+                                                                                              tions on human mobility (e.g., exploration and preferential return
+                                                                                              model [41]), often fail to accurately capture the complex mobility
+This work is licensed under a Creative Commons Attribution 4.0 International License.         patterns encoded by real-world human trajectories [8]. To address
+KDD ’25, Toronto, ON, Canada                                                                  this limitation, recent works resort to neural network-based genera-
+© 2025 Copyright held by the owner/author(s).
+ACM ISBN 979-8-4007-1454-2/2025/08                                                            tive models for learning directly from real-world human trajectory
+https://doi.org/10.1145/3711896.3737039                                                       data to imitate human mobility behaviors, using Recurrent Neural
+
+
+
+
+                                                                                        463
+KDD ’25, August 3–7, 2025, Toronto, ON, Canada                                                                                    Bangchao Deng et al.
+
+
+Networks (RNNs), attention mechanisms [47], Generative Adversar-               partial context during the autoregressive generation process of the
+ial Networks (GANs) [3, 12, 56], Variational Autoencoders (VAEs)               TPP, because the partial context influences the intensity function
+[22, 33], or diffusion models [57, 63, 64]. Although the expressive-           only during its active period. It is also impractical to design entry-
+ness of these neural architectures largely improves the capability             exit mechanisms for the partial context influencing the intensity
+of these models to capture the complex spatiotemporal mobility                 function during the autoregressive generation process; because the
+patterns, such an unconditional generative paradigm relies on a                intensity function can only shift when an event occurs, which does
+pure data-driven learning scheme without considering the rich                  not necessarily align with the starting and ending time of the partial
+context of human mobility, making these models inflexible and                  context (e.g., a user presence event is rarely observed right at the
+uncontrollable to meet the requirements of user-specified scenarios            starting and ending time of a rainstorm).
+(e.g., generating trajectory data in previously unseen scenarios).                To address these issues, we propose Marionette, a Manipulatable
+   Existing studies have demonstrated that human mobility patterns             generative model for human trajectory data with fine-grained
+are profoundly influenced by various context factors, such as user             conditions. First, we integrate the mobility-related global and par-
+profile [39], almanac [5], weather conditions [4], social events [20],         tial contexts using a context alignment method, and then extract
+festive activities [24], or other urban anomalies [30]. For example,           both sequence-level and event-level conditions. Second, for condi-
+user profiles often determine user preference for locations in the             tional temporal modeling, we design a conditional TPP following a
+user trajectories [39]; daily mobility patterns have been shown to             diffusion-alike TPP scheme to capture the impact of the conditions
+vary across different days in a week [9, 53], working days versus              on both event-triggered shifts and continuous variation of the in-
+holidays, and the days of social events such as cultural festivals             tensity function of the TPP. Third, for conditional spatial modeling,
+or concerts [20, 24]; moreover, empirical evidence also shows that             we design a cascading conditioning mechanism integrated with
+both routine weather variations and extreme climatic events (e.g.,             a discrete diffusion model to capture the cascading dependence
+rainstorms or typhoons) can significantly alter the mobility patterns          of locations on activity categories and further on time. Our Mari-
+of populations [4, 7]. Subsequently, a few recent works on human               onette can thus offer fine-grained controllable generative modeling
+trajectory generation started to consider the context information,             of human trajectory data. Our contributions are summarized below:
+mostly user profiles [8, 33], or spatiotemporal constraints [32], to           • We reveal the limitations of existing human trajectory generative
+condition the generated trajectory data. However, these approaches               models in ignoring the significant impact of rich context infor-
+are designed to leverage the user profile as a global context to                 mation on human mobility patterns, which limits the flexibility
+condition the entire user trajectory as a whole, while overlooking               and manipulability in data-driven mobility simulation.
+the dynamics of some context factors where a partial context may               • We propose Marionette, a Manipulatable generative model for
+influence part of the trajectory only. For example, a rainstorm often            human trajectory data with fine-grained conditions, offering fine-
+lasts for a few hours, which influences the mobility patterns of                 grained controllable generative modeling of human trajectory
+human daily trajectories over its active period only. Compared to                data with both global and partial mobility-related contexts.
+the global context which provides coarse-grained conditioning to               • We conduct a thorough evaluation of Marionette on two real-
+trajectory generative models, the partial context allows fine-grained            world human trajectory datasets against a sizeable collection of
+conditioning in a more flexible and controllable manner.                         state-of-the-art baselines. Results show that Marionette consis-
+   Against this background, we study the problem of fine-grained                 tently outperforms the best baselines by 13.96-54.13% on statis-
+conditional generative modeling of spatiotemporal human trajec-                  tical and distributional similarity metrics and by 9.36-40.63% in
+tory data. Specifically, different from the periodic and regularly               task-based data utility evaluation. Ablation studies verify our key
+sampled vehicle trajectories with GPS coordinates such as taxi                   design choices. Case studies also demonstrate the manipulability
+trajectories [3], human trajectories usually consist of sparse and ir-           of Marionette in generating data in previously unseen scenarios.
+regularly observed presence events on continuous time at semantic-
+enriched locations, such as user voluntarily shared check-ins at               2 Related Work
+Points of Interest (POIs) on social media [10, 51]. Subsequently,
+those widely studied (conditional) sequence models for language                2.1 Context Modeling for Mobility
+modeling, which model only the order of tokens in sequence, are                Existing studies have widely shown that human mobility patterns
+incapable of capturing important temporal information over con-                are complicated and influenced by various contextual factors, such
+tinuous time. In this context, as a human trajectory consisting of a           as weather conditions [7, 20], social events [55], and government
+sequence of stochastic presence events over continuous time, a few             policies [14]. For example, Chapman et al. [4] revealed that the mo-
+recent works resort to neural Temporal Point Processes (TPPs) to               bility patterns of the urban population usually exhibit significant
+model human trajectory data [8, 33, 57, 58], showing superior per-             variations in different temperatures; Chen et al. [7] investigated
+formance. Following the generative process of a TPP, these models              the impact of extreme weather events (such as typhoons) on urban
+generate a sequence of user presence events in an autoregressive               human flow and found that destructive weather events led to sig-
+manner where the intensity function of the TPP is modeled by                   nificant changes in the local spatial agglomeration of migrant pop-
+a neural network parameterized by information extracted from                   ulations; Jiang et al. [24] predicted crowd dynamics under different
+historical events. This scheme can easily incorporate the global               event situations (e.g., earthquakes, typhoons and national festivals);
+context by adding it as an initial (global) condition of the TPP,              Gao et al. [14] studied the social distancing policies of different
+which influences the intensity function over the whole generation              regional governments in the United States and their impact on hu-
+process [8, 33, 57, 58]. However, it is challenging to integrate the           man mobility patterns during the COVID-19 period, and revealed
+
+
+
+
+                                                                         464
+Marionette: Fine-Grained Conditional Generative Modeling of
+Spatiotemporal Human Trajectory Data Beyond Imitation                                                               KDD ’25, August 3–7, 2025, Toronto, ON, Canada
+
+
+that the implementation of different policies under the pandemic               their advancements, these methods often fail to consider the impact
+had a significant impact on human mobility; STORM [20] predicts                of various mobility-related contexts on human mobility, making
+abnormal crowd traffic by modeling the time-occasional impact of               them inflexible and uncontrollable to meet the requirements of
+sudden event context (e.g., weather conditions); CausalMob [55] in-            user-specified generation scenarios.
+corporates Large Language models (LLMs) and causal framework to                   Second, information-guided methods incorporate additional con-
+learn confounder representations between social events and human               texts, such as road networks, origin-destination pairs, and other
+mobility for prediction; CDGON [30] integrates existing physical               relevant factors, into the mobility generative models, to further
+knowledge and the neural ODE model to capture the dynamic recov-               regulate the generated human mobility patterns. For instance, TS-
+ery patterns of urban mobility in post-disaster scenarios. However,            TrajGen [26] combines the A* algorithm [17] with a GAN frame-
+all these existing techniques focus on the predictive modeling of              work to generate continuously sampled trajectories on given urban
+human mobility, which differs from our focus on the generative                 road networks. DiffTraj [63] applies a diffusion probabilistic model
+modeling for human trajectories with fine-grained conditions of                guided by external factors, such as departure times and regions, to
+both global and partial contexts.                                              generate trajectories in the continuous spatial domain. ControlTraj
+                                                                               [64] pre-trains a road network encoder and employs a conditional
+                                                                               diffusion model under the structural constraints of the road net-
+2.2     Trajectory Generative Modeling                                         work topology. However, these works all focus on continuously
+Existing works on trajectory generative modeling can be broadly                sampled vehicle trajectory data (i.e., regularly sampled GPS traces)
+classified into two categories as follows.                                     and subsequently provide certain controllable generation in the
+   First, information-free methods focus on directly learning human            spatial domain (e.g., generating GPS points on a given road net-
+mobility patterns from data. Earlier approaches mostly designed                work), which differs from our current work focusing on sparse
+mechanistic models with a small number of parameters to describe               and irregularly observed human trajectories at semantic-enriched
+the key characteristics of human mobility [15, 42], such as temporal           locations and its controllable conditional generative modeling with
+periodicity and spatial continuity. For example, the Exploration and           fine-grained contexts.
+Preferential Return (EPR) model [41] integrates exploration and
+return mobility patterns by selecting new locations through a ran-             3     Problem Formulation
+dom walk process for exploration, and revisiting locations based on            We present our key terminology and problem formulation below.
+their visit frequency for preferential return. TimeGeo [25] expands            Human Trajectory. A human trajectory is defined as a time-
+the EPR model by incorporating temporal elements to better char-               ordered sequence 𝜓 = {(𝑡 1, 𝑘 1, 𝑙 1 ), (𝑡 2, 𝑘 2, 𝑙 2 ), ..., (𝑡𝑖 , 𝑘𝑖 , 𝑙𝑖 ), ...}, where
+acterize temporal mobility patterns. With advancements in deep                 each tuple (𝑡𝑖 , 𝑘𝑖 , 𝑙𝑖 ) is a presence event defined as a tuple consisting
+learning, recent methods make fewer prior assumptions, allowing                of a timestamp 𝑡𝑖 , and a semantic activity category 𝑘𝑖 , and a location
+the model to capture more complex spatiotemporal patterns inher-               (POI1 ) 𝑙𝑖 .
+ent in real-world mobility trajectories. For instance, SeqGAN [56]             Human Mobility-Related Context. Mobility-related contexts
+uses Generative Adversarial Networks (GANs) for sequence gener-                refer to environmental factors that may have an impact on human
+ation. MoveSim [12] introduces physical distance, temporal peri-               mobility patterns, such as almanac [5], weather conditions [4], or
+odicity, and historical transition matrices into a GAN framework.              social events [20], etc.
+TrajGen [3] uses a CNN-based GAN to map mobility trajectories to               Conditional Trajectory Generation. Given a real-world human
+images and generate synthetic trajectory images, which are then                trajectory dataset and various human mobility-related conditions,
+processed by a Seq2Seq model to produce the synthetic trajectories.            the objective is to generate a synthetic trajectory dataset according
+SAVE [23] integrates VAE and LSTM to generate mobility trajecto-               to user-specified mobility-related conditions while preserving the
+ries. COLA [47] develops a model-agnostic transfer framework by                fidelity and utility of the original real-world dataset.
+separating private and shared modules and calibrating prediction
+probabilities to account for city-specific characteristics in human
+trajectory simulation. Recently, neural temporal point processes
+                                                                               4     Marionette
+[6, 40, 57, 65] are widely used to model the stochasticity of temporal         Figure 1 shows the overview of our Marionette consisting of three
+dynamics of sparse and irregularly observed human trajectories. In             parts: 1) context alignment and extraction, 2) conditional temporal
+the context of trajectory generation, VOLUNTEER [33] combines                  modeling, and 3) conditional spatial modeling. First, for a given
+a two-layer VAE model with a temporal point process to capture                 trajectory, the context alignment and extraction module integrates
+human mobility characteristics. ActSTD [58] improves dynamic                   the mobility-related global and partial contexts using a context
+modeling of individual trajectories by using neural ordinary differ-           alignment method, and then extracts both sequence-level (for the
+ential equations in the continuous location domain. DSTPP [57]                 whole sequence) and event-level (for each presence event) condi-
+further models complex spatiotemporal joint distributions using                tions. Second, the conditional temporal model designs a conditional
+diffusion models. Geo-CETRA [32] decomposes the spatiotemporal                 Temporal Point Process (TPP) on top of a diffusion-alike TPP model
+constraints of human trajectories and models time and spatial distri-          to capture the impact of the conditions on both event-triggered
+butions separately, generating high-quality trajectories that satisfy          shifts and continuous variation of the intensity function of the
+constraints under a beam search strategy. MIRAGE [8] integrates
+an intensity-free neural TPP and a neural EPR model to imitate the             1 A POI is a semantic-enriched location, such as a restaurant or a shop; in the context
+human decision-making process in trajectory generation. Despite                of human trajectories, we do not distinguish the two terms throughout this paper.
+
+
+
+
+                                                                         465
+KDD ’25, August 3–7, 2025, Toronto, ON, Canada                                                                                         Bangchao Deng et al.
+
+
+                                                                                  partial context for the trajectory is represented by a vector 𝑐 𝑝 ∈ R𝐿 .
+                                                                                  Afterward, as the global context persists over the whole trajectory,
+                                                                                  we extend the global context to match the length of the partial
+                                                                                  context vector represented as 𝑐𝑔 ∈ R𝐿 , obtaining aligned global
+                                                                                  and partial contexts for each time segment. Finally, we concatenate
+                                                                                  all extended global contexts and partial contexts along with the
+                                                                                  time segment into a sequence of context 𝐶 ∈ R |𝐶 | ×𝐿 , where |𝐶 |
+                                                                                  represents the number of contexts.
+                                                                                     The advantage of this alignment mechanism lies in its flexibility
+                                                                                  to integrate contexts of different time granularities with trajectories
+                                                                                  of different lengths. For example, for a daily trajectory, the day-in-
+                                                                                  week (e.g., Monday) is considered as a global context because it is
+                                                                                  persistent for the whole day; for a weekly trajectory, the day-in-
+                                                                                  week becomes a partial context because it is valid only on the first
+                                                                                  day of the week (Monday).
+                                                                                  4.1.2 Context Extraction. With the aligned global and partial
+                                                                                  contexts, we then extract two levels of conditions, i.e., event-level
+                                                                                  and sequence-level conditions. First, for each presence event 𝑖 in
+                                                                                  continuous time, we get its mobility-related context based on its
+                                                                                  time 𝑡𝑖 by probing into the sequence of aligned context 𝐶, as shown
+                 Figure 1: Overview of Marionette.                                in Figure 1; the obtained contexts are then embedded into a latent
+                                                                                  space as learnable embeddings to obtain the event-level condition,
+                                                                                  denoted as 𝑒𝑖𝑐 ∈ R |𝐶 | ×𝐷 , where 𝑖 represents the 𝑖-th event, |𝐶 |
+TPP. Third, the conditional spatial model designs a cascading con-
+                                                                                  represents the number of contexts, and 𝐷 is the dimension of the
+ditioning mechanism integrated with a discrete diffusion model
+                                                                                  embedding space. The event-level condition allows us to capture the
+to capture the dependence of locations on activity categories and
+                                                                                  fine-grained condition at the exact presence event. Second, we also
+further on time.
+                                                                                  consider the context of the entire sequence. We embedded the
+                                                                                  aligned global and partial contexts 𝐶 ∈ R |𝐶 | ×𝐿 into a latent space
+4.1     Context Alignment and Extraction
+                                                                                  via a transformer encoder, to output the sequence-level condition,
+The context of human mobility is rather complex, and its impact                   denoted as 𝐶𝑠𝑒𝑞 ∈ R |𝐶 | ×𝐿×𝐷 , where 𝐷 again represents the dimen-
+may persist for varying durations. In this work, we define two types              sion of the embedding space. Note that the sequence-level condition
+of mobility-related context according to the impact duration. First,              integrates the contexts across all time segments over the whole tra-
+a global context influences the entire trajectory, serving as a coarse-           jectory duration regardless of when an event occurs. In other words,
+grained condition for the whole sequence of the trajectory. For                   different trajectories (consisting of different presence events) may
+example, considering generating daily trajectories, the weekday or                have the same sequence-level contexts. Therefore, the sequence-
+seasonal information is persistent over the whole trajectory. Second,             level condition captures the temporal dynamics and interactions of
+a partial context influences part of the trajectory only, serving as              different contexts over the whole trajectory.
+a fine-grained condition for a subsequence of the trajectory. For
+example, a rainstorm usually lasts for several hours, thus having                 4.2    Conditional Temporal Modeling
+an impact on the mobility patterns of user trajectories over its
+                                                                                  As a human trajectory intrinsically consists of a sequence of sto-
+period only. Moreover, this impact on the mobility patterns further
+                                                                                  chastic presence events over continuous time, neural TPPs have
+varies across the absolute time of the rainstorm [5]; for instance,
+                                                                                  been recently adopted to model the stochasticity of presence events
+a significant impact is usually observed if the rainstorm happens
+                                                                                  in the sequence. Specifically, existing neural TPPs model a sequence
+on a weekend morning (as people may avoid unnecessary travel),
+                                                                                  of presence events in an autoregressive manner where the intensity
+while the impact is often negligible if it happens over the night.
+                                                                                  function of the TPP is modeled by a neural network parameter-
+4.1.1 Context Alignment. To systematically integrate the global                   ized by information extracted from historical events [8, 33, 57, 58].
+and partial contexts while minimizing information redundancy or                   However, such an autoregressive scheme is incompatible with the
+loss, we propose a mobility context alignment method, as shown in                 partial context that is active on a subsequence only; it is also im-
+Figure 1. Specifically, as the partial context impacts only a subpe-              practical to design an entry-exit mechanism for the partial context
+riod of the whole trajectory, we first segment the whole duration                 influencing the intensity function during the autoregressive gener-
+of the trajectory into a number of 𝐿 segments, where the length                   ation process; because the intensity function can only shift when
+of each segment corresponds to the finest granularity of all partial              an event occurs, which does not necessarily align with the starting
+contexts. For example, rainstorm signals are reported at an hourly                and ending time of the partial context as shown in Figure 1 (e.g.,
+granularity, while typhoon signals are reported at a half-hour gran-              no user presence event is observed right at the starting and ending
+ularity; for a daily trajectory of 24 hours, the partial context of these         time of a rainstorm). Against this background, instead of adopt-
+weather conditions then falls into 𝐿 = 48 segments. Subsequently, a               ing an autoregressive scheme, we resort to a diffusion-alike TPP
+
+
+
+
+                                                                            466
+Marionette: Fine-Grained Conditional Generative Modeling of
+Spatiotemporal Human Trajectory Data Beyond Imitation                                                              KDD ’25, August 3–7, 2025, Toronto, ON, Canada
+
+
+scheme and design a conditional TPP capturing the impact of the                   where 𝑛 refers to the diffusion timestep. The conditional 𝑔𝜃 thus
+conditions on both event-triggered shifts and continuous variation                captures the event-triggered shifts over a trajectory sequence.
+of the intensity function of the TPP.
+                                                                                  4.2.3 Conditional Intensity 𝝀𝜽 (𝝉 ). To condition the intensity
+4.2.1 Diffusion-alike TPP. The diffusion-alike TPP [34] consid-                   function 𝜆𝜃 (𝜏), we parameterize the Gaussian mixture in 𝜆𝜃 (𝜏).
+ers the forward process of the diffusion model as operations involv-              Specifically, different from the autoregressive TPPs where the con-
+ing removing old events from the current sequence and adding new                  ditional intensity characterizes the intensity function at a given
+events from a homogeneous Poisson process. Let 𝜏0 = (𝑡 1, ..., 𝑡 𝑗 , ...)         time conditioned on the past event history, in the diffusion-alike
+denote a sequence sampled from a TPP specified by an unknown                      TPP, the intensity function characterizes temporal dynamics over
+intensity 𝜆0 . The forward process can be defined as a sequence                   the whole sequence. Subsequently, instead of using the past events
+of TPPs that start with the true intensity 𝜆0 and converge to a                   only, we can now use all events in the sequence as conditions to
+homogeneous Poisson process (HPP), i.e., 𝜆0 → 𝜆1 → ... → 𝜆𝑁 :                     capture the continuous variation of the intensity function over the
+                  𝜆𝑛 (𝜏) = 𝛼𝑛 𝜆𝑛−1 (𝜏) + (1 − 𝛼𝑛 )𝜆𝐻 𝑃𝑃              (1)          whole sequence. To this end, we first encode all event time informa-
+                                                                                  tion by feeding all 𝑒𝑖𝑡 where 𝑡𝑖 ∈ 𝜏𝑛 to a neural network to output
+where 1 > 𝛼 1 > 𝛼 2 > ... > 𝛼 𝑁 > 0 and 𝜆𝐻 𝑃𝑃 denotes the constant                a sequence embedding 𝑠 which characterizes the overall temporal
+intensity of an HPP. Eq. 1 indeed describes a combination of two                  dynamics of events in the trajectory, and then aggregate it with the
+processes: 1) a process 𝜆𝑛−1 thinned with probability 1 −𝛼𝑛 (remov-               sequence-level context 𝐶𝑠𝑒𝑞 (obtained in Section 4.1.2) to consider
+ing old events), and 2) an HPP with intensity (1 − 𝛼𝑛 )𝜆𝐻 𝑃𝑃 (adding              the rich context of the whole trajectory. Afterward, we use the
+new events). Importantly, due to the property of the Markov chain,                concatenated 𝑠 and 𝐶𝑠𝑒𝑞 as inputs to compute the Gaussian mixture
+we can derive the intensity of 𝜆𝑛 (𝜏) at arbitrary timestep in the                parameters 𝜔𝑚 , 𝜇𝑚 , 𝜎𝑚 of 𝜆𝜃 (𝜏) in Eq. 3 via an MLP as follows:
+diffusion process directly from 𝜆0 (𝜏) as:
+                                                                                                   𝜔𝑚 = Softplus(𝑀𝐿𝑃𝜔 ([𝑛, 𝑠, 𝐶𝑠𝑒𝑞 ]))
+                   𝜆𝑛 (𝜏) = 𝛼 𝑛 𝜆0 (𝜏) + (1 − 𝛼 𝑛 )𝜆𝐻 𝑃𝑃             (2)
+                                                                                                  
+                                                                                                  
+                                                                                                  
+                                                                                                  
+                                                                                                    𝜇𝑚 = Sigmoid(𝑀𝐿𝑃 𝜇 ([𝑛, 𝑠, 𝐶𝑠𝑒𝑞 ]))                        (6)
+   The reverse process is designed to sample realizations 𝜏0 ∼ 𝜆0                                 
+                                                                                                  𝜎𝑚 = exp(−|𝑀𝐿𝑃𝜎 ([𝑛, 𝑠, 𝐶𝑠𝑒𝑞 ])|)
+                                                                                                  
+starting from the noise-corrupted 𝜏𝑁 ∼ 𝜆𝐻 𝑃𝑃 by learning to reverse                               
+the Markov chain of the forward process, i.e., 𝜆𝑁 → ... → 𝜆0 . The                where 𝑛 refers to the timestep of the diffusion process; the Softplus,
+events in the sequence 𝜏𝑛−1 are decomposed into disjoint sets of                  Sigmoid, and exponential (exp) functions are used to put the con-
+events based on whether they are also in 𝜏0 or 𝜏𝑛 , which can be                  straints on the distribution parameters (𝜔𝑚 > 0, 0 < 𝜇𝑚 < 1) and
+generated by sampling from the intensity functions 𝜆𝑛−1 (𝜏 |𝜏0, 𝜏𝑛 ).             regularization on 𝜎𝑚 → 0).
+Since there is no information about 𝜏0 in the reverse process, it is                  In summary, the training process of the conditional temporal
+learned to be approximated as 𝜏ˆ0 ≈ 𝜏0 below:                                     model learns the conditional event classifier and the conditional
+                                  𝑀
+                                  ∑︁                                              intensity function by minimizing the sum of the respective Binary
+                     𝜆𝜃 (𝜏) = 𝐻         𝜔𝑚 𝑓 (𝜏; 𝜇𝑚 , 𝜎𝑚 )           (3)          Cross-Entropy (BCE) loss and Negative Log-Likelihood (NLL) loss,
+                                  𝑚=1                                             i.e., L𝑡𝑒𝑚𝑝𝑜𝑟𝑎𝑙 = L𝑁 𝐿𝐿 + L𝐵𝐶𝐸 .
+                               𝑔𝜃 = 𝑀𝐿𝑃 (𝑒)                          (4)
+                                                                                  4.3     Conditional Spatial Modeling
+Eq. 3 includes the unnormalized mixture of 𝑀 weighted and trun-
+cated Gaussian density functions to parameterize the events 𝜏0 \𝜏𝑛                Different from the continuously sampled vehicle trajectories with
+(events belong to 𝜏0 but not belong to 𝜏𝑛 ), and 𝐻 represent the                  GPS coordinates such as taxi trajectories [3], the human trajectories
+number of events in 𝜏𝑛 . Eq. 4 represents a classifier of the events              involve the semantic-rich locations (POIs) in the spatial domain.
+𝜏0 ∩ 𝜏𝑛 (events from 𝜏𝑛 belong to 𝜏0 , where 𝑒 represents a learnable             Subsequently, the conditional spatial model is designed to gener-
+event time embedding (more details below). By learning 𝜆𝜃 (𝜏) and                 ate the discrete POIs. Recent works have shown that the human
+𝑔𝜃 , we can approximate 𝜏ˆ0 ≈ 𝜏0 and then use the posterior intensity             decision-making process of generating trajectory follows a cascad-
+to reverse the noising process. Please refer to [34] for more details             ing manner [8, 58]. At a given time (e.g. noon), an activity category
+on the diffusion-alike TPP.                                                       (e.g., food) is first sampled according to the time; a POI (e.g., a spe-
+    In the following, we design a conditioning mechanism for this                 cific restaurant) is then sampled according to the time and activity
+reverse process to offer more flexible and controllable generation.               category. Therefore, we design a cascading conditioning mech-
+We present our conditional design of 𝑔𝜃 and 𝜆𝜃 (𝜏) below.                         anism integrated with a discrete diffusion model to capture the
+                                                                                  dependence of locations on activity categories and further on time.
+4.2.2 Conditional Event Classifier 𝒈𝜽 . To condition the clas-                        We first integrate the activity category and POI information
+sifier 𝑔𝜃 , we first encode each event time 𝑡𝑖 ∈ 𝜏𝑛 and inter-event               into the same sequence by introducing three special tokens <sos>,
+time Δ𝑖 = 𝑡𝑖 − 𝑡𝑖 −1 , to produce an event time embedding 𝑒𝑖𝑡 using a             <eos>, and <sep>, represented as:
+sinusoidal embedding [45] which characterize the time information                                                                                             
+of the event, and then integrates it with its corresponding event-                          x = <sos> 𝑘 1, 𝑘 2, . . . , 𝑘 𝑗 <sep> 𝑙 1, 𝑙 2, . . . , 𝑙 𝑗 <eos>   (7)
+level condition 𝑒𝑖𝑐 (obtained in Section 4.1.2) to consider the rich
+                                                                                  where 𝑘 𝑗 and 𝑙 𝑗 represent category tokens and POI tokens, respec-
+context of the event. We feed the concatenated 𝑒𝑖𝑡 and 𝑒𝑖𝑐 into the
+                                                                                  tively. The <sos> and <eos> tokens denote the start and end of
+event classifier 𝑔𝜃 parameterized by an MLP:
+                                                                                  a sequence, respectively; the <sep> token serves as a separator
+                          𝑔𝜃 = 𝑀𝐿𝑃 ( [𝑛, 𝑒𝑖𝑡 ; 𝑒𝑖𝑐 ])                (5)          between the category sequence and the POI sequence.
+
+
+
+
+                                                                            467
+KDD ’25, August 3–7, 2025, Toronto, ON, Canada                                                                                                Bangchao Deng et al.
+
+
+   Based on this representation, we then employ a discrete diffu-                 Notably, the [𝑀𝐴𝑆𝐾_𝑃𝑂𝐼 ] token always retains its own state:
+sion model [1] and design a cascading conditioning mechanism
+                                                                                                  𝛼𝑛 + 𝛽𝑛             𝛽𝑛           𝛽𝑛        ···    0
+on top of it to model the conditional spatial dynamics of human
+                                                                                                                    𝛼 𝑛 + 𝛽𝑛                  ···    0
+                                                                                                                                                        
+                                                                                                   𝛽𝑛                              𝛽𝑛
+trajectories. Specifically, given a sequence x0 ∼ 𝑞(x0 ), the forward                                                                                   
+                                                                                              𝑝𝑜𝑖  𝛽𝑛                 𝛽𝑛        𝛼 𝑛 + 𝛽𝑛     ···    0
+process gradually corrupts it via a fixed Markov chain, yielding a                           Q𝑛 =                                                            (11)
+                                                                                                   ..                   ..           ..      ..     .. 
+sequence of increasingly noisy latent variables x1:𝑁 = x1, x2, ..., x𝑁 :                           .                     .            .         .    . 
+                Î𝑁                                                                                
+𝑞(x1:𝑁 |x0 ) = 𝑛=1    𝑞(x𝑛 |x𝑛−1 ). In the reverse process, we grad-                               𝛾 𝑝𝑜𝑖             𝛾𝑛
+                                                                                                                        𝑝𝑜𝑖
+                                                                                                                                   𝛾𝑛
+                                                                                                                                     𝑝𝑜𝑖
+                                                                                                                                              ···    1
+                                                                                                   𝑛
+ually denoise the noisy sequence x𝑁 to recover the sequence x0
+conditioned on an encoded condition 𝑌 (more details below in                          Furthermore, as the sample of POIs depends on the sample of
+Section 4.3.2):                                                                   activity categories, we use different rates for transforming category
+                                                                                  and POI tokens into their final noisy states (i.e., categories transition
+                                        𝑁
+                                        Ö                                         to [𝑀𝐴𝑆𝐾_𝐶𝐴𝑇 ] and POIs transition to [𝑀𝐴𝑆𝐾_𝑃𝑂𝐼 ]). Specifically,
+                 𝑝𝜂 (x0:𝑁 ) = 𝑃 (x𝑁 )         𝑝𝜂 (x𝑛−1 |x𝑛 , 𝑌 )      (8)         the masking rate for categories follows a non-linear schedule, where
+                                        𝑛=1                                       it is initially low and then rapidly increases to transform categories
+   Moreover, as our spatial sequence now contains three types                     into [𝑀𝐴𝑆𝐾_𝐶𝐴𝑇 ] tokens in the later stages, while POIs follow a
+of discrete tokens, i.e., activity category tokens, POI tokens, and               conventional linear noising schedule [1]. This design ensures that
+special tokens, we design a customized transition forward process                 during the reverse process, category tokens are generated first from
+with justified design choices as follows.                                         noisy tokens, naturally guiding the generation of POIs.
+                                                                                      Through the above operations, the sequence x0 in Eq. 7 (con-
+4.3.1 Block-wise Transition Forward Process. We adopt a                           taining the POI tokens and their corresponding category tokens,
+block-wise transition matrix [59] that prevents internal transitions              as well as special tokens) is corrupted via the transition probabil-
+across different token types during the forward process, thereby re-              ity matrix, which gradually transfers all category and POI tokens
+ducing the transition matrix Q𝑛 to a block-wise diagonal structure.               into their respective masked tokens x𝑁 with no meaningful infor-
+                                                                                  mation after 𝑁 steps of state transitions. Next, we will introduce
+                            Q𝑠𝑝𝑒𝑐                                               the reparameterization of the reverse process conditioned on the
+                             𝑛                                                  context.
+                      Q𝑛 =             Q𝑐𝑎𝑡
+                                          𝑛
+                                                         
+                                                                     (9)
+                                                     𝑝𝑜𝑖 
+                            
+                                                   Q𝑛                           4.3.2 Cascading Conditioning Denoising. In the reverse pro-
+                                                                                  cess, the initial x𝑁 is denoised iteratively by neural networks
+          𝑠𝑝𝑒𝑐                𝑝𝑜𝑖
+where Q𝑛 , Q𝑐𝑎𝑡 𝑛 , and Q𝑛 represent the probabilities of the in-                 conditioned on both time and context embeddings to obtain x0 .
+ternal transition within special tokens, category tokens, and poi                 Our cascading conditioning mechanism leverages the generated
+tokens, respectively.                                                             event time along with the corresponding mobility-related condi-
+   First, as special tokens describe the structure of the sequence,               tion to guide the denoising process of the discrete diffusion model.
+any transition between them will lead to an invalid sequence. There-              To condition the 𝑝𝜂 , we first extract the event-level condition 𝑒𝑖𝑐
+fore, we choose to disable any transition between them by setting                 for each check-in based on the event time. Afterward, we input
+  𝑠𝑝𝑒𝑐
+Q𝑛 = I.                                                                           the entire sequence of conditions (𝑒 𝑐1 , 𝑒 𝑐2 , . . . , 𝑒 𝑐𝑗 , ...) into a trans-
+   Second, since category tokens represent the semantic informa-                  former encoder to out an encoded condition 𝑌 . We then input
+tion of locations, transitioning a category token to another category             it along with the current step 𝑛 of the diffusion process into the
+token would cause abrupt changes in the semantic meaning of loca-                 Transformer decoder to generate an entire sequence. Following
+tions. To address this, we choose to transition a category token to               [59, 61], here we adopt the 𝑥 0 -parameterization approach that
+a special [𝑀𝐴𝑆𝐾_𝐶𝐴𝑇 ] token rather than to another meaningful
+                                                                                                      Í
+                                                                                  𝑝𝜂 (x𝑛−1 |x𝑛 , 𝑌 ) ∝ x̃0 𝑞(x𝑛−1, x𝑛 | x̃0 ) 𝑝𝜂 ( x̃0 |x𝑛 , 𝑌 ). Based on the
+category token, where [𝑀𝐴𝑆𝐾_𝐶𝐴𝑇 ] retains its own state without                   reparameterization trick, our denoising objective encourages the
+further transitions. Therefore, we introduce the absorbing state                  network to predict a noiseless sequence with the following loss
+transition matrix for category tokens:                                            function: L𝑠𝑝𝑎𝑡𝑖𝑎𝑙 = −log𝑝𝜂 (x0 |x𝑛 , 𝑌 )
+                      1 − 𝛾𝑛𝑐𝑎𝑡            0         ···    0
+                                                                                 4.4     Model Training and Generation
+                       0               1 − 𝛾𝑛𝑐𝑎𝑡     ···    0
+                  𝑐𝑎𝑡
+                 Q𝑛 = 
+                      
+                           ..                ..              ..     (10)         The training process of our Marionette minimizes the sum of tem-
+                                                      ..
+                      
+                           .                 .          .    .                 poral and spatial losses:
+                       𝛾 𝑐𝑎𝑡             𝛾𝑛𝑐𝑎𝑡       ···    1
+                       𝑛                                                                                 L = L𝑡𝑒𝑚𝑝𝑜𝑟𝑎𝑙 + L𝑠𝑝𝑎𝑡𝑖𝑎𝑙                             (12)
+   Third, transitions between POI tokens do not cause significant                 The trajectory generation process takes the following steps. For
+changes in the overall semantic meaning of the sequence, while                    user-specified global and partial contexts, we first perform the
+also enhancing the diversity of generated trajectories. Therefore,                context alignment and directly get the sequence-level condition.
+we adopt the Mask-and-replace diffusion strategy [16]: each token                 Subsequently, we generate a sequence of event times using the
+                      𝑝𝑜𝑖
+has a probability of 𝛾𝑛 to be replaced by the [𝑀𝐴𝑆𝐾_𝑃𝑂𝐼 ] token,                  conditional TPPs, where the event-level conditions are obtained on
+a probability of 𝐾 𝛽𝑛 to transit to any other POI token uniformly,                the fly during the diffusion reverse process by probing the event
+                                         𝑝𝑜𝑖
+and a probability of 𝛼𝑛 = 1 − 𝐾 𝛽𝑛 − 𝛾𝑛 to remain unchanged.                      time into the sequence of aligned context 𝐶, as shown in Figure 1.
+
+
+
+
+                                                                            468
+Marionette: Fine-Grained Conditional Generative Modeling of
+Spatiotemporal Human Trajectory Data Beyond Imitation                                                       KDD ’25, August 3–7, 2025, Toronto, ON, Canada
+
+
+                      Table 1: Dataset statistics                              and epidemic simulation (EpiSim), which model user trajectory data
+                                   Campus            Istanbul                  in four different aspects, i.e., user preferences, sequential patterns,
+            #Trajectories           31,819             11,949                  collective traffics, and spatiotemporal contacts, respectively. For
+            #Presence events        628.7K             74.1K                   each task, multiple state-of-the-art techniques are used to conduct
+            #POIs                     396               3465                   experiments and report the results on multiple metrics. Finally, this
+            #Categories                8                  9                    protocol measures the paired performance discrepancy between
+            Sampling Rate        27s (median)     3.60h (median)
+                                                                               the real and generated trajectories using Mean Absolute Percent-
+            Activity Scale         Campus               City
+                                                                               age Error (MAPE) and Mean Squared Percentage Error (MSPE). A
+            Duration              24 months         22 months
+                                                                               smaller performance discrepancy here indicates better generative
+                                                                               modeling performance; because the generated trajectories show a
+Finally, based on the obtained sequence of event times and event-
+                                                                               more similar utility to the real trajectories across these mobility
+level conditions, we generate the corresponding activity categories
+                                                                               modeling tasks. Please refer to Appendix B for more details.
+and POIs and finally obtain a complete trajectory.
+
+5 Experiments
+5.1 Experimental Settings                                                      5.2    Performance Comparison
+5.1.1 Dataset. We conduct extensive experiments on two human                   Table 2 shows the performance on statistical and distributional
+trajectory datasets: a Campus human trajectory dataset based                   similarity metrics, and Table 3 shows the performance in the task-
+on Wi-Fi connection records [5], and a Istanbul dataset collected              based evaluation on MAPE (we observe similar results on MSPE,
+from a location-based social network Foursquare [53, 54]. Table 1              shown in Appendix C). We observe that Marionette achieves the
+shows the dataset statistics. For the campus dataset, we consider              best performance in most cases. Specifically, on statistical and dis-
+the daily trajectory with the global context including Day-in-weeks,           tributional similarity metrics, Marionette yields 54.13% and 13.96%
+Almanac, Teaching Arrangement, and the partial context including               improvement (reduction on JSD) over the best-performing base-
+Hour-in-day and Weather Conditions (Tropical Cyclone Warning                   lines on the Campus and Istanbul datasets, respectively. Meanwhile,
+Signal and Rainstorm Warning Signal). For the Istanbul dataset,                in task-based evaluation, Marionette achieves 40.63% and 9.36%
+we consider the daily trajectory with the global context including             improvement over the best baselines on the two respective datasets.
+Day-in-weeks, Social Events (Ramadan), Public holidays, and the                The large improvement on the Campus dataset is attributed to its
+partial context including Hour-in-day.                                         richer contexts compared to the Istanbul dataset.
+                                                                                  We also have interesting findings on our extended conditional
+5.1.2 Baselines. We consider the following state-of-the-art base-              baseline Cond-MIRAGE, where we encode both our global and
+lines of three categories: statistical models Semi-Markov [28] and             partial contexts (the same contexts as for our Marionette) into
+TimeGeo [25]; neural TPPs RMTPP [11], ERTPP [49], and Act-                     an overall condition and feed it as an additional input to further
+STD [58]; deep learning generative models SeqGAN [56], MoveSim                 parameterize the autoregressive TPP of MIRAGE. On one hand,
+[12], VOLUNTEER [33], DiffTraj [63], COLA [47], and MIRAGE                     Cond-MIRAGE outperforms its original version MIRAGE, show-
+[8]. We also extend MIRAGE by feeding the same contexts we used                ing the usefulness of considering the mobility-related context in
+as an additional input to its autoregressive TPP, denoted as Cond-             trajectory generative models. On the other hand, our Marionette
+MIRAGE, to compare with our method that uses a diffusion-alike                 further outperforms Cond-MIRAGE using the same contexts, which
+TPP. The baseline details are in Appendix A.                                   is attributed to the superiority of our model design. In other words,
+5.1.3 Statistical and Distributional Similarity Metrics. We adopt five         encoding the global and partial contexts as an overall condition
+popular metrics [12, 36] to evaluate the resemblance between real              fails to offer fine-grained conditioning from the partial contexts,
+and generated trajectories in different aspects. Distance measures             thus leading to inferior performance.
+the distance between successive locations in a trajectory. Radius
+of gyration is calculated as the root mean squared distance of all
+locations from the central one in a trajectory. Interval is computed
+as time intervals between successive events in a trajectory. Dai-              5.3    Ablation Study
+lyLoc computes the unique locations visited by users. Category                 We conduct an ablation study with the following two variants,
+computes the overall distribution of the POI categories. G-RANK                i.e., Marionette-noCond which is a variant of Marionette trained
+computes the visited frequency of the top locations. We use the                without any context and Marionette-noPartial which is a variant
+Jensen-Shannon divergence (JSD) [13] as the similarity metric be-              of Marionette trained without the partial context, on the Campus
+tween the distributions of real and generated trajectories.                    dataset due to its rich contexts. Tables 4 and 5 show the results.
+                                                                               We observe that Marionette consistently outperforms Marionette-
+5.1.4 Task-Based Utility Evaluation Protocol. We adopt the compre-             noCond on both similarities and task-based evaluation by 32.96%
+hensive task-based evaluation protocol2 [8] to evaluate the utility            and 30.06%, respectively, highlighting the importance of contexts
+of the generated trajectories in four downstream predictive mobil-             in trajectory generative modeling. Second, Marionette also con-
+ity modeling tasks, i.e., location recommendation (LocRec), next               sistently outperforms Marionette-noPartial with an improvement
+location prediction (NexLoc), semantic location labeling (SemLoc),             of 37.22% and 23.87% on similarities and task-based evaluation,
+2 https://github.com/UM-Data-Intelligence-Lab/MIRAGE                           respectively, which verifies the usefulness of the partial context.
+
+
+
+
+                                                                         469
+KDD ’25, August 3–7, 2025, Toronto, ON, Canada                                                                                        Bangchao Deng et al.
+
+
+                                  Table 2: Performance on Statistical and Distributional Similarity Metrics
+                                               Campus                                            Istanbul
+             Method      Distance Radius Interval DailyLoc Category G-RANK Distance Radius Interval DailyLoc Category G-RANK
+             Semi-Markov  0.2639 0.2209 0.1240 0.1342       0.0433   0.1214 0.4796 0.3190 0.1238 0.1434       0.0343   0.2433
+             Time Geo     0.2940 0.2827 0.1675 0.1022       0.0416   0.1597 0.5463 0.5536 0.0724 0.1077       0.0442   0.2962
+             RMTPP        0.2508 0.2270 0.0836 0.0799       0.0506   0.1254 0.1881 0.1449 0.0837 0.1406       0.0364   0.2647
+             ERTPP        0.1683 0.1269 0.0571 0.0365       0.0356   0.1007 0.2763 0.2126 0.0962 0.1390       0.0782   0.2202
+             ActSTD       0.1581 0.1901 0.0296 0.0836       0.0303   0.1546 0.3493 0.1913 0.0394 0.0857       0.0610   0.1849
+             SeqGAN       0.1844 0.1487 0.0704 0.0676       0.0311   0.1407 0.1782 0.1638 0.1375 0.0874       0.0265   0.1989
+             MoveSim      0.1931 0.1256 0.1095 0.1231       0.0464   0.2202 0.1676 0.1576 0.0471 0.1562       0.0525   0.1879
+             VOLUNTEER    0.1823 0.1971 0.0735 0.0957       0.0464   0.1542 0.1994 0.1657 0.0299 0.0766       0.0343   0.1922
+             DiffTraj     0.1520 0.1214 0.1404 0.0855       0.0397   0.1064 0.1974 0.1676 0.0920 0.0773       0.0248   0.2497
+             COLA         0.1957 0.2062 0.2869 0.1554       0.0312   0.1016 0.1542 0.1538 0.0998 0.1469       0.0311   0.1349
+             MIRAGE       0.1250 0.0656 0.0135 0.0428       0.0252   0.0829 0.1282 0.0559 0.0123 0.0411       0.0061   0.1288
+             Cond-MIRAGE 0.0937 0.0635 0.0128 0.0238        0.0157   0.0580 0.1130 0.0698 0.0094 0.0392       0.0054 0.1172
+             Marionette   0.0664 0.0134 0.0083 0.0144 0.0024 0.0248 0.1060 0.0450 0.0080 0.0384 0.0029 0.1238
+
+Table 3: Performance in the Task-Based Evaluation on MAPE                       Table 6: Performance on Statistical and Distributional Simi-
+                      Campus                       Istanbul                     larity Metrics with Different Contexts
+Method      LocRec NexLoc SemLoc EpiSim LocRec NexLoc SemLoc EpiSim              Method                Distance Radius Interval DailyLoc Category G-RANK
+Semi-Markov 0.7501 0.6630 0.3738 0.7478 0.9830 0.9630 0.3632 0.6237              no Almanac             0.0666 0.0140 0.0090 0.0153 0.0045 0.0256
+Time Geo    0.6667 0.7879 0.2977 0.4506 0.8490 0.9476 0.3104 0.7781              no HourInDay           0.0682 0.0139 0.0085 0.0146 0.0049 0.0256
+RMTPP       0.5607 0.5707 0.3180 0.1966 0.6231 0.5746 0.4640 0.4112              no Rainstorm           0.0667 0.0133 0.0088 0.0158 0.0026 0.0253
+ERTPP       0.4258 0.6023 0.3103 0.1389 0.7436 0.6323 0.3490 0.2914              no TropicalCyclone     0.0665 0.0134 0.0088 0.0149 0.0053 0.0292
+ActSTD      0.3781 0.5692 0.6553 0.7896 0.7774 0.7249 0.3438 0.5142              no DayInWeek           0.0677 0.0148 0.0095 0.0201 0.0057 0.0411
+SeqGAN      0.5185 0.8488 0.3669 0.8125 1.0636 0.7816 0.2728 0.4743              no Thunderstorm        0.0663 0.0134 0.0088 0.0147 0.0053 0.0292
+MoveSim     1.8991 0.5324 0.4538 0.1595 0.7316 0.7927 0.3363 0.2623              no TeachingArrangement 0.0689 0.0143 0.0093 0.0168 0.0048 0.0258
+VOLUNTEER 0.5712 0.7534 0.6100 0.7245 0.9562 0.8908 0.3886 0.1917                all contexts           0.0664 0.0134 0.0083 0.0144 0.0024 0.0248
+DiffTraj    0.9795 0.4508 0.2645 0.5634 0.8418 0.7759 0.3713 0.4574
+COLA        0.6891 0.4449 0.4645 0.1596 0.6015 0.7193 0.3953 0.2921
+MIRAGE      0.3309 0.3856 0.1273 0.1180 0.5628 0.5002 0.1750 0.1434
+Cond-MIRAGE 0.3018 0.2128 0.1149 0.0653 0.3942 0.3567 0.1429 0.1640             Table 7: Performance in the Task-Based Evaluation on MAPE
+Marionette  0.1862 0.0847 0.0943 0.0352 0.3303 0.3312 0.1564 0.1096             with Different Contexts
+                                                                                  Method                       LocRec    NexLoc     SemLoc     EpiSim
+Table 4: Ablation Study on Statistical and Distributional Sim-
+                                                                                  no Almanac                   0.2052    0.0947      0.1352    0.0553
+ilarity Metrics                                                                   no HourInDay                 0.2047    0.1048      0.1583    0.0460
+Method              Distance Radius Interval DailyLoc Category G-RANK             no Rainstorm                 0.1926    0.1018      0.1262    0.0481
+Marionette-noCond 0.0799 0.0187 0.0089 0.0182          0.0145   0.0429
+                                                                                  no TropicalCyclone           0.2013    0.1064      0.1439    0.0391
+Marionette-noPartial 0.0771 0.0197 0.0111 0.0202       0.0104   0.0467
+Marionette           0.0664 0.0134 0.0083 0.0144 0.0024 0.0248                    no DayInWeek                 0.2089    0.1025      0.1534    0.0561
+                                                                                  no Thunderstorm              0.1975    0.0990      0.1401    0.0471
+                                                                                  no TeachingArrangement       0.2025    0.0964      0.1516    0.0424
+Table 5: Ablation study in Task-Based Evaluation on MAPE
+                                                                                  all contexts                 0.1862    0.0847     0.0943     0.0352
+      Method                   LocRec     NexLoc   SemLoc    EpiSim
+      Marionette-noCond        0.2289     0.1274    0.1857   0.0434
+      Marionette-noPartial     0.1893     0.0878    0.1748   0.0631
+      Marionette               0.1862     0.0847   0.0943    0.0352             to generate daily trajectory data in two previously unseen scenar-
+                                                                                ios: the No.8 tropical cyclone warning signal in the morning but no
+                                                                                warning in the afternoon (Figure 2), and no warning in the morn-
+5.4     Impact of Different Contexts
+                                                                                ing but the No.8 tropical cyclone warning signal in the afternoon
+In this section, we investigate the impact of different contexts on hu-         (Figure 3). We also select the trajectory data of one typical day
+man mobility using the campus dataset. Our experiments evaluate                 with no typhoon warning signal as a reference (Figure 4). To better
+how varying contexts affect both statistical and distributional simi-           analyze the generated trajectory data, we visualize the three sets
+larity metrics, as well as the performance in task-based evaluation.            of trajectories under transition matrices, shown in heatmaps.
+The results are shown in Tables 6 and 7. We observe that different                 We see that the mobility patterns in the two generated scenarios
+contexts have different extents of impact on human mobility, while              exhibit significant deviations from the normal condition during
+Marionette incorporates all contexts, achieves optimal performance              active periods of the partial condition of the No.8 tropical cyclone
+across most evaluation scenarios, demonstrating the usefulness of               warning signal, with large reductions in crowd movement. In con-
+various contexts in modeling human mobility.                                    trast, during periods without warning signals in the two generated
+                                                                                scenarios, the mobility patterns remain similar to the normal condi-
+5.5     Case Studies on Controllable Generation                                 tion. This shows the manipulability of our Marionette in generating
+To showcase the controllable generation with the partial context                human trajectory data to meet the requirements of user-specified
+using Marionette, we use our trained model on the Campus dataset                scenarios with fine-grained conditions (partial context).
+
+
+
+
+                                                                          470
+Marionette: Fine-Grained Conditional Generative Modeling of
+Spatiotemporal Human Trajectory Data Beyond Imitation                                                             KDD ’25, August 3–7, 2025, Toronto, ON, Canada
+
+
+
+
+                                         Figure 2: No.8 Tropical Cyclone Warning Signal in the Morning
+
+
+
+
+                                       Figure 3: No.8 Tropical Cyclone Warning Signal in the Afternoon
+
+
+
+
+                                                   Figure 4: A Typical Day with no Warning Signal
+
+
+6    Conclusion                                                               Grant (UICAG100006). This work was performed in part at SICC
+In this paper, we study the problem of fine-grained conditional               which is supported by SKL-IOTSC, University of Macau.
+generative modeling of spatiotemporal human trajectory data, and
+propose Marionette, a Manipulatable generative model for human
+trajectory data with fine-grained conditions. First, we integrate             References
+                                                                               [1] Jacob Austin, Daniel D Johnson, Jonathan Ho, Daniel Tarlow, and Rianne Van
+the mobility-related global and partial contexts using a context                   Den Berg. 2021. Structured denoising diffusion models in discrete state-spaces.
+alignment method, and then extract both sequence- and event-level                  NIPS 34 (2021), 17981–17993.
+conditions. Second, for conditional temporal modeling, we design a             [2] Fred Brauer, Carlos Castillo-Chavez, Zhilan Feng, Fred Brauer, Carlos Castillo-
+                                                                                   Chavez, and Zhilan Feng. 2019. Models for Influenza. Mathematical Models in
+conditional TPP following a diffusion-alike TPP scheme to capture                  Epidemiology (2019), 311–350.
+the impact of the conditions on both event-triggered shifts and                [3] Chu Cao and Mo Li. 2021. Generating mobility trajectories with retained Data
+                                                                                   Utility. In KDD. 2610–2620.
+continuous variation of the intensity function of the TPP. Third, for          [4] David Chapman, Kristina Nilsson, Agneta Larsson, and Agatino Rizzo. 2017. Cli-
+conditional spatial modeling, we design a cascading conditioning                   matic barriers to soft-mobility in winter: Luleå, Sweden as case study. Sustainable
+mechanism integrated with a discrete diffusion model to capture the                cities and society 35 (2017), 574–580.
+                                                                               [5] Chunhua Chen, Yuxin Yang, Hao Yuan, Longbiao Chen, Leye Wang, Bingqing Qu,
+cascading dependence of locations on activity categories and further               and Dingqi Yang. 2024. Animating the Crowd Mirage: A WiFi-Positioning-Based
+on time. We conduct a thorough evaluation of Marionette on two                     Crowd Mobility Digital Twin for Smart Campuses. IMWUT 8, 4 (2024), 1–32.
+real-world human trajectory datasets against a sizeable collection of          [6] Ricky TQ Chen, Brandon Amos, and Maximilian Nickel. 2020. Neural spatio-
+                                                                                   temporal point processes. arXiv:2011.04583 (2020).
+state-of-the-art baselines. Results show that Marionette consistently          [7] Zhenhua Chen, Zhaoya Gong, Shan Yang, Qiwei Ma, and Changcheng Kan. 2020.
+outperforms the best baselines by 13.96-54.13% on statistical and                  Impact of extreme weather events on urban human flow: A perspective from
+                                                                                   location-based service data. Computers, environment and urban systems 83 (2020),
+distributional similarity metrics and by 9.36-40.63% in task-based                 101520.
+data utility evaluation. Case studies also demonstrate the superior            [8] Bangchao Deng, Xin Jing, Tianyue Yang, Bingqing Qu, Dingqi Yang, and Philippe
+manipulability of Marionette.                                                      Cudre-Mauroux. 2025. Revisiting Synthetic Human Trajectories: Imitative Gen-
+                                                                                   eration and Benchmarks Beyond Datasaurus. In KDD. 201–212.
+   Our future work will extend the context modeling via Large                  [9] Bangchao Deng, Bingqing Qu, Pengyang Wang, Dingqi Yang, Benjamin
+Language Models to further improve its generalizability.                           Fankhauser, and Philippe Cudre-Mauroux. 2025. Replay: Modeling time-varying
+                                                                                   temporal regularities of human mobility for location prediction over sparse
+                                                                                   trajectories. IEEE Transactions on Mobile Computing (2025).
+Acknowledgments                                                               [10] Bangchao Deng, Dingqi Yang, Bingqing Qu, Benjamin Fankhauser, and Philippe
+                                                                                   Cudre-Mauroux. 2023. Robust location prediction over sparse spatiotemporal
+This project has received funding from the Science and Technol-                    trajectory data: Flashback to the right moment! ACM Transactions on Intelligent
+ogy Development Fund, Macau SAR (0047/2022/A1, 001/2024/SKL),                      Systems and Technology 14, 5 (2023), 1–24.
+                                                                              [11] Nan Du, Hanjun Dai, Rakshit Trivedi, Utkarsh Upadhyay, Manuel Gomez-
+Jiangyin Hi-tech Industrial Development Zone under the Taihu                       Rodriguez, and Le Song. 2016. Recurrent marked temporal point processes:
+Innovation Scheme (EF2025-00003-SKL-IOTSC), and UIC Research                       Embedding event history to vector. In KDD. 1555–1564.
+
+
+
+
+                                                                        471
+KDD ’25, August 3–7, 2025, Toronto, ON, Canada                                                                                                               Bangchao Deng et al.
+
+
+[12] Jie Feng, Zeyu Yang, Fengli Xu, Haisu Yu, Mudan Wang, and Yong Li. 2020.                  [40] Oleksandr Shchur, Marin Biloš, and Stephan Günnemann. 2019. Intensity-free
+     Learning to simulate human mobility. In KDD. 3426–3433.                                        learning of temporal point processes. arXiv preprint arXiv:1909.12127 (2019).
+[13] Bent Fuglede and Flemming Topsoe. 2004. Jensen-Shannon divergence and                     [41] Chaoming Song, Tal Koren, Pu Wang, and Albert-László Barabási. 2010. Modelling
+     Hilbert space embedding. In ISIT. IEEE, 31.                                                    the scaling properties of human mobility. Nature physics 6, 10 (2010), 818–823.
+[14] Song Gao, Jinmeng Rao, Yuhao Kang, Yunlei Liang, and Jake Kruse. 2020. Mapping            [42] Chaoming Song, Zehui Qu, Nicholas Blumm, and Albert-László Barabási. 2010.
+     county-level mobility pattern changes in the United States in response to COVID-               Limits of predictability in human mobility. Science 327, 5968 (2010), 1018–1021.
+     19. SIGSpatial Special 12, 1 (2020), 16–26.                                               [43] Fei Sun, Jun Liu, Jian Wu, Changhua Pei, Xiao Lin, Wenwu Ou, and Peng Jiang.
+[15] Marta C Gonzalez, Cesar A Hidalgo, and Albert-Laszlo Barabasi. 2008. Under-                    2019. BERT4Rec: Sequential recommendation with bidirectional encoder repre-
+     standing individual human mobility patterns. nature 453, 7196 (2008), 779–782.                 sentations from transformer. In CIKM. 1441–1450.
+[16] Shuyang Gu, Dong Chen, Jianmin Bao, Fang Wen, Bo Zhang, Dongdong Chen, Lu                 [44] Jiaxi Tang and Ke Wang. 2018. Personalized top-n sequential recommendation
+     Yuan, and Baining Guo. 2022. Vector quantized diffusion model for text-to-image                via convolutional sequence embedding. In WSDM. 565–573.
+     synthesis. In CVPR. 10696–10706.                                                          [45] A Vaswani. 2017. Attention is all you need. Advances in Neural Information
+[17] Peter E Hart, Nils J Nilsson, and Bertram Raphael. 1968. A formal basis for the                Processing Systems (2017).
+     heuristic determination of minimum cost paths. IEEE transactions on Systems               [46] Rajat Verma, Takahiro Yabe, and Satish V Ukkusuri. 2021. Spatiotemporal contact
+     Science and Cybernetics 4, 2 (1968), 100–107.                                                  density explains the disparity of COVID-19 spread in urban neighborhoods.
+[18] Xiangnan He, Kuan Deng, Xiang Wang, Yan Li, Yongdong Zhang, and Meng                           Scientific Reports 11, 1 (2021), 10952.
+     Wang. 2020. Lightgcn: Simplifying and powering graph convolution network for              [47] Yu Wang, Tongya Zheng, Yuxuan Liang, Shunyu Liu, and Mingli Song. 2024.
+     recommendation. In SIGIR. 639–648.                                                             Cola: Cross-city mobility transformer for human trajectory simulation. In WWW.
+[19] Xiangnan He, Lizi Liao, Hanwang Zhang, Liqiang Nie, Xia Hu, and Tat-Seng                       3509–3520.
+     Chua. 2017. Neural collaborative filtering. In WWW. 173–182.                              [48] Shu Wu, Yuyuan Tang, Yanqiao Zhu, Liang Wang, Xing Xie, and Tieniu Tan. 2019.
+[20] Yayao Hong, Hang Zhu, Tieqi Shou, Zeyu Wang, Liyue Chen, Leye Wang, Cheng                      Session-based recommendation with graph neural networks. In AAAI, Vol. 33.
+     Wang, and Longbiao Chen. 2024. STORM: A Spatio-Temporal Context-Aware                          346–353.
+     Model for Predicting Event-Triggered Abnormal Crowd Traffic. IEEE Transactions            [49] Shuai Xiao, Junchi Yan, Xiaokang Yang, Hongyuan Zha, and Stephen Chu. 2017.
+     on Intelligent Transportation Systems (2024).                                                  Modeling the intensity function of point process via recurrent neural networks.
+[21] Chris Jay Hoofnagle, Bart Van Der Sloot, and Frederik Zuiderveen Borgesius.                    In AAAI, Vol. 31.
+     2019. The European Union general data protection regulation: what it is and what          [50] Hong-Jian Xue, Xinyu Dai, Jianbing Zhang, Shujian Huang, and Jiajun Chen.
+     it means. Information & Communications Technology Law 28, 1 (2019), 65–98.                     2017. Deep matrix factorization models for recommender systems.. In IJCAI,
+[22] Dou Huang, Xuan Song, Zipei Fan, Renhe Jiang, Ryosuke Shibasaki, Yu Zhang,                     Vol. 17. Melbourne, Australia, 3203–3209.
+     Haizhong Wang, and Yugo Kato. 2019. A variational autoencoder based generative            [51] Dingqi Yang, Benjamin Fankhauser, Paolo Rosso, and Philippe Cudre-Mauroux.
+     model of urban human mobility. In MIPR. IEEE, 425–430.                                         2020. Location prediction over sparse user mobility traces using rnns. In IJCAI.
+[23] Dou Huang, Xuan Song, Zipei Fan, Renhe Jiang, Ryosuke Shibasaki, Yu Zhang,                     2184–2190.
+     Haizhong Wang, and Yugo Kato. 2019. A variational autoencoder based generative            [52] Dingqi Yang, Bin Li, and Philippe Cudré-Mauroux. 2016. POIsketch: semantic
+     model of urban human mobility. In MIPR. IEEE, 425–430.                                         place labeling over user activity streams. In IJCAI. 2697–2703.
+[24] Renhe Jiang, Xuan Song, Dou Huang, Xiaoya Song, Tianqi Xia, Zekun Cai, Zhao-              [53] Dingqi Yang, Bingqing Qu, Jie Yang, and Philippe Cudre-Mauroux. 2019. Revis-
+     nan Wang, Kyoung-Sook Kim, and Ryosuke Shibasaki. 2019. Deepurbanevent: A                      iting user mobility and social relationships in lbsns: a hypergraph embedding
+     system for predicting citywide crowd dynamics at big events. In KDD. 2114–2122.                approach. In WWW. 2147–2157.
+[25] Shan Jiang, Yingxiang Yang, Siddharth Gupta, Daniele Veneziano, Shounak                   [54] Dingqi Yang, Bingqing Qu, Jie Yang, and Philippe Cudré-Mauroux. 2020.
+     Athavale, and Marta C González. 2016. The TimeGeo modeling framework                           Lbsn2vec++: Heterogeneous hypergraph embedding for location-based social
+     for urban mobility without travel surveys. PNAS 113, 37 (2016), E5370–E5378.                   networks. IEEE Transactions on Knowledge and Data Engineering 34, 4 (2020),
+[26] Wenjun Jiang, Wayne Xin Zhao, Jingyuan Wang, and Jiawei Jiang. 2023. Contin-                   1843–1855.
+     uous Trajectory Generation Based on Two-Stage GAN. arXiv:2301.07103 (2023).               [55] Xiaojie Yang, Hangli Ge, Jiawei Wang, Zipei Fan, Renhe Jiang, Ryosuke Shibasaki,
+[27] Wang-Cheng Kang and Julian McAuley. 2018. Self-attentive sequential recom-                     and Noboru Koshizuka. 2024. CausalMob: Causal Human Mobility Prediction
+     mendation. In ICDM. IEEE, 197–206.                                                             with LLMs-derived Human Intentions toward Public Events. arXiv preprint
+[28] Vo S Korolyuk, SM Brodi, and AF Turbin. 1975. Semi-Markov processes and their                  arXiv:2412.02155 (2024).
+     applications. Journal of Soviet Mathematics 4, 3 (1975), 244–280.                         [56] Lantao Yu, Weinan Zhang, Jun Wang, and Yong Yu. 2017. Seqgan: Sequence
+[29] Shengjie Lai, Nick W Ruktanonchai, Liangcai Zhou, Olivia Prosper, Wei Luo,                     generative adversarial nets with policy gradient. In AAAI, Vol. 31.
+     Jessica R Floyd, Amy Wesolowski, Mauricio Santillana, Chi Zhang, Xiangjun Du,             [57] Yuan Yuan, Jingtao Ding, Chenyang Shao, Depeng Jin, and Yong Li. 2023. Spatio-
+     et al. 2020. Effect of non-pharmaceutical interventions to contain COVID-19 in                 temporal Diffusion Point Processes. arXiv:2305.12403 (2023).
+     China. nature 585, 7825 (2020), 410–413.                                                  [58] Yuan Yuan, Jingtao Ding, Huandong Wang, Depeng Jin, and Yong Li. 2022. Ac-
+[30] Jiahao Li, Huandong Wang, and Xinlei Chen. 2024. Physics-informed neural ode                   tivity trajectory generation via modeling spatiotemporal dynamics. In KDD.
+     for post-disaster mobility recovery. In KDD. 1587–1598.                                        4752–4762.
+[31] Dawen Liang, Rahul G Krishnan, Matthew D Hoffman, and Tony Jebara. 2018.                  [59] Junyi Zhang, Jiaqi Guo, Shizhao Sun, Jian-Guang Lou, and Dongmei Zhang.
+     Variational autoencoders for collaborative filtering. In WWW. 689–698.                         2023. Layoutdiffusion: Improving graphic layout generation by discrete diffusion
+[32] Haowen Lin, John Krumm, Cyrus Shahabi, and Li Xiong. 2024. Controllable Visit                  probabilistic models. In ICCV. 7226–7236.
+     Trajectory Generation with Spatiotemporal Constraints. In 2024 IEEE Interna-              [60] Wayne Xin Zhao, Shanlei Mu, Yupeng Hou, Zihan Lin, Yushuo Chen, Xingyu
+     tional Conference on Data Mining (ICDM). IEEE, 773–778.                                        Pan, Kaiyuan Li, Yujie Lu, Hui Wang, Changxin Tian, Yingqian Min, Zhichao
+[33] Qingyue Long, Huandong Wang, Tong Li, Lisi Huang, Kun Wang, Qiong Wu,                          Feng, Xinyan Fan, Xu Chen, Pengfei Wang, Wendi Ji, Yaliang Li, Xiaoling Wang,
+     Guangyu Li, Yanping Liang, Li Yu, and Yong Li. 2023. Practical synthetic human                 and Ji-Rong Wen. 2021. RecBole: Towards a Unified, Comprehensive and Efficient
+     trajectories generation based on variational point processes. In KDD. 4561–4571.               Framework for Recommendation Algorithms. In CIKM. ACM, 4653–4664.
+[34] David Lüdke, Marin Biloš, Oleksandr Shchur, Marten Lienen, and Stephan Gün-               [61] Kun Zhou, Yifan Li, Wayne Xin Zhao, and Ji-Rong Wen. 2024. Diffusion-NAT:
+     nemann. 2023. Add and thin: Diffusion for temporal point processes. NIPS 36                    Self-Prompting Discrete Diffusion for Non-Autoregressive Text Generation. In
+     (2023), 56784–56801.                                                                           EACL. 1438–1451.
+[35] Diala Naboulsi, Marco Fiore, Stephane Ribot, and Razvan Stanica. 2016. Large-             [62] Yuanshao Zhu, Yongchao Ye, Ying Wu, Xiangyu Zhao, and James Yu. 2023. Syn-
+     Scale Mobile Traffic Analysis: A Survey. IEEE Communications Surveys and                       Mob: Creating High-Fidelity Synthetic GPS Trajectory Dataset for Urban Mobility
+     Tutorials 18, 1 (2016), 124–161.                                                               Analysis. In NIPS.
+[36] Kun Ouyang, Reza Shokri, David S Rosenblum, and Wenzhuo Yang. 2018. A                     [63] Yuanshao Zhu, Yongchao Ye, Shiyao Zhang, Xiangyu Zhao, and James Yu. 2024.
+     non-parametric generative model for human trajectories.. In IJCAI, Vol. 18. 3812–              Difftraj: Generating gps trajectory with diffusion probabilistic model. NIPS 36
+     3817.                                                                                          (2024).
+[37] Steffen Rendle, Christoph Freudenthaler, Zeno Gantner, and Lars Schmidt-Thieme.           [64] Yuanshao Zhu, James Jianqiao Yu, Xiangyu Zhao, Qidong Liu, Yongchao Ye,
+     2012. BPR: Bayesian personalized ranking from implicit feedback. arXiv:1205.2618               Wei Chen, Zijian Zhang, Xuetao Wei, and Yuxuan Liang. 2024. Controltraj:
+     (2012).                                                                                        Controllable trajectory generation with topology-constrained diffusion model.
+[38] Steffen Rendle, Christoph Freudenthaler, and Lars Schmidt-Thieme. 2010. Factor-                In KDD. 4676–4687.
+     izing personalized markov chains for next-basket recommendation. In WWW.                  [65] Simiao Zuo, Haoming Jiang, Zichong Li, Tuo Zhao, and Hongyuan Zha. 2020.
+     811–820.                                                                                       Transformer hawkes process. In ICML. PMLR, 11692–11702.
+[39] Chenyang Shao, Fengli Xu, Bingbing Fan, Jingtao Ding, Yuan Yuan, Meng Wang,
+     and Yong Li. 2024. Beyond imitation: Generating human mobility from context-
+     aware reasoning with large language models. arXiv preprint arXiv:2402.09836
+     (2024).
+
+
+
+
+                                                                                         472
+Marionette: Fine-Grained Conditional Generative Modeling of
+Spatiotemporal Human Trajectory Data Beyond Imitation                                                         KDD ’25, August 3–7, 2025, Toronto, ON, Canada
+
+
+A     Baselines                                                                  Table 8: Performance in Task-Based Evaluation on MSPE
+Semi-Markov [28] employs an exponential distribution with Gamma                                        Campus                       Istanbul
+                                                                                 Method      LocRec NexLoc SemLoc EpiSim LocRec NexLoc SemLoc EpiSim
+priors for time intervals and utilizes a Dirichlet prior to construct            Semi-Markov 0.8435 0.8461 0.1551 0.5607 0.9663 0.9663 0.1533 0.3937
+the transition matrix for Bayesian inference. TimeGeo [25] designs               Time Geo    0.4789 2.5793 0.0976 0.2032 0.7252 0.8981 0.1100 0.6058
+a statistical EPR model that integrates temporal information, such               RMTPP       0.4526 0.3893 0.1147 0.1164 0.4640 0.3607 0.3024 0.1906
+                                                                                 ERTPP       0.3138 0.4529 0.1043 0.0798 0.5643 0.4979 0.1418 0.3155
+as weekly home-based tour numbers, dwell rates, and burst rates, to              ActSTD      0.4737 0.4375 0.4594 0.6237 0.6145 0.5527 0.1290 0.4639
+better characterize temporal patterns in human mobility. RMTPP                   SeqGAN      0.3006 0.9174 0.1434 0.6609 2.3803 0.6412 0.1444 0.3379
+[11] leverages Recurrent Neural Networks (RNNs) to jointly capture               MoveSim     4.7328 0.2840 0.2433 0.0277 0.7877 0.6819 0.1573 0.0931
+                                                                                 VOLUNTEER 0.3971 0.5712 0.3801 0.5257 0.9155 0.8036 0.1718 0.0482
+the dependencies of time and mark (location ID) based on historical              DiffTraj    0.9884 0.2389 0.2032 0.3376 0.7111 0.6854 0.1492 0.2989
+information in temporal point processes, enabling more flexible                  COLA        0.5504 0.2658 0.2655 0.5347 0.6129 0.5982 0.1706 0.0909
+modeling of the joint distribution of time and marks. ERTPP [49]                 MIRAGE      0.1257 0.1540 0.0171 0.0141 0.3348 0.3713 0.0447 0.0417
+                                                                                 Cond-MIRAGE 0.1469 0.1196 0.0236 0.0065 0.1584 0.2446 0.0268 0.0273
+employs two distinct RNNs to independently model the timing and                  Marionette  0.0366 0.0075 0.0149 0.0021 0.1226 0.1937 0.0344 0.0129
+marks of events to improve flexibility and performance. ActSTD
+[58] focuses on capturing the continuous spatiotemporal dynamics                Table 9: Ablation study in Task-Based Evaluation on MSPE
+of human mobility and enhances the dynamic modeling of individ-
+                                                                                     Method                 LocRec     NexLoc     SemLoc      EpiSim
+ual trajectories by utilizing neural ordinary differential equations.
+                                                                                     Marionette-noCond      0.0577     0.0173      0.0357     0.0024
+SeqGAN [56] combines Generative Adversarial Networks (GANs)                          Marionette-noPartial   0.0387     0.0079      0.0314     0.0069
+with reinforcement learning to address the challenge of generating                   Marionette             0.0366     0.0075     0.0149      0.0021
+discrete sequences, such as text or event sequences. MoveSim [12]
+is a GAN-based framework that integrates physical regularities and
+                                                                                and 10). 2) Next Location Prediction Task (NexLoc): considers
+prior knowledge of human mobility in trajectory generation. VOL-
+                                                                                five sequence prediction algorithms, i.e., FPMC [38], BERT4Rec [43],
+UNTEER [33] incorporates a two-layer VAE model with a TPP to
+                                                                                Caser [44], SRGNN [48], and SASRec [27], and report their perfor-
+capture the characteristics of human mobility from both group and
+                                                                                mance on MRR@N, NDCG@N, hit@N (where N = 5 and 10). Note
+individual views. COLA [47] introduces a model-agnostic transfer
+                                                                                that our LocRec and NexLoc tasks are implemented by RecBole [60].
+framework that separates private and shared modules, adjusting
+                                                                                3) Semantic Location Labeling Task (SemLoc): assigns a seman-
+prediction probabilities to reflect city-specific characteristics in the
+                                                                                tic label (i.e., activity category) to a location based on the collective
+simulation of human trajectories. DiffTraj [63] uses a diffusion
+                                                                                traffic pattern of the location, extracted from users’ trajectory data
+probabilistic model for continuous location generation where we
+                                                                                [52]. We consider five typical classification algorithms, i.e., Decision
+choose the nearest POI to each generated GPS coordinate as the
+                                                                                Tree, Naive Bayes, K-Nearest Neighbors, Logistic Regression, and
+generated POI. MIRAGE [8] integrates an intensity-free neural
+                                                                                Support Vector Machine, and report their performance on Accuracy,
+TPP and a neural EPR model to imitate the human decision-making
+                                                                                F1-Micro, and F1-Macro scores. 4) Epidemic Simulation Task
+process in trajectory generation in an autoregressive manner. We
+                                                                                (EpiSim): simulates the epidemic spreading over a contact network
+further extend MIRAGE with our defined mobility-related contexts
+                                                                                characterizing the spatiotemporal contact patterns of user trajec-
+by encoding both global and partial contexts into one overall condi-
+                                                                                tories [46]. Following the setting of recent works [12, 29, 58], we
+tion, which is then fed as an additional input to further parameterize
+                                                                                adopt the Susceptible–Exposed–Infected–Recovered (SEIR) model.
+its autoregressive TPP; this variant is denoted as Cond-MIRAGE.
+                                                                                We consider the simulation of COVID-19 using the parameters
+                                                                                suggested by [12, 58] and influenza using the parameters suggested
+B    Task-Based Utility Evaluation Protocol                                     by [2], and report the average results of 10 repeated simulations
+Following [8], our evaluation protocol includes four typical tasks:             to discount the impact of the random selection of initially exposed
+location recommendation, next location prediction, semantic loca-               individuals. Note that for each individual task, we compare the
+tion labeling, and epidemic simulation, which model user trajectory             paired performance discrepancy between the real and generated
+data in four aspects, user preferences on locations, sequential mobil-          trajectories using MAPE and MSPE.
+ity patterns, collective traffic patterns, and spatiotemporal contact
+patterns, respectively. For each task, we choose multiple state-of-             C    Task-Based Evaluation Performance on MSPE
+the-art techniques to conduct experiments and report the results on             Table 8 shows performance comparison in the task-based evalu-
+multiple metrics, to average out the biases of individual techniques            ation on MSPE. Similar to the results on MAPE, we observe that
+and metrics. We then measure the paired performance discrepancy                 Marionette achieves the best performance in most cases. Compared
+between the real and generated trajectories using Mean Absolute                 to the best-performing baselines, Marionette achieves 61.35% and
+Percentage Error (MAPE) and Mean Squared Percentage Error                       16.97% improvement over the best baselines on the two respective
+(MSPE), which serve as final benchmarks to assess the ultimate util-            datasets. Table 9 shows the ablation study results in the task-based
+ity of the generated trajectories. The details of the four tasks are as         evaluation on MSPE. Similar to the results on MAPE, we also ob-
+follows: 1) Location Recommendation Task (LocRec): considers                    serve that Marionette outperforms its variants Marionette-noCond
+five popular recommendation algorithms, i.e., BPR [37], DMF [50],               and Marionette-noPartial, by 41.31% and 33.09%, respectively.
+LightGCN [18], MultiVAE [31], and NeuMF [19] and report their
+performance on Mean Reciprocal Rank@N (MRR@N), Normalized
+Discounted Cumulative Gain@N (NDCG@N), hit@N (where N = 5
+
+
+
+
+                                                                          473
+

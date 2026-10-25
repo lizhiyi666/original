@@ -1,0 +1,686 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{45}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{} and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showURL}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showURL #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Austin et~al\mbox{.}(2021)]%
+        {austin2021d3pm}
+\bibfield{author}{\bibinfo{person}{Jacob Austin}, \bibinfo{person}{Daniel~D.
+  Johnson}, \bibinfo{person}{Jonathan Ho}, \bibinfo{person}{Daniel Tarlow},
+  {and} \bibinfo{person}{Rianne van~den Berg}.}
+  \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Structured Denoising Diffusion Models in Discrete
+  State-Spaces}. In \bibinfo{booktitle}{\emph{Advances in Neural Information
+  Processing Systems}}, Vol.~\bibinfo{volume}{34}. \bibinfo{publisher}{Curran
+  Associates, Inc.}, \bibinfo{pages}{17981--17993}.
+\newblock
+\urldef\tempurl%
+\url{https://proceedings.neurips.cc/paper_files/paper/2021/hash/958c530554f78bcd8e97125b70e6973d-Abstract.html}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Cao and Li(2021)]%
+        {cao2021trajgen}
+\bibfield{author}{\bibinfo{person}{Chu Cao} {and} \bibinfo{person}{Mo Li}.}
+  \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Generating Mobility Trajectories with Retained Data
+  Utility}. In \bibinfo{booktitle}{\emph{Proceedings of the 27th ACM SIGKDD
+  Conference on Knowledge Discovery and Data Mining}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{2610--2620}.
+\newblock
+\href{https://doi.org/10.1145/3447548.3467158}{doi:\nolinkurl{10.1145/3447548.3467158}}
+
+
+\bibitem[Cardei et~al\mbox{.}(2025)]%
+        {cardei2025cdd}
+\bibfield{author}{\bibinfo{person}{Michael Cardei}, \bibinfo{person}{Jacob~K.
+  Christopher}, \bibinfo{person}{Bhavya Kailkhura}, \bibinfo{person}{Tom
+  Hartvigsen}, {and} \bibinfo{person}{Ferdinando Fioretto}.}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Constrained Discrete Diffusion}. In
+  \bibinfo{booktitle}{\emph{Advances in Neural Information Processing
+  Systems}}, Vol.~\bibinfo{volume}{38}. \bibinfo{publisher}{Curran Associates,
+  Inc.}, \bibinfo{pages}{12383--12416}.
+\newblock
+\href{https://doi.org/10.52202/085713-0415}{doi:\nolinkurl{10.52202/085713-0415}}
+
+
+\bibitem[Chen et~al\mbox{.}(2024)]%
+        {chen2024controldag}
+\bibfield{author}{\bibinfo{person}{Jinghong Chen}, \bibinfo{person}{Weizhe
+  Lin}, \bibinfo{person}{Jingbiao Mei}, {and} \bibinfo{person}{Bill Byrne}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Control-DAG: Constrained Decoding for
+  Non-Autoregressive Directed Acyclic T5 using Weighted Finite State Automata}.
+  In \bibinfo{booktitle}{\emph{Proceedings of the 2024 Conference of the North
+  American Chapter of the Association for Computational Linguistics: Human
+  Language Technologies (Volume 2: Short Papers)}}.
+  \bibinfo{publisher}{Association for Computational Linguistics},
+  \bibinfo{address}{Mexico City, Mexico}, \bibinfo{pages}{508--518}.
+\newblock
+\href{https://doi.org/10.18653/v1/2024.naacl-short.42}{doi:\nolinkurl{10.18653/v1/2024.naacl-short.42}}
+
+
+\bibitem[Chen et~al\mbox{.}(2025)]%
+        {chen2025sequentialdiffusion}
+\bibfield{author}{\bibinfo{person}{Jialei Chen}, \bibinfo{person}{Yuanbo Xu},
+  {and} \bibinfo{person}{Yiheng Jiang}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Unlocking the Power of Diffusion Models in
+  Sequential Recommendation: A Simple and Effective Approach}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 31st ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining V.2}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{155--166}.
+\newblock
+\href{https://doi.org/10.1145/3711896.3737172}{doi:\nolinkurl{10.1145/3711896.3737172}}
+
+
+\bibitem[Chu et~al\mbox{.}(2024)]%
+        {chen2024trajgdm}
+\bibfield{author}{\bibinfo{person}{Chen Chu}, \bibinfo{person}{Hengcai Zhang},
+  \bibinfo{person}{Peixiao Wang}, {and} \bibinfo{person}{Feng Lu}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Simulating Human Mobility with a Trajectory
+  Generation Framework Based on Diffusion Model}.
+\newblock \bibinfo{journal}{\emph{International Journal of Geographical
+  Information Science}} \bibinfo{volume}{38}, \bibinfo{number}{5}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{847--878}.
+\newblock
+\href{https://doi.org/10.1080/13658816.2024.2312199}{doi:\nolinkurl{10.1080/13658816.2024.2312199}}
+
+
+\bibitem[Deng et~al\mbox{.}(2025a)]%
+        {deng2025marionette}
+\bibfield{author}{\bibinfo{person}{Bangchao Deng}, \bibinfo{person}{Ling Ding},
+  \bibinfo{person}{Lianhua Ji}, \bibinfo{person}{Chunhua Chen},
+  \bibinfo{person}{Xin Jing}, \bibinfo{person}{Bingqing Qu}, {and}
+  \bibinfo{person}{Dingqi Yang}.} \bibinfo{year}{2025}\natexlab{a}.
+\newblock \showarticletitle{Marionette: Fine-Grained Conditional Generative
+  Modeling of Spatiotemporal Human Trajectory Data Beyond Imitation}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 31st ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining V.2}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{463--473}.
+\newblock
+\href{https://doi.org/10.1145/3711896.3737039}{doi:\nolinkurl{10.1145/3711896.3737039}}
+
+
+\bibitem[Deng et~al\mbox{.}(2025b)]%
+        {deng2025mirage}
+\bibfield{author}{\bibinfo{person}{Bangchao Deng}, \bibinfo{person}{Xin Jing},
+  \bibinfo{person}{Tianyue Yang}, \bibinfo{person}{Bingqing Qu},
+  \bibinfo{person}{Dingqi Yang}, {and} \bibinfo{person}{Philippe
+  Cudre-Mauroux}.} \bibinfo{year}{2025}\natexlab{b}.
+\newblock \showarticletitle{Revisiting Synthetic Human Trajectories: Imitative
+  Generation and Benchmarks Beyond Datasaurus}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 31st ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining V.1}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{201--212}.
+\newblock
+\href{https://doi.org/10.1145/3690624.3709180}{doi:\nolinkurl{10.1145/3690624.3709180}}
+
+
+\bibitem[Feng et~al\mbox{.}(2018)]%
+        {feng2018deepmove}
+\bibfield{author}{\bibinfo{person}{Jie Feng}, \bibinfo{person}{Yong Li},
+  \bibinfo{person}{Chao Zhang}, \bibinfo{person}{Funing Sun},
+  \bibinfo{person}{Fanchao Meng}, \bibinfo{person}{Ang Guo}, {and}
+  \bibinfo{person}{Depeng Jin}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{DeepMove: Predicting Human Mobility with
+  Attentional Recurrent Networks}. In \bibinfo{booktitle}{\emph{Proceedings of
+  the 2018 World Wide Web Conference}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{1459--1468}.
+\newblock
+\href{https://doi.org/10.1145/3178876.3186058}{doi:\nolinkurl{10.1145/3178876.3186058}}
+
+
+\bibitem[Feng et~al\mbox{.}(2020)]%
+        {feng2020simulate}
+\bibfield{author}{\bibinfo{person}{Jie Feng}, \bibinfo{person}{Zeyu Yang},
+  \bibinfo{person}{Fengli Xu}, \bibinfo{person}{Haisu Yu},
+  \bibinfo{person}{Mudan Wang}, {and} \bibinfo{person}{Yong Li}.}
+  \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Learning to Simulate Human Mobility}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 26th ACM SIGKDD International
+  Conference on Knowledge Discovery and Data Mining}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{3426--3433}.
+\newblock
+\href{https://doi.org/10.1145/3394486.3412862}{doi:\nolinkurl{10.1145/3394486.3412862}}
+
+
+\bibitem[Geng et~al\mbox{.}(2023)]%
+        {geng2023grammar}
+\bibfield{author}{\bibinfo{person}{Saibo Geng}, \bibinfo{person}{Martin
+  Josifoski}, \bibinfo{person}{Maxime Peyrard}, {and} \bibinfo{person}{Robert
+  West}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Grammar-Constrained Decoding for Structured NLP
+  Tasks without Finetuning}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  2023 Conference on Empirical Methods in Natural Language Processing}}.
+  \bibinfo{publisher}{Association for Computational Linguistics},
+  \bibinfo{address}{Singapore}, \bibinfo{pages}{10932--10952}.
+\newblock
+\href{https://doi.org/10.18653/v1/2023.emnlp-main.674}{doi:\nolinkurl{10.18653/v1/2023.emnlp-main.674}}
+
+
+\bibitem[Gong et~al\mbox{.}(2025)]%
+        {gong2025stcdm}
+\bibfield{author}{\bibinfo{person}{Letian Gong}, \bibinfo{person}{Shengnan
+  Guo}, \bibinfo{person}{Yan Lin}, \bibinfo{person}{Yichen Liu},
+  \bibinfo{person}{Erwen Zheng}, \bibinfo{person}{Yiwei Shuang},
+  \bibinfo{person}{Youfang Lin}, \bibinfo{person}{Jilin Hu}, {and}
+  \bibinfo{person}{Huaiyu Wan}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{STCDM: Spatio-Temporal Contrastive Diffusion Model
+  for Check-In Sequence Generation}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Knowledge and Data
+  Engineering}} \bibinfo{volume}{37}, \bibinfo{number}{4}
+  (\bibinfo{year}{2025}), \bibinfo{pages}{2141--2154}.
+\newblock
+\href{https://doi.org/10.1109/TKDE.2025.3525718}{doi:\nolinkurl{10.1109/TKDE.2025.3525718}}
+
+
+\bibitem[Gonz{\'a}lez et~al\mbox{.}(2008)]%
+        {gonzalez2008mobility}
+\bibfield{author}{\bibinfo{person}{Marta~C. Gonz{\'a}lez},
+  \bibinfo{person}{C{\'e}sar~A. Hidalgo}, {and}
+  \bibinfo{person}{Albert-L{\'a}szl{\'o} Barab{\'a}si}.}
+  \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{Understanding Individual Human Mobility Patterns}.
+\newblock \bibinfo{journal}{\emph{Nature}} \bibinfo{volume}{453},
+  \bibinfo{number}{7196} (\bibinfo{year}{2008}), \bibinfo{pages}{779--782}.
+\newblock
+\href{https://doi.org/10.1038/nature06958}{doi:\nolinkurl{10.1038/nature06958}}
+
+
+\bibitem[Haydari et~al\mbox{.}(2026)]%
+        {haydari2026mobilitygpt}
+\bibfield{author}{\bibinfo{person}{Ammar Haydari}, \bibinfo{person}{Dongjie
+  Chen}, \bibinfo{person}{Zhengfeng Lai}, \bibinfo{person}{Michael Zhang},
+  {and} \bibinfo{person}{Chen-Nee Chuah}.} \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{MobilityGPT: Enhanced Human Mobility Modeling With
+  a GPT Model}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Intelligent
+  Transportation Systems}} \bibinfo{volume}{27}, \bibinfo{number}{1}
+  (\bibinfo{year}{2026}), \bibinfo{pages}{1681--1694}.
+\newblock
+\href{https://doi.org/10.1109/TITS.2025.3626357}{doi:\nolinkurl{10.1109/TITS.2025.3626357}}
+
+
+\bibitem[Ho et~al\mbox{.}(2020)]%
+        {ho2020ddpm}
+\bibfield{author}{\bibinfo{person}{Jonathan Ho}, \bibinfo{person}{Ajay Jain},
+  {and} \bibinfo{person}{Pieter Abbeel}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Denoising Diffusion Probabilistic Models}. In
+  \bibinfo{booktitle}{\emph{Advances in Neural Information Processing
+  Systems}}, Vol.~\bibinfo{volume}{33}. \bibinfo{publisher}{Curran Associates,
+  Inc.}, \bibinfo{pages}{6840--6851}.
+\newblock
+\urldef\tempurl%
+\url{https://proceedings.neurips.cc/paper_files/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Hsu et~al\mbox{.}(2024)]%
+        {hsu2024trajgpt}
+\bibfield{author}{\bibinfo{person}{Shang-Ling Hsu}, \bibinfo{person}{Emmanuel
+  Tung}, \bibinfo{person}{John Krumm}, \bibinfo{person}{Cyrus Shahabi}, {and}
+  \bibinfo{person}{Khurram Shafique}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{TrajGPT: Controlled Synthetic Trajectory Generation
+  Using a Multitask Transformer-Based Spatiotemporal Model}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 32nd ACM International
+  Conference on Advances in Geographic Information Systems}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{362--371}.
+\newblock
+\href{https://doi.org/10.1145/3678717.3691303}{doi:\nolinkurl{10.1145/3678717.3691303}}
+
+
+\bibitem[Hu et~al\mbox{.}(2024)]%
+        {hu2024retrasyn}
+\bibfield{author}{\bibinfo{person}{Yujia Hu}, \bibinfo{person}{Yuntao Du},
+  \bibinfo{person}{Zhikun Zhang}, \bibinfo{person}{Ziquan Fang},
+  \bibinfo{person}{Lu Chen}, \bibinfo{person}{Kai Zheng}, {and}
+  \bibinfo{person}{Yunjun Gao}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Real-Time Trajectory Synthesis with Local
+  Differential Privacy}. In \bibinfo{booktitle}{\emph{Proceedings of the IEEE
+  International Conference on Data Engineering}}. \bibinfo{publisher}{IEEE},
+  \bibinfo{pages}{1685--1698}.
+\newblock
+\href{https://doi.org/10.1109/ICDE60146.2024.00137}{doi:\nolinkurl{10.1109/ICDE60146.2024.00137}}
+
+
+\bibitem[Jiang et~al\mbox{.}(2023)]%
+        {jiang2023tstrajgen}
+\bibfield{author}{\bibinfo{person}{Wenjun Jiang}, \bibinfo{person}{Wayne~Xin
+  Zhao}, \bibinfo{person}{Jingyuan Wang}, {and} \bibinfo{person}{Jiawei
+  Jiang}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Continuous Trajectory Generation Based on Two-Stage
+  GAN}. In \bibinfo{booktitle}{\emph{Proceedings of the AAAI Conference on
+  Artificial Intelligence}}, Vol.~\bibinfo{volume}{37}.
+  \bibinfo{publisher}{Association for the Advancement of Artificial
+  Intelligence (AAAI)}, \bibinfo{pages}{4374--4382}.
+\newblock
+\href{https://doi.org/10.1609/aaai.v37i4.25557}{doi:\nolinkurl{10.1609/aaai.v37i4.25557}}
+
+
+\bibitem[Li et~al\mbox{.}(2025)]%
+        {li2025geollama}
+\bibfield{author}{\bibinfo{person}{Siyu Li}, \bibinfo{person}{Toan Tran},
+  \bibinfo{person}{Haowen Lin}, \bibinfo{person}{John Krumm},
+  \bibinfo{person}{Cyrus Shahabi}, \bibinfo{person}{Lingyi Zhao},
+  \bibinfo{person}{Khurram Shafique}, {and} \bibinfo{person}{Li Xiong}.}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Geo-Llama: Leveraging LLMs for Human Mobility
+  Trajectory Generation with Constraints}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 2025 IEEE International
+  Conference on Mobile Data Management}}. \bibinfo{publisher}{IEEE},
+  \bibinfo{pages}{20--31}.
+\newblock
+\href{https://doi.org/10.1109/MDM65600.2025.00023}{doi:\nolinkurl{10.1109/MDM65600.2025.00023}}
+
+
+\bibitem[Lin et~al\mbox{.}(2023)]%
+        {lin2023mbpgail}
+\bibfield{author}{\bibinfo{person}{Haowen Lin}, \bibinfo{person}{Sina Shaham},
+  \bibinfo{person}{Yao-Yi Chiang}, {and} \bibinfo{person}{Cyrus Shahabi}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Generating Realistic and Representative
+  Trajectories with Mobility Behavior Clustering}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 31st ACM International
+  Conference on Advances in Geographic Information Systems}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{1--4}.
+\newblock
+\href{https://doi.org/10.1145/3589132.3625657}{doi:\nolinkurl{10.1145/3589132.3625657}}
+
+
+\bibitem[Long et~al\mbox{.}(2024)]%
+        {long2024cloudedge}
+\bibfield{author}{\bibinfo{person}{Jing Long}, \bibinfo{person}{Guanhua Ye},
+  \bibinfo{person}{Tong Chen}, \bibinfo{person}{Yang Wang},
+  \bibinfo{person}{Meng Wang}, {and} \bibinfo{person}{Hongzhi Yin}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Diffusion-Based Cloud-Edge-Device Collaborative
+  Learning for Next POI Recommendations}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 30th ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{2026--2036}.
+\newblock
+\href{https://doi.org/10.1145/3637528.3671743}{doi:\nolinkurl{10.1145/3637528.3671743}}
+
+
+\bibitem[Long et~al\mbox{.}(2026)]%
+        {long2026population}
+\bibfield{author}{\bibinfo{person}{Qingyue Long}, \bibinfo{person}{Can Rong},
+  \bibinfo{person}{Tong Li}, {and} \bibinfo{person}{Yong Li}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{Dynamic Population Distribution Aware Human
+  Trajectory Generation with Diffusion Model}.
+\newblock \bibinfo{journal}{\emph{ACM Transactions on Intelligent Systems and
+  Technology}} \bibinfo{volume}{17}, \bibinfo{number}{3}
+  (\bibinfo{year}{2026}), \bibinfo{pages}{1--23}.
+\newblock
+\href{https://doi.org/10.1145/3787459}{doi:\nolinkurl{10.1145/3787459}}
+
+
+\bibitem[Long et~al\mbox{.}(2023)]%
+        {long2023synthetic}
+\bibfield{author}{\bibinfo{person}{Qingyue Long}, \bibinfo{person}{Huandong
+  Wang}, \bibinfo{person}{Tong Li}, \bibinfo{person}{Lisi Huang},
+  \bibinfo{person}{Kun Wang}, \bibinfo{person}{Qiong Wu},
+  \bibinfo{person}{Guangyu Li}, \bibinfo{person}{Yanping Liang},
+  \bibinfo{person}{Li Yu}, {and} \bibinfo{person}{Yong Li}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Practical Synthetic Human Trajectories Generation
+  Based on Variational Point Processes}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 29th ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{4561--4571}.
+\newblock
+\href{https://doi.org/10.1145/3580305.3599888}{doi:\nolinkurl{10.1145/3580305.3599888}}
+
+
+\bibitem[Lou et~al\mbox{.}(2024)]%
+        {lou2024sedd}
+\bibfield{author}{\bibinfo{person}{Aaron Lou}, \bibinfo{person}{Chenlin Meng},
+  {and} \bibinfo{person}{Stefano Ermon}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Discrete Diffusion Modeling by Estimating the
+  Ratios of the Data Distribution}. In \bibinfo{booktitle}{\emph{Proceedings of
+  the 41st International Conference on Machine Learning}}
+  \emph{(\bibinfo{series}{Proceedings of Machine Learning Research},
+  Vol.~\bibinfo{volume}{235})}. \bibinfo{publisher}{PMLR},
+  \bibinfo{pages}{32819--32848}.
+\newblock
+\urldef\tempurl%
+\url{https://proceedings.mlr.press/v235/lou24a.html}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Luo et~al\mbox{.}(2021)]%
+        {luo2021stan}
+\bibfield{author}{\bibinfo{person}{Yingtao Luo}, \bibinfo{person}{Qiang Liu},
+  {and} \bibinfo{person}{Zhaocheng Liu}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{STAN: Spatio-Temporal Attention Network for Next
+  Location Recommendation}. In \bibinfo{booktitle}{\emph{Proceedings of the Web
+  Conference 2021}}. \bibinfo{publisher}{ACM}, \bibinfo{pages}{2177--2185}.
+\newblock
+\href{https://doi.org/10.1145/3442381.3449998}{doi:\nolinkurl{10.1145/3442381.3449998}}
+
+
+\bibitem[Meng et~al\mbox{.}(2022)]%
+        {meng2022concrete}
+\bibfield{author}{\bibinfo{person}{Chenlin Meng}, \bibinfo{person}{Kristy
+  Choi}, \bibinfo{person}{Jiaming Song}, {and} \bibinfo{person}{Stefano
+  Ermon}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Concrete Score Matching: Generalized Score Matching
+  for Discrete Data}. In \bibinfo{booktitle}{\emph{Advances in Neural
+  Information Processing Systems}}, Vol.~\bibinfo{volume}{35}.
+  \bibinfo{publisher}{Neural Information Processing Systems Foundation, Inc.
+  (NeurIPS)}, \bibinfo{pages}{34532--34545}.
+\newblock
+\href{https://doi.org/10.52202/068431-2502}{doi:\nolinkurl{10.52202/068431-2502}}
+
+
+\bibitem[Netzler and Lienkamp(2024)]%
+        {netzler2024privacy}
+\bibfield{author}{\bibinfo{person}{Fabian Netzler} {and}
+  \bibinfo{person}{Markus Lienkamp}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Privacy Preserving Human Mobility Generation Using
+  Grid-Based Data and Graph Autoencoders}.
+\newblock \bibinfo{journal}{\emph{ISPRS International Journal of
+  Geo-Information}} \bibinfo{volume}{13}, \bibinfo{number}{7}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{245}.
+\newblock
+\href{https://doi.org/10.3390/ijgi13070245}{doi:\nolinkurl{10.3390/ijgi13070245}}
+
+
+\bibitem[Qin et~al\mbox{.}(2024)]%
+        {qin2023diffpoi}
+\bibfield{author}{\bibinfo{person}{Yifang Qin}, \bibinfo{person}{Hongjun Wu},
+  \bibinfo{person}{Wei Ju}, \bibinfo{person}{Xiao Luo}, {and}
+  \bibinfo{person}{Ming Zhang}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{A Diffusion Model for POI Recommendation}.
+\newblock \bibinfo{journal}{\emph{ACM Transactions on Information Systems}}
+  \bibinfo{volume}{42}, \bibinfo{number}{2} (\bibinfo{year}{2024}),
+  \bibinfo{pages}{1--27}.
+\newblock
+\href{https://doi.org/10.1145/3624475}{doi:\nolinkurl{10.1145/3624475}}
+
+
+\bibitem[Rao et~al\mbox{.}(2023)]%
+        {rao2023cats}
+\bibfield{author}{\bibinfo{person}{Jinmeng Rao}, \bibinfo{person}{Song Gao},
+  {and} \bibinfo{person}{Sijia Zhu}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{CATS: Conditional Adversarial Trajectory Synthesis
+  for Privacy-Preserving Trajectory Data Publication Using Deep Learning
+  Approaches}.
+\newblock \bibinfo{journal}{\emph{International Journal of Geographical
+  Information Science}} \bibinfo{volume}{37}, \bibinfo{number}{12}
+  (\bibinfo{year}{2023}), \bibinfo{pages}{2538--2574}.
+\newblock
+\href{https://doi.org/10.1080/13658816.2023.2262550}{doi:\nolinkurl{10.1080/13658816.2023.2262550}}
+
+
+\bibitem[Rao et~al\mbox{.}(2025)]%
+        {rao2025seed}
+\bibfield{author}{\bibinfo{person}{Xuan Rao}, \bibinfo{person}{Shuo Shang},
+  \bibinfo{person}{Renhe Jiang}, \bibinfo{person}{Peng Han}, {and}
+  \bibinfo{person}{Lisi Chen}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Seed: Bridging Sequence and Diffusion Models for
+  Road Trajectory Generation}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  ACM Web Conference 2025}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{2007--2017}.
+\newblock
+\href{https://doi.org/10.1145/3696410.3714951}{doi:\nolinkurl{10.1145/3696410.3714951}}
+
+
+\bibitem[Sahoo et~al\mbox{.}(2024)]%
+        {sahoo2024mdlm}
+\bibfield{author}{\bibinfo{person}{Subham Sahoo}, \bibinfo{person}{Marianne
+  Arriola}, \bibinfo{person}{Yair Schiff}, \bibinfo{person}{Aaron Gokaslan},
+  \bibinfo{person}{Edgar Marroquin}, \bibinfo{person}{Justin Chiu},
+  \bibinfo{person}{Alexander Rush}, {and} \bibinfo{person}{Volodymyr
+  Kuleshov}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Simple and Effective Masked Diffusion Language
+  Models}. In \bibinfo{booktitle}{\emph{Advances in Neural Information
+  Processing Systems}}, Vol.~\bibinfo{volume}{37}. \bibinfo{publisher}{Neural
+  Information Processing Systems Foundation, Inc. (NeurIPS)},
+  \bibinfo{pages}{130136--130184}.
+\newblock
+\href{https://doi.org/10.52202/079017-4135}{doi:\nolinkurl{10.52202/079017-4135}}
+
+
+\bibitem[Schiff et~al\mbox{.}(2025)]%
+        {schiff2025guidance}
+\bibfield{author}{\bibinfo{person}{Yair Schiff}, \bibinfo{person}{Subham~Sekhar
+  Sahoo}, \bibinfo{person}{Hao Phung}, \bibinfo{person}{Guanghan Wang},
+  \bibinfo{person}{Sam Boshar}, \bibinfo{person}{Hugo Dalla-torre},
+  \bibinfo{person}{Bernardo~P. de Almeida}, \bibinfo{person}{Alexander~M.
+  Rush}, \bibinfo{person}{Thomas Pierrot}, {and} \bibinfo{person}{Volodymyr
+  Kuleshov}.} \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Simple Guidance Mechanisms for Discrete Diffusion
+  Models}. In \bibinfo{booktitle}{\emph{The Thirteenth International Conference
+  on Learning Representations}}.
+\newblock
+\urldef\tempurl%
+\url{https://openreview.net/forum?id=i5MrJ6g5G1}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Song et~al\mbox{.}(2010)]%
+        {song2010predictability}
+\bibfield{author}{\bibinfo{person}{Chaoming Song}, \bibinfo{person}{Zehui Qu},
+  \bibinfo{person}{Nicholas Blumm}, {and}
+  \bibinfo{person}{Albert-L{\'a}szl{\'o} Barab{\'a}si}.}
+  \bibinfo{year}{2010}\natexlab{}.
+\newblock \showarticletitle{Limits of Predictability in Human Mobility}.
+\newblock \bibinfo{journal}{\emph{Science}} \bibinfo{volume}{327},
+  \bibinfo{number}{5968} (\bibinfo{year}{2010}), \bibinfo{pages}{1018--1021}.
+\newblock
+\href{https://doi.org/10.1126/science.1177170}{doi:\nolinkurl{10.1126/science.1177170}}
+
+
+\bibitem[Sun et~al\mbox{.}(2023)]%
+        {sun2023sprt}
+\bibfield{author}{\bibinfo{person}{Xinyue Sun}, \bibinfo{person}{Qingqing Ye},
+  \bibinfo{person}{Haibo Hu}, \bibinfo{person}{Yuandong Wang},
+  \bibinfo{person}{Kai Huang}, \bibinfo{person}{Tianyu Wo}, {and}
+  \bibinfo{person}{Jie Xu}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Synthesizing Realistic Trajectory Data With
+  Differential Privacy}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Intelligent
+  Transportation Systems}} \bibinfo{volume}{24}, \bibinfo{number}{5}
+  (\bibinfo{year}{2023}), \bibinfo{pages}{5502--5515}.
+\newblock
+\href{https://doi.org/10.1109/TITS.2023.3241290}{doi:\nolinkurl{10.1109/TITS.2023.3241290}}
+
+
+\bibitem[Wang et~al\mbox{.}(2025)]%
+        {wang2025gnprsid}
+\bibfield{author}{\bibinfo{person}{Dongsheng Wang}, \bibinfo{person}{Yuxi
+  Huang}, \bibinfo{person}{Shen Gao}, \bibinfo{person}{Yifan Wang},
+  \bibinfo{person}{Chengrui Huang}, {and} \bibinfo{person}{Shuo Shang}.}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{Generative Next POI Recommendation with Semantic
+  ID}. In \bibinfo{booktitle}{\emph{Proceedings of the 31st ACM SIGKDD
+  Conference on Knowledge Discovery and Data Mining V.2}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{2904--2914}.
+\newblock
+\href{https://doi.org/10.1145/3711896.3736981}{doi:\nolinkurl{10.1145/3711896.3736981}}
+
+
+\bibitem[Wang et~al\mbox{.}(2023)]%
+        {wang2023pategail}
+\bibfield{author}{\bibinfo{person}{Huandong Wang}, \bibinfo{person}{Changzheng
+  Gao}, \bibinfo{person}{Yuchen Wu}, \bibinfo{person}{Depeng Jin},
+  \bibinfo{person}{Lina Yao}, {and} \bibinfo{person}{Yong Li}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{PateGail: A Privacy-Preserving Mobility Trajectory
+  Generator with Imitation Learning}. In \bibinfo{booktitle}{\emph{Proceedings
+  of the AAAI Conference on Artificial Intelligence}},
+  Vol.~\bibinfo{volume}{37}. \bibinfo{publisher}{Association for the
+  Advancement of Artificial Intelligence (AAAI)},
+  \bibinfo{pages}{14539--14547}.
+\newblock
+\href{https://doi.org/10.1609/aaai.v37i12.26700}{doi:\nolinkurl{10.1609/aaai.v37i12.26700}}
+
+
+\bibitem[Wang et~al\mbox{.}(2024)]%
+        {wang2024dsdrec}
+\bibfield{author}{\bibinfo{person}{Ziwei Wang}, \bibinfo{person}{Jun Zeng},
+  \bibinfo{person}{Lin Zhong}, \bibinfo{person}{Ling Liu}, \bibinfo{person}{Min
+  Gao}, {and} \bibinfo{person}{Junhao Wen}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{DSDRec: Next POI Recommendation Using Deep Semantic
+  Extraction and Diffusion Model}.
+\newblock \bibinfo{journal}{\emph{Information Sciences}}  \bibinfo{volume}{678}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{121004}.
+\newblock
+\href{https://doi.org/10.1016/j.ins.2024.121004}{doi:\nolinkurl{10.1016/j.ins.2024.121004}}
+
+
+\bibitem[Wei et~al\mbox{.}(2024)]%
+        {wei2024diffrntraj}
+\bibfield{author}{\bibinfo{person}{Tonglong Wei}, \bibinfo{person}{Youfang
+  Lin}, \bibinfo{person}{Shengnan Guo}, \bibinfo{person}{Yan Lin},
+  \bibinfo{person}{Yiheng Huang}, \bibinfo{person}{Chenyang Xiang},
+  \bibinfo{person}{Yuqing Bai}, {and} \bibinfo{person}{Huaiyu Wan}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Diff-RNTraj: A Structure-Aware Diffusion Model for
+  Road Network-Constrained Trajectory Generation}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Knowledge and Data
+  Engineering}} \bibinfo{volume}{36}, \bibinfo{number}{12}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{7940--7953}.
+\newblock
+\href{https://doi.org/10.1109/TKDE.2024.3460051}{doi:\nolinkurl{10.1109/TKDE.2024.3460051}}
+
+
+\bibitem[Xiong et~al\mbox{.}(2024)]%
+        {xiong2024trajsgan}
+\bibfield{author}{\bibinfo{person}{Gang Xiong}, \bibinfo{person}{Zhishuai Li},
+  \bibinfo{person}{Meihua Zhao}, \bibinfo{person}{Yu Zhang},
+  \bibinfo{person}{Qinghai Miao}, \bibinfo{person}{Yisheng Lv}, {and}
+  \bibinfo{person}{Fei-Yue Wang}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{TrajSGAN: A Semantic-Guiding Adversarial Network
+  for Urban Trajectory Generation}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Computational Social
+  Systems}} \bibinfo{volume}{11}, \bibinfo{number}{2} (\bibinfo{year}{2024}),
+  \bibinfo{pages}{1733--1743}.
+\newblock
+\href{https://doi.org/10.1109/TCSS.2023.3235923}{doi:\nolinkurl{10.1109/TCSS.2023.3235923}}
+
+
+\bibitem[Yang et~al\mbox{.}(2022)]%
+        {yang2022getnext}
+\bibfield{author}{\bibinfo{person}{Song Yang}, \bibinfo{person}{Jiamou Liu},
+  {and} \bibinfo{person}{Kaiqi Zhao}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{GETNext: Trajectory Flow Map Enhanced Transformer
+  for Next POI Recommendation}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  45th International ACM SIGIR Conference on Research and Development in
+  Information Retrieval}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{1144--1153}.
+\newblock
+\href{https://doi.org/10.1145/3477495.3531983}{doi:\nolinkurl{10.1145/3477495.3531983}}
+
+
+\bibitem[Yuan et~al\mbox{.}(2023)]%
+        {yuan2023stdpp}
+\bibfield{author}{\bibinfo{person}{Yuan Yuan}, \bibinfo{person}{Jingtao Ding},
+  \bibinfo{person}{Chenyang Shao}, \bibinfo{person}{Depeng Jin}, {and}
+  \bibinfo{person}{Yong Li}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Spatio-temporal Diffusion Point Processes}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 29th ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{3173--3184}.
+\newblock
+\href{https://doi.org/10.1145/3580305.3599511}{doi:\nolinkurl{10.1145/3580305.3599511}}
+
+
+\bibitem[Yuan et~al\mbox{.}(2022)]%
+        {yuan2022activity}
+\bibfield{author}{\bibinfo{person}{Yuan Yuan}, \bibinfo{person}{Jingtao Ding},
+  \bibinfo{person}{Huandong Wang}, \bibinfo{person}{Depeng Jin}, {and}
+  \bibinfo{person}{Yong Li}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Activity Trajectory Generation via Modeling
+  Spatiotemporal Dynamics}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{4752--4762}.
+\newblock
+\href{https://doi.org/10.1145/3534678.3542671}{doi:\nolinkurl{10.1145/3534678.3542671}}
+
+
+\bibitem[Zhang et~al\mbox{.}(2024)]%
+        {zhang2024mobglm}
+\bibfield{author}{\bibinfo{person}{Kunyi Zhang}, \bibinfo{person}{Yanbo Pang},
+  \bibinfo{person}{Yurong Zhang}, {and} \bibinfo{person}{Yoshihide Sekimoto}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{MobGLM: A Large Language Model for Synthetic Human
+  Mobility Generation}. In \bibinfo{booktitle}{\emph{Proceedings of the 32nd
+  ACM International Conference on Advances in Geographic Information Systems}}.
+  \bibinfo{publisher}{ACM}, \bibinfo{pages}{629--632}.
+\newblock
+\href{https://doi.org/10.1145/3678717.3691311}{doi:\nolinkurl{10.1145/3678717.3691311}}
+
+
+\bibitem[Zhu et~al\mbox{.}(2023)]%
+        {zhu2023difftraj}
+\bibfield{author}{\bibinfo{person}{Yuanshao Zhu}, \bibinfo{person}{Yongchao
+  Ye}, \bibinfo{person}{Shiyao Zhang}, \bibinfo{person}{Xiangyu Zhao}, {and}
+  \bibinfo{person}{James J.~Q. Yu}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{DiffTraj: Generating GPS Trajectory with Diffusion
+  Probabilistic Model}. In \bibinfo{booktitle}{\emph{Advances in Neural
+  Information Processing Systems}}, Vol.~\bibinfo{volume}{36}.
+  \bibinfo{publisher}{Curran Associates, Inc.}, \bibinfo{pages}{65168--65188}.
+\newblock
+\href{https://doi.org/10.52202/075280-2843}{doi:\nolinkurl{10.52202/075280-2843}}
+
+
+\bibitem[Zhu et~al\mbox{.}(2024)]%
+        {zhu2024controltraj}
+\bibfield{author}{\bibinfo{person}{Yuanshao Zhu},
+  \bibinfo{person}{James~Jianqiao Yu}, \bibinfo{person}{Xiangyu Zhao},
+  \bibinfo{person}{Qidong Liu}, \bibinfo{person}{Yongchao Ye},
+  \bibinfo{person}{Wei Chen}, \bibinfo{person}{Zijian Zhang},
+  \bibinfo{person}{Xuetao Wei}, {and} \bibinfo{person}{Yuxuan Liang}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{ControlTraj: Controllable Trajectory Generation
+  with Topology-Constrained Diffusion Model}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 30th ACM SIGKDD Conference on
+  Knowledge Discovery and Data Mining}}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{4676--4687}.
+\newblock
+\href{https://doi.org/10.1145/3637528.3671866}{doi:\nolinkurl{10.1145/3637528.3671866}}
+
+
+\end{thebibliography}

@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="239.76pt" height="183.6pt" viewBox="0 0 239.76 183.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.7, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 183.6
+L 239.76 183.6
+L 239.76 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="pcdg-postswap-intro">
+   <g id="postswap-panel-2">
+    <path d="M 3.6 176.4
+L 115.2 176.4
+L 115.2 17.28
+L 3.6 17.28
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #ffffff; stroke: #c9cfd4; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-generated-0-W-5">
+    <path d="M 52.7832 42.2568
+L 58.0968 42.2568
+L 58.0968 36.9432
+L 52.7832 36.9432
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #d55e00; fill-opacity: 0.14; stroke: #d55e00; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-generated-edge-0-7">
+    <path d="M 59.5728 39.6
+Q 62.2296 39.6 64.271481 39.6
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+    <path d="M 62.191481 38.56
+L 64.271481 39.6
+L 62.191481 40.64
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #59616a; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+   </g>
+   <g id="postswap-generated-1-S-8">
+    <path d="M 69.0192 42.2568
+C 69.723792 42.2568 70.39962 41.976863 70.897841 41.478641
+C 71.396063 40.98042 71.676 40.304592 71.676 39.6
+C 71.676 38.895408 71.396063 38.21958 70.897841 37.721359
+C 70.39962 37.223137 69.723792 36.9432 69.0192 36.9432
+C 68.314608 36.9432 67.63878 37.223137 67.140559 37.721359
+C 66.642337 38.21958 66.3624 38.895408 66.3624 39.6
+C 66.3624 40.304592 66.642337 40.98042 67.140559 41.478641
+C 67.63878 41.976863 68.314608 42.2568 69.0192 42.2568
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #0072b2; fill-opacity: 0.14; stroke: #0072b2; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-reordered-0-S-11">
+    <path d="M 55.44 57.3768
+C 56.144592 57.3768 56.82042 57.096863 57.318641 56.598641
+C 57.816863 56.10042 58.0968 55.424592 58.0968 54.72
+C 58.0968 54.015408 57.816863 53.33958 57.318641 52.841359
+C 56.82042 52.343137 56.144592 52.0632 55.44 52.0632
+C 54.735408 52.0632 54.05958 52.343137 53.561359 52.841359
+C 53.063137 53.33958 52.7832 54.015408 52.7832 54.72
+C 52.7832 55.424592 53.063137 56.10042 53.561359 56.598641
+C 54.05958 57.096863 54.735408 57.3768 55.44 57.3768
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #0072b2; fill-opacity: 0.14; stroke: #0072b2; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-reordered-edge-0-13">
+    <path d="M 59.5728 54.72
+Q 62.2296 54.72 64.271481 54.72
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+    <path d="M 62.191481 53.68
+L 64.271481 54.72
+L 62.191481 55.76
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #59616a; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+   </g>
+   <g id="postswap-reordered-1-W-14">
+    <path d="M 66.3624 57.3768
+L 71.676 57.3768
+L 71.676 52.0632
+L 66.3624 52.0632
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #d55e00; fill-opacity: 0.14; stroke: #d55e00; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-route-map-16">
+    <path d="M 10.08 160.56
+L 108.72 160.56
+L 108.72 133.92
+L 10.08 133.92
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #fcfcfc; stroke: #c9cfd4; stroke-width: 0.55; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-route-poi-w-W-21">
+    <path d="M 21.564 144.6912
+L 28.188 144.6912
+L 28.188 138.0672
+L 21.564 138.0672
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #d55e00; fill-opacity: 0.14; stroke: #d55e00; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-route-poi-s-S-23">
+    <path d="M 94.9104 157.212
+C 95.788753 157.212 96.631249 156.863027 97.252338 156.241938
+C 97.873427 155.620849 98.2224 154.778353 98.2224 153.9
+C 98.2224 153.021647 97.873427 152.179151 97.252338 151.558062
+C 96.631249 150.936973 95.788753 150.588 94.9104 150.588
+C 94.032047 150.588 93.189551 150.936973 92.568462 151.558062
+C 91.947373 152.179151 91.5984 153.021647 91.5984 153.9
+C 91.5984 154.778353 91.947373 155.620849 92.568462 156.241938
+C 93.189551 156.863027 94.032047 157.212 94.9104 157.212
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #0072b2; fill-opacity: 0.14; stroke: #0072b2; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="postswap-route-route-0-25">
+    <path d="M 90.657827 153.139722
+Q 59.8932 147.6396 30.00904 142.296889
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #252b32; stroke-width: 0.8; stroke-linecap: round"/>
+    <path d="M 31.873545 143.686716
+L 30.00904 142.296889
+L 32.239605 141.639181
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #252b32; stroke: #252b32; stroke-width: 0.8; stroke-linecap: round"/>
+   </g>
+   <g id="pcdg-panel-28">
+    <path d="M 124.56 176.4
+L 236.16 176.4
+L 236.16 17.28
+L 124.56 17.28
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #ffffff; stroke: #c9cfd4; stroke-width: 0.6; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-stage-1-30">
+    <path d="M 130.32 48.96
+L 230.4 48.96
+L 230.4 38.16
+L 130.32 38.16
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #d55e00; fill-opacity: 0.055; stroke: #d55e00; stroke-opacity: 0.85; stroke-width: 0.75; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-stage-edge-1-33">
+    <path d="M 180.36 49.68
+Q 180.36 51.48 180.36 52.665081
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+    <path d="M 181.4 50.585081
+L 180.36 52.665081
+L 179.32 50.585081
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #59616a; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+   </g>
+   <g id="pcdg-stage-2-34">
+    <path d="M 130.32 64.08
+L 230.4 64.08
+L 230.4 53.28
+L 130.32 53.28
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #0072b2; fill-opacity: 0.055; stroke: #0072b2; stroke-opacity: 0.85; stroke-width: 0.75; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-stage-edge-2-37">
+    <path d="M 180.36 64.8
+Q 180.36 66.6 180.36 67.785081
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+    <path d="M 181.4 65.705081
+L 180.36 67.785081
+L 179.32 65.705081
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #59616a; stroke: #59616a; stroke-width: 0.55; stroke-linecap: round"/>
+   </g>
+   <g id="pcdg-stage-3-38">
+    <path d="M 130.32 79.2
+L 230.4 79.2
+L 230.4 68.4
+L 130.32 68.4
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #009e73; fill-opacity: 0.055; stroke: #009e73; stroke-opacity: 0.85; stroke-width: 0.75; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-route-map-41">
+    <path d="M 131.04 160.56
+L 229.68 160.56
+L 229.68 133.92
+L 131.04 133.92
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #fcfcfc; stroke: #c9cfd4; stroke-width: 0.55; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-route-poi-s-S-46">
+    <path d="M 155.7 157.212
+C 156.578353 157.212 157.420849 156.863027 158.041938 156.241938
+C 158.663027 155.620849 159.012 154.778353 159.012 153.9
+C 159.012 153.021647 158.663027 152.179151 158.041938 151.558062
+C 157.420849 150.936973 156.578353 150.588 155.7 150.588
+C 154.821647 150.588 153.979151 150.936973 153.358062 151.558062
+C 152.736973 152.179151 152.388 153.021647 152.388 153.9
+C 152.388 154.778353 152.736973 155.620849 153.358062 156.241938
+C 153.979151 156.863027 154.821647 157.212 155.7 157.212
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #0072b2; fill-opacity: 0.14; stroke: #0072b2; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-route-poi-w-W-48">
+    <path d="M 194.8032 144.6912
+L 201.4272 144.6912
+L 201.4272 138.0672
+L 194.8032 138.0672
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #d55e00; fill-opacity: 0.14; stroke: #d55e00; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="pcdg-route-route-0-50">
+    <path d="M 159.843247 152.67693
+Q 176.9076 147.6396 193.114121 142.855499
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #252b32; stroke-width: 0.8; stroke-linecap: round"/>
+    <path d="M 190.824781 142.446936
+L 193.114121 142.855499
+L 191.413667 144.441833
+z
+" clip-path="url(#p6a5c70f731)" style="fill: #252b32; stroke: #252b32; stroke-width: 0.8; stroke-linecap: round"/>
+   </g>
+   <g id="postswap-route-grid-v-17">
+    <path d="M 42.6312 160.56
+L 42.6312 133.92
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="postswap-route-grid-h-18">
+    <path d="M 10.08 151.7688
+L 108.72 151.7688
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="postswap-route-grid-v-19">
+    <path d="M 75.1824 160.56
+L 75.1824 133.92
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="postswap-route-grid-h-20">
+    <path d="M 10.08 142.9776
+L 108.72 142.9776
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="pcdg-route-grid-v-42">
+    <path d="M 163.5912 160.56
+L 163.5912 133.92
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="pcdg-route-grid-h-43">
+    <path d="M 131.04 151.7688
+L 229.68 151.7688
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="pcdg-route-grid-v-44">
+    <path d="M 196.1424 160.56
+L 196.1424 133.92
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="pcdg-route-grid-h-45">
+    <path d="M 131.04 142.9776
+L 229.68 142.9776
+" clip-path="url(#p6a5c70f731)" style="fill: none; stroke: #e7eaec; stroke-width: 0.35; stroke-linecap: square"/>
+   </g>
+   <g id="requested-relation-0">
+    <text style="font-weight: 700; font-size: 8px; font-family: 'Times New Roman'; text-anchor: middle; fill: #252b32" x="119.88" y="6.888125" transform="rotate(-0 119.88 6.888125)">Requested order: sightseeing before shopping</text>
+   </g>
+   <g id="schematic-note-1">
+    <text style="font-size: 6.5px; font-family: 'Times New Roman'; text-anchor: middle; fill: #59616a" x="119.88" y="15.95543" transform="rotate(-0 119.88 15.95543)">Both categories must occur; routes are schematic.</text>
+   </g>
+   <g id="postswap-title-3">
+    <text style="font-weight: 700; font-size: 8.2px; font-family: 'Times New Roman'; text-anchor: start; fill: #252b32" x="8.64" y="27.814328" transform="rotate(-0 8.64 27.814328)">(a) Post-generation reorder</text>
+   </g>
+   <g id="postswap-generated-label-4">
+    <text style="font-size: 6.9px; font-family: 'Times New Roman'; text-anchor: start; fill: #59616a" x="9.36" y="41.257617" transform="rotate(-0 9.36 41.257617)">Sampled</text>
+   </g>
+   <g id="postswap-generated-0-label-6">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="55.44" y="41.191398" transform="rotate(-0 55.44 41.191398)">W</text>
+   </g>
+   <g id="postswap-generated-1-label-9">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #0072b2" x="69.0192" y="41.191398" transform="rotate(-0 69.0192 41.191398)">S</text>
+   </g>
+   <g id="postswap-reordered-label-10">
+    <text style="font-size: 6.9px; font-family: 'Times New Roman'; text-anchor: start; fill: #59616a" x="9.36" y="56.377617" transform="rotate(-0 9.36 56.377617)">After reorder</text>
+   </g>
+   <g id="postswap-reordered-0-label-12">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #0072b2" x="55.44" y="56.311398" transform="rotate(-0 55.44 56.311398)">S</text>
+   </g>
+   <g id="postswap-reordered-1-label-15">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="69.0192" y="56.311398" transform="rotate(-0 69.0192 56.311398)">W</text>
+   </g>
+   <g id="postswap-route-poi-w-label-22">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="24.876" y="142.970598" transform="rotate(-0 24.876 142.970598)">W</text>
+   </g>
+   <g id="postswap-route-poi-s-label-24">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #0072b2" x="94.9104" y="155.491398" transform="rotate(-0 94.9104 155.491398)">S</text>
+   </g>
+   <g id="postswap-route-caption-26">
+    <text style="font-size: 6.4px; font-family: 'Times New Roman'; text-anchor: middle; fill: #59616a" x="59.4" y="169.2915" transform="rotate(-0 59.4 169.2915)">Same POIs; long inter-area move</text>
+   </g>
+   <g id="postswap-missing-27">
+    <text style="font-size: 6.4px; font-family: 'Times New Roman'; text-anchor: start; fill: #59616a" x="59.4" y="175.7715" transform="rotate(-0 59.4 175.7715)">Missing category: unavailable.</text>
+   </g>
+   <g id="pcdg-title-29">
+    <text style="font-weight: 700; font-size: 8.2px; font-family: 'Times New Roman'; text-anchor: start; fill: #252b32" x="129.6" y="27.814328" transform="rotate(-0 129.6 27.814328)">(b) PCDG during generation</text>
+   </g>
+   <g id="pcdg-stage-1-num-31">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="133.92" y="45.511398" transform="rotate(-0 133.92 45.511398)">1</text>
+   </g>
+   <g id="pcdg-stage-1-title-32">
+    <text style="font-weight: 700; font-size: 6.7px; font-family: 'Times New Roman'; text-anchor: start; fill: #252b32" x="142.56" y="45.421742" transform="rotate(-0 142.56 45.421742)">Order + existence</text>
+   </g>
+   <g id="pcdg-stage-2-num-35">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #0072b2" x="133.92" y="60.631398" transform="rotate(-0 133.92 60.631398)">2</text>
+   </g>
+   <g id="pcdg-stage-2-title-36">
+    <text style="font-weight: 700; font-size: 6.7px; font-family: 'Times New Roman'; text-anchor: start; fill: #252b32" x="142.56" y="60.585711" transform="rotate(-0 142.56 60.585711)">Category-aware decode</text>
+   </g>
+   <g id="pcdg-stage-3-num-39">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #009e73" x="133.92" y="75.751398" transform="rotate(-0 133.92 75.751398)">3</text>
+   </g>
+   <g id="pcdg-stage-3-title-40">
+    <text style="font-weight: 700; font-size: 6.7px; font-family: 'Times New Roman'; text-anchor: start; fill: #252b32" x="142.56" y="75.707805" transform="rotate(-0 142.56 75.707805)">Same-category refine</text>
+   </g>
+   <g id="pcdg-route-poi-s-label-47">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #0072b2" x="155.7" y="155.491398" transform="rotate(-0 155.7 155.491398)">S</text>
+   </g>
+   <g id="pcdg-route-poi-w-label-49">
+    <text style="font-weight: 700; font-size: 7.1px; font-family: 'Times New Roman'; text-anchor: middle; fill: #d55e00" x="198.1152" y="142.970598" transform="rotate(-0 198.1152 142.970598)">W</text>
+   </g>
+   <g id="pcdg-route-caption-51">
+    <text style="font-size: 6.4px; font-family: 'Times New Roman'; text-anchor: middle; fill: #59616a" x="180.36" y="169.2975" transform="rotate(-0 180.36 169.2975)">One possible refined route</text>
+   </g>
+   <g id="pcdg-mapping-52">
+    <text style="font-size: 6.3px; font-family: 'Times New Roman'; text-anchor: middle; fill: #59616a" x="180.36" y="175.74757" transform="rotate(-0 180.36 175.74757)">Categories preserved.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p6a5c70f731">
+   <rect x="0" y="0" width="239.76" height="183.6"/>
+  </clipPath>
+ </defs>
+</svg>

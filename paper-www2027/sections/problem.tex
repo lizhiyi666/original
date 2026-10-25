@@ -2,49 +2,77 @@
 \label{sec:problem}
 
 \begin{definition}[POI check-in sequence]
-We model a user's daily behavior on an LBSN as a variable-length sequence of
-check-in events. A sequence of length $n$ consists of arrival times
-$t_{1:n}$ (continuous, strictly increasing), activity categories
-$k_{1:n}$ with $k_i \in \mathcal{C} = \{1,\dots,C\}$, and points of interest
-$l_{1:n}$ with $l_i \in \mathcal{L}$. Each POI $l$ carries fixed geographic
+A POI check-in sequence of length $n$ is
+$s=(t_{1:n},k_{1:n},l_{1:n})$, where $t_{1:n}$ are arrival times,
+$k_i \in \mathcal{C}=\{1,\dots,C\}$ are activity categories, and
+$l_i \in \mathcal{L}$ are points of interest. Each POI $l$ has fixed
 coordinates $\mathrm{gps}(l)$ and a catalog category $\mathrm{cat}(l)$.
-The generator's category token $k_i$ and the emitted POI's category
-$\mathrm{cat}(l_i)$ are separate outputs and can disagree; the latter determines
-the realized activity. A per-sequence context $\mathbf{c}$ encodes coarse temporal and
-behavioral conditions (e.g., time-of-day occupancy indicators). The empirical
-distribution over such sequences is highly structured: it reflects the
-regularity and bounded predictability of human mobility~\cite{gonzalez2008mobility,song2010predictability}
-while retaining substantial individual variability.
 \end{definition}
 
-\begin{definition}[Category partial-order constraint]
-We encode a reference or user-specified category order as a sample-level binary
-matrix $\Mmat \in \{0,1\}^{C\times C}$, where $\Mmat[a,b]=1$ denotes the
-strict precedence constraint ``category $a$ precedes category $b$'': in a
-satisfying sequence, \emph{every} occurrence of category $a$ must appear before
-\emph{every} occurrence of category $b$. When $\Mmat$ is derived from a reference
-sequence, we set $\Mmat[a,b]=1$ iff the last position of $a$ precedes the first
-position of $b$. A constraint $(a,b)$ is \emph{violated} by an inversion
-(some $b$ before some $a$) or by dropping either category entirely.
+\begin{definition}[Sequence-level context]
+A sequence-level context is a tuple
+$\mathbf{c}=(\mathbf{c}^{(1)},\dots,\mathbf{c}^{(R)})$, where each
+$\mathbf{c}^{(r)}$ is a coarse temporal or behavioral condition represented
+over fixed within-day time bins. The same context conditions the generation of
+the complete sequence.
 \end{definition}
+
+In the current backbone, $R=6$ and the conditions are encoded over $24$ daily
+time windows to obtain a sequence-level context embedding. These channels
+describe the background under which a sequence is generated; they do not
+specify POI identities, category precedence, or the partial-order matrix below.
+The generator's category token $k_i$ and the emitted POI's category
+$\mathrm{cat}(l_i)$ are separate outputs, and the latter determines the
+realized activity.
+
+\begin{definition}[Category partial-order matrix]
+A category partial-order matrix is a binary matrix
+$\Mmat\in\{0,1\}^{C\times C}$, where $\Mmat[a,b]=1$ denotes the strict
+precedence requirement that category $a$ precede category $b$, and
+$\Mmat[a,b]=0$ denotes no such requirement.
+\end{definition}
+
+Both user-specified partial-order constraints and a reference check-in
+sequence induce a matrix of this form. For a sequence $s$, let
+$I_s(a)=\{i:\mathrm{cat}(l_i)=a\}$ be the positions whose realized POI
+category is $a$. Its induced matrix is
+\begin{equation}
+  \widehat{\Mmat}(s)[a,b]=
+  \begin{cases}
+    1, & I_s(a),I_s(b)\neq\varnothing\text{ and }\max I_s(a)<\min I_s(b),\\
+    0, & \text{otherwise}.
+  \end{cases}
+  \label{eq:induced-po-matrix}
+\end{equation}
+For user-specified relations, $\Mmat[a,b]=1$ whenever $a$ is required to
+precede $b$; for a reference sequence $s_{\mathrm{ref}}$, we set
+$\Mmat=\widehat{\Mmat}(s_{\mathrm{ref}})$. A missing category or an inversion
+sets the corresponding induced entry to zero.
 
 \begin{definition}[Partial-order-constrained POI generation]
-Given a frozen conditional generator of complete check-in sequences and a
-sample-level partial-order matrix $\Mmat$, we seek to sample
+Given a frozen conditional generator $p_\theta(s\mid\mathbf{c})$ and a target
+matrix $\Mmat$, sampling-time control produces
 \begin{equation}
-  (t_{1:n},\, k_{1:n},\, l_{1:n}) \sim p\big(t_{1:n}, k_{1:n}, l_{1:n} \mid \mathbf{c}, \Mmat\big),
+  \hat{s}\sim p_{\mathrm{PCDG}}(s\mid\mathbf{c},\Mmat),
+  \qquad
+  \Mmat[a,b]\leq\widehat{\Mmat}(\hat{s})[a,b]
+  \quad\forall a,b,
   \label{eq:task}
 \end{equation}
-such that (i) the generated sequences remain close to the real data distribution
-in time, space, and activity semantics; and (ii) the realized category sequence
-$\mathrm{cat}(l_{1:n})$ satisfies the precedence constraints encoded by
-$\Mmat$. The sampled tokens $k_{1:n}$ serve as a control representation, whose
-effect depends on POI decoding. Unlike next-location
-prediction~\cite{feng2018deepmove,luo2021stan,yang2022getnext}, the task outputs a
-\emph{complete} time-stamped, categorized, geolocated sequence; unlike single-step
-conditioning, the constraint couples \emph{multiple, non-adjacent} positions and
-therefore cannot be enforced by reweighting any single token independently.
+or, equivalently,
+\[
+  \Mmat\odot\bigl(\mathbf{1}_{C\times C}-\widehat{\Mmat}(\hat{s})\bigr)=0.
+\]
 \end{definition}
+
+The condition in~\eqref{eq:task} checks only relations required by $\Mmat$;
+additional valid relations are allowed. A relation fails if either category is
+absent or their order is inverted. Since $\widehat{\Mmat}$ uses
+$\mathrm{cat}(l_i)$, satisfaction is measured on realized POI categories.
+Unlike next-location prediction~\cite{feng2018deepmove,luo2021stan,yang2022getnext},
+the task generates a complete time-stamped, categorized, geolocated sequence
+under constraints coupling multiple, potentially non-adjacent positions.
+
 We evaluate along two axes that are in tension. \emph{Distributional fidelity} is
 measured by the Jensen--Shannon divergence (JSD) between generated and reference
 marginals of travel distance, centroid-based Radius, category-transition structure,
@@ -52,5 +80,5 @@ daily location count, hourly category usage, and a global ranking statistic
 (G-RANK). \emph{Constraint satisfaction} is measured by ordering-violation rates
 (OVR), pairwise and category coverage of the required relations, and an overall
 unsatisfied-relation rate (Unsat); full definitions are given in
-\S\ref{sec:exp:metrics} and Appendix~\ref{app:metrics}. These measures jointly distinguish correct ordering
-from the disappearance of required activities.
+\S\ref{sec:exp:metrics} and Appendix~\ref{app:metrics}. These measures jointly
+distinguish correct ordering from the disappearance of required activities.

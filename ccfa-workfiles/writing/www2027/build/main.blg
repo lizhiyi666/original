@@ -1,0 +1,90 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: ACM-Reference-Format.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: references.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=200001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty address in austin2021d3pm
+Warning--empty address in cao2021trajgen
+Warning--empty address in cardei2025cdd
+Warning--empty address in chen2025sequentialdiffusion
+Warning--empty address in deng2025marionette
+Warning--empty address in deng2025mirage
+Warning--empty address in feng2018deepmove
+Warning--empty address in feng2020simulate
+Warning--empty address in ho2020ddpm
+Warning--empty address in hsu2024trajgpt
+Warning--empty address in hu2024retrasyn
+Warning--can't use both volume and number fields in jiang2023tstrajgen
+Warning--empty address in jiang2023tstrajgen
+Warning--empty address in li2025geollama
+Warning--empty address in lin2023mbpgail
+Warning--empty address in long2024cloudedge
+Warning--empty address in long2023synthetic
+Warning--empty address in lou2024sedd
+Warning--empty address in luo2021stan
+Warning--empty address in meng2022concrete
+Warning--empty address in rao2025seed
+Warning--empty address in sahoo2024mdlm
+Warning--empty publisher in schiff2025guidance
+Warning--empty address in schiff2025guidance
+Warning--page numbers missing in both pages and numpages fields in schiff2025guidance
+Warning--empty address in wang2025gnprsid
+Warning--can't use both volume and number fields in wang2023pategail
+Warning--empty address in wang2023pategail
+Warning--empty address in yang2022getnext
+Warning--empty address in yuan2023stdpp
+Warning--empty address in yuan2022activity
+Warning--empty address in zhang2024mobglm
+Warning--empty address in zhu2023difftraj
+Warning--empty address in zhu2024controltraj
+You've used 45 entries,
+            6273 wiz_defined-function locations,
+            1811 strings with 30260 characters,
+and the built_in function-call counts, 61928 in all, are:
+= -- 7558
+> -- 2242
+< -- 0
++ -- 773
+- -- 733
+* -- 4763
+:= -- 5874
+add.period$ -- 224
+call.type$ -- 45
+change.case$ -- 419
+chr.to.int$ -- 44
+cite$ -- 79
+duplicate$ -- 5467
+empty$ -- 3775
+format.name$ -- 912
+if$ -- 15000
+int.to.chr$ -- 3
+int.to.str$ -- 1
+missing$ -- 212
+newline$ -- 424
+num.names$ -- 314
+pop$ -- 2154
+preamble$ -- 1
+purify$ -- 777
+quote$ -- 0
+skip$ -- 2079
+stack$ -- 0
+substring$ -- 4964
+swap$ -- 665
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 1162
+warning$ -- 34
+while$ -- 271
+width$ -- 0
+write$ -- 959
+(There were 34 warnings)

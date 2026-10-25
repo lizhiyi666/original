@@ -95,7 +95,8 @@ class PageLayoutTests(unittest.TestCase):
     def test_main_include_tree_excludes_appendix_floats(self):
         self.assertEqual(main_float_labels(), {
             "fig:postswap-pcdg", "fig:framework", "fig:tradeoff",
-            "tab:method", "tab:method-jsd", "alg:pcdg"})
+            "tab:method", "tab:method-jsd", "tab:ablation-jsd", "tab:ablation",
+            "alg:pcdg"})
 
 
 if __name__ == "__main__":

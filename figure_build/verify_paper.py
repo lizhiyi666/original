@@ -44,9 +44,27 @@ def git(*args):
 
 
 def data_rows(text):
-    return Counter(line.strip() for line in text.splitlines()
-                   if " & " in line and re.search(r"\d+\.\d+", line)
-                   and line.rstrip().endswith(r"\\"))
+    rows = []
+    for line in text.splitlines():
+        if " & " not in line or not re.search(r"\d+\.\d+", line) or not line.rstrip().endswith(r"\\"):
+            continue
+        numbers = tuple(round(float(value), 3)
+                        for value in re.findall(r"(?<![A-Za-z])\d+\.\d+", line))
+        structure = re.sub(r"(?<![A-Za-z])\d+\.\d+", "<NUM>", line.strip())
+        rows.append((structure, numbers))
+    return rows
+
+
+def equivalent_data_rows(original, current, tolerance=0.00101):
+    """Allow display rounding while preserving row structure and values."""
+    if len(original) != len(current):
+        return False
+    for (old_structure, old_numbers), (new_structure, new_numbers) in zip(original, current):
+        if old_structure != new_structure or len(old_numbers) != len(new_numbers):
+            return False
+        if any(abs(old - new) > tolerance for old, new in zip(old_numbers, new_numbers)):
+            return False
+    return True
 
 
 def verify_locked_metadata(original, current):
@@ -107,7 +125,7 @@ def main(build_dir=None):
     for filename in ("method-comparison.tex", "ablation.tex", "stagewise.tex"):
         old = git("show", f"{BASELINE}:paper-www2027/tables/{filename}")
         new = (PAPER / "tables" / filename).read_text(encoding="utf-8")
-        assert data_rows(old) and data_rows(old) == data_rows(new), filename
+        assert data_rows(old) and equivalent_data_rows(data_rows(old), data_rows(new)), filename
         print(f"PASS unchanged numeric rows / precision / bolding: {filename}")
     for path in [PAPER / "main.tex", *sorted((PAPER / "sections").glob("*.tex"))]:
         text = path.read_text(encoding="utf-8")

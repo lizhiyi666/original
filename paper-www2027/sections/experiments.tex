@@ -3,9 +3,9 @@
 We test constraint satisfaction, distributional fidelity, and the contributions
 of projection, decoding, and geometry refinement.
 
-\subsection{Setup}
+\subsection{Experimental Setup}
 \label{sec:exp:setup}
-\paragraph{Datasets.}
+\noindent\textbf{Datasets.}
 New York has $3{,}160$ training and $2{,}108$ test sequences; Istanbul has
 $7{,}035$ and $4{,}914$. New York's sequence-level split reverses category-
 precedence preferences, but does not guarantee disjoint complete partial-order
@@ -14,7 +14,7 @@ construction provenance is not fully recoverable. Each test reference supplies
 an order matrix from actual category first/last positions (\S\ref{sec:problem}).
 Sampling-time methods share frozen city-specific backbones; PO-CFG is retrained.
 
-\paragraph{Protocol.}
+\noindent\textbf{Protocol.}
 Order, existence, token-KL, and distance-KL weights are $(1,5,1,1)$.
 Projection uses Gumbel temperature $3$ every fourth step in the final $40$
 reverse steps: $10$ outer by $50$ inner iterations (5,000 updates per active
@@ -25,7 +25,7 @@ stack uses $(\rho,\lambda,\beta)=(0.5,0,1)$. Reported spreads are sample SDs
 across seeds $135398$, $135399$, $135400$ at fixed checkpoints, not training
 variability or confidence intervals.
 
-\paragraph{Baselines.}
+\noindent\textbf{Baselines.}
 \textbf{JointGen} is the unconstrained backbone.
 \textbf{PostSwap} stably reorders generated events according to $\Mmat$.
 \textbf{EnergyGuide} takes one gradient step on order plus five times existence
@@ -33,7 +33,7 @@ energy per controlled step, without projection's KL anchor or dual updates.
 \textbf{PO-CFG} is trained with partial-order conditioning for $1000$ epochs and
 evaluated at classifier-free guidance scale $1$; it is the only retrained
 baseline. Our variants are \pcdgp (projection), \pcdgpd (projection and
-category-consistent decoding), and \pcdg (the full stack).
+category-consistent decoding), and \pcdg (full).
 
 % Queue the unchanged double-column table before the page break in Setup.
 \input{tables/method-comparison}
@@ -52,7 +52,7 @@ category-consistent decoding), and \pcdg (the full stack).
   \label{fig:tradeoff}
 \end{figure}
 
-\paragraph{Metrics.}
+\noindent\textbf{Metrics.}
 \label{sec:exp:metrics}
 All tables use the archived evaluation-v2 protocol.
 Fidelity uses six JSDs: cumulative travel \emph{Distance}, \emph{Radius},
@@ -90,7 +90,7 @@ Tables express these rates in percent.
 \label{sec:exp:main}
 Table~\ref{tab:method} compares all methods on both cities.
 
-\paragraph{Constraint satisfaction.}
+\noindent\textbf{Constraint satisfaction.}
 The full \pcdg reduces strict OVR from $92.89\%$ to $4.04\%$ on Istanbul and
 from $89.45\%$ to $11.28\%$ on New York, reductions of $88.85$ and $78.17$
 percentage points. Unsat falls from $95.57\%$ to $7.29\%$ and from $93.64\%$
@@ -99,7 +99,7 @@ All five constraint metrics improve over PO-CFG in both cities.
 PostSwap reaches zero skip OVR but leaves coverage unchanged, illustrating why
 skip OVR alone is insufficient. EnergyGuide gives much smaller gains.
 
-\paragraph{Fidelity and residuals.}
+\noindent\textbf{Fidelity and residuals.}
 On Istanbul, projection alone degrades Distance ($0.1128\to0.1314$) and Radius
 ($0.0226\to0.0516$), while the full stack lowers all six JSDs below JointGen.
 It also lowers five of six below PO-CFG; its G-RANK remains slightly higher
@@ -112,27 +112,17 @@ no significance test is performed.
 
 \subsection{Ablation of the projection stage}
 \label{sec:exp:ablation}
-Appendix~\ref{app:ablation} reports eight projection-stage variants:
-\textsc{No Projection}, \textsc{No Existence}, \textsc{No Order},
-\textsc{No KL} (both KL terms off), \textsc{No Distance KL},
-\textsc{Fixed Multipliers}, \textsc{No Gumbel}, and \textsc{Full} ($=\pcdgp$).
+The projection ablation removes one component at a time. Tables~\ref{tab:ablation-jsd}
+and~\ref{tab:ablation} report all six fidelity and five constraint metrics with
+three-seed means and standard deviations.
+\input{tables/ablation}
 
-Removing existence reduces pair coverage to $7.34\%$ on Istanbul and $10.95\%$
-on New York, below JointGen's $14.63\%$ and $21.13\%$. Skip OVR also decreases,
-to $7.67\%$ and $18.04\%$: omitting constrained categories evades the order
-penalty. Removing order retains high coverage ($72.53\%$/$69.92\%$) but raises
-strict OVR to $63.50\%$/$65.43\%$. Fixed multipliers increase strict OVR by
-$9.90$/$19.94$ percentage points, supporting adaptive dual updates at this budget.
-Distance KL lowers Distance and Radius in both cities: from $0.1441/0.0582$ to
-$0.1314/0.0516$ on Istanbul and from $0.2484/0.1430$ to $0.2210/0.1265$ on New
-York. Comparing \textsc{No KL} with \textsc{No Distance KL} isolates the token
-anchor only with distance regularization disabled; it does not establish its
-marginal effect in the full projection. Removing Gumbel noise has nonuniform
-effects and lowers New York Distance to $0.2055$.
-Together, the ablations separate category presence and ordering from spatial
-regularization: existence and order terms address distinct constraint failures,
-while the distance term changes spatial fidelity without guaranteeing gains on
-every metric.
+Removing existence lowers PairCov below the unconstrained backbone, showing
+that ordering alone can be satisfied by omitting constrained categories.
+Removing order retains coverage but raises strict OVR, separating presence from
+ordering. Distance KL improves the two spatial indicators in both cities, while
+the Gumbel and KL variants have metric-dependent effects; these are component
+effects rather than a claim that every term improves every fidelity statistic.
 
 \subsection{Decomposing the fidelity--constraint trade-off}
 \label{sec:exp:tradeoff}

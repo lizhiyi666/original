@@ -1,0 +1,2293 @@
+{
+  "checked": "2026-10-19",
+  "source": "Crossref publisher-deposited metadata; DOI identity is not citation-context proof",
+  "records": [
+    {
+      "key": "deng2025marionette",
+      "doi": "10.1145/3711896.3737039",
+      "title": [
+        "Marionette: Fine-Grained Conditional Generative Modeling of Spatiotemporal Human Trajectory Data Beyond Imitation"
+      ],
+      "authors": [
+        "Deng, Bangchao",
+        "Ding, Ling",
+        "Ji, Lianhua",
+        "Chen, Chunhua",
+        "Jing, Xin",
+        "Qu, Bingqing",
+        "Yang, Dingqi"
+      ],
+      "venue": [
+        "Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2"
+      ],
+      "published": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "online": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "print": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "463-473",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3711896.3737039",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "gong2025stcdm",
+      "doi": "10.1109/TKDE.2025.3525718",
+      "title": [
+        "STCDM: Spatio-Temporal Contrastive Diffusion Model for Check-In Sequence Generation"
+      ],
+      "authors": [
+        "Gong, Letian",
+        "Guo, Shengnan",
+        "Lin, Yan",
+        "Liu, Yichen",
+        "Zheng, Erwen",
+        "Shuang, Yiwei",
+        "Lin, Youfang",
+        "Hu, Jilin",
+        "Wan, Huaiyu"
+      ],
+      "venue": [
+        "IEEE Transactions on Knowledge and Data Engineering"
+      ],
+      "published": [
+        [
+          2025,
+          4
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2025,
+          4
+        ]
+      ],
+      "volume": "37",
+      "issue": "4",
+      "page": "2141-2154",
+      "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/69/10918320/10836764.pdf?arnumber=10836764",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "yuan2023stdpp",
+      "doi": "10.1145/3580305.3599511",
+      "title": [
+        "Spatio-temporal Diffusion Point Processes"
+      ],
+      "authors": [
+        "Yuan, Yuan",
+        "Ding, Jingtao",
+        "Shao, Chenyang",
+        "Jin, Depeng",
+        "Li, Yong"
+      ],
+      "venue": [
+        "Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+      ],
+      "published": [
+        [
+          2023,
+          8,
+          4
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          8,
+          4
+        ]
+      ],
+      "print": [
+        [
+          2023,
+          8,
+          6
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "3173-3184",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3580305.3599511",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3580305.3599511",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "yuan2022activity",
+      "doi": "10.1145/3534678.3542671",
+      "title": [
+        "Activity Trajectory Generation via Modeling Spatiotemporal Dynamics"
+      ],
+      "authors": [
+        "Yuan, Yuan",
+        "Ding, Jingtao",
+        "Wang, Huandong",
+        "Jin, Depeng",
+        "Li, Yong"
+      ],
+      "venue": [
+        "Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+      ],
+      "published": [
+        [
+          2022,
+          8,
+          14
+        ]
+      ],
+      "online": [
+        [
+          2022,
+          8,
+          14
+        ]
+      ],
+      "print": [
+        [
+          2022,
+          8,
+          14
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "4752-4762",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3534678.3542671",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3534678.3542671",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "deng2025mirage",
+      "doi": "10.1145/3690624.3709180",
+      "title": [
+        "Revisiting Synthetic Human Trajectories: Imitative Generation and Benchmarks Beyond Datasaurus"
+      ],
+      "authors": [
+        "Deng, Bangchao",
+        "Jing, Xin",
+        "Yang, Tianyue",
+        "Qu, Bingqing",
+        "Yang, Dingqi",
+        "Cudre-Mauroux, Philippe"
+      ],
+      "venue": [
+        "Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.1"
+      ],
+      "published": [
+        [
+          2025,
+          7,
+          20
+        ]
+      ],
+      "online": [
+        [
+          2025,
+          7,
+          20
+        ]
+      ],
+      "print": [
+        [
+          2025,
+          7,
+          20
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "201-212",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3690624.3709180",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3690624.3709180",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "cardei2025cdd",
+      "doi": "10.52202/085713-0415",
+      "title": [
+        "Constrained Discrete Diffusion"
+      ],
+      "authors": [
+        "Cardei, Michael",
+        "Christopher, Jacob K",
+        "Kailkhura, Bhavya",
+        "Hartvigsen, Tom",
+        "Fioretto, Ferdinando"
+      ],
+      "venue": [
+        "Advances in Neural Information Processing Systems 38"
+      ],
+      "published": [
+        [
+          2025
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2025
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "13870-13903",
+      "publisher": "Neural Information Processing Systems Foundation, Inc. (NeurIPS)",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": null,
+      "relation": {}
+    },
+    {
+      "key": "zhu2024controltraj",
+      "doi": "10.1145/3637528.3671866",
+      "title": [
+        "ControlTraj: Controllable Trajectory Generation with Topology-Constrained Diffusion Model"
+      ],
+      "authors": [
+        "Zhu, Yuanshao",
+        "Yu, James Jianqiao",
+        "Zhao, Xiangyu",
+        "Liu, Qidong",
+        "Ye, Yongchao",
+        "Chen, Wei",
+        "Zhang, Zijian",
+        "Wei, Xuetao",
+        "Liang, Yuxuan"
+      ],
+      "venue": [
+        "Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+      ],
+      "published": [
+        [
+          2024,
+          8,
+          24
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          8,
+          24
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          8,
+          25
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "4676-4687",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3637528.3671866",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3637528.3671866",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "wang2024dsdrec",
+      "doi": "10.1016/j.ins.2024.121004",
+      "title": [
+        "DSDRec: Next POI recommendation using deep semantic extraction and diffusion model"
+      ],
+      "authors": [
+        "Wang, Ziwei",
+        "Zeng, Jun",
+        "Zhong, Lin",
+        "Liu, Ling",
+        "Gao, Min",
+        "Wen, Junhao"
+      ],
+      "venue": [
+        "Information Sciences"
+      ],
+      "published": [
+        [
+          2024,
+          9
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024,
+          9
+        ]
+      ],
+      "volume": "678",
+      "issue": null,
+      "page": "121004",
+      "publisher": "Elsevier BV",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://api.elsevier.com/content/article/PII:S0020025524009186?httpAccept=text/xml",
+          "content-type": "text/xml",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://api.elsevier.com/content/article/PII:S0020025524009186?httpAccept=text/plain",
+          "content-type": "text/plain",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "long2024cloudedge",
+      "doi": "10.1145/3637528.3671743",
+      "title": [
+        "Diffusion-Based Cloud-Edge-Device Collaborative Learning for Next POI Recommendations"
+      ],
+      "authors": [
+        "Long, Jing",
+        "Ye, Guanhua",
+        "Chen, Tong",
+        "Wang, Yang",
+        "Wang, Meng",
+        "Yin, Hongzhi"
+      ],
+      "venue": [
+        "Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+      ],
+      "published": [
+        [
+          2024,
+          8,
+          24
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          8,
+          24
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          8,
+          25
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "2026-2036",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3637528.3671743",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3637528.3671743",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "hu2011precedence",
+      "doi": "10.1609/aaai.v25i1.8052",
+      "title": [
+        "On the Discovery and Utility of Precedence Constraints in Temporal Planning"
+      ],
+      "authors": [
+        "Hu, Yanmei",
+        "Yin, Minghao",
+        "Cai, Dunbo"
+      ],
+      "venue": [
+        "Proceedings of the AAAI Conference on Artificial Intelligence"
+      ],
+      "published": [
+        [
+          2011,
+          8,
+          4
+        ]
+      ],
+      "online": [
+        [
+          2011,
+          8,
+          4
+        ]
+      ],
+      "print": null,
+      "volume": "25",
+      "issue": "1",
+      "page": "1788-1789",
+      "publisher": "Association for the Advancement of Artificial Intelligence (AAAI)",
+      "type": "journal-article",
+      "abstract": "<jats:p>\n      \n        We extend the precedence constraints contexts heuristic (hpcc) to a temporal and numeric setting, and propose rules to account precedence constraints among comparison variables and logical variables. Experimental results on benchmark domains show that our extension has the potential to lead to better plan quality than that with the heuristic proposed by Eyerich and others.\n      \n    </jats:p>",
+      "link": [
+        {
+          "URL": "https://ojs.aaai.org/index.php/AAAI/article/download/8052/7911",
+          "content-type": "application/pdf",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://ojs.aaai.org/index.php/AAAI/article/download/8052/7911",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "geng2023grammar",
+      "doi": "10.18653/v1/2023.emnlp-main.674",
+      "title": [
+        "Grammar-Constrained Decoding for Structured NLP Tasks without Finetuning"
+      ],
+      "authors": [
+        "Geng, Saibo",
+        "Josifoski, Martin",
+        "Peyrard, Maxime",
+        "West, Robert"
+      ],
+      "venue": [
+        "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing"
+      ],
+      "published": [
+        [
+          2023
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2023
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "10932-10952",
+      "publisher": "Association for Computational Linguistics",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": null,
+      "relation": {}
+    },
+    {
+      "key": "chen2025sequentialdiffusion",
+      "doi": "10.1145/3711896.3737172",
+      "title": [
+        "Unlocking the Power of Diffusion Models in Sequential Recommendation: A Simple and Effective Approach"
+      ],
+      "authors": [
+        "Chen, Jialei",
+        "Xu, Yuanbo",
+        "Jiang, Yiheng"
+      ],
+      "venue": [
+        "Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2"
+      ],
+      "published": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "online": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "print": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "155-166",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3711896.3737172",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "sahoo2024mdlm",
+      "doi": "10.52202/079017-4135",
+      "title": [
+        "Simple and Effective Masked Diffusion Language Models"
+      ],
+      "authors": [
+        "Sahoo, Subham",
+        "Arriola, Marianne",
+        "Schiff, Yair",
+        "Gokaslan, Aaron",
+        "Marroquin, Edgar",
+        "Chiu, Justin",
+        "Rush, Alexander",
+        "Kuleshov, Volodymyr"
+      ],
+      "venue": [
+        "Advances in Neural Information Processing Systems 37"
+      ],
+      "published": [
+        [
+          2024
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "130136-130184",
+      "publisher": "Neural Information Processing Systems Foundation, Inc. (NeurIPS)",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": null,
+      "relation": {}
+    },
+    {
+      "key": "cao2021trajgen",
+      "doi": "10.1145/3447548.3467158",
+      "title": [
+        "Generating Mobility Trajectories with Retained Data Utility"
+      ],
+      "authors": [
+        "Cao, Chu",
+        "Li, Mo"
+      ],
+      "venue": [
+        "Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery &amp; Data Mining"
+      ],
+      "published": [
+        [
+          2021,
+          8,
+          14
+        ]
+      ],
+      "online": [
+        [
+          2021,
+          8,
+          14
+        ]
+      ],
+      "print": [
+        [
+          2021,
+          8,
+          14
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "2610-2620",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3447548.3467158",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3447548.3467158",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "long2023synthetic",
+      "doi": "10.1145/3580305.3599888",
+      "title": [
+        "Practical Synthetic Human Trajectories Generation Based on Variational Point Processes"
+      ],
+      "authors": [
+        "Long, Qingyue",
+        "Wang, Huandong",
+        "Li, Tong",
+        "Huang, Lisi",
+        "Wang, Kun",
+        "Wu, Qiong",
+        "Li, Guangyu",
+        "Liang, Yanping",
+        "Yu, Li",
+        "Li, Yong"
+      ],
+      "venue": [
+        "Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+      ],
+      "published": [
+        [
+          2023,
+          8,
+          4
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          8,
+          4
+        ]
+      ],
+      "print": [
+        [
+          2023,
+          8,
+          6
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "4561-4571",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3580305.3599888",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3580305.3599888",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "feng2020simulate",
+      "doi": "10.1145/3394486.3412862",
+      "title": [
+        "Learning to Simulate Human Mobility"
+      ],
+      "authors": [
+        "Feng, Jie",
+        "Yang, Zeyu",
+        "Xu, Fengli",
+        "Yu, Haisu",
+        "Wang, Mudan",
+        "Li, Yong"
+      ],
+      "venue": [
+        "Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining"
+      ],
+      "published": [
+        [
+          2020,
+          8,
+          20
+        ]
+      ],
+      "online": [
+        [
+          2020,
+          8,
+          20
+        ]
+      ],
+      "print": [
+        [
+          2020,
+          8,
+          23
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "3426-3433",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3394486.3412862",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3394486.3412862",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "chen2024controldag",
+      "doi": "10.18653/v1/2024.naacl-short.42",
+      "title": [
+        "Control-DAG: Constrained Decoding for Non-Autoregressive Directed Acyclic T5 using Weighted Finite State Automata"
+      ],
+      "authors": [
+        "Chen, Jinghong",
+        "Lin, Weizhe",
+        "Mei, Jingbiao",
+        "Byrne, Bill"
+      ],
+      "venue": [
+        "Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 2: Short Papers)"
+      ],
+      "published": [
+        [
+          2024
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "508-518",
+      "publisher": "Association for Computational Linguistics",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": null,
+      "relation": {}
+    },
+    {
+      "key": "gonzalez2008mobility",
+      "doi": "10.1038/nature07850",
+      "title": [
+        "Understanding individual human mobility patterns"
+      ],
+      "authors": [
+        "González, Marta C.",
+        "Hidalgo, César A.",
+        "Barabási, Albert-László"
+      ],
+      "venue": [
+        "Nature"
+      ],
+      "published": [
+        [
+          2009,
+          3
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2009,
+          3
+        ]
+      ],
+      "volume": "458",
+      "issue": "7235",
+      "page": "238-238",
+      "publisher": "Springer Science and Business Media LLC",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://www.nature.com/articles/nature07850.pdf",
+          "content-type": "application/pdf",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "http://www.nature.com/articles/nature07850",
+          "content-type": "text/html",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "http://www.nature.com/articles/nature07850.pdf",
+          "content-type": "application/pdf",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "yang2022getnext",
+      "doi": "10.1145/3477495.3531983",
+      "title": [
+        "GETNext"
+      ],
+      "authors": [
+        "Yang, Song",
+        "Liu, Jiamou",
+        "Zhao, Kaiqi"
+      ],
+      "venue": [
+        "Proceedings of the 45th International ACM SIGIR Conference on Research and Development in Information Retrieval"
+      ],
+      "published": [
+        [
+          2022,
+          7,
+          6
+        ]
+      ],
+      "online": [
+        [
+          2022,
+          7,
+          7
+        ]
+      ],
+      "print": [
+        [
+          2022,
+          7,
+          6
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "1144-1153",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3477495.3531983",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3477495.3531983",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "feng2018deepmove",
+      "doi": "10.1145/3178876.3186058",
+      "title": [
+        "DeepMove"
+      ],
+      "authors": [
+        "Feng, Jie",
+        "Li, Yong",
+        "Zhang, Chao",
+        "Sun, Funing",
+        "Meng, Fanchao",
+        "Guo, Ang",
+        "Jin, Depeng"
+      ],
+      "venue": [
+        "Proceedings of the 2018 World Wide Web Conference on World Wide Web - WWW '18"
+      ],
+      "published": [
+        [
+          2018
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2018
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "1459-1468",
+      "publisher": "ACM Press",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3178876.3186058",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "http://dl.acm.org/ft_gateway.cfm?id=3186058&ftid=1957378&dwn=1",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "luo2021stan",
+      "doi": "10.1145/3442381.3449998",
+      "title": [
+        "STAN: Spatio-Temporal Attention Network for Next Location Recommendation"
+      ],
+      "authors": [
+        "Luo, Yingtao",
+        "Liu, Qiang",
+        "Liu, Zhaocheng"
+      ],
+      "venue": [
+        "Proceedings of the Web Conference 2021"
+      ],
+      "published": [
+        [
+          2021,
+          4,
+          19
+        ]
+      ],
+      "online": [
+        [
+          2021,
+          6,
+          3
+        ]
+      ],
+      "print": [
+        [
+          2021,
+          4,
+          19
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "2177-2185",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3442381.3449998",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3442381.3449998",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "meng2022concrete",
+      "doi": "10.52202/068431-2502",
+      "title": [
+        "Concrete Score Matching: Generalized Score Matching for Discrete Data"
+      ],
+      "authors": [
+        "Meng, Chenlin",
+        "Choi, Kristy",
+        "Song, Jiaming",
+        "Ermon, Stefano"
+      ],
+      "venue": [
+        "Advances in Neural Information Processing Systems 35"
+      ],
+      "published": [
+        [
+          2022
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2022
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "34532-34545",
+      "publisher": "Neural Information Processing Systems Foundation, Inc. (NeurIPS)",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": null,
+      "relation": {}
+    },
+    {
+      "key": "wang2025gnprsid",
+      "doi": "10.1145/3711896.3736981",
+      "title": [
+        "Generative Next POI Recommendation with Semantic ID"
+      ],
+      "authors": [
+        "Wang, Dongsheng",
+        "Huang, Yuxi",
+        "Gao, Shen",
+        "Wang, Yifan",
+        "Huang, Chengrui",
+        "Shang, Shuo"
+      ],
+      "venue": [
+        "Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2"
+      ],
+      "published": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "online": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "print": [
+        [
+          2025,
+          8,
+          3
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "2904-2914",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3711896.3736981",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "wei2024diffrntraj",
+      "doi": "10.1109/TKDE.2024.3460051",
+      "title": [
+        "Diff-RNTraj: A Structure-Aware Diffusion Model for Road Network-Constrained Trajectory Generation"
+      ],
+      "authors": [
+        "Wei, Tonglong",
+        "Lin, Youfang",
+        "Guo, Shengnan",
+        "Lin, Yan",
+        "Huang, Yiheng",
+        "Xiang, Chenyang",
+        "Bai, Yuqing",
+        "Wan, Huaiyu"
+      ],
+      "venue": [
+        "IEEE Transactions on Knowledge and Data Engineering"
+      ],
+      "published": [
+        [
+          2024,
+          12
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024,
+          12
+        ]
+      ],
+      "volume": "36",
+      "issue": "12",
+      "page": "7940-7953",
+      "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/69/10750897/10679607.pdf?arnumber=10679607",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "song2010predictability",
+      "doi": "10.1126/science.1177170",
+      "title": [
+        "Limits of Predictability in Human Mobility"
+      ],
+      "authors": [
+        "Song, Chaoming",
+        "Qu, Zehui",
+        "Blumm, Nicholas",
+        "Barabási, Albert-László"
+      ],
+      "venue": [
+        "Science"
+      ],
+      "published": [
+        [
+          2010,
+          2,
+          19
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2010,
+          2,
+          19
+        ]
+      ],
+      "volume": "327",
+      "issue": "5968",
+      "page": "1018-1021",
+      "publisher": "American Association for the Advancement of Science (AAAS)",
+      "type": "journal-article",
+      "abstract": "<jats:title>Predictable Travel Routines</jats:title>\n                  <jats:p>\n                    While people rarely perceive their actions to be random, current models of human activity are fundamentally stochastic. Processes that rely on human mobility patterns, like the prediction of new epidemics, traffic engineering, or city planning, could benefit from highly accurate predictive models. To investigate the predictability of human dynamics,\n                    <jats:bold>\n                      Song\n                      <jats:italic>et al.</jats:italic>\n                    </jats:bold>\n                    (p.\n                    <jats:related-article xmlns:xlink=\"http://www.w3.org/1999/xlink\" ext-link-type=\"doi\" page=\"1018\" related-article-type=\"in-this-issue\" vol=\"327\" xlink:href=\"10.1126/science.1177170\">1018</jats:related-article>\n                    ) used the recorded trajectories of millions of mobile phone users, collected by mobile phone companies and anonymized for research purposes. They hypothesized that given the wide range of travel patterns that different users follow, there would be significant differences between their predictability as well: Users who travel less should be easier to predict than those who are constantly on the road. Surprisingly, there was 93% predictability across the whole user base, and individuals' predictability did not in general fall significantly below 80%.\n                  </jats:p>",
+      "link": [
+        {
+          "URL": "https://www.science.org/doi/pdf/10.1126/science.1177170",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "rao2025seed",
+      "doi": "10.1145/3696410.3714951",
+      "title": [
+        "Seed: Bridging Sequence and Diffusion Models for Road Trajectory Generation"
+      ],
+      "authors": [
+        "Rao, Xuan",
+        "Shang, Shuo",
+        "Jiang, Renhe",
+        "Han, Peng",
+        "Chen, Lisi"
+      ],
+      "venue": [
+        "Proceedings of the ACM on Web Conference 2025"
+      ],
+      "published": [
+        [
+          2025,
+          4,
+          22
+        ]
+      ],
+      "online": [
+        [
+          2025,
+          4,
+          22
+        ]
+      ],
+      "print": [
+        [
+          2025,
+          4,
+          22
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "2007-2017",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3696410.3714951",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3696410.3714951",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "qin2023diffpoi",
+      "doi": "10.1145/3624475",
+      "title": [
+        "A Diffusion Model for POI Recommendation"
+      ],
+      "authors": [
+        "Qin, Yifang",
+        "Wu, Hongjun",
+        "Ju, Wei",
+        "Luo, Xiao",
+        "Zhang, Ming"
+      ],
+      "venue": [
+        "ACM Transactions on Information Systems"
+      ],
+      "published": [
+        [
+          2023,
+          11,
+          8
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          11,
+          8
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          3,
+          31
+        ]
+      ],
+      "volume": "42",
+      "issue": "2",
+      "page": "1-27",
+      "publisher": "Association for Computing Machinery (ACM)",
+      "type": "journal-article",
+      "abstract": "<jats:p>\n            Next Point-of-Interest (POI) recommendation is a critical task in location-based services that aim to provide personalized suggestions for the user’s next destination. Previous works on POI recommendation have laid focus on modeling the user’s spatial preference. However, existing works that leverage spatial information are only based on the aggregation of users’ previous visited positions, which discourages the model from recommending POIs in novel areas. This trait of position-based methods will harm the model’s performance in many situations. Additionally, incorporating sequential information into the user’s spatial preference remains a challenge. In this article, we propose\n            <jats:italic>Diff-POI</jats:italic>\n            : a\n            <jats:italic>Diffu</jats:italic>\n            sion-based model that samples the user’s spatial preference for the next\n            <jats:italic>POI</jats:italic>\n            recommendation. Inspired by the wide application of diffusion algorithm in sampling from distributions, Diff-POI encodes the user’s visiting sequence and spatial character with two tailor-designed graph encoding modules, followed by a diffusion-based sampling strategy to explore the user’s spatial visiting trends. We leverage the diffusion process and its reverse form to sample from the posterior distribution and optimized the corresponding score function. We design a joint training and inference framework to optimize and evaluate the proposed Diff-POI. Extensive experiments on four real-world POI recommendation datasets demonstrate the superiority of our Diff-POI over state-of-the-art baseline methods. Further ablation and parameter studies on Diff-POI reveal the functionality and effectiveness of the proposed diffusion-based sampling strategy for addressing the limitations of existing methods.\n          </jats:p>",
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3624475",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3624475",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "long2026population",
+      "doi": "10.1145/3787459",
+      "title": [
+        "Dynamic Population Distribution Aware Human Trajectory Generation with Diffusion Model"
+      ],
+      "authors": [
+        "Long, Qingyue",
+        "Rong, Can",
+        "Li, Tong",
+        "Li, Yong"
+      ],
+      "venue": [
+        "ACM Transactions on Intelligent Systems and Technology"
+      ],
+      "published": [
+        [
+          2026,
+          4,
+          27
+        ]
+      ],
+      "online": [
+        [
+          2026,
+          4,
+          27
+        ]
+      ],
+      "print": [
+        [
+          2026,
+          6,
+          30
+        ]
+      ],
+      "volume": "17",
+      "issue": "3",
+      "page": "1-23",
+      "publisher": "Association for Computing Machinery (ACM)",
+      "type": "journal-article",
+      "abstract": "<jats:p>Human trajectory data are crucial in urban planning, traffic engineering, and public health. However, directly using real-world trajectory data often faces challenges such as privacy concerns, data acquisition costs, and data quality. A practical solution to these challenges is trajectory generation, a method developed to simulate human mobility behaviors. Existing trajectory generation methods mainly focus on capturing individual movement patterns but often overlook the influence of population distribution on trajectory generation. In reality, dynamic population distribution reflects changes in population density across different regions, significantly impacting individual mobility behavior. Thus, we propose a novel trajectory generation framework based on a diffusion model, which integrates the dynamic population distribution constraints to guide high-fidelity generation outcomes. Specifically, we construct a spatial graph to enhance the spatial correlation of trajectories. Then, we design a dynamic population distribution aware denoising network to capture the spatiotemporal dependencies of human mobility behavior as well as the impact of population distribution in the denoising process. Extensive experiments show that the trajectories generated by our model can resemble real-world trajectories in terms of some critical statistical metrics, outperforming state-of-the-art algorithms by over 54%.</jats:p>",
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3787459",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "hsu2024trajgpt",
+      "doi": "10.1145/3678717.3691303",
+      "title": [
+        "TrajGPT: Controlled Synthetic Trajectory Generation Using a Multitask Transformer-Based Spatiotemporal Model"
+      ],
+      "authors": [
+        "Hsu, Shang-Ling",
+        "Tung, Emmanuel",
+        "Krumm, John",
+        "Shahabi, Cyrus",
+        "Shafique, Khurram"
+      ],
+      "venue": [
+        "Proceedings of the 32nd ACM International Conference on Advances in Geographic Information Systems"
+      ],
+      "published": [
+        [
+          2024,
+          10,
+          29
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          11,
+          22
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          10,
+          29
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "362-371",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3678717.3691303",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3678717.3691303",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "li2025geollama",
+      "doi": "10.1109/MDM65600.2025.00023",
+      "title": [
+        "Geo-Llama: Leveraging LLMs for Human Mobility Trajectory Generation with Constraints"
+      ],
+      "authors": [
+        "Li, Siyu",
+        "Tran, Toan",
+        "Lin, Haowen",
+        "Krumm, John",
+        "Shahabi, Cyrus",
+        "Zhao, Lingyi",
+        "Shafique, Khurram",
+        "Xiong, Li"
+      ],
+      "venue": [
+        "2025 26th IEEE International Conference on Mobile Data Management (MDM)"
+      ],
+      "published": [
+        [
+          2025,
+          6,
+          2
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2025,
+          6,
+          2
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "20-31",
+      "publisher": "IEEE",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/11058387/11058380/11058458.pdf?arnumber=11058458",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "zhang2024mobglm",
+      "doi": "10.1145/3678717.3691311",
+      "title": [
+        "MobGLM: A Large Language Model for Synthetic Human Mobility Generation"
+      ],
+      "authors": [
+        "Zhang, Kunyi",
+        "Pang, Yanbo",
+        "Zhang, Yurong",
+        "Sekimoto, Yoshihide"
+      ],
+      "venue": [
+        "Proceedings of the 32nd ACM International Conference on Advances in Geographic Information Systems"
+      ],
+      "published": [
+        [
+          2024,
+          10,
+          29
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          11,
+          22
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          10,
+          29
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "629-632",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3678717.3691311",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3678717.3691311",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "sun2023sprt",
+      "doi": "10.1109/TITS.2023.3241290",
+      "title": [
+        "Synthesizing Realistic Trajectory Data With Differential Privacy"
+      ],
+      "authors": [
+        "Sun, Xinyue",
+        "Ye, Qingqing",
+        "Hu, Haibo",
+        "Wang, Yuandong",
+        "Huang, Kai",
+        "Wo, Tianyu",
+        "Xu, Jie"
+      ],
+      "venue": [
+        "IEEE Transactions on Intelligent Transportation Systems"
+      ],
+      "published": [
+        [
+          2023,
+          5
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2023,
+          5
+        ]
+      ],
+      "volume": "24",
+      "issue": "5",
+      "page": "5502-5515",
+      "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx7/6979/10121021/10038642.pdf?arnumber=10038642",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "haydari2026mobilitygpt",
+      "doi": "10.1109/TITS.2025.3626357",
+      "title": [
+        "MobilityGPT: Enhanced Human Mobility Modeling With a GPT Model"
+      ],
+      "authors": [
+        "Haydari, Ammar",
+        "Chen, Dongjie",
+        "Lai, Zhengfeng",
+        "Zhang, Michael",
+        "Chuah, Chen-Nee"
+      ],
+      "venue": [
+        "IEEE Transactions on Intelligent Transportation Systems"
+      ],
+      "published": [
+        [
+          2026,
+          1
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2026,
+          1
+        ]
+      ],
+      "volume": "27",
+      "issue": "1",
+      "page": "1681-1694",
+      "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/6979/11322649/11242012.pdf?arnumber=11242012",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "hu2024retrasyn",
+      "doi": "10.1109/ICDE60146.2024.00137",
+      "title": [
+        "Real-Time Trajectory Synthesis with Local Differential Privacy"
+      ],
+      "authors": [
+        "Hu, Yujia",
+        "Du, Yuntao",
+        "Zhang, Zhikun",
+        "Fang, Ziquan",
+        "Chen, Lu",
+        "Zheng, Kai",
+        "Gao, Yunjun"
+      ],
+      "venue": [
+        "2024 IEEE 40th International Conference on Data Engineering (ICDE)"
+      ],
+      "published": [
+        [
+          2024,
+          5,
+          13
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024,
+          5,
+          13
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "1685-1698",
+      "publisher": "IEEE",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/10597630/10597390/10598029.pdf?arnumber=10598029",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "wang2023pategail",
+      "doi": "10.1609/aaai.v37i12.26700",
+      "title": [
+        "PateGail: A Privacy-Preserving Mobility Trajectory Generator with Imitation Learning"
+      ],
+      "authors": [
+        "Wang, Huandong",
+        "Gao, Changzheng",
+        "Wu, Yuchen",
+        "Jin, Depeng",
+        "Yao, Lina",
+        "Li, Yong"
+      ],
+      "venue": [
+        "Proceedings of the AAAI Conference on Artificial Intelligence"
+      ],
+      "published": [
+        [
+          2023,
+          6,
+          26
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          6,
+          26
+        ]
+      ],
+      "print": null,
+      "volume": "37",
+      "issue": "12",
+      "page": "14539-14547",
+      "publisher": "Association for the Advancement of Artificial Intelligence (AAAI)",
+      "type": "journal-article",
+      "abstract": "<jats:p>Generating human mobility trajectories is of great importance to solve the lack of large-scale trajectory data in numerous applications, which is caused by privacy concerns. However, existing mobility trajectory generation methods still require real-world human trajectories centrally collected as the training data, where there exists an inescapable risk of privacy leakage. To overcome this limitation, in this paper, we propose PateGail, a privacy-preserving imitation learning model to generate mobility trajectories, which utilizes the powerful generative adversary imitation learning model to simulate the decision-making process of humans. Further, in order to protect user privacy, we train this model collectively based on decentralized mobility data stored in user devices, where personal discriminators are trained locally to distinguish and reward the real and generated human trajectories. In the training process, only the generated trajectories and their rewards obtained based on personal discriminators are shared between the server and devices, whose privacy is further preserved by our proposed perturbation mechanisms with theoretical proof to satisfy differential privacy. Further, to better model the human decision-making process, we propose a novel aggregation mechanism of the rewards obtained from personal discriminators. We theoretically prove that under the reward obtained based on the aggregation mechanism, our proposed model maximizes the lower bound of the discounted total rewards of users. Extensive experiments show that the trajectories generated by our model are able to resemble real-world trajectories in terms of five key statistical metrics, outperforming state-of-the-art algorithms by over 48.03%. Furthermore, we demonstrate that the synthetic trajectories are able to efficiently support practical applications, including mobility prediction and location recommendation.</jats:p>",
+      "link": [
+        {
+          "URL": "https://ojs.aaai.org/index.php/AAAI/article/download/26700/26472",
+          "content-type": "application/pdf",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://ojs.aaai.org/index.php/AAAI/article/download/26700/26472",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "xiong2024trajsgan",
+      "doi": "10.1109/TCSS.2023.3235923",
+      "title": [
+        "TrajSGAN: A Semantic-Guiding Adversarial Network for Urban Trajectory Generation"
+      ],
+      "authors": [
+        "Xiong, Gang",
+        "Li, Zhishuai",
+        "Zhao, Meihua",
+        "Zhang, Yu",
+        "Miao, Qinghai",
+        "Lv, Yisheng",
+        "Wang, Fei-Yue"
+      ],
+      "venue": [
+        "IEEE Transactions on Computational Social Systems"
+      ],
+      "published": [
+        [
+          2024,
+          4
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024,
+          4
+        ]
+      ],
+      "volume": "11",
+      "issue": "2",
+      "page": "1733-1743",
+      "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx7/6570650/10488768/10025663.pdf?arnumber=10025663",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "jiang2023tstrajgen",
+      "doi": "10.1609/aaai.v37i4.25557",
+      "title": [
+        "Continuous Trajectory Generation Based on Two-Stage GAN"
+      ],
+      "authors": [
+        "Jiang, Wenjun",
+        "Zhao, Wayne Xin",
+        "Wang, Jingyuan",
+        "Jiang, Jiawei"
+      ],
+      "venue": [
+        "Proceedings of the AAAI Conference on Artificial Intelligence"
+      ],
+      "published": [
+        [
+          2023,
+          6,
+          26
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          6,
+          26
+        ]
+      ],
+      "print": null,
+      "volume": "37",
+      "issue": "4",
+      "page": "4374-4382",
+      "publisher": "Association for the Advancement of Artificial Intelligence (AAAI)",
+      "type": "journal-article",
+      "abstract": "<jats:p>Simulating the human mobility and generating large-scale trajectories are of great use in many real-world applications, such as urban planning, epidemic spreading analysis, and geographic privacy protect. Although many previous works have studied the problem of trajectory generation, the continuity of the generated trajectories has been neglected, which makes these methods useless for practical urban simulation scenarios. To solve this problem, we propose a novel two-stage generative adversarial framework to generate the continuous trajectory on the road network, namely TS-TrajGen, which efficiently integrates prior domain knowledge of human mobility with model-free learning paradigm. Specifically, we build the generator under the human mobility hypothesis of the A* algorithm to learn the human mobility behavior. For the discriminator, we combine the sequential reward with the mobility yaw reward to enhance the effectiveness of the generator. Finally, we propose a novel two-stage generation process to overcome the weak point of the existing stochastic generation process. Extensive experiments on two real-world datasets and two case studies demonstrate that our framework yields significant improvements over the state-of-the-art methods.</jats:p>",
+      "link": [
+        {
+          "URL": "https://ojs.aaai.org/index.php/AAAI/article/download/25557/25329",
+          "content-type": "application/pdf",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://ojs.aaai.org/index.php/AAAI/article/download/25557/25329",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "liu2023act2loc",
+      "doi": "10.1080/13658816.2023.2292570",
+      "title": [
+        "Act2Loc: a synthetic trajectory generation method by combining machine learning and mechanistic models"
+      ],
+      "authors": [
+        "Liu, Kang",
+        "Jin, Xin",
+        "Cheng, Shifen",
+        "Gao, Song",
+        "Yin, Ling",
+        "Lu, Feng"
+      ],
+      "venue": [
+        "International Journal of Geographical Information Science"
+      ],
+      "published": [
+        [
+          2023,
+          12,
+          12
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          12,
+          12
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          3,
+          3
+        ]
+      ],
+      "volume": "38",
+      "issue": "3",
+      "page": "407-431",
+      "publisher": "Informa UK Limited",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://www.tandfonline.com/doi/pdf/10.1080/13658816.2023.2292570",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "chen2024trajgdm",
+      "doi": "10.1080/13658816.2024.2312199",
+      "title": [
+        "Simulating human mobility with a trajectory generation framework based on diffusion model"
+      ],
+      "authors": [
+        "Chu, Chen",
+        "Zhang, Hengcai",
+        "Wang, Peixiao",
+        "Lu, Feng"
+      ],
+      "venue": [
+        "International Journal of Geographical Information Science"
+      ],
+      "published": [
+        [
+          2024,
+          2,
+          6
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          2,
+          6
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          5,
+          3
+        ]
+      ],
+      "volume": "38",
+      "issue": "5",
+      "page": "847-878",
+      "publisher": "Informa UK Limited",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://www.tandfonline.com/doi/pdf/10.1080/13658816.2024.2312199",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "lin2023mbpgail",
+      "doi": "10.1145/3589132.3625657",
+      "title": [
+        "Generating Realistic and Representative Trajectories with Mobility Behavior Clustering"
+      ],
+      "authors": [
+        "Lin, Haowen",
+        "Shaham, Sina",
+        "Chiang, Yao-Yi",
+        "Shahabi, Cyrus"
+      ],
+      "venue": [
+        "Proceedings of the 31st ACM International Conference on Advances in Geographic Information Systems"
+      ],
+      "published": [
+        [
+          2023,
+          11,
+          13
+        ]
+      ],
+      "online": [
+        [
+          2023,
+          12,
+          22
+        ]
+      ],
+      "print": [
+        [
+          2023,
+          11,
+          13
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "1-4",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3589132.3625657",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3589132.3625657",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "kim2024humonet",
+      "doi": "10.1109/MDM61037.2024.00042",
+      "title": [
+        "HumoNet: A Framework for Realistic Modeling and Simulation of Human Mobility Network"
+      ],
+      "authors": [
+        "Kim, Joon-Seok",
+        "Thakur, Gautam Malviya",
+        "Amichi, Licia",
+        "Burger, Annetta",
+        "Gunaratne, Chathika",
+        "Tuccillo, Joseph",
+        "Hauser, Taylor",
+        "Bentley, Joseph",
+        "Sparks, Kevin",
+        "De, Debraj",
+        "Brown, Chance",
+        "McBride, Elizabeth",
+        "McGaha, Jesse",
+        "Gaboardi, James",
+        "Nie, Xiuling",
+        "Christopher, Steven Carter"
+      ],
+      "venue": [
+        "2024 25th IEEE International Conference on Mobile Data Management (MDM)"
+      ],
+      "published": [
+        [
+          2024,
+          6,
+          24
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2024,
+          6,
+          24
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "185-194",
+      "publisher": "IEEE",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/10591618/10591487/10591691.pdf?arnumber=10591691",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "netzler2024privacy",
+      "doi": "10.3390/ijgi13070245",
+      "title": [
+        "Privacy Preserving Human Mobility Generation Using Grid-Based Data and Graph Autoencoders"
+      ],
+      "authors": [
+        "Netzler, Fabian",
+        "Lienkamp, Markus"
+      ],
+      "venue": [
+        "ISPRS International Journal of Geo-Information"
+      ],
+      "published": [
+        [
+          2024,
+          7,
+          9
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          7,
+          9
+        ]
+      ],
+      "print": null,
+      "volume": "13",
+      "issue": "7",
+      "page": "245",
+      "publisher": "MDPI AG",
+      "type": "journal-article",
+      "abstract": "<jats:p>This paper proposes a one-to-one trajectory synthetization method with stable long-term individual mobility behavior based on a generalizable area embedding. Previous methods concentrate on producing highly detailed data on short-term and restricted areas for, e.g., autonomous driving scenarios. Another possibility consists of city-wide and beyond scales that can be used to predict general traffic flows. The now-presented approach takes the tracked mobility behavior of individuals and creates coherent synthetic mobility data. These generated data reflect the person’s long-term mobility behavior, guaranteeing location persistency and sound embedding within the point-of-interest structure of the observed area. After an analysis and clustering step of the original data, the area is distributed into a geospatial grid structure (H3 is used here). The neighborhood relationships between the grids are interpreted as a graph. A feed-forward autoencoder and a graph encoding–decoding network generate a latent space representation of the area. The original clustered data are associated with their respective H3 grids. With a greedy algorithm approach and concerning privacy strategies, new combinations of grids are generated as top-level patterns for individual mobility behavior. Based on the original data, concrete locations within the new grids are found and connected to ways. The goal is to generate a dataset that shows equivalence in aggregated characteristics and distances in comparison with the original data. The described method is applied to a sample of 120 from a study with 1000 participants whose mobility data were generated in the city of Munich in Germany. The results show the applicability of the approach in generating synthetic data, enabling further research on individual mobility behavior and patterns. The result comprises a sharable dataset on the same abstraction level as the input data, which can be beneficial for different applications, particularly for machine learning.</jats:p>",
+      "link": [
+        {
+          "URL": "https://www.mdpi.com/2220-9964/13/7/245/pdf",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "abbar2025trajddgan",
+      "doi": "10.1109/ACCESS.2025.3602274",
+      "title": [
+        "TrajDD-GAN: A Synthetic Mobility Trajectory Generation Solution Based on Diffusion Models"
+      ],
+      "authors": [
+        "Abbar, Hamza",
+        "Kassan, Sara",
+        "Bidet, François",
+        "Cherigui, Aya",
+        "Guépin, Florent",
+        "Renaud, Denis"
+      ],
+      "venue": [
+        "IEEE Access"
+      ],
+      "published": [
+        [
+          2025
+        ]
+      ],
+      "online": null,
+      "print": [
+        [
+          2025
+        ]
+      ],
+      "volume": "13",
+      "issue": null,
+      "page": "158018-158027",
+      "publisher": "Institute of Electrical and Electronics Engineers (IEEE)",
+      "type": "journal-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "http://xplorestaging.ieee.org/ielx8/6287639/10820123/11135496.pdf?arnumber=11135496",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    },
+    {
+      "key": "wang2024cola",
+      "doi": "10.1145/3589334.3645469",
+      "title": [
+        "COLA: Cross-city Mobility Transformer for Human Trajectory Simulation"
+      ],
+      "authors": [
+        "Wang, Yu",
+        "Zheng, Tongya",
+        "Liang, Yuxuan",
+        "Liu, Shunyu",
+        "Song, Mingli"
+      ],
+      "venue": [
+        "Proceedings of the ACM Web Conference 2024"
+      ],
+      "published": [
+        [
+          2024,
+          5,
+          13
+        ]
+      ],
+      "online": [
+        [
+          2024,
+          5,
+          13
+        ]
+      ],
+      "print": [
+        [
+          2024,
+          5,
+          13
+        ]
+      ],
+      "volume": null,
+      "issue": null,
+      "page": "3509-3520",
+      "publisher": "ACM",
+      "type": "proceedings-article",
+      "abstract": null,
+      "link": [
+        {
+          "URL": "https://dl.acm.org/doi/10.1145/3589334.3645469",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "text-mining"
+        },
+        {
+          "URL": "https://dl.acm.org/doi/pdf/10.1145/3589334.3645469",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "relation": {}
+    }
+  ]
+}

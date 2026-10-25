@@ -1,33 +1,31 @@
 \section{Limitations}
 \label{sec:limitations}
-The two-city, three-seed study measures neither training variability nor
-statistical significance. Istanbul and New York use different backbone batch
-sizes, and full training provenance is unavailable. PO-CFG uses scale $1$
-without extrapolation tuning; batch-level distance KL gives no per-sequence
-spatial guarantee. Finite-budget projection and decoder fallback leave residual
-violations, while same-category refinement cannot repair New York's category-
-transition gap. Training-side calibration is not independent validation; its
-failed distribution gates and override are reported in \S\ref{sec:exp:tradeoff}
-and Appendix~\ref{app:grid}. Stage (d) uses fixed geometry settings, whereas
-(d)$\to$(e) jointly changes three factors. Complex order DAGs, conflict
-detection, adaptive scheduling, training-time order losses and downstream
-recommendation utility remain open. Synthetic output has no formal privacy
-guarantee, and distributional similarity does not establish safe release.
+The two-city, three-seed study does not measure training variability or
+statistical significance. The cities use different backbone batch sizes, and
+full training provenance is unavailable. PO-CFG uses scale $1$ without
+extrapolation tuning; batch-level distance KL gives no per-sequence guarantee.
+Finite-budget projection and decoder fallback leave residual violations, and
+same-category refinement does not fix New York's category-transition gap.
+Training-side calibration is not independent validation; its failed
+distribution gates and override are detailed in \S\ref{sec:exp:tradeoff} and
+Appendix~\ref{app:grid}. Stage (d) fixes geometry settings, while (d)$\to$(e)
+jointly changes three factors. Complex order DAGs, conflict detection, adaptive
+scheduling, training-time order losses, and recommendation utility remain open.
+Synthetic output has no formal privacy guarantee; distributional similarity
+does not establish safe release.
 
-These boundaries also delimit the evidence for the control stack. A finite
-projection budget can leave requested relations unsatisfied when the backbone
-assigns little mass to their categories. The decoder addresses category--POI
-mismatch, while category-preserving geometry cannot correct errors already
-present in the generated category sequence.
+When the backbone assigns little mass to required categories, finite-budget
+projection can leave relations unsatisfied. Decoding addresses category--POI
+mismatch; category-preserving geometry cannot correct errors in the generated
+category sequence.
 
 \section{Conclusion}
 \label{sec:conclusion}
-Order/existence projection, category-consistent decoding, and same-category
-refinement form \pcdg on a frozen generator. It outperforms retrained PO-CFG
-on all five constraint metrics in both cities and JointGen on six fidelity JSDs
-in Istanbul and four in New York. Refinement preserves constraint metrics while
-recovering spatial fidelity, but leaves New York's category-transition and
-popularity errors unresolved.
-The frozen generator can thus serve new category-order requests without
-retraining, with spatial refinement restricted to realized categories.
+On a frozen generator, \pcdg combines order/existence projection,
+category-consistent decoding, and same-category refinement to support new
+category-order requests without retraining. It outperforms retrained PO-CFG on
+all five constraint metrics in both cities and JointGen on six fidelity JSDs in
+Istanbul and four in New York. Refinement restores spatial fidelity while
+preserving constraints, but leaves New York's category-transition and
+popularity errors unresolved and is restricted to realized categories.
 \label{end:main}

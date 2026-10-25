@@ -6,7 +6,7 @@ category-consistent POI decoding, and terminal same-category refinement
 (Figure~\ref{fig:framework}). The weights $\rho,\lambda,\beta$ enter their objectives.
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/framework.pdf}
+  \includegraphics[width=0.9\textwidth]{figures/framework.pdf}
   \caption{\pcdg (schematic). (a) Frozen reverse loop and terminal refinement.
   (b) Category order/existence energies and POI distance KL, anchored by base-to-projected token KL.
   (c) Category-filtered POI reselection reuses Gumbel noise.
@@ -45,12 +45,14 @@ Projection acts on these reverse-step logits, not directly on the denoiser's
 clean-token predictions. \pcdg keeps the backbone frozen and changes sampling
 distributions and terminal POI assignments.
 
-\subsection{Partial-order constraints as differentiable energies}
+\subsection{Partial-order projection in the reverse process}
 \label{sec:method:energy}
-Given the sample-level matrix $\Mmat$, we parse it into a set of pairwise
-constraints $\{(a,b): \Mmat[a,b]>\tfrac12\}$. To make a constraint differentiable
-in the logits, we relax the hard categorical choice at each position into a
-distribution. With temperature $T$ and (optionally) Gumbel noise $\mathbf{g}_l$,
+\label{sec:method:project}
+\label{sec:method:placement}
+Given the sample-level matrix $\Mmat$, we parse the required pairs
+$\{(a,b): \Mmat[a,b]>\tfrac12\}$. At each reverse step, temperature-$T$
+softmax probabilities (optionally with Gumbel noise $\mathbf{g}_l$) relax the
+categorical choices:
 \begin{equation}
   \boldsymbol{\pi}_l = \mathrm{softmax}\big((\mathbf{z}_l + \mathbf{g}_l)/T\big)\in\Delta^{V-1},
   \qquad l=1,\dots,L .
@@ -69,22 +71,15 @@ energies:
                            + \relu\!\Big(1-\textstyle\sum_{l} P^B_l\Big).
      \label{eq:exist}
 \end{align}
-The \emph{order energy}~\eqref{eq:order} sums relaxed inverted-pair mass: under
-independent draws at category positions it is the expected number of $b$-before-$a$
-pairs. For a one-hot assignment, zero energy means no such inversion; a small
-relaxed value alone does not certify the decoded sequence.
-The \emph{existence energy}~\eqref{eq:exist} penalizes an
-expected count below one for either constrained category, discouraging trivial
-satisfaction of ordering by \emph{omitting} $a$ or $b$. Both energies are
-computed only over category positions; POI logits do not enter
-Eqs.~\eqref{eq:order}--\eqref{eq:exist}.
+The order energy~\eqref{eq:order} sums relaxed $b$-before-$a$ pair mass; for a
+one-hot assignment, zero energy means no inversion. The existence
+energy~\eqref{eq:exist} penalizes an expected count below one for either
+category, preventing omission-based satisfaction. Both energies use category
+positions only; POI logits do not enter these terms.
 
-\subsection{KL-preserving augmented-Lagrangian projection}
-\label{sec:method:project}
-At a controlled reverse step, we project the backbone logits to reduce constraint
-violations while staying close to the model's own distribution. Let
-$\mathbf{y}^{(0)}=\mathbf{z}$ be the detached backbone logits and $\mathbf{y}$ a
-trainable copy. The sequence-level constrained formulation is
+Let $\mathbf{y}^{(0)}=\mathbf{z}$ be the detached backbone logits and $\mathbf{y}$
+a trainable copy. At controlled steps we reduce constraint violations while
+penalizing deviations from the model distribution:
 \begin{equation}
 \begin{aligned}
   \min_{\mathbf{y}}\;&\dkl\!\big(\mathrm{softmax}(\mathbf{y}^{(0)})\,\big\|\,\mathrm{softmax}(\mathbf{y})\big)\\
@@ -93,11 +88,8 @@ trainable copy. The sequence-level constrained formulation is
 \end{aligned}
   \label{eq:constrained}
 \end{equation}
-where the KL term penalizes deviation from the base model; it does not guarantee
-unchanged fidelity metrics. Its direction is base-to-projected: the frozen
-distribution is the target argument of the implementation's KL loss.
-We optimize the
-augmented-Lagrangian relaxation of~\eqref{eq:constrained}: with
+where the KL direction is base-to-projected. We optimize the
+augmented-Lagrangian relaxation with
 $\delta^{\bullet}=\relu(g^{\bullet}-\tau)$,
 \begin{equation}
 \begin{aligned}
@@ -109,61 +101,66 @@ $\delta^{\bullet}=\relu(g^{\bullet}-\tau)$,
 \end{aligned}
 \label{eq:auglag}
 \end{equation}
-The \emph{inner} loop uses SGD on active rows of $\mathbf{y}$ with rate $\eta$
-and gradient-norm clipping. It optimizes the penalty objective without an
-additional hard feasible-set projection.
-An \emph{outer} loop evaluates the \emph{hard} violations
-$\hat{\delta}$ (from the $\arg\max$ one-hot assignment, not the relaxation) and
-updates the dual variables,
+An inner SGD loop updates active rows of $\mathbf{y}$ with rate $\eta$ and
+gradient clipping. The outer loop computes $\hat{\delta}$ from the hard
+$\arg\max$ assignment and updates dual variables,
 \begin{equation}
   \lambda \leftarrow \lambda + \mu\,\hat{\delta},\qquad
   \mu \leftarrow \min(\alpha\,\mu,\;\mu_{\max})\ \text{if}\ \hat{\delta}>\tau_{\mathrm{tol}},
   \label{eq:dual}
 \end{equation}
-using a fixed budget without early stopping in the reported runs.
-The batch objective averages token KL over the full batch size but sums
-order/existence penalties over active rows and relations (Appendix~\ref{app:algo}).
-Hard violations determine which penalties grow. The order and existence terms
-act on category positions; distance KL also updates POI logits
-(\S\ref{sec:method:distance}). Hard POI-support masking belongs to the subsequent
-decoder, not these order/existence energies.
+Reported runs use a fixed budget without early stopping. Batch KL is averaged
+over the full batch; order/existence penalties are summed over active rows and
+relations (Appendix~\ref{app:algo}). Hard violations determine dual updates.
+Control runs every $f$ steps in the final $K$ reverse steps, replacing category
+logits with projected values and, when enabled, POI logits with distance-adjusted
+values. Joint sampling produces the next state; the temporal branch is unchanged.
+Disabling control recovers the backbone. Hard POI-support masking belongs to the
+subsequent decoder. Algorithm~\ref{alg:pcdg} summarizes this controlled step.
 
-\subsection{Distance-distribution regularization}
+\subsection{Distributional regularization and calibration}
 \label{sec:method:distance}
-Enforcing category order perturbs the category marginals and, indirectly, the
-induced spatial statistics. We therefore add a separate distance regularizer
-to match the \emph{population} distribution of travel
-length. From the training split only, we compute the cumulative great-circle
-(Haversine) route length $d$ of every training sequence with at least two POIs and
-summarize it as a soft histogram $H_{\mathrm{train}}$ over $\log(1+d)$ with fixed
-Gaussian bins (the reference is content-hashed and cached, never stored in the
-model). During projection, for each POI position we fix the top-$\kappa$ candidate
-POIs under the backbone and draw $P$ routes with a straight-through
-Gumbel-softmax (exact distance on the forward pass, a bilinear surrogate on the
-backward pass), forming a differentiable route-length histogram
-$H_{\mathrm{proj}}(\mathbf{y})$. We add the term
+\label{sec:method:balance}
+To limit spatial drift, a batch-level distance KL matches the training
+population's route-length distribution. Cumulative Haversine lengths $d$ from
+training sequences with at least two POIs form a fixed-bin histogram
+$H_{\mathrm{train}}$ over $\log(1+d)$ (the reference is content-hashed and cached,
+never stored in the model). For each POI position, the backbone's
+top-$\kappa$ candidates define $P$ straight-through Gumbel-softmax routes; exact
+distances are used forward and a bilinear surrogate backward to form
+$H_{\mathrm{proj}}(\mathbf{y})$:
 \begin{equation}
   w_{\mathrm{dist}}\,\dkl\!\big(H_{\mathrm{train}}\,\|\,H_{\mathrm{proj}}(\mathbf{y})\big)
   \label{eq:distance}
 \end{equation}
-to the objective~\eqref{eq:auglag}. Unlike the order/existence energies, this term
-acts on \emph{POI-position} logits, and it is a batch-level distribution-matching
-regularizer, not a hard constraint on each sample. It is applied only to
-sequences with at least two POIs and uses an independent random stream. Its weight
-is not tuned per city and is not guaranteed to improve every fidelity metric; we
-quantify its effect via the \textsc{No Distance KL} ablation
-(\S\ref{sec:experiments}).
+to the objective~\eqref{eq:auglag}. This term acts on POI logits and matches a
+batch distribution rather than imposing a per-sequence constraint. It applies
+only to sequences with at least two POIs, uses an independent random stream, and
+has one shared weight across cities. The weight is not tuned per city and is not
+guaranteed to improve every fidelity metric; its effect is measured by the
+\textsc{No Distance KL} ablation (\S\ref{sec:experiments}).
 
-\subsection{Placement in the reverse process and joint sampling}
-\label{sec:method:placement}
-Control runs every $f$ steps within the last $K$ reverse steps, when category
-predictions inform the energies. It replaces category-position logits with
-projected values and, when enabled, POI-position logits with distance-adjusted
-values. Joint categorical sampling then produces the next state, optionally
-using the decoder in \S\ref{sec:method:decoding}. The temporal branch is unchanged;
-disabling all control stages recovers the unconstrained backbone.
-Algorithm~\ref{alg:pcdg} gives the controlled step;
-Appendix~\ref{app:algo} lists additional implementation settings.
+Distribution correction uses the training reference pool to balance constraint
+strength and fidelity. The coefficient $\rho\in(0,1]$ scales the constraint
+penalty, while $\lambda\geq0$ weights
+$\mathcal{L}_{\mathrm{cat}}=\tfrac12(\mathrm{JSD}_{\mathrm{hour}\times\mathrm{cat}}+
+\mathrm{JSD}_{\mathrm{transition}})$ computed from expected counts. The POI-side
+coefficient $\beta\geq0$ adds
+$\tfrac12(\mathrm{JSD}_{\mathrm{top}1000}+\mathrm{JSD}_{\mathrm{DailyLoc}})$;
+top-$1000$ visitation aligns POI identities across the generated/reference union.
+Pre-refinement samples are shared across $\beta$ settings. The selected
+configuration is $(\rho,\lambda,\beta)=(0.5,0,1)$ (Appendix~\ref{app:grid}).
+The resulting projection objective is
+\begin{equation}
+\begin{aligned}
+ \mathcal{L}_{\mathrm{bal}}={}&w_{\mathrm{kl}}\,\dkl
+ +\rho\!\sum_{(a,b)}\!\mathrm{AL}(g^{\mathrm{ord}},g^{\mathrm{ex}})
+ +w_{\mathrm{dist}}\,\dkl(H_{\mathrm{train}}\|H_{\mathrm{proj}})\\
+ &+\lambda\,\mathcal{L}_{\mathrm{cat}}+
+ \beta\,\tfrac12(\mathrm{JSD}_{\mathrm{top}1000}+\mathrm{JSD}_{\mathrm{DailyLoc}}).
+\end{aligned}
+\label{eq:balance}
+\end{equation}
 
 \subsection{Category-consistent POI decoding}
 \label{sec:method:decoding}
@@ -237,44 +234,7 @@ statistics to change, but does not guarantee a match to every reference
 distribution within the candidate sets. Refinement cannot repair the category-side
 divergences it preserves.
 
-\subsection{Distribution correction}
-\label{sec:method:balance}
-Three scalars govern the balance between constraint strength and distributional
-fidelity, all referenced to the \emph{training} reference pool only. First,
-$\rho\in(0,1]$ scales the constraint term of Eq.~\eqref{eq:auglag}, so the projection
-objective becomes
-\begin{equation}
-\begin{aligned}
-  w_{\mathrm{kl}}\,\dkl
-  &+ \rho\!\sum_{(a,b)}\!\mathrm{AL}\big(g^{\mathrm{ord}},g^{\mathrm{ex}};\lambda^{\bullet},\mu^{\bullet}\big)\\
-  &+ w_{\mathrm{dist}}\,\dkl\big(H_{\mathrm{train}}\|H_{\mathrm{proj}}\big)
-   + \lambda\,\mathcal{L}_{\mathrm{cat}} .
-\end{aligned}
-\label{eq:balance}
-\end{equation}
-Second, $\lambda\ge 0$ weights a category-side term
-\begin{equation}
-  \mathcal{L}_{\mathrm{cat}}=\tfrac12\big(
-    \mathrm{JSD}_{\mathrm{hour}\times\mathrm{cat}}
-    +\mathrm{JSD}_{\mathrm{transition}}\big),
-  \label{eq:catbalance}
-\end{equation}
-computed from \emph{expected} counts under the relaxed assignment, without
-Monte Carlo draws or additional randomness. Self-transitions are counted,
-sequence boundaries excluded, and reference rows without support contribute zero.
-Third, $\beta\ge 0$ adds to Eq.~\eqref{eq:geometry} a POI-side term
-$\tfrac12(\mathrm{JSD}_{\mathrm{top}1000}+\mathrm{JSD}_{\mathrm{DailyLoc}})$,
-where the first is an \emph{identity-aligned} top-$1000$ visitation divergence (the
-generated and reference top-$1000$ sets are unioned by POI id before normalization, not
-compared as sorted popularity curves) and the second a soft expected-\emph{DailyLoc}
-divergence. Pre-refinement spatial samples are cached independently of $\beta$, so the
-three $\beta$ settings of a batch are compared at identical upstream randomness.
-
-The full configuration is $\rho{=}0.5$, $\lambda{=}0$, $\beta{=}1$, selected
-on training-side calibration data (Appendix~\ref{app:grid}). The selected value
-$\lambda=0$ describes this grid's outcome, not the absence of category-side error.
-
-\subsection{Controlled-step algorithm}
+\paragraph{Controlled-step algorithm.}
 \label{sec:method:algorithm}
 Algorithm~\ref{alg:pcdg} summarizes one controlled step: relaxed energies
 update detached logits, hard assignments update duals, and category decoding
