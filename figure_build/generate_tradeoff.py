@@ -42,12 +42,12 @@ def main():
     plt.rcParams.update({"font.family": "Times New Roman", "font.size": 9,
                          "pdf.fonttype": 42, "svg.fonttype": "none", "svg.hashsalt": "pcdg-www2027",
                          "axes.spines.top": False, "axes.spines.right": False})
-    fig, axes = plt.subplots(1, 2, figsize=(7, 2.65), sharex=True, sharey=True)
-    fig.subplots_adjust(left=.078, right=.985, top=.89, bottom=.33, wspace=.13)
+    fig, axes = plt.subplots(2, 1, figsize=(3.25, 4.8), sharex=True, sharey=True)
+    fig.subplots_adjust(left=.18, right=.98, top=.94, bottom=.19, hspace=.42)
     names = ["(a) JointGen", "(b) PCDG-P", "(c) PCDG-PD", "(d) + geometry", "(e) PCDG"]
     colors = ["#555555", "#0072B2", "#009E73", "#CC79A7", "#D55E00"]
     shapes = ["o", "s", "^", "D", "*"]
-    for ax, city in zip(axes, CITIES):
+    for row, (ax, city) in enumerate(zip(axes, CITIES)):
         assert len(jsd[city]) == len(constraints[city]) == 7
         assert len(stages[city]) == 5
         coords = [(v[-1], v[0]) for _, v in stages[city]]
@@ -73,14 +73,16 @@ def main():
         ax.set_ylim(0, .345)
         ax.set_xticks([0, 25, 50, 75, 100])
         ax.set_yticks([0, .1, .2, .3])
-        ax.set_xlabel("Unsatisfied required relations (%)", labelpad=3)
+        if row == len(CITIES) - 1:
+            ax.set_xlabel("Unsatisfied required relations (%)", labelpad=3)
         ax.grid(axis="y", color="#e7e7e7", lw=.6)
         ax.tick_params(length=3, pad=2)
     axes[0].set_ylabel("Distance JSD", labelpad=4)
+    axes[1].set_ylabel("Distance JSD", labelpad=4)
     handles = [Line2D([], [], color=c, marker=m, linestyle="None", markersize=6,
                       label=n) for c, m, n in zip(colors, shapes, names)]
-    fig.legend(handles=handles, loc="lower center", ncol=5, frameon=False,
-               columnspacing=1.1, handletextpad=.35, bbox_to_anchor=(.52, .035), fontsize=8.5)
+    fig.legend(handles=handles, loc="lower center", ncol=3, frameon=False,
+               columnspacing=.8, handletextpad=.3, bbox_to_anchor=(.52, .035), fontsize=8.0)
     OUT.mkdir(parents=True, exist_ok=True)
     BUILD.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / "tradeoff.pdf", metadata={"Creator": "Matplotlib", "CreationDate": None})

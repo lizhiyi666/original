@@ -37,10 +37,10 @@ category-consistent decoding), and \pcdg (the full stack).
 
 % Queue the unchanged double-column table before the page break in Setup.
 \input{tables/method-comparison}
-% Queue the unchanged trade-off figure next, avoiding an isolated float page.
-\begin{figure*}[t]
+% Keep the trade-off figure within one column; the panels are vertically stacked.
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/tradeoff.pdf}
+  \includegraphics[width=\columnwidth]{figures/tradeoff.pdf}
   \caption{Unsat--Distance trade-off using the evaluation-v2 three-seed means in
   Tables~\ref{tab:method} and~\ref{tab:stagewise}; lower is better on both axes.
   Dashed paths connect (a)--(e); shared method/stage points are plotted once.
@@ -50,7 +50,7 @@ category-consistent decoding), and \pcdg (the full stack).
   and three other baselines, with unsatisfied required relations on the horizontal
   axis and Distance JSD on the vertical axis.}
   \label{fig:tradeoff}
-\end{figure*}
+\end{figure}
 
 \paragraph{Metrics.}
 \label{sec:exp:metrics}

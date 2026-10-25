@@ -150,26 +150,24 @@ def make_figure():
     ax = fig.add_axes([0, 0, 1, 1], xlim=(0, 700), ylim=(0, 325))
     ax.axis("off")
     ax.set_gid("pcdg-postswap-intro")
-    txt(ax, 350, 315, "Activity-order constraint: Sightseeing before Shopping", size=10.5,
-        bold=True, name="requested-relation")
-    txt(ax, 350, 299, "Same map and POI catalog; different visit sequences and POI choices.",
-        size=8.5, color=MUTED, name="shared-catalog-note")
+    txt(ax, 350, 315, "Same map and POI catalog; different visit sequences and POI choices.",
+        size=11.5, color=MUTED, name="shared-catalog-note")
     for name, title, first, second in (
         ("postswap", "(a) Post-generation reordering", "Order satisfied; distant POIs retained", "Long cross-district detour"),
         ("pcdg", "(b) PCDG", "Order satisfied; nearby POIs selected", "Spatially coherent visit sequence"),
     ):
         bounds = MAP_BOUNDS[name]
         cx = bounds[0] + bounds[2]/2
-        txt(ax, cx, 282, title, size=10, bold=True, name=name + "-title")
+        txt(ax, cx, 282, title, size=12.5, bold=True, name=name + "-title")
         draw_map(ax, bounds, name)
         draw_route(ax, bounds, name)
-        txt(ax, cx, 53, first, size=8.6, color=ROUTE_COLORS[name], bold=True,
+        txt(ax, cx, 53, first, size=9.5, color=ROUTE_COLORS[name], bold=True,
             name=name + "-outcome")
-        txt(ax, cx, 39, second, size=8.5, name=name + "-interpretation")
+        txt(ax, cx, 37, second, size=8.8, name=name + "-interpretation")
     for x, cat, label in ((115, "S", "Sightseeing"), (281, "W", "Shopping"),
                            (437, "D", "Dining"), (571, "H", "Hotel")):
         icon(ax, x, 15, cat, radius=8.5, name="legend-" + cat)
-        txt(ax, x+14, 15, label, size=8.5, align="left", name="legend-label-" + cat)
+        txt(ax, x+14, 15, label, size=11.0, align="left", name="legend-label-" + cat)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     for label in ax.texts:
