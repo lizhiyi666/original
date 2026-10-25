@@ -13,7 +13,7 @@
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \caption{Ablation of the projection stage: distributional similarity (JSD $\downarrow$, evaluation v2).
-\textsc{Full} here is \textsc{PCDG-P}, i.e.\ the projection stage alone.}
+\textsc{PCDG-P (base)} has all projection components enabled; the full stack \textsc{PCDG} is in Table~\ref{tab:method}.}
 \label{tab:ablation-jsd}
 \begin{tabular}{lrrrrrr}
 \toprule
@@ -28,7 +28,7 @@ No KL & $0.1406\pm 0.0117$ & $0.0574\pm 0.0028$ & $0.0164\pm 0.0006$ & $0.0361\p
 Fixed Multipliers & $0.1296\pm 0.0093$ & $0.0526\pm 0.0045$ & $0.0185\pm 0.0005$ & $0.0361\pm 0.0009$ & $0.0457\pm 0.0025$ & $0.1841\pm 0.0020$ \\
 No Gumbel Noise & $0.1315\pm 0.0091$ & $0.0524\pm 0.0023$ & $\mathbf{0.0160\pm 0.0010}$ & $0.0370\pm 0.0005$ & $0.0439\pm 0.0023$ & $0.1831\pm 0.0027$ \\
 No Distance KL & $0.1441\pm 0.0073$ & $0.0582\pm 0.0025$ & $0.0162\pm 0.0010$ & $0.0366\pm 0.0008$ & $0.0437\pm 0.0023$ & $0.1828\pm 0.0026$ \\
-\textsc{Full} ($=$\textsc{PCDG-P}) & $0.1314\pm 0.0035$ & $0.0516\pm 0.0022$ & $0.0162\pm 0.0006$ & $0.0368\pm 0.0014$ & $0.0446\pm 0.0020$ & $0.1820\pm 0.0016$ \\
+\textsc{PCDG-P (base)} & $0.1314\pm 0.0035$ & $0.0516\pm 0.0022$ & $0.0162\pm 0.0006$ & $0.0368\pm 0.0014$ & $0.0446\pm 0.0020$ & $0.1820\pm 0.0016$ \\
 \midrule
 \multicolumn{7}{l}{\textbf{New York}} \\
 \midrule
@@ -41,7 +41,7 @@ No KL & $0.2415\pm 0.0239$ & $0.1421\pm 0.0046$ & $0.0125\pm 0.0006$ & $0.0352\p
 Fixed Multipliers & $0.2402\pm 0.0487$ & $0.1218\pm 0.0018$ & $0.0127\pm 0.0005$ & $0.0353\pm 0.0041$ & $0.0175\pm 0.0006$ & $0.1891\pm 0.0023$ \\
 No Gumbel Noise & $\mathbf{0.2055\pm 0.0205}$ & $0.1248\pm 0.0056$ & $0.0130\pm 0.0010$ & $0.0360\pm 0.0036$ & $0.0173\pm 0.0003$ & $0.1918\pm 0.0041$ \\
 No Distance KL & $0.2484\pm 0.0267$ & $0.1430\pm 0.0055$ & $0.0134\pm 0.0011$ & $0.0355\pm 0.0031$ & $\mathbf{0.0172\pm 0.0013}$ & $0.1937\pm 0.0082$ \\
-\textsc{Full} ($=$\textsc{PCDG-P}) & $0.2210\pm 0.0224$ & $0.1265\pm 0.0051$ & $0.0132\pm 0.0004$ & $\mathbf{0.0351\pm 0.0035}$ & $0.0173\pm 0.0013$ & $0.1942\pm 0.0041$ \\
+\textsc{PCDG-P (base)} & $0.2210\pm 0.0224$ & $0.1265\pm 0.0051$ & $0.0132\pm 0.0004$ & $\mathbf{0.0351\pm 0.0035}$ & $0.0173\pm 0.0013$ & $0.1942\pm 0.0041$ \\
 \bottomrule
 \end{tabular}
 \par\smallskip
@@ -61,7 +61,7 @@ component.
 \setlength{\tabcolsep}{3pt}
 \caption{Ablation of the projection stage: constraint satisfaction (\%, evaluation v2). The existence
 energy drives coverage, the order energy drives strict ordering, and the adaptive multipliers beat a
-fixed penalty.}
+fixed penalty. \textsc{PCDG-P (base)} has all projection components enabled.}
 \label{tab:ablation}
 \begin{tabular}{lrrrrr}
 \toprule
@@ -76,7 +76,7 @@ No KL & $32.85\pm 0.52$ & $9.20\pm 0.29$ & $71.11\pm 0.08$ & $85.40\pm 0.16$ & $
 Fixed Multipliers & $42.70\pm 0.51$ & $20.97\pm 0.90$ & $71.25\pm 0.89$ & $85.00\pm 0.42$ & $45.64\pm 0.58$ \\
 No Gumbel Noise & $\mathbf{32.75\pm 0.39}$ & $9.13\pm 0.22$ & $70.97\pm 0.34$ & $85.38\pm 0.19$ & $\mathbf{36.75\pm 0.25}$ \\
 No Distance KL & $32.96\pm 0.46$ & $9.10\pm 0.16$ & $70.92\pm 0.23$ & $85.29\pm 0.14$ & $36.83\pm 0.24$ \\
-\textsc{Full} ($=$\textsc{PCDG-P}) & $32.80\pm 0.50$ & $9.12\pm 0.10$ & $70.99\pm 0.08$ & $85.36\pm 0.15$ & $36.86\pm 0.37$ \\
+\textsc{PCDG-P (base)} & $32.80\pm 0.50$ & $9.12\pm 0.10$ & $70.99\pm 0.08$ & $85.36\pm 0.15$ & $36.86\pm 0.37$ \\
 \midrule
 \multicolumn{6}{l}{\textbf{New York}} \\
 \midrule
@@ -89,7 +89,7 @@ No KL & $\mathbf{38.24\pm 0.96}$ & $13.98\pm 0.82$ & $67.67\pm 1.56$ & $81.57\pm
 Fixed Multipliers & $58.45\pm 0.66$ & $35.14\pm 0.60$ & $63.79\pm 0.76$ & $78.37\pm 0.35$ & $60.67\pm 0.49$ \\
 No Gumbel Noise & $39.11\pm 1.53$ & $13.93\pm 1.34$ & $66.41\pm 1.32$ & $80.95\pm 0.65$ & $43.91\pm 1.59$ \\
 No Distance KL & $38.48\pm 1.04$ & $\mathbf{13.76\pm 0.72}$ & $67.33\pm 1.86$ & $81.38\pm 0.81$ & $42.77\pm 1.79$ \\
-\textsc{Full} ($=$\textsc{PCDG-P}) & $38.51\pm 0.95$ & $14.11\pm 1.22$ & $67.60\pm 1.86$ & $81.54\pm 0.70$ & $42.42\pm 1.84$ \\
+\textsc{PCDG-P (base)} & $38.51\pm 0.95$ & $14.11\pm 1.22$ & $67.60\pm 1.86$ & $81.54\pm 0.70$ & $42.42\pm 1.84$ \\
 \bottomrule
 \end{tabular}
 \par\smallskip
