@@ -14,6 +14,12 @@ detection, adaptive scheduling, training-time order losses and downstream
 recommendation utility remain open. Synthetic output has no formal privacy
 guarantee, and distributional similarity does not establish safe release.
 
+These boundaries also delimit the evidence for the control stack. A finite
+projection budget can leave requested relations unsatisfied when the backbone
+assigns little mass to their categories. The decoder addresses category--POI
+mismatch, while category-preserving geometry cannot correct errors already
+present in the generated category sequence.
+
 \section{Conclusion}
 \label{sec:conclusion}
 Order/existence projection, category-consistent decoding, and same-category
@@ -22,4 +28,6 @@ on all five constraint metrics in both cities and JointGen on six fidelity JSDs
 in Istanbul and four in New York. Refinement preserves constraint metrics while
 recovering spatial fidelity, but leaves New York's category-transition and
 popularity errors unresolved.
+The frozen generator can thus serve new category-order requests without
+retraining, with spatial refinement restricted to realized categories.
 \label{end:main}

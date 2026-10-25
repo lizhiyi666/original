@@ -129,6 +129,10 @@ York. Comparing \textsc{No KL} with \textsc{No Distance KL} isolates the token
 anchor only with distance regularization disabled; it does not establish its
 marginal effect in the full projection. Removing Gumbel noise has nonuniform
 effects and lowers New York Distance to $0.2055$.
+Together, the ablations separate category presence and ordering from spatial
+regularization: existence and order terms address distinct constraint failures,
+while the distance term changes spatial fidelity without guaranteeing gains on
+every metric.
 
 \subsection{Decomposing the fidelity--constraint trade-off}
 \label{sec:exp:tradeoff}
