@@ -16,11 +16,12 @@ $\mathbf{c}^{(r)}$ is a coarse temporal or behavioral condition represented
 over fixed within-day time bins. The same context conditions the generation of
 the complete sequence.
 \end{definition}
-For instance, $\mathbf{c}^{(1)}$ may encode weekday vs.\ weekend and $\mathbf{c}^{(2)}$ the user's home region, each as a 24-dimensional vector.
 
 In the current backbone, $R=6$ and the conditions are encoded over $24$ daily
 time windows to obtain a sequence-level context embedding. These channels
-describe the \emph{background} under which a sequence is generated---for instance, temporal preference or user type---but do not directly assign specific POI identities to individual positions, nor do they dictate which categories must appear or the partial-order matrix below.
+describe the \emph{background} under which a sequence is generated, but do not
+directly assign specific POI identities to individual positions, nor do they
+dictate which categories must appear or the partial-order matrix below.
 The generator's category token $k_i$ and the emitted POI's catalog category
 $\mathrm{cat}(l_i)$ are separate outputs, and the latter determines the
 realized activity.
