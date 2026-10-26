@@ -1,6 +1,9 @@
 \section{Method}
 \label{sec:method}
 
+\paragraph{Notation.}
+The backbone generates sequences via discrete diffusion over a vocabulary $\mathcal{V}$ containing both \emph{category tokens} and \emph{POI identities}. At each position $l$, the model emits a vocabulary token $v \in \mathcal{V}$. When $v$ is a POI identity, its \emph{realized activity category} is $\mathrm{cat}(v)$ as recorded in the catalog (\S\ref{sec:problem}).
+
 \pcdg controls a frozen generator through sampling-time logit projection,
 category-consistent POI decoding, and terminal same-category refinement
 (Figure~\ref{fig:framework}). The weights $\rho,\lambda,\beta$ enter their objectives.
@@ -179,6 +182,7 @@ POI support and reselect using the \emph{same} draw:
  \quad S_l=\{v:\mathrm{cat}(v)=\hat c_l\}.
  \label{eq:ccdecode}
 \end{equation}
+For instance, if $\hat c_3$ corresponds to a restaurant category, then $S_3$ contains only restaurant POIs, ensuring $\mathrm{cat}(\hat x^{\mathrm{cc}}_3)$ equals the category inferred from $\hat c_3$.
 For a supported category, logits outside $S_l$ are set to $-\infty$, not a large
 finite penalty. Category positions are untouched, and the sampler consumes
 exactly one draw of the original shape per step. At intermediate steps the POI
@@ -225,11 +229,8 @@ projection never ran, are skipped.
 \paragraph{Constraint neutrality.} Because the refinement substitutes only POIs of the
 same realized category, together with their catalog coordinates, and leaves category
 tokens, the realized category sequence, event times, sequence lengths, event order and
-all conditions unchanged \emph{per event}, every constraint-relevant statistic is
-invariant by construction: OVR\textsubscript{strict}, OVR\textsubscript{skip}, pair and
-category coverage, Unsat, \emph{Category}, \emph{CategoryTransition} and the
-category--POI mismatch rate. We verify this numerically on every test run, requiring
-agreement within $10^{-12}$. This invariance permits spatial and popularity
+all conditions unchanged \emph{per event}, it \textbf{preserves by construction} the
+constraint-satisfaction status. Specifically, any metric depending solely on (i) category tokens, (ii) realized categories $\mathrm{cat}(l_i)$, (iii) event times, (iv) sequence length, or (v) event order remains identical; this includes the constraint metrics defined in \S\ref{sec:exp:metrics}. We verify numerically that these agree within $10^{-12}$ on every test run. This invariance permits spatial and popularity
 statistics to change, but does not guarantee a match to every reference
 distribution within the candidate sets. Refinement cannot repair the category-side
 divergences it preserves.
