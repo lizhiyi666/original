@@ -1,31 +1,22 @@
 \section{Limitations}
 \label{sec:limitations}
-The two-city, three-seed study does not measure training variability or
-statistical significance. The cities use different backbone batch sizes, and
-full training provenance is unavailable. PO-CFG uses scale $1$ without
-extrapolation tuning; batch-level distance KL gives no per-sequence guarantee.
-Finite-budget projection and decoder fallback leave residual violations, and
-same-category refinement does not fix New York's category-transition gap.
-Training-side calibration is not independent validation; its failed
-distribution gates and override are detailed in \S\ref{sec:exp:tradeoff} and
-Appendix~\ref{app:grid}. Stage (d) fixes geometry settings, while (d)$\to$(e)
-jointly changes three factors. Complex order DAGs, conflict detection, adaptive
-scheduling, training-time order losses, and recommendation utility remain open.
-Synthetic output has no formal privacy guarantee; distributional similarity
-does not establish safe release.
-
-When the backbone assigns little mass to required categories, finite-budget
-projection can leave relations unsatisfied. Decoding addresses category--POI
-mismatch; category-preserving geometry cannot correct errors in the generated
-category sequence.
+With two cities and three seeds, we do not estimate training variability or
+significance; backbone batch sizes differ and training provenance is incomplete.
+PO-CFG scale $1$ is untuned, and batch-level distance KL gives no per-sequence
+guarantee. Finite-budget projection and decoder fallback may leave violations;
+same-category refinement cannot repair category-sequence errors, including
+New York's transition gap. Calibration is not independent validation; failed
+gates and the override are detailed in \S\ref{sec:exp:tradeoff} and
+Appendix~\ref{app:grid}. Stage (d)$\to$(e) changes three factors jointly.
+Complex DAGs, conflict handling, adaptive scheduling, training-time losses,
+recommendation utility, and formal privacy remain open; distributional
+similarity alone does not establish safe release.
 
 \section{Conclusion}
 \label{sec:conclusion}
-On a frozen generator, \pcdg combines order/existence projection,
-category-consistent decoding, and same-category refinement to support new
-category-order requests without retraining. It outperforms retrained PO-CFG on
-all five constraint metrics in both cities and JointGen on six fidelity JSDs in
-Istanbul and four in New York. Refinement restores spatial fidelity while
-preserving constraints, but leaves New York's category-transition and
-popularity errors unresolved and is restricted to realized categories.
+On a frozen generator, \pcdg adds projection, category-consistent decoding, and
+same-category refinement for new order requests without retraining. It beats
+PO-CFG on all five constraint measures in both cities and JointGen on six
+fidelity divergences in Istanbul and four in New York. Refinement restores
+spatial fidelity but leaves New York's transition and popularity errors.
 \label{end:main}

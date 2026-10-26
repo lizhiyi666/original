@@ -37,34 +37,37 @@ category-consistent decoding), and \pcdg (full).
 
 \noindent\textbf{Metrics.}
 \label{sec:exp:metrics}
-All tables use the archived evaluation-v2 protocol. The Jensen--Shannon
-divergence (JSD) compares generated and reference distributions for cumulative
-travel Distance, centroid-based Radius, conditional CategoryTransition, daily
-distinct-POI count (DailyLoc), hourly Category usage, and identity-aligned
-top-$1000$ POI visitation (G-RANK). Distance uses aligned sequences with
-matching endpoint categories; Radius is the square root of mean distance to the
-centroid. Appendix~\ref{app:metrics} gives filtering details.
+All tables follow evaluation v2. We report Jensen--Shannon divergence (JSD)
+between generated and reference distributions for cumulative travel distance
+(Distance), centroid-based radius (Radius, the square root of mean distance to
+the centroid), conditional category transitions (CategoryTransition), daily
+distinct-POI count (DailyLoc), hourly category use (Category), and top-$1000$
+POI-visitation mass aligned by identity (G-RANK). Distance includes sequences
+with matching generated/reference endpoint categories. Appendix~\ref{app:metrics}
+details the filtering.
 
 Constraint measures use emitted POIs' catalog categories $\mathrm{cat}(l)$.
-For pair $i$, $R_i$ is the set of distinct category pairs $(a,b)$ strictly
-ordered in the reference, $P_i\subseteq R_i$ those with both categories in the
-generated sequence, $C_i$ the categories in $R_i$, and $\widehat C_i$ the
-generated category set. For a present pair, $v_i(a,b)$ is the inverted
-occurrence-pair fraction, with denominator $n_{i,a}n_{i,b}$; a missing-category
-pair has violation $1$ for strict OVR and Unsat and is omitted from skip OVR.
-Strict OVR averages $v_i$ over $R_i$ then sequences with nonempty $R_i$;
-skip OVR does likewise over $P_i$. Pair coverage (PairCov) is the fraction of
-required pairs present, category coverage (CatCov) the fraction of required
-categories present, and Unsat the pooled fraction of missing or inverted pairs:
+For sequence $i$, $R_i$ contains distinct category pairs $(a,b)$ strictly
+ordered in the reference; $P_i\subseteq R_i$ contains pairs whose categories
+both occur in the generated sequence; $C_i$ contains categories in $R_i$; and
+$\widehat C_i$ is the generated category set. For a present pair,
+$v_i(a,b)$ is the fraction of inverted occurrence pairs, with denominator
+$n_{i,a}n_{i,b}$. The ordering-violation rate (OVR) averages $v_i$ over $R_i$
+within each sequence, then over sequences with nonempty $R_i$; missing-category
+pairs count as $1$. Skip OVR instead averages over $P_i$ and sequences with
+nonempty $P_i$, omitting missing-category pairs. Pair coverage (PairCov) is
+the fraction of required pairs present; category coverage (CatCov) is the
+fraction of required categories present; unsatisfied-relation rate (Unsat) is
+the pooled fraction of missing or inverted pairs:
 \begin{align}
  \mathrm{PairCov}&=\frac{\sum_i|P_i|}{\sum_i|R_i|},\\
  \mathrm{CatCov}&=\frac{\sum_i|C_i\cap\widehat C_i|}{\sum_i|C_i|},\\
  \mathrm{Unsat}&=\frac{\sum_i\sum_{(a,b)\in R_i}
  \mathbf{1}[(a,b)\notin P_i\ \lor\ v_i(a,b)>0]}{\sum_i|R_i|}.
 \end{align}
-PairCov, CatCov, and Unsat pool counts over sequences; empty denominators are
-undefined, not zero. Pair coverage does not require correct order. Tables report
-these rates in percent.
+PairCov, CatCov, and Unsat pool counts across sequences; an empty denominator
+is undefined. Pair coverage does not require correct order. Tables report rates
+in percent.
 
 % The definitions above precede every result table and metric-bearing figure.
 \input{tables/method-comparison}

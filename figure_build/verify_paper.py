@@ -51,7 +51,8 @@ def data_rows(text):
             continue
         numbers = tuple(round(float(value), 3)
                         for value in re.findall(r"(?<![A-Za-z])\d+\.\d+", line))
-        structure = re.sub(r"(?<![A-Za-z])\d+\.\d+", "<NUM>", line.strip())
+        structure = re.sub(r"\\(?:mathbf|underline)\{([^{}]*)\}", r"\1", line.strip())
+        structure = re.sub(r"(?<![A-Za-z])\d+\.\d+", "<NUM>", structure)
         rows.append((structure, numbers))
     return rows
 
@@ -127,7 +128,7 @@ def main(build_dir=None):
         old = git("show", f"{BASELINE}:paper-www2027/tables/{filename}")
         new = (PAPER / "tables" / filename).read_text(encoding="utf-8")
         assert data_rows(old) and equivalent_data_rows(data_rows(old), data_rows(new)), filename
-        print(f"PASS unchanged numeric rows / precision / bolding: {filename}")
+        print(f"PASS unchanged numeric rows / precision / row structure: {filename}")
     for path in [PAPER / "main.tex", *sorted((PAPER / "sections").glob("*.tex"))]:
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"\\todo\s*\{", text), path

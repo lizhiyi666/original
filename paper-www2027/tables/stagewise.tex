@@ -20,7 +20,7 @@
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2pt}
-\caption{Stage-wise comparison, evaluation-v2 three-seed means. SDs for (a), (b), (c),
+\caption{Stage-wise comparison, evaluation-v2 three-seed means. Bold and underline mark the best and second-best unrounded means within each city. SDs for (a), (b), (c),
 and (e) are in Table~\ref{tab:method}. Geometry (d) preserves (c)'s constraints within
 $10^{-12}$ and uses a previously fixed configuration. Transition (d)$\to$(e) jointly
 changes $\rho$ ($1\to0.5$), $\beta$ ($0\to1$), and the same-category candidate pool;
@@ -36,8 +36,8 @@ Stage & Distance & Radius & CatTrans & DailyLoc & Category & G-RANK & & OVR\_str
 \multicolumn{11}{l}{\textbf{Istanbul}} \\
 (a) JointGen (no control) & $0.1128$ & $0.0226$ & $0.0403$ & $0.0414$ & $0.0649$ & $0.1922$ & & $92.89$ & $14.63$ & $95.57$ \\
 (b) $+$ order/existence projection & $0.1314$ & $0.0516$ & $\mathbf{0.0162}$ & $0.0368$ & $\underline{0.0446}$ & $0.1820$ & & $32.80$ & $70.99$ & $36.86$ \\
-(c) $+$ category-consistent decoding & $0.1539$ & $0.0892$ & $\underline{0.0238}$ & $0.0297$ & $\mathbf{0.0423}$ & $\underline{0.1813}$ & & $\mathbf{3.72}$ & $\mathbf{94.74}$ & $\mathbf{6.90}$ \\
-(d) $+$ geometry refinement & $\mathbf{0.0372}$ & $\mathbf{0.0159}$ & $\underline{0.0238}$ & $\underline{0.0284}$ & $\mathbf{0.0423}$ & $0.1835$ & & $\mathbf{3.72}$ & $\mathbf{94.74}$ & $\mathbf{6.90}$ \\
+(c) $+$ category-consistent decoding & $0.1539$ & $0.0892$ & $0.0238$ & $0.0297$ & $\underline{0.0423}$ & $\underline{0.1813}$ & & $\mathbf{3.72}$ & $\mathbf{94.74}$ & $\mathbf{6.90}$ \\
+(d) $+$ geometry refinement & $\mathbf{0.0372}$ & $\mathbf{0.0159}$ & $0.0238$ & $\underline{0.0284}$ & $\underline{0.0423}$ & $0.1835$ & & $\mathbf{3.72}$ & $\mathbf{94.74}$ & $\mathbf{6.90}$ \\
 (e) $+$ distribution correction (full) & $\underline{0.0395}$ & $\underline{0.0166}$ & $\underline{0.0235}$ & $\mathbf{0.0249}$ & $\mathbf{0.0423}$ & $\mathbf{0.1798}$ & & $\underline{4.04}$ & $\underline{94.68}$ & $\underline{7.29}$ \\
 \midrule
 \multicolumn{11}{l}{\textbf{New York}} \\
@@ -45,7 +45,7 @@ Stage & Distance & Radius & CatTrans & DailyLoc & Category & G-RANK & & OVR\_str
 (b) $+$ order/existence projection & $0.2210$ & $0.1265$ & $\underline{0.0132}$ & $0.0351$ & $\mathbf{0.0173}$ & $0.1942$ & & $38.51$ & $67.60$ & $42.42$ \\
 (c) $+$ category-consistent decoding & $0.1989$ & $0.1681$ & $0.0182$ & $\underline{0.0335}$ & $0.0178$ & $\underline{0.1914}$ & & $\mathbf{9.52}$ & $\mathbf{88.67}$ & $\mathbf{14.09}$ \\
 (d) $+$ geometry refinement & $\mathbf{0.0610}$ & $\underline{0.0382}$ & $0.0182$ & $\underline{0.0335}$ & $0.0178$ & $0.2069$ & & $\mathbf{9.52}$ & $\mathbf{88.67}$ & $\mathbf{14.09}$ \\
-(e) $+$ distribution correction (full) & $\underline{0.0698}$ & $\mathbf{0.0373}$ & $0.0183$ & $\mathbf{0.0301}$ & $\underline{0.0175}$ & $\underline{0.1914}$ & & $\underline{11.28}$ & $\underline{87.87}$ & $\underline{15.86}$ \\
+(e) $+$ distribution correction (full) & $\underline{0.0698}$ & $\mathbf{0.0373}$ & $0.0183$ & $\mathbf{0.0301}$ & $\underline{0.0175}$ & $0.1914$ & & $\underline{11.28}$ & $\underline{87.87}$ & $\underline{15.86}$ \\
 \bottomrule
 \end{tabular}
 \end{table*}

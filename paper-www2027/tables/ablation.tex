@@ -6,7 +6,7 @@
 %% `No KL' switches off BOTH the token-KL anchor and the distance-KL term (tools/ablation_common.py:
 %% DISTANCE_VARIANTS sets distance=0 when name == 'no_kl'); `No Distance KL' switches off only the
 %% distance term and keeps the token-KL anchor.
-%% Bold = best unrounded three-seed mean within each city (NOT significance).
+%% Bold = best; underline = second-best unrounded three-seed mean within each city (NOT significance).
 %% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
 \begin{table*}[t]
 \centering
@@ -26,8 +26,8 @@ No Existence & $\mathbf{0.1084\pm 0.0114}$ & $\mathbf{0.0215\pm 0.0027}$ & $0.03
 No Order & $0.1176\pm 0.0023$ & $0.0486\pm 0.0035$ & $0.0227\pm 0.0008$ & $\mathbf{0.0358\pm 0.0006}$ & $\underline{0.0439\pm 0.0018}$ & $\mathbf{0.1770\pm 0.0040}$ \\
 No KL & $0.1406\pm 0.0117$ & $0.0574\pm 0.0028$ & $0.0164\pm 0.0006$ & $\underline{0.0361\pm 0.0012}$ & $\mathbf{0.0429\pm 0.0012}$ & $\underline{0.1817\pm 0.0024}$ \\
 Fixed Multipliers & $0.1296\pm 0.0093$ & $0.0526\pm 0.0045$ & $0.0185\pm 0.0005$ & $0.0361\pm 0.0009$ & $0.0457\pm 0.0025$ & $0.1841\pm 0.0020$ \\
-No Gumbel Noise & $0.1315\pm 0.0091$ & $0.0524\pm 0.0023$ & $\mathbf{0.0160\pm 0.0010}$ & $0.0370\pm 0.0005$ & $\underline{0.0439\pm 0.0023}$ & $0.1831\pm 0.0027$ \\
-No Distance KL & $0.1441\pm 0.0073$ & $0.0582\pm 0.0025$ & $\underline{0.0162\pm 0.0010}$ & $0.0366\pm 0.0008$ & $0.0437\pm 0.0023$ & $0.1828\pm 0.0026$ \\
+No Gumbel Noise & $0.1315\pm 0.0091$ & $0.0524\pm 0.0023$ & $\mathbf{0.0160\pm 0.0010}$ & $0.0370\pm 0.0005$ & $0.0439\pm 0.0023$ & $0.1831\pm 0.0027$ \\
+No Distance KL & $0.1441\pm 0.0073$ & $0.0582\pm 0.0025$ & $\underline{0.0162\pm 0.0010}$ & $0.0366\pm 0.0008$ & $\underline{0.0437\pm 0.0023}$ & $0.1828\pm 0.0026$ \\
 \textsc{PCDG-P (base)} & $0.1314\pm 0.0035$ & $0.0516\pm 0.0022$ & $\underline{0.0162\pm 0.0006}$ & $0.0368\pm 0.0014$ & $0.0446\pm 0.0020$ & $0.1820\pm 0.0016$ \\
 \midrule
 \multicolumn{7}{l}{\textbf{New York}} \\
@@ -46,8 +46,8 @@ No Distance KL & $0.2484\pm 0.0267$ & $0.1430\pm 0.0055$ & $0.0134\pm 0.0011$ & 
 \end{tabular}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded mean
-within each city, not statistical significance. \textsc{No KL} disables both the token-KL anchor and
+Mean $\pm$ sample standard deviation over three sampling seeds. Bold and underline denote the best and
+second-best unrounded means within each city, not statistical significance. \textsc{No KL} disables both the token-KL anchor and
 the distance-KL term; \textsc{No Distance KL} disables only the latter. Removing the KL or Gumbel
 terms does not uniformly degrade fidelity, which we report rather than claiming a benefit for every
 component.
@@ -72,7 +72,7 @@ Variant & OVR\_strict $\downarrow$ & OVR\_skip $\downarrow$ & Pair cov. $\uparro
 No Projection & $92.89\pm 0.08$ & $48.05\pm 0.74$ & $14.63\pm 0.19$ & $43.19\pm 0.20$ & $95.57\pm 0.15$ \\
 No Existence & $93.67\pm 0.15$ & $\mathbf{7.67\pm 0.56}$ & $7.34\pm 0.12$ & $36.92\pm 0.19$ & $93.58\pm 0.17$ \\
 No Order & $63.50\pm 0.76$ & $50.34\pm 0.73$ & $\mathbf{72.53\pm 0.70}$ & $\mathbf{86.08\pm 0.17}$ & $70.70\pm 0.73$ \\
-No KL & $32.85\pm 0.52$ & $9.20\pm 0.29$ & $\underline{71.11\pm 0.08}$ & $\underline{85.40\pm 0.16}$ & $\mathbf{36.75\pm 0.57}$ \\
+No KL & $32.85\pm 0.52$ & $9.20\pm 0.29$ & $\underline{71.11\pm 0.08}$ & $\underline{85.40\pm 0.16}$ & $\underline{36.75\pm 0.57}$ \\
 Fixed Multipliers & $42.70\pm 0.51$ & $20.97\pm 0.90$ & $71.25\pm 0.89$ & $85.00\pm 0.42$ & $45.64\pm 0.58$ \\
 No Gumbel Noise & $\mathbf{32.75\pm 0.39}$ & $9.13\pm 0.22$ & $70.97\pm 0.34$ & $85.38\pm 0.19$ & $\mathbf{36.75\pm 0.25}$ \\
 No Distance KL & $32.96\pm 0.46$ & $\underline{9.10\pm 0.16}$ & $70.92\pm 0.23$ & $85.29\pm 0.14$ & $36.83\pm 0.24$ \\
@@ -94,7 +94,8 @@ No Distance KL & $\underline{38.48\pm 1.04}$ & $\mathbf{13.76\pm 0.72}$ & $67.33
 \end{tabular}
 \par\smallskip
 \begin{minipage}{\textwidth}\footnotesize
-Mean $\pm$ sample standard deviation over three sampling seeds. Bold denotes the best unrounded mean
+Mean $\pm$ sample standard deviation over three sampling seeds. Bold and underline denote the best and
+second-best unrounded means
 within each city. Removing the existence energy collapses coverage \emph{below} the unconstrained
 backbone, confirming that ordering can otherwise be satisfied by omitting the constrained
 categories.

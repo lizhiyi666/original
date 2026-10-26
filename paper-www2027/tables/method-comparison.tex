@@ -6,7 +6,7 @@
 %%              (rho=0.5, lambda=0, beta=1); 6 results / 21,066 trajectories.
 %% Naming map to the Chinese manuscript: PCDG-P = "PCDG"(投影) ; PCDG-PD = "方案A（类别一致解码）" ;
 %%   PCDG (full) = "分布校正版（最佳候选）".
-%% Bold = best unrounded three-seed mean within each city (NOT significance). Istanbul Category:
+%% Bold = best; underline = second-best unrounded three-seed mean within each city (NOT significance). Istanbul Category:
 %%   PCDG 0.04229393378375002 < PCDG-PD 0.04232732278162768, both display as 0.0423.
 %% Requires booktabs. Cells are mean +/- sample SD over three sampling seeds.
 \begin{table*}[t]
@@ -15,8 +15,8 @@
 \setlength{\tabcolsep}{3pt}
 \caption{Method comparison (evaluation v2): fidelity JSDs (upper panel) and constraint
 metrics in percent (lower panel). Cells are mean $\pm$ sample SD over three sampling seeds
-at fixed checkpoints, not confidence intervals. Bold marks the best unrounded city-wise
-mean, not significance. \textsc{PCDG-P}: projection; \textsc{PCDG-PD}: adds decoding;
+at fixed checkpoints, not confidence intervals. Bold and underline mark the best and second-best
+unrounded city-wise means, respectively, not significance. \textsc{PCDG-P}: projection; \textsc{PCDG-PD}: adds decoding;
 \textsc{PCDG}: full stack. New York CategoryTransition and G-RANK remain above JointGen.}
 \label{tab:method-jsd}
 \label{tab:method}
@@ -32,20 +32,20 @@ EnergyGuide & $0.116\pm 0.005$ & $\underline{0.022\pm 0.002}$ & $0.042\pm 0.001$
 PO-CFG (s=1) & $\underline{0.089\pm 0.005}$ & $0.026\pm 0.002$ & $0.036\pm 0.001$ & $0.044\pm 0.002$ & $0.063\pm 0.001$ & $\mathbf{0.179\pm 0.003}$ \\
 \midrule
 \textsc{PCDG-P} (projection) & $0.131\pm 0.004$ & $0.052\pm 0.002$ & $\mathbf{0.016\pm 0.001}$ & $0.037\pm 0.001$ & $\underline{0.045\pm 0.002}$ & $0.182\pm 0.002$ \\
-\textsc{PCDG-PD} ($+$decoding) & $0.154\pm 0.003$ & $0.089\pm 0.002$ & $\underline{0.024\pm 0.001}$ & $\underline{0.030\pm 0.001}$ & $\mathbf{0.042\pm 0.001}$ & $0.181\pm 0.002$ \\
+\textsc{PCDG-PD} ($+$decoding) & $0.154\pm 0.003$ & $0.089\pm 0.002$ & $0.024\pm 0.001$ & $\underline{0.030\pm 0.001}$ & $\underline{0.042\pm 0.001}$ & $0.181\pm 0.002$ \\
 \textsc{PCDG} (full) & $\mathbf{0.040\pm 0.004}$ & $\mathbf{0.017\pm 0.001}$ & $\underline{0.024\pm 0.001}$ & $\mathbf{0.025\pm 0.001}$ & $\mathbf{0.042\pm 0.002}$ & $\underline{0.180\pm 0.002}$ \\
 \midrule
 \multicolumn{7}{l}{\textbf{New York}} \\
 \midrule
 Method & Distance $\downarrow$ & Radius $\downarrow$ & CategoryTransition $\downarrow$ & DailyLoc $\downarrow$ & Category $\downarrow$ & G-RANK $\downarrow$ \\
 \midrule
-JointGen & $0.290\pm 0.016$ & $0.110\pm 0.007$ & $\underline{0.007\pm 0.001}$ & $0.041\pm 0.004$ & $\underline{0.018\pm 0.000}$ & $\underline{0.161\pm 0.001}$ \\
-PostSwap & $0.228\pm 0.045$ & $0.110\pm 0.007$ & $\underline{0.007\pm 0.001}$ & $0.041\pm 0.004$ & $\underline{0.017\pm 0.001}$ & $\underline{0.161\pm 0.001}$ \\
-EnergyGuide & $0.294\pm 0.006$ & $0.111\pm 0.006$ & $\underline{0.007\pm 0.001}$ & $0.041\pm 0.003$ & $\underline{0.018\pm 0.000}$ & $0.162\pm 0.001$ \\
+JointGen & $0.290\pm 0.016$ & $0.110\pm 0.007$ & $\underline{0.007\pm 0.001}$ & $0.041\pm 0.004$ & $0.018\pm 0.000$ & $\underline{0.161\pm 0.001}$ \\
+PostSwap & $0.228\pm 0.045$ & $0.110\pm 0.007$ & $0.007\pm 0.001$ & $0.041\pm 0.004$ & $\underline{0.017\pm 0.001}$ & $\underline{0.161\pm 0.001}$ \\
+EnergyGuide & $0.294\pm 0.006$ & $0.111\pm 0.006$ & $0.007\pm 0.001$ & $0.041\pm 0.003$ & $0.018\pm 0.000$ & $0.162\pm 0.001$ \\
 PO-CFG (s=1) & $\underline{0.123\pm 0.016}$ & $\underline{0.082\pm 0.003}$ & $\mathbf{0.005\pm 0.002}$ & $0.050\pm 0.001$ & $\mathbf{0.012\pm 0.001}$ & $\mathbf{0.152\pm 0.002}$ \\
 \midrule
-\textsc{PCDG-P} (projection) & $0.221\pm 0.022$ & $0.126\pm 0.005$ & $0.013\pm 0.000$ & $0.035\pm 0.004$ & $\underline{0.017\pm 0.001}$ & $0.194\pm 0.004$ \\
-\textsc{PCDG-PD} ($+$decoding) & $0.199\pm 0.020$ & $0.168\pm 0.004$ & $0.018\pm 0.001$ & $\underline{0.034\pm 0.002}$ & $\underline{0.018\pm 0.001}$ & $0.191\pm 0.006$ \\
+\textsc{PCDG-P} (projection) & $0.221\pm 0.022$ & $0.126\pm 0.005$ & $0.013\pm 0.000$ & $0.035\pm 0.004$ & $0.017\pm 0.001$ & $0.194\pm 0.004$ \\
+\textsc{PCDG-PD} ($+$decoding) & $0.199\pm 0.020$ & $0.168\pm 0.004$ & $0.018\pm 0.001$ & $\underline{0.034\pm 0.002}$ & $0.018\pm 0.001$ & $\underline{0.191\pm 0.006}$ \\
 \textsc{PCDG} (full) & $\mathbf{0.070\pm 0.011}$ & $\mathbf{0.037\pm 0.004}$ & $0.018\pm 0.000$ & $\mathbf{0.030\pm 0.001}$ & $\underline{0.018\pm 0.001}$ & $0.191\pm 0.006$ \\
 \bottomrule
 \end{tabular}
