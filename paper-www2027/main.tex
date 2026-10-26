@@ -59,25 +59,24 @@
 \begin{abstract}
 Location-based social networks (LBSNs) are a core source of web-scale human-mobility
 data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic
-synthetic generation. Beyond statistical realism, many downstream web applications need
-control over the \emph{semantic order} of activities---e.g., leisure before dining---a
-sample-level, cross-position requirement that single-step conditioning cannot express.
-Enforcing such constraints is commonly assumed to cost distributional fidelity; we show
-this trade-off is largely \emph{separable}. We present \pcdg, a \emph{training-free}
-control stack for a frozen conditional joint temporal\,+\,category/POI
-discrete-diffusion generator. \pcdg converts category-order requirements into
-differentiable energies, projects category-position logits through a KL-anchored
-augmented-Lagrangian optimization in late reverse steps, and decodes POIs consistent with
-the sampled categories. A final same-category POI reselection restores spatial realism
-while keeping the realized activity sequence fixed. Across two cities under an
-out-of-distribution split and three sampling seeds, \pcdg reduces the mean fraction of
-required category pairs that are missing or out of order from $92.89\%$ to $4.04\%$ on
-Istanbul and from $89.45\%$ to $11.28\%$ on New York; missing categories count as
-violations. It improves all six distributional divergences over the unconstrained
-backbone on Istanbul and four of six on New York. On Istanbul it also outperforms a
-\emph{fully retrained} partial-order conditional model on all five measures of constraint
-satisfaction and five of six distributional divergences. Stage-wise ablations localize
-where fidelity is lost and recovered across the three-stage stack.
+synthetic generation. Beyond statistical realism, many downstream web applications require
+specified activities to occur in a partial order, such as leisure before dining, without
+prescribing a complete itinerary. Meeting these requirements requires both the presence
+and correct ordering of the specified categories while preserving realistic spatial
+patterns. We present \pcdg, a training-free control framework for a frozen conditional
+diffusion generator of arrival times, activity categories, and POIs. \pcdg couples
+differentiable order and existence energies in a KL-anchored augmented-Lagrangian
+projection during late reverse steps, with distributional regularization against training
+references. Category-consistent decoding connects sampled activity categories to emitted
+POIs. A final same-category POI refinement improves spatial fidelity while keeping the
+realized activity sequence fixed. Across Istanbul and New York with three sampling seeds,
+\pcdg reduces the strict ordering-violation rate from $92.89\%$ to $4.04\%$ on Istanbul
+and from $89.45\%$ to $11.28\%$ on New York, counting missing-category pairs as full
+violations. It improves all six distributional divergences over the unconstrained backbone
+on Istanbul and four of six on New York. It also outperforms the retrained partial-order
+conditional baseline on all five constraint measures in both cities and five of six
+distributional divergences on Istanbul. Stage-wise analyses show that same-category
+refinement reduces spatial discrepancies while preserving all five constraint measures.
 \end{abstract}
 % ---- CCS ----
 % Exported from the official ACM CCS tool (https://dl.acm.org/ccs), 2026-10-18.
