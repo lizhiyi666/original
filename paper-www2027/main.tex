@@ -2,7 +2,6 @@
 %% Double-blind, review mode. Compile with:  latexmk -pdf main.tex
 % Disable optional last-page balancing: it overfills the bibliography box.
 \documentclass[sigconf,anonymous,review,balance=false]{acmart}
-
 % ---- review / draft conveniences (remove `review` and set copyright for camera-ready) ----
 \settopmatter{printacmref=false}          % suppress ACM reference block during review
 \setcopyright{none}                        % anonymous review; set properly for camera-ready
@@ -18,7 +17,6 @@
 \usepackage{enumitem}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-
 % No visible draft annotations in the review PDF.
 \newcommand{\todo}[1]{}
 % Permit flexible paragraph breaking without changing font, margins, or spacing.
@@ -32,11 +30,8 @@
 \newcommand{\dkl}{D_{\mathrm{KL}}}
 \newcommand{\relu}{\mathrm{ReLU}}
 \newtheorem{definition}{Definition}[section]
-
 \begin{document}
-
 \title{Training-Free Partial-Order Control for Discrete-Diffusion POI Check-in Generation}
-
 % ---- Author block ----
 % Order and names are LOCKED at the 2026-10-18 abstract registration.
 % E-mail addresses supplied by the first author on 2026-10-18.
@@ -61,7 +56,6 @@
 }
 
 \renewcommand{\shortauthors}{Li and Zhao}
-
 \begin{abstract}
 Location-based social networks (LBSNs) are a core source of web-scale human-mobility
 data, yet sharing raw check-in traces is privacy-sensitive, motivating realistic
@@ -85,7 +79,6 @@ backbone on Istanbul and four of six on New York. On Istanbul it also outperform
 satisfaction and five of six distributional divergences. Stage-wise ablations localize
 where fidelity is lost and recovered across the three-stage stack.
 \end{abstract}
-
 % ---- CCS ----
 % Exported from the official ACM CCS tool (https://dl.acm.org/ccs), 2026-10-18.
 \begin{CCSXML}
@@ -127,20 +120,16 @@ where fidelity is lost and recovered across the three-stage stack.
 training-free constrained sampling, POI check-in sequences}
 
 \maketitle
-
 \input{sections/intro}
 \input{sections/problem}
 \input{sections/method}
 \input{sections/experiments}
 \input{sections/related}
 \input{sections/conclusion}
-
 \clearpage
 \phantomsection
 \label{start:references}
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
-
 \input{sections/appendix}
-
 \end{document}

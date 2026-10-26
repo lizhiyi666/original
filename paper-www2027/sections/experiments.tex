@@ -68,7 +68,6 @@ the pooled fraction of missing or inverted pairs:
 PairCov, CatCov, and Unsat pool counts across sequences; an empty denominator
 is undefined. Pair coverage does not require correct order. Tables report rates
 in percent.
-
 % The definitions above precede every result table and metric-bearing figure.
 \input{tables/method-comparison}
 \begin{figure}[!t]
@@ -84,7 +83,6 @@ in percent.
   axis and Distance JSD on the vertical axis.}
   \label{fig:tradeoff}
 \end{figure}
-
 \subsection{Main results}
 \label{sec:exp:main}
 Table~\ref{tab:method} compares all methods on both cities.
@@ -117,7 +115,6 @@ The projection ablation removes one component at a time. Tables~\ref{tab:ablatio
 and~\ref{tab:ablation} report all six fidelity and five constraint metrics with
 three-seed means and standard deviations.
 \input{tables/ablation}
-
 Removing existence lowers PairCov below the unconstrained backbone, showing
 that ordering alone can be satisfied by omitting constrained categories.
 Removing order retains coverage but raises strict OVR, separating presence from
@@ -130,7 +127,6 @@ effects rather than a claim that every term improves every fidelity statistic.
 Figure~\ref{fig:tradeoff} shows the Unsat--Distance plane; the complete stage-wise
 means are in Table~\ref{tab:stagewise}. Appendix~\ref{app:ablation} ablates
 projection-stage components; stages isolate decoding and refinement corrective roles.
-
 \paragraph{Projection and decoding.}
 Decoding (b)$\to$(c) reduces strict OVR from $32.80\%$ to $3.72\%$ on Istanbul
 and from $38.51\%$ to $9.52\%$ on New York. Radius increases from $0.0516$ to
@@ -138,7 +134,6 @@ $0.0892$ and from $0.1265$ to $0.1681$, respectively. The fidelity changes are
 metric-dependent: category-transition JSD also increases in both cities.
 Thus coupling the token and catalog representations strengthens realized
 activity-order control, but also changes the distribution of available POIs.
-
 \paragraph{Geometry and distribution correction.}
 At (c)$\to$(d), geometry preserves constraint metrics within $10^{-12}$.
 Distance/Radius fall from $0.1539/0.0892$ to $0.0372/0.0159$ on Istanbul and
@@ -152,7 +147,6 @@ $0.1798$, with a modest constraint regression. This transition jointly changes
 $\rho$, $\beta$, and the candidate pool, so it does not isolate their individual
 effects. Selection of $\lambda=0$ identifies a preferred configuration within
 the evaluated grid, not evidence that category-side fidelity loss is absent.
-
 \paragraph{Selection protocol.}
 The $18$ configurations were screened on training-side calibration records
 already seen by the backbone, not an independent validation set.
@@ -165,7 +159,6 @@ selection. Final ranking used v3 re-evaluation; both screening order and final
 candidate order agree with v2 (Appendix~\ref{app:grid}).
 No test metric entered hyperparameter selection, candidate construction, or
 the refinement objective.
-
 \subsection{Cost and reproducibility}
 \label{sec:exp:cost}
 \pcdg requires no retraining but adds projection, decoding, and refinement work.
