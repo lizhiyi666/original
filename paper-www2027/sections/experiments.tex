@@ -35,12 +35,42 @@ evaluated at classifier-free guidance scale $1$; it is the only retrained
 baseline. Our variants are \pcdgp (projection), \pcdgpd (projection and
 category-consistent decoding), and \pcdg (full).
 
-% Queue the unchanged double-column table before the page break in Setup.
+\noindent\textbf{Metrics.}
+\label{sec:exp:metrics}
+All tables use the archived evaluation-v2 protocol. The Jensen--Shannon
+divergence (JSD) compares generated and reference distributions for cumulative
+travel Distance, centroid-based Radius, conditional CategoryTransition, daily
+distinct-POI count (DailyLoc), hourly Category usage, and identity-aligned
+top-$1000$ POI visitation (G-RANK). Distance uses aligned sequences with
+matching endpoint categories; Radius is the square root of mean distance to the
+centroid. Appendix~\ref{app:metrics} gives filtering details.
+
+Constraint measures use emitted POIs' catalog categories $\mathrm{cat}(l)$.
+For pair $i$, $R_i$ is the set of distinct category pairs $(a,b)$ strictly
+ordered in the reference, $P_i\subseteq R_i$ those with both categories in the
+generated sequence, $C_i$ the categories in $R_i$, and $\widehat C_i$ the
+generated category set. For a present pair, $v_i(a,b)$ is the inverted
+occurrence-pair fraction, with denominator $n_{i,a}n_{i,b}$; a missing-category
+pair has violation $1$ for strict OVR and Unsat and is omitted from skip OVR.
+Strict OVR averages $v_i$ over $R_i$ then sequences with nonempty $R_i$;
+skip OVR does likewise over $P_i$. Pair coverage (PairCov) is the fraction of
+required pairs present, category coverage (CatCov) the fraction of required
+categories present, and Unsat the pooled fraction of missing or inverted pairs:
+\begin{align}
+ \mathrm{PairCov}&=\frac{\sum_i|P_i|}{\sum_i|R_i|},\\
+ \mathrm{CatCov}&=\frac{\sum_i|C_i\cap\widehat C_i|}{\sum_i|C_i|},\\
+ \mathrm{Unsat}&=\frac{\sum_i\sum_{(a,b)\in R_i}
+ \mathbf{1}[(a,b)\notin P_i\ \lor\ v_i(a,b)>0]}{\sum_i|R_i|}.
+\end{align}
+PairCov, CatCov, and Unsat pool counts over sequences; empty denominators are
+undefined, not zero. Pair coverage does not require correct order. Tables report
+these rates in percent.
+
+% The definitions above precede every result table and metric-bearing figure.
 \input{tables/method-comparison}
-% Keep the trade-off figure within one column; the panels are vertically stacked.
-\begin{figure}[t]
+\begin{figure}[!t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/tradeoff.pdf}
+  \includegraphics[width=0.82\columnwidth]{figures/tradeoff.pdf}
   \caption{Unsat--Distance trade-off using the evaluation-v2 three-seed means in
   Tables~\ref{tab:method} and~\ref{tab:stagewise}; lower is better on both axes.
   Dashed paths connect (a)--(e); shared method/stage points are plotted once.
@@ -52,52 +82,20 @@ category-consistent decoding), and \pcdg (full).
   \label{fig:tradeoff}
 \end{figure}
 
-\noindent\textbf{Metrics.}
-\label{sec:exp:metrics}
-All tables use the archived evaluation-v2 protocol.
-Fidelity uses six JSDs: cumulative travel \emph{Distance}, \emph{Radius},
-conditional \emph{CategoryTransition}, distinct daily POI count
-(\emph{DailyLoc}), hourly \emph{Category} usage, and identity-aligned top-$1000$
-POI visitation (\emph{G-RANK}). Distance is conditional on generated/reference
-first and last categories matching; the eligible subset can differ by method.
-Radius is the square root of mean distance to the centroid, not standard radius
-of gyration. Appendix~\ref{app:metrics} specifies the fidelity statistics and filtering.
-
-Constraint metrics use the catalog categories $\mathrm{cat}(l)$ of emitted
-POIs, not the sampled category tokens. For reference sequence $i$, let $R_i$
-contain each distinct-category pair $(a,b)$ satisfying
-$\max\operatorname{pos}_i(a)<\min\operatorname{pos}_i(b)$.
-Let $P_i\subseteq R_i$ contain pairs whose two categories both occur in the
-generated sequence; $C_i$ is the set of categories involved in $R_i$ and
-$\widehat C_i$ the generated category set. For a present pair, $v_i(a,b)$ is
-the number of inverted occurrence pairs divided by $n_a n_b$.
-
-Strict OVR averages $v_i$ over $R_i$, assigning $1$ to missing-category pairs,
-then averages over sequences with nonempty $R_i$. Skip OVR averages $v_i$
-over $P_i$, then over sequences with nonempty $P_i$. Coverage and Unsat pool counts:
-\begin{align}
- \mathrm{PairCov}&=\frac{\sum_i|P_i|}{\sum_i|R_i|},\\
- \mathrm{CatCov}&=\frac{\sum_i|C_i\cap\widehat C_i|}{\sum_i|C_i|},\\
- \mathrm{Unsat}&=\frac{\sum_i\sum_{(a,b)\in R_i}
- \mathbf{1}[(a,b)\notin P_i\ \lor\ v_i(a,b)>0]}{\sum_i|R_i|}.
-\end{align}
-Unsat counts unsatisfied relations, not sequences; pair coverage requires
-both categories to occur, not correct order. Empty denominators are undefined,
-not zero; undefined OVR sequences are omitted from their respective means.
-Tables express these rates in percent.
-
 \subsection{Main results}
 \label{sec:exp:main}
 Table~\ref{tab:method} compares all methods on both cities.
 
 \noindent\textbf{Constraint satisfaction.}
-The full \pcdg reduces strict OVR from $92.89\%$ to $4.04\%$ on Istanbul and
+The full \pcdg reduces strict OVR, the per-sequence mean fraction of required
+pairs missing or inverted, from $92.89\%$ to $4.04\%$ on Istanbul and
 from $89.45\%$ to $11.28\%$ on New York, reductions of $88.85$ and $78.17$
 percentage points. Unsat falls from $95.57\%$ to $7.29\%$ and from $93.64\%$
 to $15.86\%$, while pair coverage increases by $6.5\times$ and $4.2\times$.
 All five constraint metrics improve over PO-CFG in both cities.
-PostSwap reaches zero skip OVR but leaves coverage unchanged, illustrating why
-skip OVR alone is insufficient. EnergyGuide gives much smaller gains.
+PostSwap reaches zero skip OVR, which conditions on pairs whose categories
+both appear, but leaves coverage unchanged; skip OVR alone therefore does not
+capture omissions. EnergyGuide gives much smaller gains.
 
 \noindent\textbf{Fidelity and residuals.}
 On Istanbul, projection alone degrades Distance ($0.1128\to0.1314$) and Radius

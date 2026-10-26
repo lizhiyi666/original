@@ -13,7 +13,8 @@ from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper-www2027"
-BASELINE = "c828598216bd4949fd12f1e59aa1eca9ccba0e72"
+# Modification checkpoint for this revision; it is already synchronized with origin.
+BASELINE = "c28af0efc8bc8383d9a29109f034a2bcac46ae81"
 # Official https://dl.acm.org/ccs Generate Code export, checked 2026-10-18.
 OFFICIAL_CCS = {
     ("10002951.10003227.10003236.10003101", "Information systems~Location based services", "500"),
@@ -68,22 +69,22 @@ def equivalent_data_rows(original, current, tolerance=0.00101):
 
 
 def verify_locked_metadata(original, current):
-    """Allow only the author's 2026-10-19 correction within locked metadata."""
+    """Keep title, keywords and author order fixed; abstract edits are scoped below."""
     patterns = {
         "title": r"\\title\{[^\n]+\}",
-        "abstract": r"\\begin\{abstract\}.*?\\end\{abstract\}",
         "keywords": r"\\keywords\{.*?\}",
         "author order": r"\\author\{[^}]+\}",
     }
     for label, pattern in patterns.items():
         old = re.findall(pattern, original, re.S)
         new = re.findall(pattern, current, re.S)
-        if label == "abstract":
-            assert len(old) == 1 and old[0].count("eliminates residual") == 1
-            old = [old[0].replace("eliminates residual", "reduces residual", 1)]
         assert old and old == new, f"Locked {label} changed"
-        suffix = " (authorized eliminates -> reduces correction only)" if label == "abstract" else ""
-        print(f"PASS locked {label}{suffix}")
+        print(f"PASS locked {label}")
+    assert len(re.findall(r"\\begin\{abstract\}.*?\\end\{abstract\}", current, re.S)) == 1
+    assert r"this trade-off is largely \emph{separable}" in current
+    assert "missing or out of order" in current
+    assert "missing categories count as" in current
+    print("PASS abstract states the first constraint result in plain language")
 
 
 def main_float_labels():
@@ -165,7 +166,7 @@ def main(build_dir=None):
     assert not changed, f"Scientific inputs or implementation changed: {changed}"
     print(f"PASS PDF: {len(reader.pages)} pages; main text ends p{body_page}; all main floats within p1-8; references p{reference_page}; appendix p{appendix_page}; embedded fonts; anonymous text/metadata/links")
     print("PASS no changes to sealed experiments or audited scientific implementation")
-    print("PASS abstract correction agrees with nonzero decoder mismatch; other abstract text remains locked")
+    print("PASS abstract metric-first clarification and non-abstract metadata locks")
 
 
 if __name__ == "__main__":

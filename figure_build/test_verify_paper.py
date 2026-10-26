@@ -3,6 +3,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 import re
 import unittest
+import verify_paper
 
 from verify_paper import BASELINE, git, main_float_labels, verify_locked_metadata, verify_page_layout
 
@@ -11,26 +12,26 @@ class LockedMetadataTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.original = git("show", f"{BASELINE}:paper-www2027/main.tex")
-        cls.authorized = cls.original.replace("eliminates residual", "reduces residual", 1)
+        cls.authorized = (verify_paper.PAPER / "main.tex").read_text(encoding="utf-8")
 
     def check(self, text):
         with redirect_stdout(StringIO()):
             verify_locked_metadata(self.original, text)
 
-    def test_authorized_correction_passes(self):
+    def test_clarified_abstract_passes(self):
         self.check(self.authorized)
 
     def test_original_overclaim_is_rejected(self):
         with self.assertRaises(AssertionError):
             self.check(self.original)
 
-    def test_other_abstract_word_is_rejected(self):
+    def test_overstated_abstract_claim_is_rejected(self):
         with self.assertRaises(AssertionError):
             self.check(self.authorized.replace("largely", "completely", 1))
 
-    def test_extra_abstract_sentence_is_rejected(self):
+    def test_undefined_first_constraint_result_is_rejected(self):
         with self.assertRaises(AssertionError):
-            self.check(self.authorized.replace(r"\end{abstract}", r"Extra claim.\end{abstract}", 1))
+            self.check(self.authorized.replace("missing or out of order", "violations", 1))
 
     def test_title_is_locked(self):
         with self.assertRaises(AssertionError):

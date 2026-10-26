@@ -2,11 +2,13 @@
 \label{sec:method}
 
 \paragraph{Notation.}
-The backbone generates sequences via discrete diffusion over a vocabulary $\mathcal{V}$ containing both \emph{category tokens} and \emph{POI identities}. At each position $l$, the model emits a vocabulary token $v \in \mathcal{V}$. When $v$ is a POI identity, its \emph{realized activity category} is $\mathrm{cat}(v)$ as recorded in the catalog (\S\ref{sec:problem}).
+The backbone generates sequences via discrete diffusion over a vocabulary $\mathcal{V}$ containing category tokens, which encode activity categories, and POI identities, which identify catalog places. At each position $l$, the model emits a vocabulary token $v \in \mathcal{V}$. When $v$ is a POI identity, its \emph{realized activity category} is $\mathrm{cat}(v)$ as recorded in the catalog (\S\ref{sec:problem}).
 
 \pcdg controls a frozen generator through sampling-time logit projection,
 category-consistent POI decoding, and terminal same-category refinement
-(Figure~\ref{fig:framework}). The weights $\rho,\lambda,\beta$ enter their objectives.
+(Figure~\ref{fig:framework}). Refinement reselects each generated POI only
+among POIs with its already realized catalog category, keeping the activity
+sequence fixed. The corresponding loss weights are introduced with their objectives.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=0.9\textwidth]{figures/framework.pdf}
@@ -124,6 +126,11 @@ subsequent decoder. Algorithm~\ref{alg:pcdg} summarizes this controlled step.
 \subsection{Distributional regularization and calibration}
 \label{sec:method:distance}
 \label{sec:method:balance}
+Here $D_{\mathrm{KL}}(P\|Q)=\sum_jP_j\log(P_j/Q_j)$ is the
+base-to-projected Kullback--Leibler divergence used for probability vectors and
+histograms. We use the Jensen--Shannon divergence
+$\mathrm{JSD}(P,Q)=\tfrac12D_{\mathrm{KL}}(P\|M)+\tfrac12D_{\mathrm{KL}}(Q\|M)$,
+where $M=(P+Q)/2$, for symmetric comparisons of normalized distributions.
 To limit spatial drift, a batch-level distance KL matches the training
 population's route-length distribution. Cumulative Haversine lengths $d$ from
 training sequences with at least two POIs form a fixed-bin histogram
@@ -207,33 +214,44 @@ by catalog id so the construction is deterministic. Stage (d) uses the original
 POI, top-$15$ by score and nearest-$16$ to the centroid; stage (e) uses the original,
 top-$11$, nearest-$12$, and the $8$ most visited training POIs. Scores come from one frozen,
 untruncated $t{=}0$ evaluation of the backbone; reference GPS from the test split never
-enters. Writing $\mathbf{w}$ for a relaxed assignment over candidates, we minimize
+enters. For an eligible batch, let $q$ be the candidate proposal distribution at each
+event: half its mass is on the original POI and the other half is distributed among
+candidates according to their backbone scores. Let $\mathbf{w}$ be a relaxed
+probability assignment over those same-category candidates. The fidelity term
+$D_{\mathrm{KL}}(\mathbf{w}\|q)$ is averaged over eligible events. The normalized
+32-bin histograms $H^{\mathrm{dist}}_{\mathrm{train}}$ and
+$H^{\mathrm{rad}}_{\mathrm{train}}$ summarize cumulative travel distance and
+centroid-based radius in the training reference pool; the corresponding
+$H^{\mathrm{dist}}(\mathbf{w})$ and $H^{\mathrm{rad}}(\mathbf{w})$ are the soft
+batch histograms induced by the candidate assignments. The objective minimizes
+the sum of these two Jensen--Shannon divergences and the proposal regularizer,
+weighted by $w_{\mathrm{d}}$, $w_{\mathrm{r}}$, and $w_{\mathrm{fid}}$,
+respectively:
 \begin{equation}
 \begin{aligned}
-  &\dkl\!\big(q\,\|\,\mathbf{w}\big)\,w_{\mathrm{fid}}
+  &\dkl\!\big(\mathbf{w}\,\|\,q\big)\,w_{\mathrm{fid}}
   + w_{\mathrm{d}}\,\mathrm{JSD}\big(H^{\mathrm{dist}}_{\mathrm{train}},H^{\mathrm{dist}}(\mathbf{w})\big)\\
   &\quad + w_{\mathrm{r}}\,\mathrm{JSD}\big(H^{\mathrm{rad}}_{\mathrm{train}},H^{\mathrm{rad}}(\mathbf{w})\big),
 \end{aligned}
   \label{eq:geometry}
 \end{equation}
-where the two soft histograms are differentiable in $\mathbf{w}$ and the proposal $q$
-places half of its mass on the original POI and spreads the other half over the
-candidates by model score, so the fidelity term penalizes drifting away from the
-backbone's preference. Optimization uses $8$ straight-through paths and a
+where the two soft histograms are differentiable in $\mathbf{w}$, so the proposal
+term penalizes assignments that drift from the backbone preference. Optimization
+uses $8$ straight-through paths and a
 prequalified $200$-step budget; Appendix~\ref{app:algo} gives the settings.
 For the \emph{hard} output, we retain the lowest-objective assignment among the
 original and $8$ optimized paths.
 Empty, single-point and single-candidate positions, and batches in which the base
 projection never ran, are skipped.
 
-\paragraph{Constraint neutrality.} Because the refinement substitutes only POIs of the
-same realized category, together with their catalog coordinates, and leaves category
-tokens, the realized category sequence, event times, sequence lengths, event order and
-all conditions unchanged \emph{per event}, it \textbf{preserves by construction} the
-constraint-satisfaction status. Specifically, any metric depending solely on (i) category tokens, (ii) realized categories $\mathrm{cat}(l_i)$, (iii) event times, (iv) sequence length, or (v) event order remains identical; this includes the constraint metrics defined in \S\ref{sec:exp:metrics}. We verify numerically that these agree within $10^{-12}$ on every test run. This invariance permits spatial and popularity
-statistics to change, but does not guarantee a match to every reference
-distribution within the candidate sets. Refinement cannot repair the category-side
-divergences it preserves.
+\paragraph{Constraint measures after refinement.} Refinement changes only POI
+identities and their catalog coordinates; it retains the catalog category at each event,
+category tokens, times, sequence lengths, order, and context. Therefore metrics computed
+solely from those retained fields, including the five constraint measures in
+\S\ref{sec:exp:metrics}, are structurally unchanged. In the reported test runs these
+measures agree before and after refinement within $10^{-12}$. Spatial and popularity
+statistics can change, but need not match every reference distribution within the finite
+candidate sets. Refinement cannot correct category-side divergences that it leaves fixed.
 
 \paragraph{Controlled-step algorithm.}
 \label{sec:method:algorithm}

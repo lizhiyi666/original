@@ -4,24 +4,29 @@
 \begin{definition}[POI check-in sequence]
 A POI check-in sequence of length $n$ is
 $s=(t_{1:n},k_{1:n},l_{1:n})$, where $t_{1:n}$ are arrival times,
-$k_i \in \mathcal{C}=\{1,\dots,C\}$ are activity categories, and
+$k_i \in \mathcal{C}=\{1,\dots,C\}$ are activity categories; $\mathcal{C}$ is
+the category set and $C=|\mathcal{C}|$ its size; and
 $l_i \in \mathcal{L}$ are points of interest. Each POI $l$ has fixed
 coordinates $\mathrm{gps}(l)$ and a catalog category $\mathrm{cat}(l)$.
 \end{definition}
 
-\begin{definition}[Sequence-level context]
-A sequence-level context is a tuple
+\begin{definition}[Context]
+The context supplied with a sequence is a tuple
 $\mathbf{c}=(\mathbf{c}^{(1)},\dots,\mathbf{c}^{(R)})$, where each
-$\mathbf{c}^{(r)}$ is a coarse temporal or behavioral condition represented
-over fixed within-day time bins. The same context conditions the generation of
-the complete sequence.
+$\mathbf{c}^{(r)}$ is one condition channel represented over fixed within-day
+bins. A channel may encode a day-level calendar or behavioral label that
+persists across the sequence, or a partial condition that varies over the day.
+The context conditions generation of the complete sequence; generated event
+times $t_{1:n}$ remain separate temporal variables.
 \end{definition}
 
-In the current backbone, $R=6$ and the conditions are encoded over $24$ daily
-time windows to obtain a sequence-level context embedding. These channels
-describe the \emph{background} under which a sequence is generated, but do not
-directly assign specific POI identities to individual positions, nor do they
-dictate which categories must appear or the partial-order matrix below.
+The backbone has six condition channels encoded over $24$ daily windows. The
+Istanbul setup described by Marionette uses day of week, Ramadan, public
+holidays, and hour of day; the first three are global and the last is partial.
+This study's New York preprocessing encodes day of week, a U.S. federal-holiday
+flag, and season; its other three channels are constant-coded. The window axis
+indexes context, not event times $t_{1:n}$. Context does not assign POI
+identities or specify required categories or their partial order.
 The generator's category token $k_i$ and the emitted POI's catalog category
 $\mathrm{cat}(l_i)$ are separate outputs, and the latter determines the
 realized activity.
@@ -74,12 +79,9 @@ Unlike next-location prediction~\cite{feng2018deepmove,luo2021stan,yang2022getne
 the task generates a complete time-stamped, categorized, geolocated sequence
 under constraints coupling multiple, potentially non-adjacent positions.
 
-We evaluate along two axes that are in tension. \emph{Distributional fidelity} is
-measured by the Jensen--Shannon divergence (JSD) between generated and reference
-marginals of travel distance, centroid-based Radius, category-transition structure,
-daily location count, hourly category usage, and a global ranking statistic
-(G-RANK). \emph{Constraint satisfaction} is measured by ordering-violation rates
-(OVR), pairwise and category coverage of the required relations, and an overall
-unsatisfied-relation rate (Unsat); full definitions are given in
-\S\ref{sec:exp:metrics} and Appendix~\ref{app:metrics}. These measures jointly
-distinguish correct ordering from the disappearance of required activities.
+We evaluate distributional fidelity and satisfaction of the required category
+orders. The former compares generated and reference mobility statistics; the
+latter checks whether required categories appear and occur in the requested
+order. Section~\ref{sec:exp:metrics} and Appendix~\ref{app:metrics} define the
+statistics and their aggregation rules. Together they distinguish correct
+ordering from apparent satisfaction caused by omitting required activities.

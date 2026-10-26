@@ -71,20 +71,19 @@ sample-level, cross-position requirement that single-step conditioning cannot ex
 Enforcing such constraints is commonly assumed to cost distributional fidelity; we show
 this trade-off is largely \emph{separable}. We present \pcdg, a \emph{training-free}
 control stack for a frozen conditional joint temporal\,+\,category/POI
-discrete-diffusion generator. \pcdg compiles category partial-order constraints into
-differentiable energies, projects the category-position logits through a KL-preserving
-augmented-Lagrangian optimization in the late reverse steps, reduces residual
-category--POI inconsistency via a category-consistent decoder, and restores spatial
-realism through a distribution-aware same-category geometry refinement that leaves every
-constraint metric unchanged \emph{by construction}. Across two cities under an
-out-of-distribution split and three sampling seeds, \pcdg cuts the strict
-ordering-violation rate from $92.89\%$ to $4.04\%$ on Istanbul and from $89.45\%$ to
-$11.28\%$ on New York, raising pairwise ordering coverage by $6.5\times$ and
-$4.2\times$, while \emph{improving} all six fidelity divergences over the unconstrained
-backbone on Istanbul and four of six on New York. On Istanbul it surpasses a
-\emph{fully retrained} partial-order conditional model on all five constraint metrics and
-five of six fidelity divergences, without retraining anything. Stage-wise ablations
-localize where fidelity is lost and recovered across the three-stage stack.
+discrete-diffusion generator. \pcdg converts category-order requirements into
+differentiable energies, projects category-position logits through a KL-anchored
+augmented-Lagrangian optimization in late reverse steps, and decodes POIs consistent with
+the sampled categories. A final same-category POI reselection restores spatial realism
+while keeping the realized activity sequence fixed. Across two cities under an
+out-of-distribution split and three sampling seeds, \pcdg reduces the mean fraction of
+required category pairs that are missing or out of order from $92.89\%$ to $4.04\%$ on
+Istanbul and from $89.45\%$ to $11.28\%$ on New York; missing categories count as
+violations. It improves all six distributional divergences over the unconstrained
+backbone on Istanbul and four of six on New York. On Istanbul it also outperforms a
+\emph{fully retrained} partial-order conditional model on all five measures of constraint
+satisfaction and five of six distributional divergences. Stage-wise ablations localize
+where fidelity is lost and recovered across the three-stage stack.
 \end{abstract}
 
 % ---- CCS ----
