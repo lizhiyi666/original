@@ -10,26 +10,27 @@ $l_i \in \mathcal{L}$ are points of interest. Each POI $l$ has fixed
 coordinates $\mathrm{gps}(l)$ and a catalog category $\mathrm{cat}(l)$.
 \end{definition}
 
-\begin{definition}[Context]
-The context supplied with a sequence is a tuple
+\begin{definition}[Mobility-related context]
+The mobility-related context supplied with a sequence is a tuple
 $\mathbf{c}=(\mathbf{c}^{(1)},\dots,\mathbf{c}^{(R)})$, where each
 $\mathbf{c}^{(r)}$ is one condition channel represented over fixed within-day
-bins. A channel may encode a day-level calendar or behavioral label that
-persists across the sequence, or a partial condition that varies over the day.
-The context conditions generation of the complete sequence; generated event
-times $t_{1:n}$ remain separate temporal variables.
+bins. A channel may encode environmental factors such as day of week, weather
+conditions, public holidays, or hour of day. The context conditions generation
+of the complete sequence; generated event times $t_{1:n}$ remain separate
+temporal variables.
 \end{definition}
 
-The backbone has six condition channels encoded over $24$ daily windows. The
-Istanbul setup described by Marionette uses day of week, Ramadan, public
-holidays, and hour of day; the first three are global and the last is partial.
-This study's New York preprocessing encodes day of week, a U.S. federal-holiday
-flag, and season; its other three channels are constant-coded. The window axis
-indexes context, not event times $t_{1:n}$. Context does not assign POI
-identities or specify required categories or their partial order.
-The generator's category token $k_i$ and the emitted POI's catalog category
-$\mathrm{cat}(l_i)$ are separate outputs, and the latter determines the
-realized activity.
+Context does not assign POI identities or specify required categories or their
+partial order. The generator's category token $k_i$ and the emitted POI's
+catalog category $\mathrm{cat}(l_i)$ are separate outputs, and the latter
+determines the realized activity.
+
+\begin{definition}[Conditional generator]
+A conditional generator is a parameterized model $f_\theta$ that defines a
+probability distribution $p_\theta(s\mid\mathbf{c})$ over sequences $s$ given
+mobility-related context $\mathbf{c}$. A \emph{frozen} generator has fixed
+parameters $\theta$ that remain unchanged during sampling-time control.
+\end{definition}
 
 \begin{definition}[Category partial-order matrix]
 A category partial-order matrix is a binary matrix
